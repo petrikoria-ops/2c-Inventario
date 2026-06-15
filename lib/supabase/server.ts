@@ -1,0 +1,9 @@
+// Cliente para usar en Server Components y API Routes (Node.js)
+import { createClient } from '@supabase/supabase-js'
+
+export function getSupabaseServer() {
+  return createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+  )
+}
