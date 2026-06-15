@@ -91,6 +91,29 @@ export interface Movimiento {
   proyectos?: Pick<Proyecto, 'id' | 'ot' | 'nombre'> | null
 }
 
+export interface SolicitudCompraItem {
+  id: number
+  solicitud_id: number
+  material_id: number | null
+  codigo: string
+  descripcion: string
+  unidad: string | null
+  cantidad_pedida: number
+  proveedor_sugerido: string | null
+  precio_unitario: number | null
+}
+
+export interface SolicitudCompra {
+  id: number
+  numero: string
+  fecha: string
+  estado: 'pendiente' | 'comprado'
+  observaciones: string | null
+  creado_en: string
+  actualizado_en: string
+  solicitudes_compra_items?: SolicitudCompraItem[]
+}
+
 export interface DashboardStats {
   totalItems: number
   bajoMinimo: number

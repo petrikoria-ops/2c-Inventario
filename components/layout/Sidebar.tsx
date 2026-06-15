@@ -22,8 +22,9 @@ const NAV = [
   {
     section: 'Gestión',
     links: [
-      { href: '/proyectos',   icon: '📋', label: 'Proyectos / OT' },
-      { href: '/proveedores', icon: '🏭', label: 'Proveedores' },
+      { href: '/proyectos',    icon: '📋', label: 'Proyectos / OT' },
+      { href: '/proveedores',  icon: '🏭', label: 'Proveedores' },
+      { href: '/solicitudes',  icon: '🛒', label: 'Compras' },
     ],
   },
   {
