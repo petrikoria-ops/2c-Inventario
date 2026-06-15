@@ -16,6 +16,7 @@ const NAV = [
       { href: '/materiales',   icon: '🔌', label: 'Materiales' },
       { href: '/herramientas', icon: '🔧', label: 'Herramientas' },
       { href: '/movimientos',  icon: '↕️', label: 'Movimientos' },
+      { href: '/importar',     icon: '📥', label: 'Importar' },
     ],
   },
   {
