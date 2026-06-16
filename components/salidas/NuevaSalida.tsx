@@ -141,8 +141,8 @@ export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, '
         </div>
       </div>
 
-      {/* Buscador */}
-      <div className="panel mb-4">
+      {/* Buscador — usa panel-search (sin overflow-hidden) para que el dropdown absoluto no se corte */}
+      <div className="panel-search mb-4">
         <div className="panel-header"><h2>Agregar materiales</h2></div>
         <div className="p-4">
           <div ref={searchRef} className="relative">

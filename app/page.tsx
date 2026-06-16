@@ -1,103 +1,96 @@
+import Link from 'next/link'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import AlertasStockRealtime from '@/components/dashboard/AlertasStockRealtime'
-import { clp, fechaHora, num } from '@/lib/utils'
-import { BadgeTipo } from '@/components/ui/Badge'
+import { num } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 export const revalidate = 0
 
-export default async function DashboardPage() {
+const ACCIONES = [
+  { href: '/salidas/nueva',     icon: '📤', title: 'Nuevo despacho',       desc: 'Registrar salida de materiales',    color: 'bg-blue-600'    },
+  { href: '/solicitudes/nueva', icon: '🛒', title: 'Solicitud de compra',  desc: 'Pedir materiales al proveedor',      color: 'bg-emerald-600' },
+  { href: '/movimientos',       icon: '↕️', title: 'Movimiento',           desc: 'Entrada, ajuste o devolución',       color: 'bg-violet-600'  },
+  { href: '/materiales',        icon: '🔌', title: 'Inventario',           desc: 'Ver y gestionar materiales',         color: 'bg-slate-600'   },
+  { href: '/proyectos',         icon: '📋', title: 'Proyectos / OT',       desc: 'Órdenes de trabajo y factibilidad',  color: 'bg-amber-600'   },
+  { href: '/herramientas',      icon: '🔧', title: 'Herramientas',         desc: 'Estado y ubicación de equipos',      color: 'bg-rose-600'    },
+]
+
+export default async function HomePage() {
   const sb = getSupabaseServer()
 
-  // Estadísticas en paralelo
   const [
-    { count: totalItems },
     { data: materiales },
-    { count: herEnRep },
-    { count: herExtraviadas },
     { count: proyActivos },
-    { data: ultMov },
+    solicRes,
   ] = await Promise.all([
-    sb.from('materiales').select('*', { count: 'exact', head: true }).eq('activo', true),
-    sb.from('materiales').select('id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario').eq('activo', true),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion'),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'extraviada'),
+    sb.from('materiales').select('stock_actual,stock_minimo').eq('activo', true),
     sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
-    sb.from('movimientos')
-      .select('*,materiales(codigo,descripcion,unidad),proyectos(ot)')
-      .order('fecha', { ascending: false })
-      .limit(10),
+    sb.from('solicitudes_compra').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
   ])
 
-  const alertas = (materiales ?? []).filter(m => m.stock_actual <= m.stock_minimo)
-  const valorInventario = (materiales ?? []).reduce((s, m) => s + m.stock_actual * m.precio_unitario, 0)
-
-  const stats = [
-    { icon: '🔌', label: 'Ítems en inventario', value: num(totalItems ?? 0, 0), bg: 'bg-blue-100' },
-    { icon: '⚠️', label: 'Bajo stock mínimo',    value: num(alertas.length, 0),  bg: 'bg-red-100' },
-    { icon: '💰', label: 'Valor inventario',      value: clp(valorInventario),    bg: 'bg-green-100' },
-    { icon: '📋', label: 'Proyectos en proceso',  value: num(proyActivos ?? 0, 0),bg: 'bg-yellow-100' },
-    ...(herEnRep     ? [{ icon: '🔧', label: 'Her. en reparación', value: num(herEnRep,     0), bg: 'bg-orange-100' }] : []),
-    ...(herExtraviadas ? [{ icon: '🔍', label: 'Herramientas extraviadas', value: num(herExtraviadas, 0), bg: 'bg-red-100' }] : []),
-  ]
+  const alertas       = (materiales ?? []).filter(m => m.stock_actual <= m.stock_minimo).length
+  const solicPend     = solicRes.error ? 0 : (solicRes.count ?? 0)
 
   return (
-    <div className="p-5">
-      <h1 className="text-lg font-bold text-slate-800 mb-4">Dashboard</h1>
+    <div className="p-5 max-w-4xl">
+      {/* Cabecera */}
+      <div className="mb-6">
+        <h1 className="text-xl font-bold text-slate-800">2C Electricidad</h1>
+        <p className="text-sm text-slate-500">Taller de tableros eléctricos — Inventario</p>
+      </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 mb-5">
-        {stats.map(s => (
-          <div key={s.label} className="stat-card">
-            <div className={`stat-icon ${s.bg}`}>{s.icon}</div>
-            <div>
-              <div className="text-xl font-bold text-slate-800 leading-tight">{s.value}</div>
-              <div className="text-xs text-slate-500 font-medium">{s.label}</div>
+      {/* Alerta de stock */}
+      {alertas > 0 && (
+        <div className="alert alert-red mb-5">
+          ⚠️ {alertas} material{alertas !== 1 ? 'es' : ''} bajo stock mínimo.{' '}
+          <a href="/materiales?bajo_minimo=1" className="underline font-semibold">Ver ahora →</a>
+        </div>
+      )}
+
+      {/* Acciones rápidas */}
+      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Acciones rápidas</h2>
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+        {ACCIONES.map(a => (
+          <Link key={a.href} href={a.href}
+            className="flex flex-col gap-1.5 p-4 bg-white rounded-xl shadow-sm border border-slate-100
+                       hover:shadow-md hover:-translate-y-0.5 transition-all duration-150 group">
+            <div className={`w-10 h-10 ${a.color} rounded-lg flex items-center justify-center text-lg text-white mb-1 flex-shrink-0`}>
+              {a.icon}
             </div>
-          </div>
+            <div className="font-semibold text-slate-800 text-sm group-hover:text-blue-700 transition-colors leading-tight">
+              {a.title}
+            </div>
+            <div className="text-xs text-slate-400 leading-snug">{a.desc}</div>
+          </Link>
         ))}
       </div>
 
-      {/* Alertas con Realtime */}
-      <AlertasStockRealtime initialAlertas={alertas} />
-
-      {/* Últimos movimientos */}
-      <div className="panel">
-        <div className="panel-header">
-          <h2>↕️ Últimos movimientos</h2>
-          <a href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</a>
+      {/* Mini stats */}
+      <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Estado actual</h2>
+      <div className="grid grid-cols-3 gap-3">
+        <div className={`stat-card ${alertas > 0 ? 'ring-2 ring-red-200' : ''}`}>
+          <div className={`stat-icon ${alertas > 0 ? 'bg-red-100' : 'bg-green-100'}`}>
+            {alertas > 0 ? '⚠️' : '✅'}
+          </div>
+          <div>
+            <div className="text-xl font-bold text-slate-800 leading-tight">{num(alertas, 0)}</div>
+            <div className="text-xs text-slate-500 font-medium">Alertas stock</div>
+          </div>
         </div>
-        <div className="overflow-x-auto">
-          <table className="w-full">
-            <thead>
-              <tr>
-                <th className="th">Fecha</th>
-                <th className="th">Tipo</th>
-                <th className="th">Material</th>
-                <th className="th td-r">Cantidad</th>
-                <th className="th">Usuario</th>
-                <th className="th">Proyecto</th>
-              </tr>
-            </thead>
-            <tbody>
-              {(ultMov ?? []).map(m => (
-                <tr key={m.id} className="tr-hover">
-                  <td className="td"><span className="text-xs text-slate-500 whitespace-nowrap">{fechaHora(m.fecha)}</span></td>
-                  <td className="td"><BadgeTipo tipo={m.tipo} /></td>
-                  <td className="td">
-                    <span className="code">{(m.materiales as any)?.codigo}</span>
-                    <span className="text-slate-500 text-xs ml-1">{(m.materiales as any)?.descripcion}</span>
-                  </td>
-                  <td className="td-r text-sm font-medium">{num(m.cantidad)} <span className="text-slate-400 text-xs">{(m.materiales as any)?.unidad}</span></td>
-                  <td className="td text-xs text-slate-500">{m.usuario ?? '—'}</td>
-                  <td className="td"><span className="code text-slate-500">{(m.proyectos as any)?.ot ?? '—'}</span></td>
-                </tr>
-              ))}
-              {!ultMov?.length && (
-                <tr><td colSpan={6} className="text-center py-8 text-slate-400">Sin movimientos registrados</td></tr>
-              )}
-            </tbody>
-          </table>
+
+        <div className="stat-card">
+          <div className="stat-icon bg-yellow-100">📋</div>
+          <div>
+            <div className="text-xl font-bold text-slate-800 leading-tight">{num(proyActivos ?? 0, 0)}</div>
+            <div className="text-xs text-slate-500 font-medium">Proy. activos</div>
+          </div>
+        </div>
+
+        <div className="stat-card">
+          <div className={`stat-icon ${solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100'}`}>🛒</div>
+          <div>
+            <div className="text-xl font-bold text-slate-800 leading-tight">{num(solicPend, 0)}</div>
+            <div className="text-xs text-slate-500 font-medium">Compras pend.</div>
+          </div>
         </div>
       </div>
     </div>

@@ -9,6 +9,11 @@ import type { Movimiento, Proyecto } from '@/types'
 const ESTADOS = ['presupuesto','en_proceso','terminado','entregado','cancelado']
 const BLANK: Partial<Proyecto> = { estado: 'en_proceso' }
 
+const calcCosto = (movs: unknown): number =>
+  Array.isArray(movs)
+    ? (movs as any[]).reduce((s, m) => s + (m.cantidad ?? 0) * (m.precio_unit ?? 0), 0)
+    : 0
+
 export default function TablaProyectos({ initialData }: { initialData: Proyecto[] }) {
   const { showToast } = useToast()
   const [items, setItems]       = useState<Proyecto[]>(initialData)
@@ -89,7 +94,7 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <td className="td"><BadgeEstadoProy estado={p.estado} /></td>
                   <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_inicio)}</td>
                   <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_entrega)}</td>
-                  <td className="td-r font-medium text-slate-700">{clp(p.costo_total)}</td>
+                  <td className="td-r font-medium text-slate-700">{clp(calcCosto(p.costo_total))}</td>
                   <td className="td"><div className="flex gap-0.5">
                     <button className="btn-icon" title="Ver movimientos" onClick={() => verDetalle(p)}>📜</button>
                     <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad">🔍</a>

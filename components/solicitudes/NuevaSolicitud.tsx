@@ -152,8 +152,8 @@ export default function NuevaSolicitud() {
         <a href="/solicitudes" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
       </div>
 
-      {/* Buscador + Autollenar */}
-      <div className="panel mb-4">
+      {/* Buscador + Autollenar — usa panel-search (sin overflow-hidden) para que el dropdown no se corte */}
+      <div className="panel-search mb-4">
         <div className="panel-header">
           <h2>Agregar materiales</h2>
           <button

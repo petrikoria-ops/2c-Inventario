@@ -272,8 +272,8 @@ export default function FactibilidadProyecto({
         </div>
       </div>
 
-      {/* BOM */}
-      <div className="panel mb-4">
+      {/* BOM — usa panel-search (sin overflow-hidden) para que el dropdown del buscador no se corte */}
+      <div className="panel-search mb-4">
         <div className="panel-header">
           <h2>
             Lista de materiales (BOM)

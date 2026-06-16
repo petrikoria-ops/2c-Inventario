@@ -7,7 +7,8 @@ const NAV = [
   {
     section: 'Principal',
     links: [
-      { href: '/',            icon: '📊', label: 'Dashboard' },
+      { href: '/',            icon: '🏠', label: 'Inicio' },
+      { href: '/dashboard',   icon: '📊', label: 'Métricas' },
     ],
   },
   {
