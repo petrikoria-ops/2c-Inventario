@@ -295,13 +295,19 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
         const err = await res.json()
         throw new Error(err.error ?? 'Error en clasificación IA')
       }
-      const data: { rowIdx: number; suggested: string | null }[] = await res.json()
+      const data: { rowIdx: number; suggested: string | null; failed?: boolean }[] = await res.json()
       let classified = 0
-      data.forEach(r => { if (r.suggested) { setDecision(r.rowIdx, r.suggested); classified++ } })
+      let failed     = 0
+      data.forEach(r => {
+        if (r.failed)      { failed++;    return }
+        if (r.suggested)   { setDecision(r.rowIdx, r.suggested); classified++ }
+      })
+      const parts: string[] = []
+      if (classified > 0) parts.push(`clasificó ${classified} de ${unmatched.length}`)
+      if (failed > 0)     parts.push(`${failed} sin procesar (lím. API) — revísalas manualmente`)
+      if (parts.length === 0) parts.push('no pudo clasificar ningún material')
       showToast(
-        classified > 0
-          ? `IA clasificó ${classified} de ${unmatched.length} materiales`
-          : 'La IA no pudo clasificar ningún material',
+        `IA: ${parts.join(' · ')}`,
         classified > 0 ? 'success' : 'error',
       )
     } catch (e: any) {
