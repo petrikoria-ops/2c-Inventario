@@ -70,7 +70,7 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
       <div className="panel">
         <div className="panel-header">
           <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
-          <h2>Proyectos / Órdenes de Trabajo</h2>
+          <h2>Obras activas — Tableros</h2>
           <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva OT</button>
         </div>
         <div className="filters">

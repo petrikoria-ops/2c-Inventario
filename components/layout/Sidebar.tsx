@@ -7,7 +7,7 @@ import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen,
   ClipboardList, Building2, ShoppingCart,
-  Calculator, Menu, X,
+  Calculator, CheckSquare, Menu, X,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 
@@ -35,7 +35,7 @@ const NAV: NavGroup[] = [
   {
     section: 'Gestión',
     links: [
-      { href: '/proyectos',   Icon: ClipboardList, label: 'Proyectos / OT' },
+      { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros' },
       { href: '/proveedores', Icon: Building2,     label: 'Proveedores' },
       { href: '/solicitudes', Icon: ShoppingCart,  label: 'Compras' },
     ],
@@ -43,7 +43,8 @@ const NAV: NavGroup[] = [
   {
     section: 'Recursos',
     links: [
-      { href: '/recursos', Icon: Calculator, label: 'Calculadoras y Normas' },
+      { href: '/recursos',   Icon: Calculator,   label: 'Calculadoras' },
+      { href: '/checklist',  Icon: CheckSquare,  label: 'Checklist tablero' },
     ],
   },
 ]

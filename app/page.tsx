@@ -15,7 +15,7 @@ const ACCIONES: { href: string; Icon: LucideIcon; title: string; desc: string; c
   { href: '/solicitudes/nueva', Icon: ShoppingCart,   title: 'Solicitud de compra',  desc: 'Pedir materiales al proveedor',     color: 'bg-emerald-600' },
   { href: '/movimientos',       Icon: ArrowUpDown,    title: 'Movimiento',           desc: 'Entrada, ajuste o devolución',      color: 'bg-violet-600'  },
   { href: '/materiales',        Icon: Package,        title: 'Inventario General',   desc: 'Ver y gestionar materiales',        color: 'bg-slate-600'   },
-  { href: '/proyectos',         Icon: ClipboardList,  title: 'Proyectos / OT',       desc: 'Órdenes de trabajo y factibilidad', color: 'bg-amber-600'   },
+  { href: '/proyectos',         Icon: ClipboardList,  title: 'Obras activas',        desc: 'Tableros y factibilidad de obra',  color: 'bg-amber-600'   },
   { href: '/herramientas',      Icon: Wrench,         title: 'Herramientas',         desc: 'Estado y ubicación de equipos',     color: 'bg-rose-600'    },
 ]
 
