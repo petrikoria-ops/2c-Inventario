@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2, Search, Package, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { num, clp } from '@/lib/utils'
 import type { Material, Proyecto } from '@/types'
@@ -148,7 +149,7 @@ export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, '
           <div ref={searchRef} className="relative">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                {loadingSearch ? '⟳' : '🔍'}
+                {loadingSearch ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
               </span>
               <input
                 ref={inputRef}
@@ -199,8 +200,8 @@ export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, '
             )}
           </div>
           {hasStockError && (
-            <div className="mx-4 mb-0 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">
-              ⚠️ Ítems en rojo exceden el stock disponible — corrígelos antes de confirmar.
+            <div className="mx-4 mb-0 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 flex items-center gap-2">
+              <AlertTriangle size={14} /> Ítems en rojo exceden el stock disponible — corrígelos antes de confirmar.
             </div>
           )}
           <div className="overflow-x-auto">
@@ -248,7 +249,7 @@ export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, '
         </div>
       ) : (
         <div className="panel mb-4 py-12 text-center text-slate-400">
-          <p className="text-4xl mb-2">📦</p>
+          <Package size={36} className="mx-auto mb-2" style={{ color: '#D8D8D8' }} />
           <p className="font-medium mb-1 text-slate-500">Sin materiales todavía</p>
           <p className="text-sm">Usa el buscador para agregar materiales a despachar</p>
         </div>
@@ -267,11 +268,11 @@ export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, '
       <div className="flex gap-3 items-center flex-wrap">
         <button onClick={handleSave} disabled={saving || items.length === 0 || hasStockError}
           className="btn btn-primary">
-          {saving ? '⟳ Procesando…' : `Confirmar despacho (${items.length} ítem${items.length !== 1 ? 's' : ''})`}
+          {saving ? <><Loader2 size={14} className="animate-spin" /> Procesando…</> : `Confirmar despacho (${items.length} ítem${items.length !== 1 ? 's' : ''})`}
         </button>
         <a href="/salidas" className="btn btn-outline">Cancelar</a>
         {hasStockError && (
-          <span className="text-sm text-red-600 font-medium">⚠️ Corrige el stock antes de confirmar</span>
+          <span className="text-sm text-red-600 font-medium flex items-center gap-1"><AlertTriangle size={13} /> Corrige el stock antes de confirmar</span>
         )}
       </div>
     </div>

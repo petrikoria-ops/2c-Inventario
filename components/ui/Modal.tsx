@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useRef } from 'react'
+import { X } from 'lucide-react'
 
 interface Props {
   open: boolean
@@ -39,9 +40,13 @@ export default function Modal({
                     animate-[modalIn_.2s_ease] ${wide ? 'max-w-3xl' : 'max-w-xl'}`}
       >
         {/* Header */}
-        <div className="flex items-center px-5 py-4 border-b border-slate-100">
-          <h3 className="font-semibold text-slate-800 flex-1 text-[15px]">{title}</h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-red-500 text-xl leading-none transition-colors">✕</button>
+        <div className="flex items-center px-5 py-4 border-b" style={{ borderColor: '#E8EAED' }}>
+          <h3 className="font-semibold flex-1 text-[15px]" style={{ color: '#181818' }}>{title}</h3>
+          <button onClick={onClose}
+            className="p-1.5 rounded transition-colors hover:bg-slate-100"
+            style={{ color: '#909090' }}>
+            <X size={16} strokeWidth={2} />
+          </button>
         </div>
 
         {/* Body */}
@@ -49,8 +54,8 @@ export default function Modal({
 
         {/* Footer */}
         {!hideFooter && (
-          <div className="flex justify-end gap-2 px-5 py-3 border-t border-slate-100">
-            <button className="btn btn-outline" onClick={onClose} disabled={saving}>Cancelar</button>
+          <div className="flex justify-end gap-2 px-5 py-3 border-t" style={{ borderColor: '#E8EAED' }}>
+            <button className="btn btn-ghost" onClick={onClose} disabled={saving}>Cancelar</button>
             {onSave && (
               <button className="btn btn-primary" onClick={onSave} disabled={saving}>
                 {saving ? 'Guardando…' : saveLabel}

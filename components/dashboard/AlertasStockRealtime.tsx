@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import { AlertTriangle, CheckCircle, Wifi, WifiOff } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { num } from '@/lib/utils'
 import Link from 'next/link'
@@ -14,7 +15,7 @@ interface Alerta {
 }
 
 export default function AlertasStockRealtime({ initialAlertas }: { initialAlertas: Alerta[] }) {
-  const [alertas, setAlertas]     = useState<Alerta[]>(initialAlertas)
+  const [alertas, setAlertas]       = useState<Alerta[]>(initialAlertas)
   const [realtimeOk, setRealtimeOk] = useState(true)
 
   useEffect(() => {
@@ -37,8 +38,8 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
         }
       )
       .subscribe((status) => {
-        if (status === 'SUBSCRIBED')                                    setRealtimeOk(true)
-        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT')      setRealtimeOk(false)
+        if (status === 'SUBSCRIBED')                               setRealtimeOk(true)
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setRealtimeOk(false)
       })
 
     return () => { sb.removeChannel(channel) }
@@ -47,7 +48,8 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
   if (!alertas.length) {
     return (
       <div className="alert alert-green mb-5">
-        ✔ Todos los materiales están sobre el stock mínimo.
+        <CheckCircle size={15} />
+        Todos los materiales están sobre el stock mínimo.
       </div>
     )
   }
@@ -55,11 +57,17 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
   return (
     <div className="panel mb-5">
       <div className="panel-header">
-        <h2>⚠️ Materiales bajo stock mínimo
+        <AlertTriangle size={14} style={{ color: '#D97706', flexShrink: 0 }} />
+        <h2>
+          Materiales bajo stock mínimo
           <span className="ml-2 badge badge-red">{alertas.length}</span>
           {realtimeOk
-            ? <span className="ml-2 text-xs text-green-600 font-normal">● En tiempo real</span>
-            : <span className="ml-2 text-xs text-amber-600 font-normal" title="La suscripción en tiempo real falló; recarga para actualizar">⚠ Sin tiempo real</span>
+            ? <span className="ml-2 text-xs font-normal inline-flex items-center gap-1" style={{ color: '#059669' }}>
+                <Wifi size={11} /> En tiempo real
+              </span>
+            : <span className="ml-2 text-xs font-normal inline-flex items-center gap-1" style={{ color: '#D97706' }} title="Suscripción en tiempo real inactiva — recarga para actualizar">
+                <WifiOff size={11} /> Sin tiempo real
+              </span>
           }
         </h2>
         <Link href="/materiales?bajo_minimo=1" className="btn btn-ghost btn-sm">Ver todos →</Link>
@@ -78,7 +86,7 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
           </thead>
           <tbody>
             {alertas.map(a => (
-              <tr key={a.id} className="bg-red-50/50 hover:bg-red-50 transition-colors">
+              <tr key={a.id} className="bg-red-50/40 hover:bg-red-50 transition-colors">
                 <td className="td"><span className="code">{a.codigo}</span></td>
                 <td className="td font-medium text-red-900">{a.descripcion}</td>
                 <td className="td text-xs text-slate-500">{a.ubicacion ?? '—'}</td>

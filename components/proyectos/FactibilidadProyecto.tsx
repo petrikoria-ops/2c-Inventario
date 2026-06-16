@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { Loader2, Search, Download, ClipboardList, CheckCircle, AlertTriangle, Circle, Square, ShoppingCart } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { num } from '@/lib/utils'
 import type { Material, Proyecto, ProyectoMaterial } from '@/types'
@@ -28,10 +29,10 @@ interface ImportRow {
 }
 
 const ESTADO_LABELS: Record<EstadoItem, { label: string; cls: string }> = {
-  ok:             { label: '✅ OK',           cls: 'badge-green' },
-  parcial:        { label: '⚠️ Parcial',       cls: 'badge-yellow' },
-  sin_stock:      { label: '🔴 Sin stock',     cls: 'badge-red' },
-  no_registrado:  { label: '⬜ No registrado', cls: 'badge-gray' },
+  ok:             { label: 'OK',           cls: 'badge-green' },
+  parcial:        { label: 'Parcial',      cls: 'badge-yellow' },
+  sin_stock:      { label: 'Sin stock',    cls: 'badge-red' },
+  no_registrado:  { label: 'No registrado', cls: 'badge-gray' },
 }
 
 export default function FactibilidadProyecto({
@@ -281,10 +282,10 @@ export default function FactibilidadProyecto({
           </h2>
           <div className="flex gap-2">
             <button onClick={() => setShowManual(v => !v)} className="btn btn-outline btn-sm">
-              {showManual ? '✕ Cancelar' : '+ Agregar manual'}
+              {showManual ? '× Cancelar' : '+ Agregar manual'}
             </button>
             <button onClick={() => fileInputRef.current?.click()} className="btn btn-outline btn-sm">
-              📥 Importar Excel
+              <Download size={13} /> Importar Excel
             </button>
             <input ref={fileInputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={handleFileChange} />
           </div>
@@ -295,7 +296,7 @@ export default function FactibilidadProyecto({
           <div ref={searchRef} className="relative">
             <div className="relative">
               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                {loadingSearch ? '⟳' : '🔍'}
+                {loadingSearch ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
               </span>
               <input ref={inputRef} type="text" value={query} onChange={e => setQuery(e.target.value)}
                 onFocus={() => suggestions.length > 0 && setShowDrop(true)}
@@ -355,7 +356,7 @@ export default function FactibilidadProyecto({
             </div>
             <div className="flex gap-2 mt-2">
               <button onClick={addManual} disabled={savingManual} className="btn btn-primary btn-sm">
-                {savingManual ? '⟳' : 'Agregar'}
+                {savingManual ? <Loader2 size={14} className="animate-spin" /> : 'Agregar'}
               </button>
               <button onClick={() => setShowManual(false)} className="btn btn-ghost btn-sm">Cancelar</button>
             </div>
@@ -391,7 +392,7 @@ export default function FactibilidadProyecto({
             </div>
             <div className="flex gap-2">
               <button onClick={confirmImport} disabled={importing} className="btn btn-primary btn-sm">
-                {importing ? '⟳ Importando…' : `Confirmar importación (${importPreview.length})`}
+                {importing ? <><Loader2 size={14} className="animate-spin" /> Importando…</> : `Confirmar importación (${importPreview.length})`}
               </button>
               <button onClick={() => setImportPreview(null)} className="btn btn-ghost btn-sm">Cancelar</button>
             </div>
@@ -434,7 +435,7 @@ export default function FactibilidadProyecto({
           </div>
         ) : (
           <div className="py-10 text-center text-slate-400 px-4">
-            <p className="text-3xl mb-2">📋</p>
+            <ClipboardList size={36} className="mx-auto mb-2" style={{ color: '#D8D8D8' }} />
             <p className="font-medium text-slate-500 mb-1">BOM vacío</p>
             <p className="text-sm">Busca materiales del inventario, agrégalos manualmente, o importa desde Excel</p>
           </div>
@@ -444,7 +445,7 @@ export default function FactibilidadProyecto({
         {bom.length > 0 && (
           <div className="p-4 border-t border-slate-100">
             <button onClick={evaluar} disabled={evaluating} className="btn btn-primary">
-              {evaluating ? '⟳ Evaluando…' : '🔍 Evaluar factibilidad'}
+              {evaluating ? <><Loader2 size={14} className="animate-spin" /> Evaluando…</> : <><Search size={14} /> Evaluar factibilidad</>}
             </button>
             {evalResult && (
               <span className="ml-3 text-sm text-slate-500">
@@ -462,15 +463,15 @@ export default function FactibilidadProyecto({
             <h2>Resultado de la evaluación</h2>
             <div className="flex items-center gap-3">
               {evalResult.status === 'completo' ? (
-                <span className="badge badge-green text-sm px-3 py-1">✅ Stock completo</span>
+                <span className="badge badge-green text-sm px-3 py-1 flex items-center gap-1"><CheckCircle size={13} /> Stock completo</span>
               ) : (
-                <span className="badge badge-red text-sm px-3 py-1">
-                  ⚠️ Faltan {evalResult.faltanCount} ítem{evalResult.faltanCount !== 1 ? 's' : ''}
+                <span className="badge badge-red text-sm px-3 py-1 flex items-center gap-1">
+                  <AlertTriangle size={13} /> Faltan {evalResult.faltanCount} ítem{evalResult.faltanCount !== 1 ? 's' : ''}
                 </span>
               )}
               {faltantes.length > 0 && (
                 <button onClick={generarSolicitud} disabled={generating} className="btn btn-primary btn-sm">
-                  {generating ? '⟳ Generando…' : '🛒 Generar solicitud de compra'}
+                  {generating ? <><Loader2 size={14} className="animate-spin" /> Generando…</> : <><ShoppingCart size={14} /> Generar solicitud de compra</>}
                 </button>
               )}
             </div>
@@ -515,7 +516,7 @@ export default function FactibilidadProyecto({
           {faltantes.length > 0 && (
             <div className="p-4 border-t border-slate-100 bg-amber-50/50">
               <p className="text-sm text-amber-800">
-                💡 Haz clic en <strong>«Generar solicitud de compra»</strong> para crear automáticamente
+                Haz clic en <strong>«Generar solicitud de compra»</strong> para crear automáticamente
                 una SC con los {faltantes.length} ítem{faltantes.length !== 1 ? 's' : ''} faltantes.
               </p>
             </div>

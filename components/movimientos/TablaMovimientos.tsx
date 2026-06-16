@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
+import { ArrowUpDown, Download } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeTipo } from '@/components/ui/Badge'
 import { num, fechaHora } from '@/lib/utils'
@@ -60,7 +61,6 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-      // Recargar lista
       const updated = await (await fetch('/api/movimientos?limit=200')).json()
       setMovimientos(updated.data)
       showToast('Movimiento registrado', 'success')
@@ -74,10 +74,17 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
     <>
       <div className="panel">
         <div className="panel-header">
-          <h2>↕️ Movimientos de inventario</h2>
+          <ArrowUpDown size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <h2>Movimientos de inventario</h2>
           <div className="flex gap-2">
-            <a href="/api/export/movimientos" className="btn btn-outline btn-sm">⬇ CSV</a>
-            <button className="btn btn-primary btn-sm" onClick={() => { setForm({ material_id:'', tipo:'salida', cantidad:'1', proyecto_id:'', usuario:'admin', motivo:'' }); setBusqMat(''); setModalOpen(true) }}>+ Registrar</button>
+            <a href="/api/export/movimientos" className="btn btn-ghost btn-sm">
+              <Download size={13} /> CSV
+            </a>
+            <button className="btn btn-primary btn-sm" onClick={() => {
+              setForm({ material_id:'', tipo:'salida', cantidad:'1', proyecto_id:'', usuario:'admin', motivo:'' })
+              setBusqMat('')
+              setModalOpen(true)
+            }}>+ Registrar</button>
           </div>
         </div>
         <div className="filters">
@@ -120,7 +127,7 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
                   <td className="td text-xs text-slate-500 max-w-[180px] truncate">{m.motivo ?? '—'}</td>
                 </tr>
               ))}
-              {!filtered.length && <tr><td colSpan={10} className="text-center py-8 text-slate-400">📭 Sin movimientos</td></tr>}
+              {!filtered.length && <tr><td colSpan={10} className="text-center py-10 text-slate-400">Sin movimientos registrados</td></tr>}
             </tbody>
           </table>
         </div>
@@ -147,8 +154,8 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
           <div>
             <label className="label">Tipo *</label>
             <select className="select" value={form.tipo} onChange={e => setForm(p => ({ ...p, tipo: e.target.value }))}>
-              <option value="salida">↓ Salida</option><option value="entrada">↑ Entrada</option>
-              <option value="devolucion">↩ Devolución</option><option value="ajuste">⇄ Ajuste</option>
+              <option value="salida">Salida</option><option value="entrada">Entrada</option>
+              <option value="devolucion">Devolución</option><option value="ajuste">Ajuste</option>
             </select>
           </div>
           <div>

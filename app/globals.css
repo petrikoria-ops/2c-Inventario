@@ -2,119 +2,221 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ── Design tokens ───────────────────────────────────────────── */
+:root {
+  --c-carbon:    #2E333A;
+  --c-carbon-lt: #3D4450;
+  --c-gold:      #F0C000;
+  --c-gold-dk:   #C9A000;
+  --c-black:     #181818;
+  --c-border:    #E2E4E7;
+  --c-muted:     #909090;
+  --c-bg:        #F5F6F7;
+}
+
 @layer base {
   body {
-    @apply bg-slate-100 text-slate-800 text-sm;
-    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: #F5F6F7;
+    color: #181818;
+    font-size: 0.875rem;
+    font-family: var(--font-inter), 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
   }
-
   ::-webkit-scrollbar { width: 5px; height: 5px; }
-  ::-webkit-scrollbar-track { @apply bg-slate-100; }
-  ::-webkit-scrollbar-thumb { @apply bg-slate-400 rounded; }
+  ::-webkit-scrollbar-track { background: #F0F1F3; }
+  ::-webkit-scrollbar-thumb { background: #C5C8CC; border-radius: 9999px; }
 }
 
 @layer components {
-  /* Sidebar */
+
+  /* ── Sidebar ─────────────────────────────────── */
   .nav-link {
-    @apply flex items-center gap-2.5 px-3 py-2 rounded-md text-slate-300 text-[13px]
-           hover:bg-slate-700 hover:text-white transition-colors duration-150 mx-1;
+    @apply flex items-center gap-2.5 px-3 py-2 rounded-md text-[13px]
+           transition-colors duration-150 mx-1;
+    color: #8A929E;
+  }
+  .nav-link:hover {
+    background-color: #3D4450;
+    color: #FFFFFF;
   }
   .nav-link.active {
-    @apply bg-blue-700 text-white;
+    background-color: #F0C000;
+    color: #2E333A;
+    font-weight: 600;
   }
 
-  /* Panel / Card */
+  /* ── Panels ──────────────────────────────────── */
   .panel {
-    @apply bg-white rounded-lg shadow-sm overflow-hidden mb-5;
+    @apply bg-white rounded-xl overflow-hidden mb-5;
+    border: 1px solid #E2E4E7;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06), 0 0 0 0 transparent;
   }
-  /* Panel sin overflow-hidden — para paneles que contienen dropdowns absolutos */
+  /* Panel sin overflow-hidden — para paneles con dropdowns absolutos */
   .panel-search {
-    @apply bg-white rounded-lg shadow-sm mb-5;
+    @apply bg-white rounded-xl mb-5;
+    border: 1px solid #E2E4E7;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
   }
   .panel-header {
-    @apply flex items-center gap-2 px-4 py-3 border-b border-slate-100 bg-slate-50;
+    @apply flex items-center gap-2 px-4 py-3 border-b;
+    background-color: #FAFBFC;
+    border-color: #E8EAED;
   }
   .panel-header h2 {
-    @apply text-sm font-semibold text-slate-700 flex-1;
+    @apply text-[13px] font-semibold flex-1;
+    color: #181818;
   }
 
-  /* Tabla */
+  /* ── Tables ──────────────────────────────────── */
   .th {
-    @apply px-3 py-2 text-left text-xs font-semibold text-slate-500 uppercase tracking-wide
-           bg-slate-50 border-b-2 border-slate-200 whitespace-nowrap;
+    @apply px-3 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wide whitespace-nowrap;
+    background-color: #2E333A;
+    color: #8A929E;
+    border-bottom: 2px solid #2E333A;
   }
   .td {
-    @apply px-3 py-2 border-b border-slate-100 align-middle;
+    @apply px-3 py-2.5 border-b align-middle;
+    border-color: #ECEEF1;
+    color: #181818;
   }
-  .td-r { @apply px-3 py-2 border-b border-slate-100 text-right tabular-nums; }
-  .tr-hover { @apply hover:bg-blue-50/40 transition-colors; }
+  .td-r {
+    @apply px-3 py-2.5 border-b text-right tabular-nums align-middle;
+    border-color: #ECEEF1;
+  }
+  .tr-hover { @apply transition-colors; }
+  .tr-hover:hover { background-color: #F7F8FA; }
 
-  /* Código (monospace) */
+  /* ── Code chips ──────────────────────────────── */
   .code {
-    @apply font-mono text-[12px] text-blue-700 font-semibold;
+    @apply font-mono text-[12px] font-semibold;
+    color: #2E333A;
   }
 
-  /* Badges */
+  /* ── Badges ──────────────────────────────────── */
   .badge {
     @apply inline-block px-2 py-0.5 rounded-full text-[11px] font-semibold whitespace-nowrap;
   }
-  .badge-green  { @apply bg-green-100 text-green-800; }
-  .badge-red    { @apply bg-red-100 text-red-800; }
-  .badge-yellow { @apply bg-yellow-100 text-yellow-800; }
-  .badge-blue   { @apply bg-blue-100 text-blue-800; }
-  .badge-gray   { @apply bg-slate-100 text-slate-600; }
-  .badge-orange { @apply bg-orange-100 text-orange-800; }
+  .badge-green  { @apply bg-emerald-50  text-emerald-800; }
+  .badge-red    { @apply bg-red-50      text-red-800; }
+  .badge-yellow { @apply bg-amber-50    text-amber-800; }
+  .badge-blue   { @apply bg-blue-50     text-blue-800; }
+  .badge-gray   { @apply bg-slate-100   text-slate-600; }
+  .badge-orange { @apply bg-orange-50   text-orange-800; }
+  .badge-brand  { background: rgba(240,192,0,.18); color: #2E333A; font-weight: 700; }
 
-  /* Botones */
+  /* ── Buttons ─────────────────────────────────── */
   .btn {
     @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium
            transition-all duration-150 cursor-pointer border-0 whitespace-nowrap
-           hover:brightness-90 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
+           active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed;
   }
-  .btn-primary { @apply bg-blue-700 text-white; }
-  .btn-success { @apply bg-green-700 text-white; }
-  .btn-danger  { @apply bg-red-700  text-white; }
-  .btn-outline { @apply border border-blue-700 text-blue-700 bg-transparent hover:bg-blue-50; }
-  .btn-ghost   { @apply bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700; }
-  .btn-sm      { @apply px-2 py-1 text-xs; }
-  .btn-icon    { @apply p-1.5 rounded text-slate-400 hover:bg-slate-100 hover:text-blue-600 transition-colors; }
+  /* Amarillo de marca — acción principal */
+  .btn-primary {
+    background-color: #F0C000;
+    color: #2E333A;
+    font-weight: 600;
+  }
+  .btn-primary:hover  { background-color: #C9A000; }
 
-  /* Form */
-  .label { @apply text-[11px] font-semibold text-slate-500 uppercase tracking-wide block mb-1; }
+  /* Carbon — acción secundaria importante */
+  .btn-secondary {
+    background-color: #2E333A;
+    color: #FFFFFF;
+  }
+  .btn-secondary:hover { background-color: #3D4450; }
+
+  /* Semánticos */
+  .btn-success { @apply bg-emerald-700 text-white; }
+  .btn-success:hover { @apply bg-emerald-800; }
+  .btn-danger  { @apply bg-red-600 text-white; }
+  .btn-danger:hover  { @apply bg-red-700; }
+
+  /* Outline carbon */
+  .btn-outline {
+    @apply bg-transparent;
+    border: 1px solid #2E333A;
+    color: #2E333A;
+  }
+  .btn-outline:hover {
+    background-color: #2E333A;
+    color: #FFFFFF;
+  }
+
+  /* Ghost — links y cancelar */
+  .btn-ghost {
+    @apply bg-transparent;
+    color: #909090;
+  }
+  .btn-ghost:hover {
+    background-color: #ECEEF1;
+    color: #181818;
+  }
+
+  .btn-sm   { @apply px-2.5 py-1 text-xs; }
+  .btn-icon {
+    @apply p-1.5 rounded transition-colors;
+    color: #909090;
+  }
+  .btn-icon:hover {
+    background-color: #ECEEF1;
+    color: #2E333A;
+  }
+
+  /* ── Forms ───────────────────────────────────── */
+  .label {
+    @apply text-[11px] font-semibold uppercase tracking-wide block mb-1;
+    color: #909090;
+  }
   .input {
-    @apply w-full px-2.5 py-1.5 border border-slate-300 rounded-md text-[13px] text-slate-700
-           focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20
-           transition-colors duration-150;
+    @apply w-full px-2.5 py-1.5 rounded-md text-[13px] transition-colors duration-150 bg-white;
+    border: 1px solid #D8D8D8;
+    color: #181818;
+  }
+  .input::placeholder { color: #BBBBBB; }
+  .input:focus {
+    outline: none;
+    border-color: #F0C000;
+    box-shadow: 0 0 0 3px rgba(240, 192, 0, 0.18);
   }
   .select { @apply input; }
   .textarea { @apply input min-h-[64px] resize-y; }
 
-  /* Filtros */
+  /* ── Filter bar ──────────────────────────────── */
   .filters {
-    @apply flex flex-wrap gap-2 px-4 py-2.5 bg-slate-50 border-b border-slate-100;
+    @apply flex flex-wrap gap-2 px-4 py-2.5 border-b;
+    background-color: #FAFBFC;
+    border-color: #E8EAED;
   }
   .filters .input { @apply w-auto; }
 
-  /* Stat card */
+  /* ── Stat cards ──────────────────────────────── */
   .stat-card {
-    @apply bg-white rounded-lg shadow-sm p-4 flex items-center gap-3;
+    @apply bg-white rounded-xl p-4 flex items-center gap-3;
+    border: 1px solid #E2E4E7;
+    box-shadow: 0 1px 4px rgba(0,0,0,.05);
   }
   .stat-icon {
-    @apply w-11 h-11 rounded-lg flex items-center justify-center text-xl flex-shrink-0;
+    @apply w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0;
   }
 
-  /* Alerta banner */
+  /* ── Alert banners ───────────────────────────── */
   .alert {
-    @apply flex items-center gap-2 px-4 py-3 rounded-lg text-[13px] font-medium mb-4;
+    @apply flex items-center gap-2 px-4 py-3 rounded-xl text-[13px] font-medium mb-4;
   }
-  .alert-red    { @apply bg-red-50 text-red-800 border-l-4 border-red-500; }
-  .alert-green  { @apply bg-green-50 text-green-800 border-l-4 border-green-500; }
-  .alert-yellow { @apply bg-yellow-50 text-yellow-800 border-l-4 border-yellow-500; }
-  .alert-blue   { @apply bg-blue-50 text-blue-800 border-l-4 border-blue-500; }
+  .alert-red    { @apply bg-red-50    text-red-800;    border-left: 4px solid #DC2626; }
+  .alert-green  { @apply bg-emerald-50 text-emerald-800; border-left: 4px solid #059669; }
+  .alert-yellow { @apply bg-amber-50  text-amber-800;  border-left: 4px solid #D97706; }
+  .alert-blue   { @apply bg-blue-50   text-blue-800;   border-left: 4px solid #2563EB; }
 
-  /* Paginación */
+  /* ── Pagination ──────────────────────────────── */
   .pag-btn {
-    @apply px-3 py-1 border border-slate-200 rounded text-xs hover:bg-blue-50
-           hover:border-blue-400 disabled:opacity-40 disabled:cursor-default transition-colors;
+    @apply px-3 py-1 rounded text-xs transition-colors;
+    border: 1px solid #D8D8D8;
+    color: #909090;
   }
+  .pag-btn:hover:not(:disabled) {
+    border-color: #2E333A;
+    color: #2E333A;
+  }
+  .pag-btn:disabled { @apply opacity-40 cursor-default; }
 }

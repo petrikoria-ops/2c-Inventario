@@ -1,6 +1,7 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
+import { Plug, Download, Search, ArrowUpDown, ScrollText, Pencil, Trash2, X } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeStock } from '@/components/ui/Badge'
 import { BadgeTipo } from '@/components/ui/Badge'
@@ -136,9 +137,10 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     <>
       <div className="panel">
         <div className="panel-header">
-          <h2>🔌 Materiales</h2>
+          <Plug size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <h2>Materiales</h2>
           <div className="flex gap-2">
-            <a href="/api/export/materiales" className="btn btn-outline btn-sm">⬇ CSV</a>
+            <a href="/api/export/materiales" className="btn btn-outline btn-sm"><Download size={13} /> CSV</a>
             <button className="btn btn-primary btn-sm"
               onClick={() => { setEditando({ unidad: 'UN', stock_actual: 0, stock_minimo: 0, precio_unitario: 0 }); setModalForm(true) }}>
               + Nuevo
@@ -148,7 +150,10 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
 
         {/* Filtros */}
         <div className="filters">
-          <input className="input w-52" placeholder="🔍 Código, descripción…" value={q} onChange={e => setQ(e.target.value)} />
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
+            <input className="input w-52 pl-8" placeholder="Código, descripción…" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
           <select className="select w-auto" value={catFiltro} onChange={e => setCatFiltro(e.target.value)}>
             <option value="">Todas las categorías</option>
             {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
@@ -159,7 +164,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
           </label>
           {(q || catFiltro || soloAlerta) && (
             <button className="btn btn-ghost btn-sm" onClick={() => { setQ(''); setCatFiltro(''); setSoloAlerta(false) }}>
-              ✕ Limpiar
+              <X size={12} /> Limpiar
             </button>
           )}
           <span className="text-xs text-slate-400 ml-auto self-center">{filtered.length} resultado(s)</span>
@@ -207,17 +212,17 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                     <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" title="Registrar movimiento" onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}>↕️</button>
-                        <button className="btn-icon" title="Ver historial" onClick={() => verHistorial(m)}>📜</button>
-                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>✏️</button>
-                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(m)}>🗑</button>
+                        <button className="btn-icon" title="Registrar movimiento" onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}><ArrowUpDown size={13} /></button>
+                        <button className="btn-icon" title="Ver historial" onClick={() => verHistorial(m)}><ScrollText size={13} /></button>
+                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}><Pencil size={13} /></button>
+                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(m)}><Trash2 size={13} /></button>
                       </div>
                     </td>
                   </tr>
                 )
               })}
               {!filtered.length && (
-                <tr><td colSpan={9} className="text-center py-10 text-slate-400">📭 Sin resultados</td></tr>
+                <tr><td colSpan={9} className="text-center py-10 text-slate-400">Sin resultados</td></tr>
               )}
             </tbody>
           </table>
@@ -283,7 +288,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               <label className="label">Notas</label>
               <textarea className="textarea" value={editando.notas ?? ''} onChange={e => setEditando(p => ({ ...p!, notas: e.target.value }))} />
             </div>
-            {editando.id && <p className="col-span-2 text-xs text-slate-400">⚠ Para cambiar el stock use "Registrar movimiento".</p>}
+            {editando.id && <p className="col-span-2 text-xs text-slate-400">Para cambiar el stock use "Registrar movimiento".</p>}
           </div>
         )}
       </Modal>
@@ -352,7 +357,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               </div>
             </div>
           ))}
-          {!histMovs.length && <p className="text-center py-6 text-slate-400">📭 Sin movimientos registrados</p>}
+          {!histMovs.length && <p className="text-center py-6 text-slate-400">Sin movimientos registrados</p>}
         </div>
       </Modal>
     </>

@@ -1,6 +1,7 @@
 'use client'
 import { useState, useEffect, useRef, useCallback, DragEvent, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
+import { Plug, Wrench, Upload, CheckCircle, AlertTriangle, Database, FileText, X, Check } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 
 // ─── Tipos ────────────────────────────────────────────────────
@@ -118,7 +119,7 @@ function WizardBar({ step }: { step: Step }) {
               ${i < cur  ? 'bg-blue-700 text-white'  : ''}
               ${i === cur ? 'bg-white text-blue-700'  : ''}
               ${i > cur  ? 'bg-slate-300 text-white'  : ''}`}>
-              {i < cur ? '✓' : i + 1}
+              {i < cur ? <Check size={8} /> : i + 1}
             </span>
             <span className="hidden sm:inline">{label}</span>
           </div>
@@ -136,15 +137,15 @@ function StepTypeSelect({ onSelect }: { onSelect: (t: ImportType) => void }) {
       <h2 className="text-base font-semibold text-slate-700 mb-4">¿Qué tipo de registros vas a importar?</h2>
       <div className="grid grid-cols-2 gap-4">
         {([
-          { id: 'materiales' as ImportType,   icon: '🔌', title: 'Materiales',   desc: 'Conductores, borneras, protecciones y otros insumos' },
-          { id: 'herramientas' as ImportType, icon: '🔧', title: 'Herramientas', desc: 'Equipos y herramientas del taller' },
+          { id: 'materiales' as ImportType,   Icon: Plug,   title: 'Materiales',   desc: 'Conductores, borneras, protecciones y otros insumos' },
+          { id: 'herramientas' as ImportType, Icon: Wrench, title: 'Herramientas', desc: 'Equipos y herramientas del taller' },
         ]).map(opt => (
           <button
             key={opt.id}
             onClick={() => onSelect(opt.id)}
             className="p-5 bg-white rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:shadow-md transition-all text-left group"
           >
-            <div className="text-3xl mb-2">{opt.icon}</div>
+            <div className="mb-2 text-blue-600 group-hover:text-blue-700"><opt.Icon size={28} /></div>
             <div className="font-semibold text-slate-800 group-hover:text-blue-700">{opt.title}</div>
             <div className="text-xs text-slate-500 mt-1">{opt.desc}</div>
           </button>
@@ -171,7 +172,7 @@ function StepUpload({ type, onFile }: { type: ImportType; onFile: (f: File) => v
         className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all
           ${dragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-white hover:border-blue-400 hover:bg-blue-50/30'}`}
       >
-        <div className="text-4xl mb-3">📂</div>
+        <div className="mb-3 text-slate-400"><Upload size={40} /></div>
         <p className="font-semibold text-slate-700 mb-1">Arrastra tu archivo aquí o haz clic</p>
         <p className="text-sm text-slate-400">Formatos: .xlsx · .xls · .csv</p>
         <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden"
@@ -206,7 +207,7 @@ function StepMapping({
   return (
     <div className="max-w-2xl">
       <div className="flex items-center gap-3 mb-4 p-3 bg-green-50 rounded-lg border border-green-200">
-        <span className="text-2xl">✅</span>
+        <CheckCircle size={22} style={{ color: '#059669', flexShrink: 0 }} />
         <div>
           <p className="font-medium text-green-800">{fileName}</p>
           <p className="text-sm text-green-600">{rowCount} filas · {headers.length} columnas detectadas</p>
@@ -229,7 +230,7 @@ function StepMapping({
                 <option value="">— Sin mapear —</option>
                 {headers.map(h => <option key={h} value={h}>{h}</option>)}
               </select>
-              {mapping[appField] && <span className="text-xs text-green-600 flex-shrink-0 w-16">✓ mapeado</span>}
+              {mapping[appField] && <span className="text-xs text-green-600 flex-shrink-0 w-16 flex items-center gap-0.5"><Check size={10} /> mapeado</span>}
             </div>
           ))}
         </div>
@@ -305,7 +306,7 @@ function StepReview(p: ReviewProps) {
       {analysis.errors.length > 0 && (
         <details open className="panel" style={{ display: 'block' }}>
           <summary className="panel-header cursor-pointer list-none">
-            <h2 className="text-red-700">❌ Errores ({analysis.errors.length}) — estas filas serán omitidas</h2>
+            <h2 className="text-red-700 flex items-center gap-1"><X size={14} /> Errores ({analysis.errors.length}) — estas filas serán omitidas</h2>
           </summary>
           <div className="overflow-x-auto">
             <table className="w-full text-xs">
@@ -336,10 +337,10 @@ function StepReview(p: ReviewProps) {
       {analysis.corrections.length > 0 && (
         <details open className="panel" style={{ display: 'block' }}>
           <summary className="panel-header cursor-pointer list-none">
-            <h2 className="text-amber-700">🔧 Correcciones propuestas ({analysis.corrections.length})</h2>
+            <h2 className="text-amber-700 flex items-center gap-1"><Wrench size={13} /> Correcciones propuestas ({analysis.corrections.length})</h2>
             <div className="flex gap-2 ml-auto">
-              <button onClick={p.approveAll} className="btn btn-ghost btn-sm text-green-700">✓ Aprobar todas</button>
-              <button onClick={p.rejectAll}  className="btn btn-ghost btn-sm text-red-600">✗ Rechazar todas</button>
+              <button onClick={p.approveAll} className="btn btn-ghost btn-sm text-green-700"><Check size={12} /> Aprobar todas</button>
+              <button onClick={p.rejectAll}  className="btn btn-ghost btn-sm text-red-600"><X size={12} /> Rechazar todas</button>
             </div>
           </summary>
           <div className="overflow-x-auto">
@@ -372,7 +373,7 @@ function StepReview(p: ReviewProps) {
                             ${approved ? 'bg-green-100 border-green-400 text-green-800 hover:bg-red-50 hover:border-red-300 hover:text-red-700'
                                        : 'bg-slate-100 border-slate-300 text-slate-500 hover:bg-green-50 hover:border-green-400 hover:text-green-700'}`}
                         >
-                          {approved ? '✓ Aprobada' : '✗ Rechazada'}
+                          {approved ? <span className="flex items-center gap-0.5"><Check size={10} /> Aprobada</span> : <span className="flex items-center gap-0.5"><X size={10} /> Rechazada</span>}
                         </button>
                       </td>
                     </tr>
@@ -393,7 +394,7 @@ function StepReview(p: ReviewProps) {
       {analysis.fileDups.length > 0 && (
         <details open className="panel" style={{ display: 'block' }}>
           <summary className="panel-header cursor-pointer list-none">
-            <h2 className="text-orange-700">⚠️ Códigos duplicados en el archivo ({analysis.fileDups.length})</h2>
+            <h2 className="text-orange-700 flex items-center gap-1"><AlertTriangle size={13} /> Códigos duplicados en el archivo ({analysis.fileDups.length})</h2>
           </summary>
           <div className="p-4 space-y-3">
             {analysis.fileDups.map((dup: any) => (
@@ -429,7 +430,7 @@ function StepReview(p: ReviewProps) {
       {analysis.dbConflicts.length > 0 && (
         <details open className="panel" style={{ display: 'block' }}>
           <summary className="panel-header cursor-pointer list-none">
-            <h2 className="text-yellow-700">⚠️ Conflictos de SKU en base de datos ({analysis.dbConflicts.length})</h2>
+            <h2 className="text-yellow-700 flex items-center gap-1"><AlertTriangle size={13} /> Conflictos de SKU en base de datos ({analysis.dbConflicts.length})</h2>
           </summary>
           <div className="divide-y divide-slate-100">
             {analysis.dbConflicts.map((c: any) => {
@@ -441,14 +442,14 @@ function StepReview(p: ReviewProps) {
                     <span className="code font-bold text-slate-800">{c.codigo}</span>
                     {c.sameTable
                       ? <span className="badge badge-blue text-[10px]">existe en {c.tableSource}</span>
-                      : <span className="badge badge-red text-[10px]">⚠ existe en OTRA tabla: {c.tableSource}</span>}
+                      : <span className="badge badge-red text-[10px]">existe en otra tabla: {c.tableSource}</span>}
                     <span className="text-xs text-slate-400">· fila {c.rowNum}</span>
                   </div>
 
                   {/* Comparación lado a lado */}
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs">
-                      <p className="font-bold text-yellow-800 mb-1">📂 En base de datos</p>
+                      <p className="font-bold text-yellow-800 mb-1 flex items-center gap-1"><Database size={11} /> En base de datos</p>
                       {existFields.slice(0, 5).map(k => (
                         <div key={k} className="flex gap-1 py-0.5 border-b border-yellow-100 last:border-0">
                           <span className="text-slate-400 w-24 flex-shrink-0">{k}:</span>
@@ -457,7 +458,7 @@ function StepReview(p: ReviewProps) {
                       ))}
                     </div>
                     <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 text-xs">
-                      <p className="font-bold text-blue-800 mb-1">📄 En tu archivo</p>
+                      <p className="font-bold text-blue-800 mb-1 flex items-center gap-1"><FileText size={11} /> En tu archivo</p>
                       {existFields.slice(0, 5).map(k => {
                         const incomingVal = c.incoming[k] ?? c.incoming[k.replace('_actual','').replace('_nombre','')]
                         return (
@@ -539,7 +540,9 @@ function StepDone({ result, onReset }: { result: ImportResult; onReset: () => vo
   return (
     <div className="max-w-lg">
       <div className={`rounded-xl p-6 mb-5 text-center border ${total > 0 ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'}`}>
-        <div className="text-5xl mb-3">{total > 0 ? '✅' : '⚠️'}</div>
+        <div className="flex justify-center mb-3">
+          {total > 0 ? <CheckCircle size={48} style={{ color: '#059669' }} /> : <AlertTriangle size={48} style={{ color: '#D97706' }} />}
+        </div>
         <h2 className="text-xl font-bold text-slate-800 mb-2">Importación completada</h2>
         <div className="flex justify-center gap-6 text-sm">
           <div><span className="text-2xl font-bold text-green-700">{result.inserted}</span><br /><span className="text-slate-500">insertados</span></div>

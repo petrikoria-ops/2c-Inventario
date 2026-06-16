@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
+import { Building2, Search, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { useToast } from '@/contexts/ToastContext'
 import type { Proveedor } from '@/types'
@@ -8,8 +9,8 @@ const BLANK: Partial<Proveedor> = { plazo_dias: 7, activo: true }
 
 export default function TablaProveedores({ initialData }: { initialData: Proveedor[] }) {
   const { showToast } = useToast()
-  const [items, setItems]       = useState<Proveedor[]>(initialData)
-  const [q, setQ]               = useState('')
+  const [items, setItems]         = useState<Proveedor[]>(initialData)
+  const [q, setQ]                 = useState('')
   const [modalOpen, setModalOpen] = useState(false)
   const [editando, setEditando]   = useState<Partial<Proveedor>>(BLANK)
   const [saving, setSaving]       = useState(false)
@@ -46,11 +47,15 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
     <>
       <div className="panel">
         <div className="panel-header">
-          <h2>🏭 Proveedores</h2>
+          <Building2 size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <h2>Proveedores</h2>
           <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nuevo</button>
         </div>
         <div className="filters">
-          <input className="input w-52" placeholder="🔍 Nombre, RUT, contacto…" value={q} onChange={e => setQ(e.target.value)} />
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
+            <input className="input w-52 pl-8" placeholder="Nombre, RUT, contacto…" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -68,12 +73,18 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
                   <td className="td">{p.email ? <a href={`mailto:${p.email}`} className="text-blue-600 hover:underline text-xs">{p.email}</a> : '—'}</td>
                   <td className="td"><span className="badge badge-blue">{p.plazo_dias}d</span></td>
                   <td className="td"><div className="flex gap-0.5">
-                    <button className="btn-icon" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>✏️</button>
-                    <button className="btn-icon" onClick={() => eliminar(p)}>🗑</button>
+                    <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
+                      <Pencil size={13} />
+                    </button>
+                    <button className="btn-icon" title="Eliminar" onClick={() => eliminar(p)}>
+                      <Trash2 size={13} />
+                    </button>
                   </div></td>
                 </tr>
               ))}
-              {!filtered.length && <tr><td colSpan={7} className="text-center py-8 text-slate-400">📭 Sin proveedores</td></tr>}
+              {!filtered.length && (
+                <tr><td colSpan={7} className="text-center py-10 text-slate-400">Sin proveedores registrados</td></tr>
+              )}
             </tbody>
           </table>
         </div>

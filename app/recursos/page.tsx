@@ -1,7 +1,7 @@
 'use client'
 import { useState } from 'react'
+import { Zap, Plug, Lock, BookOpen, ExternalLink, CheckSquare, Wrench, FlaskConical, Calculator, Printer } from 'lucide-react'
 
-// Constante eléctrica: resistividad del cobre (Ω·mm²/m)
 const RHO_COBRE = 0.0172
 
 function calcCaida(v: number, i: number, l: number, s: number) {
@@ -33,32 +33,31 @@ const CHECKLIST = {
 type CheckKey = `${keyof typeof CHECKLIST}_${number}`
 
 export default function RecursosPage() {
-  // Calc caída tensión
   const [ct, setCt] = useState({ v:220, i:20, l:50, s:2.5 })
   const [ctRes, setCtRes] = useState<ReturnType<typeof calcCaida> | null>(null)
-
-  // Calc sección
   const [sc, setSc] = useState({ i:30, l:30, pct:3, v:220 })
   const [scRes, setScRes] = useState<ReturnType<typeof seccionMinima> | null>(null)
-
-  // Calc protección
   const [dp, setDp] = useState({ p:5000, v:220, fp:0.85, fs:1.25, tri:false })
   const [dpRes, setDpRes] = useState<ReturnType<typeof calcBreaker> | null>(null)
-
-  // Checklist
   const [checks, setChecks] = useState<Record<CheckKey, boolean>>({} as any)
   const toggle = (k: CheckKey) => setChecks(p => ({ ...p, [k]: !p[k] }))
   const reset  = () => { if (confirm('¿Reiniciar checklist?')) setChecks({} as any) }
 
   return (
     <div className="p-5">
-      <h1 className="text-lg font-bold text-slate-800 mb-4">📐 Calculadoras y Recursos</h1>
+      <div className="flex items-center gap-2 mb-4">
+        <Calculator size={18} style={{ color: '#2E333A' }} />
+        <h1 className="text-lg font-bold text-slate-800">Calculadoras y Recursos</h1>
+      </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 mb-5">
 
         {/* Caída de tensión */}
         <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-semibold text-slate-700 mb-3">⚡ Caída de tensión</h3>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Zap size={14} style={{ color: '#D97706' }} />
+            <h3 className="font-semibold text-slate-700">Caída de tensión</h3>
+          </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
             {[
               { label:'Tensión (V)', key:'v', type:'select', opts:[220,380] },
@@ -79,7 +78,7 @@ export default function RecursosPage() {
           <button className="btn btn-primary btn-sm w-full mb-2" onClick={() => setCtRes(calcCaida(ct.v, ct.i, ct.l, ct.s))}>Calcular</button>
           {ctRes && (
             <div className={`rounded-lg px-3 py-2 text-sm font-medium text-center ${ctRes.ok ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'}`}>
-              ΔV = {ctRes.dV.toFixed(2)} V ({ctRes.pct.toFixed(2)}%)  {ctRes.ok ? '✔ OK' : '✕ Excede 3%'}
+              ΔV = {ctRes.dV.toFixed(2)} V ({ctRes.pct.toFixed(2)}%) — {ctRes.ok ? 'OK' : 'Excede 3%'}
             </div>
           )}
           <p className="text-xs text-slate-400 mt-2">ρ cobre = 0.0172 Ω·mm²/m | Límite RIC ≤ 3%</p>
@@ -87,7 +86,10 @@ export default function RecursosPage() {
 
         {/* Sección de conductor */}
         <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-semibold text-slate-700 mb-3">🔌 Sección de conductor</h3>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Plug size={14} style={{ color: '#2563EB' }} />
+            <h3 className="font-semibold text-slate-700">Sección de conductor</h3>
+          </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
             {[
               { label:'Corriente (A)', key:'i' },
@@ -112,7 +114,10 @@ export default function RecursosPage() {
 
         {/* Dimensionamiento protecciones */}
         <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-semibold text-slate-700 mb-3">🔒 Dimensionar protección</h3>
+          <div className="flex items-center gap-1.5 mb-3">
+            <Lock size={14} style={{ color: '#7C3AED' }} />
+            <h3 className="font-semibold text-slate-700">Dimensionar protección</h3>
+          </div>
           <div className="grid grid-cols-2 gap-2 mb-3">
             {[
               { label:'Potencia (W)', key:'p' },
@@ -141,7 +146,10 @@ export default function RecursosPage() {
 
         {/* Links RIC */}
         <div className="bg-white rounded-lg shadow-sm p-4">
-          <h3 className="font-semibold text-slate-700 mb-3">📘 Normativa RIC — SEC Chile</h3>
+          <div className="flex items-center gap-1.5 mb-3">
+            <BookOpen size={14} style={{ color: '#1D4ED8' }} />
+            <h3 className="font-semibold text-slate-700">Normativa RIC — SEC Chile</h3>
+          </div>
           <div className="space-y-1.5">
             {[
               ['Portal SEC — Reglamentos RIC', 'https://www.sec.cl/reglamentos-de-instalaciones-electricas-de-consumo/'],
@@ -155,7 +163,7 @@ export default function RecursosPage() {
             ].map(([label, href]) => (
               <a key={href} href={href} target="_blank" rel="noopener"
                 className="flex items-center gap-2 text-blue-600 hover:text-blue-800 text-xs py-1 border-b border-slate-100 last:border-0">
-                🔗 {label}
+                <ExternalLink size={10} /> {label}
               </a>
             ))}
           </div>
@@ -165,31 +173,41 @@ export default function RecursosPage() {
       {/* Checklist tablero */}
       <div className="bg-white rounded-lg shadow-sm p-4">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-slate-700">✅ Checklist armado y pruebas de tablero</h3>
+          <div className="flex items-center gap-1.5">
+            <CheckSquare size={15} style={{ color: '#059669' }} />
+            <h3 className="font-semibold text-slate-700">Checklist armado y pruebas de tablero</h3>
+          </div>
           <div className="flex gap-2">
             <button className="btn btn-ghost btn-sm" onClick={reset}>Reiniciar</button>
-            <button className="btn btn-outline btn-sm" onClick={() => window.print()}>🖨 Imprimir</button>
+            <button className="btn btn-outline btn-sm" onClick={() => window.print()}>
+              <Printer size={13} /> Imprimir
+            </button>
           </div>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {(Object.entries(CHECKLIST) as [keyof typeof CHECKLIST, string[]][]).map(([grupo, items]) => (
-            <div key={grupo}>
-              <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">
-                {grupo === 'mecanico' ? '🔩 Armado mecánico' : grupo === 'cableado' ? '🔌 Cableado' : '🧪 Pruebas'}
-              </h4>
-              <ul className="space-y-1">
-                {items.map((item, i) => {
-                  const k = `${grupo}_${i}` as CheckKey
-                  return (
-                    <li key={k} className="flex items-center gap-2 text-sm py-1 border-b border-slate-100 last:border-0">
-                      <input type="checkbox" id={k} checked={!!checks[k]} onChange={() => toggle(k)} className="accent-blue-700 w-4 h-4 flex-shrink-0" />
-                      <label htmlFor={k} className={`cursor-pointer ${checks[k] ? 'line-through text-slate-400' : 'text-slate-700'}`}>{item}</label>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ))}
+          {(Object.entries(CHECKLIST) as [keyof typeof CHECKLIST, string[]][]).map(([grupo, items]) => {
+            const GrupoIcon = grupo === 'mecanico' ? Wrench : grupo === 'cableado' ? Plug : FlaskConical
+            const labels: Record<string, string> = { mecanico: 'Armado mecánico', cableado: 'Cableado', pruebas: 'Pruebas' }
+            return (
+              <div key={grupo}>
+                <div className="flex items-center gap-1.5 mb-2">
+                  <GrupoIcon size={12} style={{ color: '#909090' }} />
+                  <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wide">{labels[grupo]}</h4>
+                </div>
+                <ul className="space-y-1">
+                  {items.map((item, i) => {
+                    const k = `${grupo}_${i}` as CheckKey
+                    return (
+                      <li key={k} className="flex items-center gap-2 text-sm py-1 border-b border-slate-100 last:border-0">
+                        <input type="checkbox" id={k} checked={!!checks[k]} onChange={() => toggle(k)} className="accent-blue-700 w-4 h-4 flex-shrink-0" />
+                        <label htmlFor={k} className={`cursor-pointer ${checks[k] ? 'line-through text-slate-400' : 'text-slate-700'}`}>{item}</label>
+                      </li>
+                    )
+                  })}
+                </ul>
+              </div>
+            )
+          })}
         </div>
       </div>
     </div>

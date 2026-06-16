@@ -2,8 +2,13 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import AlertasStockRealtime from '@/components/dashboard/AlertasStockRealtime'
 import { clp, fechaHora, num } from '@/lib/utils'
 import { BadgeTipo, BadgeEstadoProy } from '@/components/ui/Badge'
+import {
+  Package, AlertTriangle, DollarSign, ClipboardList,
+  CheckCircle, Wrench, Search, ShoppingCart, PackageOpen,
+  ArrowUpDown, type LucideIcon,
+} from 'lucide-react'
 
-export const dynamic = 'force-dynamic'
+export const dynamic   = 'force-dynamic'
 export const revalidate = 0
 
 const ESTADOS_PROY = ['presupuesto', 'en_proceso', 'terminado', 'entregado', 'cancelado'] as const
@@ -40,26 +45,26 @@ export default async function DashboardPage() {
     sb.from('vales_despacho').select('*', { count: 'exact', head: true }).gte('fecha', startOfMonth),
   ])
 
-  const alertas        = (materiales ?? []).filter(m => m.stock_actual <= m.stock_minimo)
+  const alertas         = (materiales ?? []).filter(m => m.stock_actual <= m.stock_minimo)
   const valorInventario = (materiales ?? []).reduce((s, m) => s + m.stock_actual * m.precio_unitario, 0)
-  const solicPend      = solicRes.error    ? 0 : (solicRes.count    ?? 0)
-  const salidasMes     = salidasRes.error  ? 0 : (salidasRes.count  ?? 0)
+  const solicPend       = solicRes.error   ? 0 : (solicRes.count   ?? 0)
+  const salidasMes      = salidasRes.error ? 0 : (salidasRes.count ?? 0)
 
   const proyPorEstado = (proyectosTodos ?? []).reduce<Record<string, number>>((acc, p: any) => {
     acc[p.estado] = (acc[p.estado] ?? 0) + 1
     return acc
   }, {})
 
-  const stats = [
-    { icon: '🔌', label: 'Ítems en inventario',    value: num(totalItems     ?? 0, 0), bg: 'bg-blue-100'   },
-    { icon: '⚠️', label: 'Bajo stock mínimo',       value: num(alertas.length,    0), bg: 'bg-red-100'    },
-    { icon: '💰', label: 'Valor inventario',         value: clp(valorInventario),      bg: 'bg-green-100'  },
-    { icon: '📋', label: 'Proyectos en proceso',     value: num(proyActivos    ?? 0, 0), bg: 'bg-yellow-100' },
-    { icon: '✅', label: 'Her. operativas',           value: num(herOperativas  ?? 0, 0), bg: 'bg-green-100'  },
-    { icon: '🔧', label: 'Her. en reparación',       value: num(herEnRep       ?? 0, 0), bg: 'bg-orange-100' },
-    { icon: '🔍', label: 'Her. extraviadas',         value: num(herExtraviadas ?? 0, 0), bg: 'bg-red-100'    },
-    { icon: '🛒', label: 'Compras pendientes',        value: num(solicPend,         0), bg: solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100' },
-    { icon: '📤', label: 'Salidas este mes',          value: num(salidasMes,        0), bg: 'bg-violet-100' },
+  const stats: { Icon: LucideIcon; label: string; value: string; bg: string; iconColor: string }[] = [
+    { Icon: Package,       label: 'Ítems en inventario', value: num(totalItems    ?? 0, 0), bg: 'bg-blue-100',   iconColor: '#1D4ED8' },
+    { Icon: AlertTriangle, label: 'Bajo stock mínimo',   value: num(alertas.length,    0), bg: 'bg-red-100',    iconColor: '#DC2626' },
+    { Icon: DollarSign,    label: 'Valor inventario',    value: clp(valorInventario),      bg: 'bg-green-100',  iconColor: '#059669' },
+    { Icon: ClipboardList, label: 'Proy. en proceso',    value: num(proyActivos   ?? 0, 0), bg: 'bg-yellow-100', iconColor: '#D97706' },
+    { Icon: CheckCircle,   label: 'Her. operativas',     value: num(herOperativas ?? 0, 0), bg: 'bg-green-100',  iconColor: '#059669' },
+    { Icon: Wrench,        label: 'Her. en reparación',  value: num(herEnRep      ?? 0, 0), bg: 'bg-orange-100', iconColor: '#EA580C' },
+    { Icon: Search,        label: 'Her. extraviadas',    value: num(herExtraviadas ?? 0, 0), bg: 'bg-red-100',   iconColor: '#DC2626' },
+    { Icon: ShoppingCart,  label: 'Compras pendientes',  value: num(solicPend,         0), bg: solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100', iconColor: solicPend > 0 ? '#EA580C' : '#909090' },
+    { Icon: PackageOpen,   label: 'Salidas este mes',    value: num(salidasMes,        0), bg: 'bg-violet-100', iconColor: '#7C3AED' },
   ]
 
   return (
@@ -70,7 +75,9 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-5">
         {stats.map(s => (
           <div key={s.label} className="stat-card">
-            <div className={`stat-icon ${s.bg}`}>{s.icon}</div>
+            <div className={`stat-icon flex items-center justify-center ${s.bg}`}>
+              <s.Icon size={17} style={{ color: s.iconColor }} />
+            </div>
             <div>
               <div className="text-xl font-bold text-slate-800 leading-tight">{s.value}</div>
               <div className="text-xs text-slate-500 font-medium">{s.label}</div>
@@ -83,7 +90,8 @@ export default async function DashboardPage() {
       {Object.keys(proyPorEstado).length > 0 && (
         <div className="panel mb-5">
           <div className="panel-header">
-            <h2>📋 Proyectos por estado</h2>
+            <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
+            <h2>Proyectos por estado</h2>
             <a href="/proyectos" className="btn btn-ghost btn-sm">Ver todos →</a>
           </div>
           <div className="flex flex-wrap gap-3 p-4">
@@ -103,7 +111,8 @@ export default async function DashboardPage() {
       {/* Últimos movimientos */}
       <div className="panel">
         <div className="panel-header">
-          <h2>↕️ Últimos movimientos</h2>
+          <ArrowUpDown size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <h2>Últimos movimientos</h2>
           <a href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</a>
         </div>
         <div className="overflow-x-auto">

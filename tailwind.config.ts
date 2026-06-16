@@ -10,11 +10,19 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        azul: {
-          DEFAULT: '#1565c0',
-          cl: '#1976d2',
-          bg: '#e3f2fd',
+        brand: {
+          carbon:     '#2E333A',
+          'carbon-lt':'#3D4450',
+          gold:       '#F0C000',
+          'gold-dk':  '#C9A000',
+          black:      '#181818',
+          border:     '#D8D8D8',
+          muted:      '#909090',
+          bg:         '#F5F6F7',
         },
+      },
+      fontFamily: {
+        sans: ['var(--font-inter)', 'Inter', 'system-ui', '-apple-system', 'sans-serif'],
       },
     },
   },

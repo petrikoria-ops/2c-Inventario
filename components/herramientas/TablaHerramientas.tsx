@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
+import { Wrench, Search, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeEstadoHer } from '@/components/ui/Badge'
 import { diasHastaMant, fechaCorta } from '@/lib/utils'
@@ -55,11 +56,15 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
     <>
       <div className="panel">
         <div className="panel-header">
-          <h2>🔧 Herramientas</h2>
+          <Wrench size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <h2>Herramientas</h2>
           <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva</button>
         </div>
         <div className="filters">
-          <input className="input w-52" placeholder="🔍 Código, descripción…" value={q} onChange={e => setQ(e.target.value)} />
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
+            <input className="input w-52 pl-8" placeholder="Código, descripción…" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
           <select className="select w-auto" value={filtroEst} onChange={e => setFiltroEst(e.target.value)}>
             <option value="">Todos los estados</option>
             {ESTADOS.map(e => <option key={e} value={e}>{e.replace('_',' ')}</option>)}
@@ -93,14 +98,20 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
                     </td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" onClick={() => { setEditando({ ...h }); setModalOpen(true) }}>✏️</button>
-                        <button className="btn-icon" onClick={() => eliminar(h)}>🗑</button>
+                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...h }); setModalOpen(true) }}>
+                          <Pencil size={13} />
+                        </button>
+                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(h)}>
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </td>
                   </tr>
                 )
               })}
-              {!filtered.length && <tr><td colSpan={8} className="text-center py-8 text-slate-400">📭 Sin herramientas</td></tr>}
+              {!filtered.length && (
+                <tr><td colSpan={8} className="text-center py-10 text-slate-400">Sin herramientas registradas</td></tr>
+              )}
             </tbody>
           </table>
         </div>

@@ -2,6 +2,7 @@
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import { Printer, Trash2, ClipboardList } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { fechaCorta } from '@/lib/utils'
 import type { SolicitudCompra } from '@/types'
@@ -21,10 +22,7 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ estado: nuevoEstado }),
     })
-    if (!res.ok) {
-      showToast('Error al cambiar estado', 'error')
-      return
-    }
+    if (!res.ok) { showToast('Error al cambiar estado', 'error'); return }
     setRows(prev => prev.map(r => r.id === sol.id ? { ...r, estado: nuevoEstado } : r))
     showToast(`Solicitud marcada como "${nuevoEstado}"`, 'success')
   }, [showToast])
@@ -45,10 +43,10 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
 
   if (rows.length === 0) {
     return (
-      <div className="panel py-16 text-center text-slate-400">
-        <p className="text-4xl mb-3">📋</p>
-        <p className="font-medium mb-1">No hay solicitudes de compra</p>
-        <p className="text-sm mb-4">Crea una para comenzar a gestionar tus compras</p>
+      <div className="panel py-16 text-center">
+        <ClipboardList size={36} className="mx-auto mb-3" style={{ color: '#D8D8D8' }} />
+        <p className="font-medium mb-1 text-slate-500">No hay solicitudes de compra</p>
+        <p className="text-sm mb-4 text-slate-400">Crea una para comenzar a gestionar tus compras</p>
         <Link href="/solicitudes/nueva" className="btn btn-primary btn-sm">+ Nueva solicitud</Link>
       </div>
     )
@@ -72,7 +70,7 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
             {rows.map(sol => (
               <tr key={sol.id} className="tr-hover">
                 <td className="td">
-                  <span className="code font-bold text-blue-700">{sol.numero}</span>
+                  <span className="code font-bold" style={{ color: '#2E333A' }}>{sol.numero}</span>
                 </td>
                 <td className="td text-sm text-slate-600">{fechaCorta(sol.fecha)}</td>
                 <td className="td-r">
@@ -85,28 +83,25 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
                     className={`badge cursor-pointer hover:opacity-80 transition-opacity select-none
                       ${sol.estado === 'comprado' ? 'badge-green' : 'badge-yellow'}`}
                   >
-                    {sol.estado === 'comprado' ? '✓ Comprado' : '⏳ Pendiente'}
+                    {sol.estado === 'comprado' ? 'Comprado' : 'Pendiente'}
                   </button>
                 </td>
                 <td className="td text-sm text-slate-500 max-w-[220px] truncate" title={sol.observaciones ?? ''}>
                   {sol.observaciones ?? '—'}
                 </td>
                 <td className="td">
-                  <div className="flex gap-2">
-                    <Link
-                      href={`/solicitudes/${sol.id}/imprimir`}
-                      className="btn btn-ghost btn-sm"
-                      title="Ver e imprimir"
-                    >
-                      🖨 Ver
+                  <div className="flex gap-1">
+                    <Link href={`/solicitudes/${sol.id}/imprimir`} className="btn btn-ghost btn-sm" title="Ver e imprimir">
+                      <Printer size={13} /> Ver
                     </Link>
                     <button
                       onClick={() => handleDelete(sol.id, sol.numero)}
                       disabled={deletingId === sol.id}
-                      className="btn btn-ghost btn-sm text-red-500 hover:text-red-700"
+                      className="btn btn-ghost btn-sm"
+                      style={{ color: '#DC2626' }}
                       title="Eliminar solicitud"
                     >
-                      {deletingId === sol.id ? '…' : '🗑'}
+                      {deletingId === sol.id ? '…' : <Trash2 size={13} />}
                     </button>
                   </div>
                 </td>

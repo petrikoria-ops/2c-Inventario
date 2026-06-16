@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
+import { ClipboardList, Search, ScrollText, ClipboardCheck, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeEstadoProy } from '@/components/ui/Badge'
 import { clp, fechaCorta, num } from '@/lib/utils'
@@ -68,11 +69,15 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
     <>
       <div className="panel">
         <div className="panel-header">
-          <h2>📋 Proyectos / Órdenes de Trabajo</h2>
+          <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <h2>Proyectos / Órdenes de Trabajo</h2>
           <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva OT</button>
         </div>
         <div className="filters">
-          <input className="input w-52" placeholder="🔍 OT, nombre, cliente…" value={q} onChange={e => setQ(e.target.value)} />
+          <div className="relative">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
+            <input className="input w-52 pl-8" placeholder="OT, nombre, cliente…" value={q} onChange={e => setQ(e.target.value)} />
+          </div>
           <select className="select w-auto" value={filtroEst} onChange={e => setFiltroEst(e.target.value)}>
             <option value="">Todos los estados</option>
             {ESTADOS.map(e => <option key={e} value={e}>{e.replace('_',' ')}</option>)}
@@ -96,14 +101,22 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_entrega)}</td>
                   <td className="td-r font-medium text-slate-700">{clp(calcCosto(p.costo_total))}</td>
                   <td className="td"><div className="flex gap-0.5">
-                    <button className="btn-icon" title="Ver movimientos" onClick={() => verDetalle(p)}>📜</button>
-                    <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad">🔍</a>
-                    <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>✏️</button>
-                    <button className="btn-icon" title="Eliminar" onClick={() => eliminar(p)}>🗑</button>
+                    <button className="btn-icon" title="Ver movimientos" onClick={() => verDetalle(p)}>
+                      <ScrollText size={13} />
+                    </button>
+                    <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad">
+                      <ClipboardCheck size={13} />
+                    </a>
+                    <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
+                      <Pencil size={13} />
+                    </button>
+                    <button className="btn-icon" title="Eliminar" onClick={() => eliminar(p)}>
+                      <Trash2 size={13} />
+                    </button>
                   </div></td>
                 </tr>
               ))}
-              {!filtered.length && <tr><td colSpan={8} className="text-center py-8 text-slate-400">📭 Sin proyectos</td></tr>}
+              {!filtered.length && <tr><td colSpan={8} className="text-center py-10 text-slate-400">Sin proyectos</td></tr>}
             </tbody>
           </table>
         </div>
@@ -161,7 +174,7 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   </tbody>
                 </table>
               </div>
-            ) : <p className="text-center py-6 text-slate-400">📭 Sin materiales consumidos</p>}
+            ) : <p className="text-center py-6 text-slate-400">Sin materiales consumidos</p>}
           </>
         )}
       </Modal>
