@@ -1,60 +1,137 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Plug, Download, Search, ArrowUpDown, ScrollText, Pencil, Trash2, X } from 'lucide-react'
+import {
+  Plug, Download, Search, ArrowUpDown, ScrollText, Pencil, Trash2, X,
+  ChevronUp, ChevronDown, SlidersHorizontal,
+} from 'lucide-react'
 import Modal from '@/components/ui/Modal'
-import { BadgeStock } from '@/components/ui/Badge'
-import { BadgeTipo } from '@/components/ui/Badge'
+import { BadgeStock, BadgeTipo } from '@/components/ui/Badge'
 import { clp, num, fechaHora } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
 import type { Categoria, Material, Proveedor, Proyecto, Movimiento } from '@/types'
 
 interface Props {
   initialData: Material[]
-  categorias: Categoria[]
+  categorias:  Categoria[]
   proveedores: Pick<Proveedor, 'id' | 'nombre'>[]
-  proyectos: Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]
+  proyectos:   Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]
 }
+
+type SortField = 'codigo' | 'descripcion' | 'categoria' | 'stock' | 'precio'
+type SortDir   = 'asc' | 'desc'
 
 const UNIDADES = ['UN', 'MT', 'ML', 'KG', 'JGO', 'RLL', 'PAR']
 
 export default function TablaMateriales({ initialData, categorias, proveedores, proyectos }: Props) {
-  const router = useRouter()
+  const router      = useRouter()
   const { showToast } = useToast()
 
-  // Estado local — se actualiza tras cada mutación
   const [materiales, setMateriales] = useState<Material[]>(initialData)
-  const [q, setQ]                   = useState('')
-  const [catFiltro, setCatFiltro]   = useState('')
-  const [soloAlerta, setSoloAlerta] = useState(false)
-  const [saving, setSaving]         = useState(false)
 
-  // Modal CRUD
+  // ── Filtros ────────────────────────────────────────────────────
+  const [q,           setQ]           = useState('')
+  const [catFiltro,   setCatFiltro]   = useState('')
+  const [provFiltro,  setProvFiltro]  = useState('')
+  const [ubicFiltro,  setUbicFiltro]  = useState('')
+  const [stockEstado, setStockEstado] = useState('')   // '' | 'ok' | 'bajo' | 'cero'
+  const [stockDesde,  setStockDesde]  = useState('')
+  const [stockHasta,  setStockHasta]  = useState('')
+  const [precioDesde, setPrecioDesde] = useState('')
+  const [precioHasta, setPrecioHasta] = useState('')
+
+  // ── Ordenamiento ───────────────────────────────────────────────
+  const [sortField, setSortField] = useState<SortField>('codigo')
+  const [sortDir,   setSortDir]   = useState<SortDir>('asc')
+
+  // ── Modales ────────────────────────────────────────────────────
   const [modalForm, setModalForm] = useState(false)
-  const [editando, setEditando]   = useState<Partial<Material> | null>(null)
+  const [editando,  setEditando]  = useState<Partial<Material> | null>(null)
+  const [saving,    setSaving]    = useState(false)
 
-  // Modal movimiento rápido
-  const [modalMov, setModalMov]   = useState(false)
-  const [movMat, setMovMat]       = useState<Material | null>(null)
-  const [movForm, setMovForm]      = useState({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' })
+  const [modalMov,  setModalMov]  = useState(false)
+  const [movMat,    setMovMat]    = useState<Material | null>(null)
+  const [movForm,   setMovForm]   = useState({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' })
 
-  // Modal historial
   const [modalHist, setModalHist] = useState(false)
-  const [histMat, setHistMat]     = useState<Material | null>(null)
-  const [histMovs, setHistMovs]   = useState<Movimiento[]>([])
+  const [histMat,   setHistMat]   = useState<Material | null>(null)
+  const [histMovs,  setHistMovs]  = useState<Movimiento[]>([])
 
-  // Filtrado local
+  // ── Ubicaciones únicas (para sugerencias / dropdown) ───────────
+  const ubicaciones = useMemo(() => {
+    const s = new Set<string>()
+    materiales.forEach(m => { if (m.ubicacion?.trim()) s.add(m.ubicacion.trim()) })
+    return Array.from(s).sort()
+  }, [materiales])
+
+  // ── Filtrado + ordenamiento ────────────────────────────────────
   const filtered = useMemo(() => {
-    return materiales.filter(m => {
-      const matchQ   = !q || m.codigo.toLowerCase().includes(q.toLowerCase()) ||
-                             m.descripcion.toLowerCase().includes(q.toLowerCase())
-      const matchCat = !catFiltro || String(m.categoria_id) === catFiltro
-      const matchMin = !soloAlerta || m.stock_actual <= m.stock_minimo
-      return matchQ && matchCat && matchMin
-    })
-  }, [materiales, q, catFiltro, soloAlerta])
+    const stockD = parseFloat(stockDesde)
+    const stockH = parseFloat(stockHasta)
+    const precD  = parseFloat(precioDesde)
+    const precH  = parseFloat(precioHasta)
+    const qLow   = q.toLowerCase()
+    const ubLow  = ubicFiltro.toLowerCase()
 
-  // ─── Guardar material (crear o editar) ─────────────────────
+    let result = materiales.filter(m => {
+      if (q && !m.codigo.toLowerCase().includes(qLow) && !m.descripcion.toLowerCase().includes(qLow)) return false
+      if (catFiltro  && String(m.categoria_id) !== catFiltro)  return false
+      if (provFiltro && String(m.proveedor_id) !== provFiltro) return false
+      if (ubicFiltro && !(m.ubicacion?.toLowerCase().includes(ubLow))) return false
+
+      if (stockEstado === 'ok'   && m.stock_actual < m.stock_minimo)  return false
+      if (stockEstado === 'bajo' && m.stock_actual >= m.stock_minimo) return false
+      if (stockEstado === 'cero' && m.stock_actual !== 0)             return false
+
+      if (!isNaN(stockD) && m.stock_actual < stockD) return false
+      if (!isNaN(stockH) && m.stock_actual > stockH) return false
+
+      const precio = m.precio_unitario ?? 0
+      if (!isNaN(precD) && precio < precD) return false
+      if (!isNaN(precH) && precio > precH) return false
+
+      return true
+    })
+
+    result.sort((a, b) => {
+      let av: any, bv: any
+      switch (sortField) {
+        case 'descripcion': av = a.descripcion;                             bv = b.descripcion;                             break
+        case 'categoria':   av = (a.categorias as any)?.nombre ?? '';      bv = (b.categorias as any)?.nombre ?? '';       break
+        case 'stock':       av = a.stock_actual;                           bv = b.stock_actual;                            break
+        case 'precio':      av = a.precio_unitario ?? 0;                   bv = b.precio_unitario ?? 0;                    break
+        default:            av = a.codigo;                                  bv = b.codigo
+      }
+      const cmp = typeof av === 'string' ? av.localeCompare(bv, 'es') : av - bv
+      return sortDir === 'asc' ? cmp : -cmp
+    })
+
+    return result
+  }, [materiales, q, catFiltro, provFiltro, ubicFiltro, stockEstado,
+      stockDesde, stockHasta, precioDesde, precioHasta, sortField, sortDir])
+
+  const hasFilters = !!(q || catFiltro || provFiltro || ubicFiltro || stockEstado || stockDesde || stockHasta || precioDesde || precioHasta)
+
+  const clearFilters = () => {
+    setQ(''); setCatFiltro(''); setProvFiltro(''); setUbicFiltro('')
+    setStockEstado(''); setStockDesde(''); setStockHasta('')
+    setPrecioDesde(''); setPrecioHasta('')
+  }
+
+  // ── Ordenar por columna ────────────────────────────────────────
+  const handleSort = (field: SortField) => {
+    if (sortField === field) setSortDir(d => d === 'asc' ? 'desc' : 'asc')
+    else { setSortField(field); setSortDir('asc') }
+  }
+
+  const sortIcon = (field: SortField) => {
+    if (sortField !== field) return <ArrowUpDown size={10} className="text-slate-300 ml-0.5" />
+    return sortDir === 'asc'
+      ? <ChevronUp   size={10} className="ml-0.5" style={{ color: '#F0C000' }} />
+      : <ChevronDown size={10} className="ml-0.5" style={{ color: '#F0C000' }} />
+  }
+
+  // ── CRUD ───────────────────────────────────────────────────────
   const guardarMaterial = useCallback(async () => {
     if (!editando) return
     if (!editando.codigo?.trim())      { showToast('El código es obligatorio', 'error'); return }
@@ -63,10 +140,10 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     if ((editando.precio_unitario ?? 0) < 0) { showToast('El precio no puede ser negativo', 'error'); return }
     setSaving(true)
     try {
-      const method = editando.id ? 'PUT' : 'POST'
-      const url    = editando.id ? `/api/materiales/${editando.id}` : '/api/materiales'
+      const method  = editando.id ? 'PUT' : 'POST'
+      const url     = editando.id ? `/api/materiales/${editando.id}` : '/api/materiales'
       const payload = { ...editando, activo: true }
-      delete (payload as any).stock_actual // stock solo via movimientos
+      delete (payload as any).stock_actual
       delete (payload as any).categorias
       delete (payload as any).proveedores
 
@@ -76,7 +153,6 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       showToast(editando.id ? 'Material actualizado' : 'Material creado', 'success')
       setModalForm(false)
       router.refresh()
-      // Actualizar lista local
       const { data } = await (await fetch('/api/materiales?limit=500')).json()
       setMateriales(data)
     } catch (e: any) {
@@ -86,7 +162,6 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     }
   }, [editando, router, showToast])
 
-  // ─── Eliminar ───────────────────────────────────────────────
   const eliminar = useCallback(async (m: Material) => {
     if (!confirm(`¿Eliminar "${m.descripcion}"?`)) return
     const res = await fetch(`/api/materiales/${m.id}`, { method: 'DELETE' })
@@ -95,12 +170,12 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     showToast('Material eliminado')
   }, [showToast])
 
-  // ─── Registrar movimiento ───────────────────────────────────
+  // ── Movimiento ─────────────────────────────────────────────────
   const registrarMov = useCallback(async () => {
     if (!movMat) return
     const cant = parseFloat(movForm.cantidad)
-    if (isNaN(cant) || cant < 0) { showToast('Cantidad no válida', 'error'); return }
-    if (movForm.tipo !== 'ajuste' && cant === 0) { showToast('La cantidad debe ser mayor a 0', 'error'); return }
+    if (isNaN(cant) || cant < 0)                         { showToast('Cantidad no válida', 'error'); return }
+    if (movForm.tipo !== 'ajuste' && cant === 0)         { showToast('La cantidad debe ser mayor a 0', 'error'); return }
     setSaving(true)
     try {
       const res = await fetch('/api/movimientos', {
@@ -110,11 +185,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error)
-
-      // Actualizar stock local
-      setMateriales(prev => prev.map(m =>
-        m.id === movMat.id ? { ...m, stock_actual: json.stock_nuevo } : m
-      ))
+      setMateriales(prev => prev.map(m => m.id === movMat.id ? { ...m, stock_actual: json.stock_nuevo } : m))
       showToast('Movimiento registrado', 'success')
       setModalMov(false)
     } catch (e: any) {
@@ -124,22 +195,24 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     }
   }, [movMat, movForm, showToast])
 
-  // ─── Ver historial ──────────────────────────────────────────
+  // ── Historial ──────────────────────────────────────────────────
   const verHistorial = useCallback(async (mat: Material) => {
     setHistMat(mat)
-    const res = await fetch(`/api/movimientos?material_id=${mat.id}&limit=100`)
+    const res  = await fetch(`/api/movimientos?material_id=${mat.id}&limit=100`)
     const json = await res.json()
     setHistMovs(json.data ?? [])
     setModalHist(true)
   }, [])
 
+  // ══════════════════════════════════════════════════════════════
   return (
     <>
       <div className="panel">
+        {/* Header */}
         <div className="panel-header">
           <Plug size={14} style={{ color: '#909090', flexShrink: 0 }} />
           <h2>Materiales</h2>
-          <div className="flex gap-2">
+          <div className="flex gap-2 ml-auto">
             <a href="/api/export/materiales" className="btn btn-outline btn-sm"><Download size={13} /> CSV</a>
             <button className="btn btn-primary btn-sm"
               onClick={() => { setEditando({ unidad: 'UN', stock_actual: 0, stock_minimo: 0, precio_unitario: 0 }); setModalForm(true) }}>
@@ -148,41 +221,100 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
           </div>
         </div>
 
-        {/* Filtros */}
-        <div className="filters">
-          <div className="relative">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
-            <input className="input w-52 pl-8" placeholder="Código, descripción…" value={q} onChange={e => setQ(e.target.value)} />
+        {/* ── Filtros ─────────────────────────────────────────── */}
+        <div className="px-4 pt-3 pb-2 border-b border-slate-100 space-y-2">
+
+          {/* Fila 1: búsqueda + categoría + proveedor + estado */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="relative">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
+              <input className="input w-52 pl-8" placeholder="Código, descripción…"
+                value={q} onChange={e => setQ(e.target.value)} />
+            </div>
+
+            <select className="select w-auto max-w-[180px]" value={catFiltro} onChange={e => setCatFiltro(e.target.value)}>
+              <option value="">Todas las categorías</option>
+              {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            </select>
+
+            <select className="select w-auto max-w-[160px]" value={provFiltro} onChange={e => setProvFiltro(e.target.value)}>
+              <option value="">Todos los proveedores</option>
+              {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+            </select>
+
+            <select className="select w-auto" value={stockEstado} onChange={e => setStockEstado(e.target.value)}>
+              <option value="">Estado stock</option>
+              <option value="ok">Stock OK</option>
+              <option value="bajo">Bajo mínimo</option>
+              <option value="cero">Sin stock (= 0)</option>
+            </select>
+
+            {hasFilters && (
+              <button className="btn btn-ghost btn-sm" onClick={clearFilters}>
+                <X size={12} /> Limpiar filtros
+              </button>
+            )}
+
+            <span className="text-xs text-slate-400 ml-auto self-center whitespace-nowrap">
+              Mostrando <strong>{filtered.length}</strong> de {materiales.length}
+            </span>
           </div>
-          <select className="select w-auto" value={catFiltro} onChange={e => setCatFiltro(e.target.value)}>
-            <option value="">Todas las categorías</option>
-            {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
-          </select>
-          <label className="flex items-center gap-1.5 text-xs text-slate-600 cursor-pointer">
-            <input type="checkbox" checked={soloAlerta} onChange={e => setSoloAlerta(e.target.checked)} className="accent-blue-700" />
-            Solo bajo mínimo
-          </label>
-          {(q || catFiltro || soloAlerta) && (
-            <button className="btn btn-ghost btn-sm" onClick={() => { setQ(''); setCatFiltro(''); setSoloAlerta(false) }}>
-              <X size={12} /> Limpiar
-            </button>
-          )}
-          <span className="text-xs text-slate-400 ml-auto self-center">{filtered.length} resultado(s)</span>
+
+          {/* Fila 2: ubicación + rangos */}
+          <div className="flex flex-wrap gap-2 items-center">
+            <div className="flex items-center gap-1">
+              <SlidersHorizontal size={12} style={{ color: '#BBBBBB', flexShrink: 0 }} />
+              <input className="input w-36 text-xs" placeholder="Ubicación…"
+                value={ubicFiltro} onChange={e => setUbicFiltro(e.target.value)}
+                list="ubicaciones-list" />
+              <datalist id="ubicaciones-list">
+                {ubicaciones.map(u => <option key={u} value={u} />)}
+              </datalist>
+            </div>
+
+            <div className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap">
+              <span>Stock</span>
+              <input className="input w-20 text-xs text-right" type="number" min="0" placeholder="desde"
+                value={stockDesde} onChange={e => setStockDesde(e.target.value)} />
+              <span>—</span>
+              <input className="input w-20 text-xs text-right" type="number" min="0" placeholder="hasta"
+                value={stockHasta} onChange={e => setStockHasta(e.target.value)} />
+            </div>
+
+            <div className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap">
+              <span>Precio (CLP)</span>
+              <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="desde"
+                value={precioDesde} onChange={e => setPrecioDesde(e.target.value)} />
+              <span>—</span>
+              <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="hasta"
+                value={precioHasta} onChange={e => setPrecioHasta(e.target.value)} />
+            </div>
+          </div>
         </div>
 
-        {/* Tabla */}
+        {/* ── Tabla ───────────────────────────────────────────── */}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
               <tr>
-                <th className="th">Código</th>
-                <th className="th">Descripción</th>
-                <th className="th">Categoría</th>
+                <th className="th cursor-pointer select-none" onClick={() => handleSort('codigo')}>
+                  <span className="inline-flex items-center">Código{sortIcon('codigo')}</span>
+                </th>
+                <th className="th cursor-pointer select-none" onClick={() => handleSort('descripcion')}>
+                  <span className="inline-flex items-center">Descripción{sortIcon('descripcion')}</span>
+                </th>
+                <th className="th cursor-pointer select-none" onClick={() => handleSort('categoria')}>
+                  <span className="inline-flex items-center">Categoría{sortIcon('categoria')}</span>
+                </th>
                 <th className="th">Ubicación</th>
-                <th className="th text-right">Stock</th>
+                <th className="th text-right cursor-pointer select-none" onClick={() => handleSort('stock')}>
+                  <span className="inline-flex items-center justify-end">Stock{sortIcon('stock')}</span>
+                </th>
                 <th className="th text-right">Mínimo</th>
                 <th className="th">Estado</th>
-                <th className="th text-right">Precio CLP</th>
+                <th className="th text-right cursor-pointer select-none" onClick={() => handleSort('precio')}>
+                  <span className="inline-flex items-center justify-end">Precio CLP{sortIcon('precio')}</span>
+                </th>
                 <th className="th">Acciones</th>
               </tr>
             </thead>
@@ -199,37 +331,52 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                       )}
                     </td>
                     <td className="td">
-                      {cat ? (
-                        <span className="badge text-[11px]" style={{ background: cat.color + '22', color: cat.color }}>
-                          {cat.nombre}
-                        </span>
-                      ) : '—'}
+                      {cat
+                        ? <span className="badge text-[11px]" style={{ background: cat.color + '22', color: cat.color }}>{cat.nombre}</span>
+                        : '—'}
                     </td>
                     <td className="td text-xs text-slate-500">{m.ubicacion ?? '—'}</td>
-                    <td className="td-r font-semibold text-slate-800">{num(m.stock_actual)} <span className="text-slate-400 text-xs font-normal">{m.unidad}</span></td>
+                    <td className="td-r font-semibold text-slate-800">
+                      {num(m.stock_actual)} <span className="text-slate-400 text-xs font-normal">{m.unidad}</span>
+                    </td>
                     <td className="td-r text-slate-500">{num(m.stock_minimo)}</td>
                     <td className="td"><BadgeStock actual={m.stock_actual} minimo={m.stock_minimo} /></td>
                     <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" title="Registrar movimiento" onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}><ArrowUpDown size={13} /></button>
-                        <button className="btn-icon" title="Ver historial" onClick={() => verHistorial(m)}><ScrollText size={13} /></button>
-                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}><Pencil size={13} /></button>
-                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(m)}><Trash2 size={13} /></button>
+                        <button className="btn-icon" title="Registrar movimiento"
+                          onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}>
+                          <ArrowUpDown size={13} />
+                        </button>
+                        <button className="btn-icon" title="Ver historial" onClick={() => verHistorial(m)}>
+                          <ScrollText size={13} />
+                        </button>
+                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>
+                          <Pencil size={13} />
+                        </button>
+                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(m)}>
+                          <Trash2 size={13} />
+                        </button>
                       </div>
                     </td>
                   </tr>
                 )
               })}
               {!filtered.length && (
-                <tr><td colSpan={9} className="text-center py-10 text-slate-400">Sin resultados</td></tr>
+                <tr>
+                  <td colSpan={9} className="text-center py-10 text-slate-400">
+                    {hasFilters
+                      ? 'Sin resultados con estos filtros. Prueba cambiando la búsqueda o limpiando los filtros.'
+                      : 'Sin materiales registrados'}
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* ── Modal CRUD ─────────────────────────────────────── */}
+      {/* ── Modal CRUD ─────────────────────────────────────────── */}
       <Modal open={modalForm} title={editando?.id ? `Editar — ${editando.codigo}` : 'Nuevo material'}
         onClose={() => setModalForm(false)} onSave={guardarMaterial} saving={saving}>
         {editando && (
@@ -265,16 +412,19 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             {!editando.id && (
               <div>
                 <label className="label">Stock inicial</label>
-                <input className="input" type="number" min="0" value={editando.stock_actual ?? 0} onChange={e => setEditando(p => ({ ...p!, stock_actual: parseFloat(e.target.value) || 0 }))} />
+                <input className="input" type="number" min="0" value={editando.stock_actual ?? 0}
+                  onChange={e => setEditando(p => ({ ...p!, stock_actual: parseFloat(e.target.value) || 0 }))} />
               </div>
             )}
             <div>
               <label className="label">Stock mínimo</label>
-              <input className="input" type="number" min="0" value={editando.stock_minimo ?? 0} onChange={e => setEditando(p => ({ ...p!, stock_minimo: parseFloat(e.target.value) || 0 }))} />
+              <input className="input" type="number" min="0" value={editando.stock_minimo ?? 0}
+                onChange={e => setEditando(p => ({ ...p!, stock_minimo: parseFloat(e.target.value) || 0 }))} />
             </div>
             <div>
               <label className="label">Precio unitario (CLP)</label>
-              <input className="input" type="number" min="0" value={editando.precio_unitario ?? 0} onChange={e => setEditando(p => ({ ...p!, precio_unitario: parseFloat(e.target.value) || 0 }))} />
+              <input className="input" type="number" min="0" value={editando.precio_unitario ?? 0}
+                onChange={e => setEditando(p => ({ ...p!, precio_unitario: parseFloat(e.target.value) || 0 }))} />
             </div>
             <div>
               <label className="label">Ubicación física</label>
@@ -293,7 +443,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
         )}
       </Modal>
 
-      {/* ── Modal movimiento rápido ─────────────────────────── */}
+      {/* ── Modal movimiento rápido ─────────────────────────────── */}
       <Modal open={modalMov} title="Registrar movimiento" onClose={() => setModalMov(false)}
         onSave={registrarMov} saveLabel="Registrar" saving={saving}>
         {movMat && (
@@ -313,7 +463,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               </div>
               <div>
                 <label className="label">{movForm.tipo === 'ajuste' ? 'Nuevo stock total *' : 'Cantidad *'}</label>
-                <input className="input" type="number" min="0" step="1" value={movForm.cantidad} onChange={e => setMovForm(p => ({ ...p, cantidad: e.target.value }))} />
+                <input className="input" type="number" min="0" step="1" value={movForm.cantidad}
+                  onChange={e => setMovForm(p => ({ ...p, cantidad: e.target.value }))} />
               </div>
               <div className="col-span-2">
                 <label className="label">Proyecto / OT</label>
@@ -335,7 +486,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
         )}
       </Modal>
 
-      {/* ── Modal historial ─────────────────────────────────── */}
+      {/* ── Modal historial ─────────────────────────────────────── */}
       <Modal open={modalHist} title={`Historial — ${histMat?.descripcion}`}
         onClose={() => setModalHist(false)} hideFooter>
         <div className="space-y-1">
