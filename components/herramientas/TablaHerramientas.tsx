@@ -26,6 +26,8 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
     }), [items, q, filtroEst])
 
   const guardar = useCallback(async () => {
+    if (!editando.codigo?.trim())      { showToast('El código es obligatorio', 'error'); return }
+    if (!editando.descripcion?.trim()) { showToast('La descripción es obligatoria', 'error'); return }
     setSaving(true)
     try {
       const method = editando.id ? 'PUT' : 'POST'
@@ -43,9 +45,10 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
 
   const eliminar = useCallback(async (h: Herramienta) => {
     if (!confirm(`¿Eliminar "${h.descripcion}"?`)) return
-    await fetch(`/api/herramientas/${h.id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/herramientas/${h.id}`, { method: 'DELETE' })
+    if (!res.ok) { showToast('Error al eliminar la herramienta', 'error'); return }
     setItems(prev => prev.filter(x => x.id !== h.id))
-    showToast('Herramienta eliminada')
+    showToast('Herramienta eliminada', 'success')
   }, [showToast])
 
   return (

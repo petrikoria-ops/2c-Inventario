@@ -14,31 +14,32 @@ interface Alerta {
 }
 
 export default function AlertasStockRealtime({ initialAlertas }: { initialAlertas: Alerta[] }) {
-  const [alertas, setAlertas] = useState<Alerta[]>(initialAlertas)
+  const [alertas, setAlertas]     = useState<Alerta[]>(initialAlertas)
+  const [realtimeOk, setRealtimeOk] = useState(true)
 
   useEffect(() => {
     const sb = getSupabaseBrowser()
 
-    // Suscripción a cambios en materiales para actualizar alertas en tiempo real
     const channel = sb
       .channel('stock-alertas')
       .on(
         'postgres_changes',
         { event: '*', schema: 'public', table: 'materiales' },
         async () => {
-          // Al detectar cualquier cambio en materiales, refrescar la lista de alertas
-          const { data: mats } = await sb
+          const { data: mats, error } = await sb
             .from('materiales')
             .select('id,codigo,descripcion,stock_actual,stock_minimo,ubicacion')
             .eq('activo', true)
+          if (error) { setRealtimeOk(false); return }
           if (mats) {
-            setAlertas(
-              (mats as Alerta[]).filter(m => m.stock_actual <= m.stock_minimo)
-            )
+            setAlertas((mats as Alerta[]).filter(m => m.stock_actual <= m.stock_minimo))
           }
         }
       )
-      .subscribe()
+      .subscribe((status) => {
+        if (status === 'SUBSCRIBED')                                    setRealtimeOk(true)
+        if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT')      setRealtimeOk(false)
+      })
 
     return () => { sb.removeChannel(channel) }
   }, [])
@@ -56,7 +57,10 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
       <div className="panel-header">
         <h2>⚠️ Materiales bajo stock mínimo
           <span className="ml-2 badge badge-red">{alertas.length}</span>
-          <span className="ml-2 text-xs text-green-600 font-normal">● En tiempo real</span>
+          {realtimeOk
+            ? <span className="ml-2 text-xs text-green-600 font-normal">● En tiempo real</span>
+            : <span className="ml-2 text-xs text-amber-600 font-normal" title="La suscripción en tiempo real falló; recarga para actualizar">⚠ Sin tiempo real</span>
+          }
         </h2>
         <Link href="/materiales?bajo_minimo=1" className="btn btn-ghost btn-sm">Ver todos →</Link>
       </div>

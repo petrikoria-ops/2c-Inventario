@@ -31,6 +31,8 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
   }, [])
 
   const guardar = useCallback(async () => {
+    if (!editando.ot?.trim())     { showToast('El N° OT es obligatorio', 'error'); return }
+    if (!editando.nombre?.trim()) { showToast('El nombre del proyecto es obligatorio', 'error'); return }
     setSaving(true)
     try {
       const method = editando.id ? 'PUT' : 'POST'
@@ -51,9 +53,10 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
 
   const eliminar = useCallback(async (p: Proyecto) => {
     if (!confirm(`¿Eliminar "${p.ot}"?`)) return
-    await fetch(`/api/proyectos/${p.id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/proyectos/${p.id}`, { method: 'DELETE' })
+    if (!res.ok) { showToast('Error al eliminar el proyecto', 'error'); return }
     setItems(prev => prev.filter(x => x.id !== p.id))
-    showToast('Proyecto eliminado')
+    showToast('Proyecto eliminado', 'success')
   }, [showToast])
 
   return (

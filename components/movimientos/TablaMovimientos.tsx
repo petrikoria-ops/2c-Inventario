@@ -48,6 +48,9 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
 
   const registrar = useCallback(async () => {
     if (!form.material_id) return showToast('Selecciona un material', 'error')
+    const cant = parseFloat(form.cantidad)
+    if (isNaN(cant) || cant < 0) return showToast('Cantidad no válida', 'error')
+    if (form.tipo !== 'ajuste' && cant === 0) return showToast('La cantidad debe ser mayor a 0', 'error')
     setSaving(true)
     try {
       const res = await fetch('/api/movimientos', {

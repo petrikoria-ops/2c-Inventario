@@ -18,13 +18,13 @@ export async function GET(req: NextRequest) {
 
   if (q) query = query.or(`codigo.ilike.%${q}%,descripcion.ilike.%${q}%,codigo_barras.ilike.%${q}%`)
   if (categoriaId) query = query.eq('categoria_id', categoriaId)
-  if (bajoMinimo)  query = query.filter('stock_actual', 'lte', sb.from('materiales').select('stock_minimo') as any)
 
-  const { data, count, error } = await query.order('codigo').range(offset, offset + limit - 1)
+  // bajo_minimo se filtra en JS porque Supabase PostgREST no soporta comparación entre columnas
+  const effectiveLimit = bajoMinimo ? 2000 : limit
+  const { data, count, error } = await query.order('codigo').range(offset, offset + effectiveLimit - 1)
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Filtro bajo mínimo en JS (Supabase no soporta comparación entre columnas directamente)
   const filtered = bajoMinimo ? (data ?? []).filter(m => m.stock_actual <= m.stock_minimo) : (data ?? [])
 
   return NextResponse.json({ data: filtered, total: count ?? 0, page, limit })

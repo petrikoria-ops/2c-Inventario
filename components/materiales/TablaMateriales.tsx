@@ -56,6 +56,10 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   // ─── Guardar material (crear o editar) ─────────────────────
   const guardarMaterial = useCallback(async () => {
     if (!editando) return
+    if (!editando.codigo?.trim())      { showToast('El código es obligatorio', 'error'); return }
+    if (!editando.descripcion?.trim()) { showToast('La descripción es obligatoria', 'error'); return }
+    if ((editando.stock_minimo ?? 0) < 0)    { showToast('El stock mínimo no puede ser negativo', 'error'); return }
+    if ((editando.precio_unitario ?? 0) < 0) { showToast('El precio no puede ser negativo', 'error'); return }
     setSaving(true)
     try {
       const method = editando.id ? 'PUT' : 'POST'
@@ -93,6 +97,9 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   // ─── Registrar movimiento ───────────────────────────────────
   const registrarMov = useCallback(async () => {
     if (!movMat) return
+    const cant = parseFloat(movForm.cantidad)
+    if (isNaN(cant) || cant < 0) { showToast('Cantidad no válida', 'error'); return }
+    if (movForm.tipo !== 'ajuste' && cant === 0) { showToast('La cantidad debe ser mayor a 0', 'error'); return }
     setSaving(true)
     try {
       const res = await fetch('/api/movimientos', {

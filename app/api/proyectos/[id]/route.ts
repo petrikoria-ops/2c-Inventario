@@ -6,6 +6,7 @@ type Ctx = { params: { id: string } }
 export async function GET(_: NextRequest, { params }: Ctx) {
   const sb = getSupabaseServer()
   const { data: proy } = await sb.from('proyectos').select('*').eq('id', params.id).single()
+  if (!proy) return NextResponse.json({ error: 'Proyecto no encontrado' }, { status: 404 })
   const { data: movs } = await sb.from('movimientos')
     .select('*,materiales(codigo,descripcion,unidad)')
     .eq('proyecto_id', params.id)

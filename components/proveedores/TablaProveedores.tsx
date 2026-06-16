@@ -19,6 +19,7 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
   , [items, q])
 
   const guardar = useCallback(async () => {
+    if (!editando.nombre?.trim()) { showToast('El nombre es obligatorio', 'error'); return }
     setSaving(true)
     try {
       const method = editando.id ? 'PUT' : 'POST'
@@ -35,9 +36,10 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
 
   const eliminar = useCallback(async (p: Proveedor) => {
     if (!confirm(`¿Eliminar "${p.nombre}"?`)) return
-    await fetch(`/api/proveedores/${p.id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/proveedores/${p.id}`, { method: 'DELETE' })
+    if (!res.ok) { showToast('Error al eliminar el proveedor', 'error'); return }
     setItems(prev => prev.filter(x => x.id !== p.id))
-    showToast('Proveedor eliminado')
+    showToast('Proveedor eliminado', 'success')
   }, [showToast])
 
   return (
