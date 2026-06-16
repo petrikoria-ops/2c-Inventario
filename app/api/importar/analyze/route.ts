@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { classifyByRules } from '@/lib/importar/categorias-map'
 
 // ─── Constantes ───────────────────────────────────────────────
 const ESTADOS_HER = ['operativa', 'en_reparacion', 'extraviada', 'dada_de_baja'] as const
@@ -290,6 +291,35 @@ export async function POST(req: NextRequest) {
     !fileDupExtraIdxs.includes(r._idx)
   ).length
 
+  // ── 6. Clasificar categorías faltantes (solo materiales) ────
+  const categoryMatches: {
+    rowIdx:      number
+    rowNum:      number
+    codigo:      string
+    descripcion: string
+    suggested:   string | null
+    confidence:  'alta' | 'none'
+    keyword:     string | null
+  }[] = []
+
+  if (type === 'materiales') {
+    for (const row of processed) {
+      if (row._hasError) continue
+      const catNombre = row.categoria_nombre != null ? String(row.categoria_nombre).trim() : ''
+      if (catNombre) continue   // ya tiene categoría válida: no tocar
+      const result = classifyByRules(row.descripcion)
+      categoryMatches.push({
+        rowIdx:      row._idx,
+        rowNum:      row._rowNum,
+        codigo:      row.codigo,
+        descripcion: row.descripcion,
+        suggested:   result.categoria,
+        confidence:  result.confidence,
+        keyword:     result.keyword,
+      })
+    }
+  }
+
   return NextResponse.json({
     errors,
     corrections,
@@ -297,5 +327,6 @@ export async function POST(req: NextRequest) {
     dbConflicts,
     validCount,
     totalRows: rows.length,
+    categoryMatches,
   })
 }
