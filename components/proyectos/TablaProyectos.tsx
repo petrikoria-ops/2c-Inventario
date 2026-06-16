@@ -88,9 +88,10 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_entrega)}</td>
                   <td className="td-r font-medium text-slate-700">{clp(p.costo_total)}</td>
                   <td className="td"><div className="flex gap-0.5">
-                    <button className="btn-icon" onClick={() => verDetalle(p)}>📜</button>
-                    <button className="btn-icon" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>✏️</button>
-                    <button className="btn-icon" onClick={() => eliminar(p)}>🗑</button>
+                    <button className="btn-icon" title="Ver movimientos" onClick={() => verDetalle(p)}>📜</button>
+                    <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad">🔍</a>
+                    <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>✏️</button>
+                    <button className="btn-icon" title="Eliminar" onClick={() => eliminar(p)}>🗑</button>
                   </div></td>
                 </tr>
               ))}

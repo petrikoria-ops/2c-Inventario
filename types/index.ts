@@ -114,6 +114,41 @@ export interface SolicitudCompra {
   solicitudes_compra_items?: SolicitudCompraItem[]
 }
 
+export interface ValeDespachoItem {
+  id: number
+  vale_id: number
+  material_id: number
+  codigo: string
+  descripcion: string
+  unidad: string | null
+  cantidad_entregada: number
+  precio_unit: number | null
+}
+
+export interface ValeDespacho {
+  id: number
+  numero: string
+  fecha: string
+  proyecto_id: number | null
+  usuario: string
+  motivo: string | null
+  observaciones: string | null
+  creado_en: string
+  vales_despacho_items?: ValeDespachoItem[]
+  proyectos?: (Pick<Proyecto, 'id' | 'ot' | 'nombre'> & { cliente?: string | null }) | null
+}
+
+export interface ProyectoMaterial {
+  id: number
+  proyecto_id: number
+  material_id: number | null
+  codigo: string
+  descripcion: string
+  unidad: string
+  cantidad_requerida: number
+  notas: string | null
+}
+
 export interface DashboardStats {
   totalItems: number
   bajoMinimo: number
