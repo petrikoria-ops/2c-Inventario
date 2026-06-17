@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import {
   Plug, Download, Search, ArrowUpDown, ScrollText, Pencil, Trash2, X,
@@ -28,6 +28,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   const { showToast } = useToast()
 
   const [materiales, setMateriales] = useState<Material[]>(initialData)
+  // Sincroniza con datos nuevos del servidor tras router.refresh()
+  useEffect(() => { setMateriales(initialData) }, [initialData])
 
   // ── Selección múltiple ─────────────────────────────────────────
   const [selectedIds,    setSelectedIds]    = useState<Set<number>>(new Set())
@@ -182,8 +184,9 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     if (!res.ok) { showToast('Error al eliminar', 'error'); return }
     setMateriales(prev => prev.filter(m => !ids.includes(m.id)))
     clearSelection()
+    router.refresh()
     showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} eliminado${ids.length !== 1 ? 's' : ''}`, 'success')
-  }, [selectedIds, showToast])
+  }, [selectedIds, router, showToast])
 
   // ── Bulk edit ─────────────────────────────────────────────────
   const bulkEdit = useCallback(async () => {
@@ -209,14 +212,15 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} actualizado${ids.length !== 1 ? 's' : ''}`, 'success')
       setModalBulkEdit(false)
       clearSelection()
+      router.refresh()
       const { data } = await (await fetch('/api/materiales?limit=500')).json()
-      setMateriales(data)
+      if (data) setMateriales(data)
     } catch (e: any) {
       showToast(e.message, 'error')
     } finally {
       setBulkSaving(false)
     }
-  }, [selectedIds, bulkFields, showToast])
+  }, [selectedIds, bulkFields, router, showToast])
 
   // ── CRUD ───────────────────────────────────────────────────────
   const guardarMaterial = useCallback(async () => {
@@ -254,8 +258,9 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     const res = await fetch(`/api/materiales/${m.id}`, { method: 'DELETE' })
     if (!res.ok) return showToast('Error al eliminar', 'error')
     setMateriales(prev => prev.filter(x => x.id !== m.id))
+    router.refresh()
     showToast('Material eliminado')
-  }, [showToast])
+  }, [router, showToast])
 
   // ── Movimiento ─────────────────────────────────────────────────
   const registrarMov = useCallback(async () => {

@@ -1,7 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import EntregarHerramientas from '@/components/herramientas/EntregarHerramientas'
 
-export const dynamic  = 'force-dynamic'
+export const dynamic   = 'force-dynamic'
+export const revalidate = 0
 export const metadata = { title: 'Entregar herramientas | 2C Inventario' }
 
 export default async function EntregarPage() {

@@ -1,5 +1,5 @@
 'use client'
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Users, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
@@ -13,6 +13,7 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
   const { showToast } = useToast()
 
   const [items,      setItems]      = useState<Trabajador[]>(initialData)
+  useEffect(() => { setItems(initialData) }, [initialData])
   const [modalOpen,  setModalOpen]  = useState(false)
   const [editando,   setEditando]   = useState<Partial<Trabajador>>(BLANK)
   const [saving,     setSaving]     = useState(false)
@@ -52,8 +53,9 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
     const res = await fetch(`/api/trabajadores/${t.id}`, { method: 'DELETE' })
     if (!res.ok) { showToast('Error al eliminar', 'error'); return }
     setItems(prev => prev.filter(x => x.id !== t.id))
+    router.refresh()
     showToast('Trabajador desactivado', 'success')
-  }, [showToast])
+  }, [router, showToast])
 
   return (
     <>

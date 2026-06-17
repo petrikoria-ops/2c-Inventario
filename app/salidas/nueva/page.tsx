@@ -1,6 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import NuevaSalida from '@/components/salidas/NuevaSalida'
 
+export const dynamic = 'force-dynamic'
+
 export default async function NuevaSalidaPage() {
   const sb = getSupabaseServer()
   const { data: proyectos } = await sb

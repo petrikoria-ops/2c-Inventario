@@ -13,8 +13,9 @@ interface EntregaItem {
   notas:       string
 }
 
-export default function EntregarHerramientas({ trabajadores }: { trabajadores: Trabajador[] }) {
+export default function EntregarHerramientas({ trabajadores: initialTrabajadores }: { trabajadores: Trabajador[] }) {
   const [items,        setItems]       = useState<EntregaItem[]>([])
+  const [trabajadores, setTrabajadores] = useState<Trabajador[]>(initialTrabajadores)
   const [trabajadorId, setTrabId]      = useState('')
   const [usuario,      setUsuario]     = useState('')
   const [observaciones, setObs]        = useState('')
@@ -27,6 +28,14 @@ export default function EntregarHerramientas({ trabajadores }: { trabajadores: T
   const inputRef  = useRef<HTMLInputElement>(null)
   const { showToast } = useToast()
   const router = useRouter()
+
+  // Fetch trabajadores frescos en cada montaje (evita datos obsoletos de SSR)
+  useEffect(() => {
+    fetch('/api/trabajadores')
+      .then(r => r.json())
+      .then(json => { if (Array.isArray(json.data)) setTrabajadores(json.data) })
+      .catch(() => {/* mantener initialTrabajadores si falla */})
+  }, [])
 
   // Búsqueda debounced
   useEffect(() => {

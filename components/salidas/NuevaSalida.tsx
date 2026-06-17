@@ -16,8 +16,9 @@ interface SalidaItem {
   precio_unit:        number
 }
 
-export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, 'id' | 'ot' | 'nombre'>[] }) {
+export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos: Pick<Proyecto, 'id' | 'ot' | 'nombre'>[] }) {
   const [items, setItems]           = useState<SalidaItem[]>([])
+  const [proyectos, setProyectos]   = useState<Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]>(initialProyectos)
   const [proyectoId, setProyectoId] = useState('')
   const [usuario, setUsuario]       = useState('')
   const [motivo, setMotivo]         = useState('')
@@ -31,6 +32,18 @@ export default function NuevaSalida({ proyectos }: { proyectos: Pick<Proyecto, '
   const inputRef  = useRef<HTMLInputElement>(null)
   const { showToast } = useToast()
   const router = useRouter()
+
+  // Fetch proyectos frescos en cada montaje
+  useEffect(() => {
+    fetch('/api/proyectos')
+      .then(r => r.json())
+      .then((data: any[]) => {
+        if (Array.isArray(data)) {
+          setProyectos(data.filter((p: any) => p.estado === 'en_proceso' || p.estado === 'presupuesto'))
+        }
+      })
+      .catch(() => {/* mantener initialProyectos si falla */})
+  }, [])
 
   // Búsqueda debounced
   useEffect(() => {
