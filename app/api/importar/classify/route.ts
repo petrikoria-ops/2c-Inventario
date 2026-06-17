@@ -157,9 +157,9 @@ export async function GET() {
     GROQ_API_KEY:         keyStatus,
     model:                MODEL,
     endpoint:             GROQ_ENDPOINT,
-    batchSize:            BATCH_SIZE,
-    batchDelayMs:         BATCH_DELAY,
+    batchingStrategy:     'cliente (8 ítems/lote, 2500 ms entre lotes)',
     maxRetries:           MAX_RETRIES,
+    retryBaseMs:          RETRY_BASE_MS,
   }
 
   if (!apiKey) {
