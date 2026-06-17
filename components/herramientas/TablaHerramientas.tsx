@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo, useCallback, useEffect } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Wrench, Search, Pencil, Trash2, X } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
@@ -15,7 +15,6 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
   const router                    = useRouter()
   const { showToast }             = useToast()
   const [items, setItems]         = useState<Herramienta[]>(initialData)
-  useEffect(() => { setItems(initialData) }, [initialData])
   const [q, setQ]                 = useState('')
   const [filtroEst, setFiltroEst] = useState('')
   const [modalOpen, setModalOpen] = useState(false)
@@ -65,9 +64,8 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
     if (!res.ok) { showToast('Error al eliminar', 'error'); return }
     setItems(prev => prev.filter(h => !ids.includes(h.id)))
     clearSelection()
-    router.refresh()
     showToast(`${ids.length} herramienta${ids.length !== 1 ? 's' : ''} eliminada${ids.length !== 1 ? 's' : ''}`, 'success')
-  }, [selectedIds, router, showToast])
+  }, [selectedIds, showToast])
 
   // ── Bulk edit ─────────────────────────────────────────────────
   const bulkEdit = useCallback(async () => {
@@ -93,13 +91,12 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
       showToast(`${ids.length} herramienta${ids.length !== 1 ? 's' : ''} actualizada${ids.length !== 1 ? 's' : ''}`, 'success')
       setModalBulkEdit(false)
       clearSelection()
-      router.refresh()
     } catch (e: any) {
       showToast(e.message, 'error')
     } finally {
       setBulkSaving(false)
     }
-  }, [selectedIds, bulkFields, router, showToast])
+  }, [selectedIds, bulkFields, showToast])
 
   // ── CRUD ───────────────────────────────────────────────────────
   const guardar = useCallback(async () => {
@@ -143,9 +140,8 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
     const res = await fetch(`/api/herramientas/${h.id}`, { method: 'DELETE' })
     if (!res.ok) { showToast('Error al eliminar la herramienta', 'error'); return }
     setItems(prev => prev.filter(x => x.id !== h.id))
-    router.refresh()
     showToast('Herramienta eliminada', 'success')
-  }, [router, showToast])
+  }, [showToast])
 
   const numSelected = selectedIds.size
 
