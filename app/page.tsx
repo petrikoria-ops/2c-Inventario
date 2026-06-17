@@ -4,7 +4,7 @@ import { num } from '@/lib/utils'
 import {
   PackageOpen, ShoppingCart, ArrowUpDown, Package,
   ClipboardList, Wrench, AlertTriangle, CheckCircle,
-  Calculator, CheckSquare, Tag,
+  Calculator, CheckSquare, Tag, Handshake, HardHat, Users, Bot,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -13,6 +13,7 @@ export const revalidate = 0
 
 const ACCIONES: { href: string; Icon: LucideIcon; title: string; desc: string; color: string }[] = [
   { href: '/salidas/nueva',     Icon: PackageOpen,    title: 'Nuevo despacho',       desc: 'Registrar salida de materiales',    color: 'bg-blue-600'    },
+  { href: '/entregas/nueva',    Icon: Handshake,      title: 'Entrega por mano',     desc: 'Sin proyecto, descuenta stock',     color: 'bg-cyan-700'    },
   { href: '/solicitudes/nueva', Icon: ShoppingCart,   title: 'Solicitud de compra',  desc: 'Pedir materiales al proveedor',     color: 'bg-emerald-600' },
   { href: '/movimientos',       Icon: ArrowUpDown,    title: 'Movimiento',           desc: 'Entrada, ajuste o devolución',      color: 'bg-violet-600'  },
   { href: '/materiales',        Icon: Package,        title: 'Inventario General',   desc: 'Ver y gestionar materiales',        color: 'bg-slate-600'   },
@@ -20,7 +21,10 @@ const ACCIONES: { href: string; Icon: LucideIcon; title: string; desc: string; c
   { href: '/herramientas',      Icon: Wrench,         title: 'Herramientas',         desc: 'Estado y ubicación de equipos',     color: 'bg-rose-600'    },
   { href: '/recursos',          Icon: Calculator,     title: 'Recursos Técnicos',    desc: 'Calculadoras eléctricas y normas',  color: 'bg-indigo-600'  },
   { href: '/checklist',         Icon: CheckSquare,    title: 'Checklist tablero',    desc: 'Verificación eléctrica imprimible', color: 'bg-teal-600'    },
-  { href: '/etiquetas',         Icon: Tag,            title: 'Etiquetas de obra',    desc: 'Pallets y bultos imprimibles',       color: 'bg-yellow-600'  },
+  { href: '/etiquetas',          Icon: Tag,            title: 'Etiquetas de obra',    desc: 'Pallets y bultos imprimibles',       color: 'bg-yellow-600'  },
+  { href: '/herramientas/entregar', Icon: HardHat,   title: 'Entregar herramientas', desc: 'Comprobante + actualiza responsable', color: 'bg-orange-700'  },
+  { href: '/trabajadores',      Icon: Users,          title: 'Trabajadores',         desc: 'Personal asignado a herramientas',   color: 'bg-slate-500'   },
+  { href: '/agente',            Icon: Bot,            title: 'Agente IA',            desc: 'Consultas en lenguaje natural',       color: 'bg-purple-600'  },
 ]
 
 export default async function HomePage() {

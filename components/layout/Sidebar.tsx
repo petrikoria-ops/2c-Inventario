@@ -5,7 +5,7 @@ import { usePathname } from 'next/navigation'
 import { useState } from 'react'
 import {
   Home, LayoutDashboard,
-  Package, Wrench, ArrowUpDown, Upload, PackageOpen,
+  Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart,
   Calculator, CheckSquare, Tag, Menu, X,
 } from 'lucide-react'
@@ -26,10 +26,13 @@ const NAV: NavGroup[] = [
     section: 'Inventario',
     links: [
       { href: '/materiales',   Icon: Package,     label: 'Materiales' },
-      { href: '/herramientas', Icon: Wrench,       label: 'Herramientas' },
+      { href: '/herramientas',          Icon: Wrench,    label: 'Herramientas'           },
+      { href: '/herramientas/entregar', Icon: HardHat,  label: 'Entregar herramientas'  },
+      { href: '/trabajadores',          Icon: Users,    label: 'Trabajadores'           },
       { href: '/movimientos',  Icon: ArrowUpDown,  label: 'Movimientos' },
       { href: '/importar',     Icon: Upload,       label: 'Importar' },
-      { href: '/salidas',      Icon: PackageOpen,  label: 'Salidas' },
+      { href: '/salidas',         Icon: PackageOpen, label: 'Salidas'            },
+      { href: '/entregas/nueva', Icon: Handshake,   label: 'Entrega por mano'  },
     ],
   },
   {
@@ -46,6 +49,7 @@ const NAV: NavGroup[] = [
       { href: '/recursos',   Icon: Calculator,   label: 'Recursos Técnicos' },
       { href: '/checklist',  Icon: CheckSquare,  label: 'Checklist tablero' },
       { href: '/etiquetas',  Icon: Tag,          label: 'Etiquetas de obra'  },
+      { href: '/agente',     Icon: Bot,          label: 'Agente IA'          },
     ],
   },
 ]

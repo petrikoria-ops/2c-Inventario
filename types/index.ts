@@ -149,6 +149,37 @@ export interface ProyectoMaterial {
   notas: string | null
 }
 
+export interface Trabajador {
+  id: number
+  nombre: string
+  rut: string | null
+  cargo: string | null
+  telefono: string | null
+  activo: boolean
+  creado_en: string
+}
+
+export interface EntregaHerramientaItem {
+  id: number
+  entrega_id: number
+  herramienta_id: number
+  codigo: string
+  descripcion: string
+  notas: string | null
+}
+
+export interface EntregaHerramienta {
+  id: number
+  numero: string
+  trabajador_id: number | null
+  trabajador_nombre: string
+  usuario: string
+  observaciones: string | null
+  fecha: string
+  entregas_herramientas_items?: EntregaHerramientaItem[]
+  trabajadores?: Pick<Trabajador, 'id' | 'nombre' | 'cargo'> | null
+}
+
 export interface DashboardStats {
   totalItems: number
   bajoMinimo: number

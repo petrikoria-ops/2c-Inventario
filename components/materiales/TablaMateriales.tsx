@@ -29,12 +29,21 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
 
   const [materiales, setMateriales] = useState<Material[]>(initialData)
 
+  // ── Selección múltiple ─────────────────────────────────────────
+  const [selectedIds,    setSelectedIds]    = useState<Set<number>>(new Set())
+  const [modalBulkEdit,  setModalBulkEdit]  = useState(false)
+  const [bulkFields,     setBulkFields]     = useState<{
+    categoria_id?: string; proveedor_id?: string; ubicacion?: string
+    stock_minimo?: string; precio_unitario?: string
+  }>({})
+  const [bulkSaving,     setBulkSaving]     = useState(false)
+
   // ── Filtros ────────────────────────────────────────────────────
   const [q,           setQ]           = useState('')
   const [catFiltro,   setCatFiltro]   = useState('')
   const [provFiltro,  setProvFiltro]  = useState('')
   const [ubicFiltro,  setUbicFiltro]  = useState('')
-  const [stockEstado, setStockEstado] = useState('')   // '' | 'ok' | 'bajo' | 'cero'
+  const [stockEstado, setStockEstado] = useState('')
   const [stockDesde,  setStockDesde]  = useState('')
   const [stockHasta,  setStockHasta]  = useState('')
   const [precioDesde, setPrecioDesde] = useState('')
@@ -57,7 +66,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   const [histMat,   setHistMat]   = useState<Material | null>(null)
   const [histMovs,  setHistMovs]  = useState<Movimiento[]>([])
 
-  // ── Ubicaciones únicas (para sugerencias / dropdown) ───────────
+  // ── Ubicaciones únicas ─────────────────────────────────────────
   const ubicaciones = useMemo(() => {
     const s = new Set<string>()
     materiales.forEach(m => { if (m.ubicacion?.trim()) s.add(m.ubicacion.trim()) })
@@ -96,11 +105,11 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     result.sort((a, b) => {
       let av: any, bv: any
       switch (sortField) {
-        case 'descripcion': av = a.descripcion;                             bv = b.descripcion;                             break
-        case 'categoria':   av = (a.categorias as any)?.nombre ?? '';      bv = (b.categorias as any)?.nombre ?? '';       break
-        case 'stock':       av = a.stock_actual;                           bv = b.stock_actual;                            break
-        case 'precio':      av = a.precio_unitario ?? 0;                   bv = b.precio_unitario ?? 0;                    break
-        default:            av = a.codigo;                                  bv = b.codigo
+        case 'descripcion': av = a.descripcion;                        bv = b.descripcion;                        break
+        case 'categoria':   av = (a.categorias as any)?.nombre ?? ''; bv = (b.categorias as any)?.nombre ?? ''; break
+        case 'stock':       av = a.stock_actual;                       bv = b.stock_actual;                       break
+        case 'precio':      av = a.precio_unitario ?? 0;              bv = b.precio_unitario ?? 0;               break
+        default:            av = a.codigo;                             bv = b.codigo
       }
       const cmp = typeof av === 'string' ? av.localeCompare(bv, 'es') : av - bv
       return sortDir === 'asc' ? cmp : -cmp
@@ -130,6 +139,84 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       ? <ChevronUp   size={10} className="ml-0.5" style={{ color: '#F0C000' }} />
       : <ChevronDown size={10} className="ml-0.5" style={{ color: '#F0C000' }} />
   }
+
+  // ── Selección ─────────────────────────────────────────────────
+  const allFilteredSelected = filtered.length > 0 && filtered.every(m => selectedIds.has(m.id))
+  const someSelected        = filtered.some(m => selectedIds.has(m.id))
+
+  const toggleAll = () => {
+    if (allFilteredSelected) {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        filtered.forEach(m => next.delete(m.id))
+        return next
+      })
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev)
+        filtered.forEach(m => next.add(m.id))
+        return next
+      })
+    }
+  }
+
+  const toggleOne = (id: number) =>
+    setSelectedIds(prev => {
+      const next = new Set(prev)
+      next.has(id) ? next.delete(id) : next.add(id)
+      return next
+    })
+
+  const clearSelection = () => setSelectedIds(new Set())
+
+  // ── Bulk delete ────────────────────────────────────────────────
+  const bulkDelete = useCallback(async () => {
+    const ids = Array.from(selectedIds)
+    if (!ids.length) return
+    if (!confirm(`¿Eliminar ${ids.length} material${ids.length !== 1 ? 'es' : ''}? Esta acción no se puede deshacer.`)) return
+    const res = await fetch('/api/materiales/bulk', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids }),
+    })
+    if (!res.ok) { showToast('Error al eliminar', 'error'); return }
+    setMateriales(prev => prev.filter(m => !ids.includes(m.id)))
+    clearSelection()
+    showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} eliminado${ids.length !== 1 ? 's' : ''}`, 'success')
+  }, [selectedIds, showToast])
+
+  // ── Bulk edit ─────────────────────────────────────────────────
+  const bulkEdit = useCallback(async () => {
+    const ids = Array.from(selectedIds)
+    if (!ids.length) return
+    const fields: Record<string, unknown> = {}
+    if (bulkFields.categoria_id   !== undefined && bulkFields.categoria_id   !== '') fields.categoria_id   = bulkFields.categoria_id   === '__clear' ? null : Number(bulkFields.categoria_id)
+    if (bulkFields.proveedor_id   !== undefined && bulkFields.proveedor_id   !== '') fields.proveedor_id   = bulkFields.proveedor_id   === '__clear' ? null : Number(bulkFields.proveedor_id)
+    if (bulkFields.ubicacion      !== undefined && bulkFields.ubicacion.trim()!=='') fields.ubicacion      = bulkFields.ubicacion.trim()
+    if (bulkFields.stock_minimo   !== undefined && bulkFields.stock_minimo   !== '') fields.stock_minimo   = parseFloat(bulkFields.stock_minimo)
+    if (bulkFields.precio_unitario!== undefined && bulkFields.precio_unitario!== '') fields.precio_unitario= parseFloat(bulkFields.precio_unitario)
+
+    if (!Object.keys(fields).length) { showToast('No hay campos para actualizar', 'error'); return }
+
+    setBulkSaving(true)
+    try {
+      const res = await fetch('/api/materiales/bulk', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids, fields }),
+      })
+      if (!res.ok) throw new Error((await res.json()).error)
+      showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} actualizado${ids.length !== 1 ? 's' : ''}`, 'success')
+      setModalBulkEdit(false)
+      clearSelection()
+      const { data } = await (await fetch('/api/materiales?limit=500')).json()
+      setMateriales(data)
+    } catch (e: any) {
+      showToast(e.message, 'error')
+    } finally {
+      setBulkSaving(false)
+    }
+  }, [selectedIds, bulkFields, showToast])
 
   // ── CRUD ───────────────────────────────────────────────────────
   const guardarMaterial = useCallback(async () => {
@@ -174,8 +261,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   const registrarMov = useCallback(async () => {
     if (!movMat) return
     const cant = parseFloat(movForm.cantidad)
-    if (isNaN(cant) || cant < 0)                         { showToast('Cantidad no válida', 'error'); return }
-    if (movForm.tipo !== 'ajuste' && cant === 0)         { showToast('La cantidad debe ser mayor a 0', 'error'); return }
+    if (isNaN(cant) || cant < 0)                 { showToast('Cantidad no válida', 'error'); return }
+    if (movForm.tipo !== 'ajuste' && cant === 0)  { showToast('La cantidad debe ser mayor a 0', 'error'); return }
     setSaving(true)
     try {
       const res = await fetch('/api/movimientos', {
@@ -204,6 +291,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     setModalHist(true)
   }, [])
 
+  const numSelected = selectedIds.size
+
   // ══════════════════════════════════════════════════════════════
   return (
     <>
@@ -220,6 +309,26 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             </button>
           </div>
         </div>
+
+        {/* ── Barra de selección múltiple ──────────────────────── */}
+        {numSelected > 0 && (
+          <div className="flex items-center gap-3 px-4 py-2.5 border-b"
+            style={{ background: '#FFF8E0', borderColor: '#F0C000' }}>
+            <span className="text-sm font-semibold" style={{ color: '#2E333A' }}>
+              {numSelected} seleccionado{numSelected !== 1 ? 's' : ''}
+            </span>
+            <button className="btn btn-sm btn-outline"
+              onClick={() => { setBulkFields({}); setModalBulkEdit(true) }}>
+              <Pencil size={12} /> Editar selección
+            </button>
+            <button className="btn btn-sm btn-danger" onClick={bulkDelete}>
+              <Trash2 size={12} /> Eliminar selección
+            </button>
+            <button className="btn btn-ghost btn-sm ml-auto" onClick={clearSelection}>
+              <X size={12} /> Deseleccionar
+            </button>
+          </div>
+        )}
 
         {/* ── Filtros ─────────────────────────────────────────── */}
         <div className="px-4 pt-3 pb-2 border-b border-slate-100 space-y-2">
@@ -297,6 +406,16 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
           <table className="w-full">
             <thead>
               <tr>
+                {/* Checkbox select-all */}
+                <th className="th" style={{ width: 36, padding: '0 10px' }}>
+                  <input type="checkbox"
+                    checked={allFilteredSelected}
+                    ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
+                    onChange={toggleAll}
+                    className="cursor-pointer"
+                    title={allFilteredSelected ? 'Deseleccionar todos' : 'Seleccionar todos visibles'}
+                  />
+                </th>
                 <th className="th cursor-pointer select-none" onClick={() => handleSort('codigo')}>
                   <span className="inline-flex items-center">Código{sortIcon('codigo')}</span>
                 </th>
@@ -320,9 +439,14 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             </thead>
             <tbody>
               {filtered.map(m => {
-                const cat = m.categorias as any
+                const cat      = m.categorias as any
+                const isSelected = selectedIds.has(m.id)
                 return (
-                  <tr key={m.id} className={`tr-hover ${m.stock_actual <= m.stock_minimo ? 'bg-red-50/60' : ''}`}>
+                  <tr key={m.id}
+                    className={`tr-hover ${isSelected ? 'bg-amber-50/60' : m.stock_actual <= m.stock_minimo ? 'bg-red-50/60' : ''}`}>
+                    <td className="td" style={{ padding: '0 10px' }}>
+                      <input type="checkbox" checked={isSelected} onChange={() => toggleOne(m.id)} className="cursor-pointer" />
+                    </td>
                     <td className="td"><span className="code">{m.codigo}</span></td>
                     <td className="td">
                       <span className="font-medium text-slate-800">{m.descripcion}</span>
@@ -364,7 +488,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               })}
               {!filtered.length && (
                 <tr>
-                  <td colSpan={9} className="text-center py-10 text-slate-400">
+                  <td colSpan={10} className="text-center py-10 text-slate-400">
                     {hasFilters
                       ? 'Sin resultados con estos filtros. Prueba cambiando la búsqueda o limpiando los filtros.'
                       : 'Sin materiales registrados'}
@@ -441,6 +565,52 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             {editando.id && <p className="col-span-2 text-xs text-slate-400">Para cambiar el stock use "Registrar movimiento".</p>}
           </div>
         )}
+      </Modal>
+
+      {/* ── Modal edición en bulk ─────────────────────────────── */}
+      <Modal open={modalBulkEdit}
+        title={`Editar ${numSelected} material${numSelected !== 1 ? 'es' : ''} seleccionado${numSelected !== 1 ? 's' : ''}`}
+        onClose={() => setModalBulkEdit(false)} onSave={bulkEdit} saveLabel="Aplicar cambios" saving={bulkSaving}>
+        <p className="text-xs text-slate-500 mb-4">
+          Solo se actualizarán los campos que completes. Los campos en blanco se dejan sin cambios.
+        </p>
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="label">Categoría</label>
+            <select className="select" value={bulkFields.categoria_id ?? ''}
+              onChange={e => setBulkFields(p => ({ ...p, categoria_id: e.target.value }))}>
+              <option value="">— no cambiar —</option>
+              <option value="__clear">Sin categoría</option>
+              {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="label">Proveedor</label>
+            <select className="select" value={bulkFields.proveedor_id ?? ''}
+              onChange={e => setBulkFields(p => ({ ...p, proveedor_id: e.target.value }))}>
+              <option value="">— no cambiar —</option>
+              <option value="__clear">Sin proveedor</option>
+              {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
+            </select>
+          </div>
+          <div className="col-span-2">
+            <label className="label">Ubicación física</label>
+            <input className="input" placeholder="— no cambiar —" value={bulkFields.ubicacion ?? ''}
+              onChange={e => setBulkFields(p => ({ ...p, ubicacion: e.target.value }))} />
+          </div>
+          <div>
+            <label className="label">Stock mínimo</label>
+            <input className="input" type="number" min="0" placeholder="— no cambiar —"
+              value={bulkFields.stock_minimo ?? ''}
+              onChange={e => setBulkFields(p => ({ ...p, stock_minimo: e.target.value }))} />
+          </div>
+          <div>
+            <label className="label">Precio unitario (CLP)</label>
+            <input className="input" type="number" min="0" placeholder="— no cambiar —"
+              value={bulkFields.precio_unitario ?? ''}
+              onChange={e => setBulkFields(p => ({ ...p, precio_unitario: e.target.value }))} />
+          </div>
+        </div>
       </Modal>
 
       {/* ── Modal movimiento rápido ─────────────────────────────── */}
