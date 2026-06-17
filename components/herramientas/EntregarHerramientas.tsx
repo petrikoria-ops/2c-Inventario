@@ -109,7 +109,7 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
   }
 
   return (
-    <div className="p-5 max-w-4xl">
+    <div className="p-5 w-full max-w-3xl">
       {/* Encabezado */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
         <Wrench size={20} style={{ color: '#2E333A' }} />

@@ -5,7 +5,7 @@ export const metadata = { title: 'Agente IA | 2C Inventario' }
 
 export default function AgentePage() {
   return (
-    <div className="flex flex-col h-screen max-h-screen overflow-hidden">
+    <div className="flex flex-col flex-1 min-h-0 overflow-hidden">
       {/* Header fijo */}
       <div className="flex items-center gap-3 px-5 py-3 border-b border-slate-200 bg-white flex-shrink-0">
         <div className="w-8 h-8 rounded-full flex items-center justify-center"

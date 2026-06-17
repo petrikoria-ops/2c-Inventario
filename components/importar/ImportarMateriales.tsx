@@ -965,7 +965,7 @@ export default function ImportarMateriales() {
   const canGoBack = !['type-select', 'analyzing', 'importing', 'done'].includes(step)
 
   return (
-    <div className="p-5 max-w-5xl">
+    <div className="p-5 w-full max-w-4xl">
       <div className="flex items-center gap-3 mb-5">
         <div>
           <h1 className="text-lg font-bold text-slate-800">

@@ -118,7 +118,7 @@ export default function NuevaEntrega() {
   const totalEstimado = items.reduce((acc, i) => acc + i.precio_unit * i.cantidad_entregada, 0)
 
   return (
-    <div className="p-5 max-w-5xl">
+    <div className="p-5 w-full max-w-3xl">
       {/* Encabezado */}
       <div className="flex items-center gap-3 mb-5 flex-wrap">
         <Handshake size={20} style={{ color: '#2E333A', flexShrink: 0 }} />

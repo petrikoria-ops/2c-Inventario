@@ -259,7 +259,7 @@ export default function FactibilidadProyecto({
   const faltantes = evalResult?.items.filter(i => i.faltante > 0) ?? []
 
   return (
-    <div className="p-5 max-w-6xl">
+    <div className="p-5 w-full">
       {/* Encabezado */}
       <div className="flex items-start gap-3 mb-5">
         <div className="flex-1">

@@ -44,7 +44,7 @@ export default async function HomePage() {
   const solicPend = solicRes.error ? 0 : (solicRes.count ?? 0)
 
   return (
-    <div className="p-5 max-w-4xl">
+    <div className="p-6 w-full">
       {/* Cabecera */}
       <div className="mb-6">
         <h1 className="text-xl font-bold" style={{ color: '#2E333A' }}>2C Montajes y Proyectos Eléctricos</h1>
@@ -62,7 +62,7 @@ export default async function HomePage() {
 
       {/* Acciones rápidas */}
       <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Acciones rápidas</h2>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 mb-8">
         {ACCIONES.map(a => (
           <Link key={a.href} href={a.href}
             className="flex flex-col gap-1.5 p-4 bg-white rounded-xl shadow-sm border border-slate-100
@@ -80,7 +80,7 @@ export default async function HomePage() {
 
       {/* Mini stats */}
       <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Estado actual</h2>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-2xl">
         <div className={`stat-card ${alertas > 0 ? 'ring-2 ring-red-200' : ''}`}>
           <div className={`stat-icon flex items-center justify-center ${alertas > 0 ? 'bg-red-100' : 'bg-green-100'}`}>
             {alertas > 0

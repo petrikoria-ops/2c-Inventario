@@ -117,7 +117,7 @@ export default function ChecklistPage() {
 
       <div className="page">
         {/* ── Screen header ─────────────────────────────── */}
-        <div className="no-print p-5 max-w-4xl">
+        <div className="no-print p-5 w-full">
           <div className="flex items-center gap-2 mb-5">
             <CheckSquare size={18} style={{ color: '#2E333A' }} />
             <h1 className="text-lg font-bold text-slate-800">Checklist de tablero eléctrico</h1>

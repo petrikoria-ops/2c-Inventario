@@ -27,7 +27,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <div className="flex min-h-screen">
             <Sidebar />
             <main className="flex-1 md:ml-56 min-h-screen flex flex-col">
-              {children}
+              <div className="flex-1 flex flex-col w-full max-w-[1440px] mx-auto">
+                {children}
+              </div>
             </main>
           </div>
         </ToastProvider>

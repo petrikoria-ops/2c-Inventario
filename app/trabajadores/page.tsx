@@ -8,7 +8,7 @@ export default async function TrabajadoresPage() {
   const sb = getSupabaseServer()
   const { data } = await sb.from('trabajadores').select('*').eq('activo', true).order('nombre')
   return (
-    <div className="p-5 max-w-4xl">
+    <div className="p-5 w-full">
       <div className="mb-5">
         <h1 className="text-xl font-bold" style={{ color: '#2E333A' }}>Trabajadores</h1>
         <p className="text-sm text-slate-500">Registro de personal para asignación de herramientas</p>
