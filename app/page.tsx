@@ -4,6 +4,7 @@ import { num } from '@/lib/utils'
 import {
   PackageOpen, ShoppingCart, ArrowUpDown, Package,
   ClipboardList, Wrench, AlertTriangle, CheckCircle,
+  Calculator, CheckSquare, Tag,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -17,6 +18,9 @@ const ACCIONES: { href: string; Icon: LucideIcon; title: string; desc: string; c
   { href: '/materiales',        Icon: Package,        title: 'Inventario General',   desc: 'Ver y gestionar materiales',        color: 'bg-slate-600'   },
   { href: '/proyectos',         Icon: ClipboardList,  title: 'Obras activas',        desc: 'Tableros y factibilidad de obra',  color: 'bg-amber-600'   },
   { href: '/herramientas',      Icon: Wrench,         title: 'Herramientas',         desc: 'Estado y ubicación de equipos',     color: 'bg-rose-600'    },
+  { href: '/recursos',          Icon: Calculator,     title: 'Recursos Técnicos',    desc: 'Calculadoras eléctricas y normas',  color: 'bg-indigo-600'  },
+  { href: '/checklist',         Icon: CheckSquare,    title: 'Checklist tablero',    desc: 'Verificación eléctrica imprimible', color: 'bg-teal-600'    },
+  { href: '/etiquetas',         Icon: Tag,            title: 'Etiquetas de obra',    desc: 'Pallets y bultos imprimibles',       color: 'bg-yellow-600'  },
 ]
 
 export default async function HomePage() {

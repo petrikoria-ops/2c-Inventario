@@ -1,5 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation'
 import { Wrench, Search, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeEstadoHer } from '@/components/ui/Badge'
@@ -11,7 +12,8 @@ const ESTADOS = ['operativa','en_reparacion','extraviada','dada_de_baja']
 const BLANK: Partial<Herramienta> = { estado: 'operativa', frecuencia_mant_dias: 365 }
 
 export default function TablaHerramientas({ initialData }: { initialData: Herramienta[] }) {
-  const { showToast } = useToast()
+  const router                    = useRouter()
+  const { showToast }             = useToast()
   const [items, setItems]         = useState<Herramienta[]>(initialData)
   const [q, setQ]                 = useState('')
   const [filtroEst, setFiltroEst] = useState('')
@@ -31,18 +33,39 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
     if (!editando.descripcion?.trim()) { showToast('La descripción es obligatoria', 'error'); return }
     setSaving(true)
     try {
-      const method = editando.id ? 'PUT' : 'POST'
-      const url    = editando.id ? `/api/herramientas/${editando.id}` : '/api/herramientas'
+      const isEdit  = !!editando.id
+      const method  = isEdit ? 'PUT' : 'POST'
+      const url     = isEdit ? `/api/herramientas/${editando.id}` : '/api/herramientas'
       const payload = { ...editando, activo: true }
+      delete (payload as any).id
+
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
-      if (!res.ok) throw new Error((await res.json()).error)
-      const updated = await (await fetch('/api/herramientas')).json()
-      setItems(updated)
-      showToast(editando.id ? 'Herramienta actualizada' : 'Herramienta creada', 'success')
+      if (!res.ok) throw new Error((await res.json()).error ?? 'Error al guardar')
+
+      if (isEdit) {
+        // PUT devuelve { ok: true } — actualizamos el ítem directamente desde el estado local
+        setItems(prev => prev.map(h =>
+          h.id === editando.id ? { ...h, ...payload, id: editando.id! } as Herramienta : h
+        ))
+      } else {
+        // POST devuelve el ítem insertado completo
+        const saved = await res.json()
+        if (saved?.id) {
+          setItems(prev => [...prev, saved as Herramienta])
+        } else {
+          // Fallback: recargar desde la API si la respuesta no trae el ítem
+          const listRes  = await fetch('/api/herramientas')
+          const listData = await listRes.json()
+          if (Array.isArray(listData)) setItems(listData)
+        }
+      }
+
+      router.refresh()  // sincroniza componentes servidor
+      showToast(isEdit ? 'Herramienta actualizada' : 'Herramienta creada', 'success')
       setModalOpen(false)
     } catch (e: any) { showToast(e.message, 'error') }
     finally { setSaving(false) }
-  }, [editando, showToast])
+  }, [editando, router, showToast])
 
   const eliminar = useCallback(async (h: Herramienta) => {
     if (!confirm(`¿Eliminar "${h.descripcion}"?`)) return

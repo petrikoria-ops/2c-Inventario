@@ -141,7 +141,7 @@ export default function RecursosPage() {
       {/* Header */}
       <div className="flex items-center gap-2 mb-4 flex-wrap">
         <Calculator size={18} style={{ color: '#2E333A' }} />
-        <h1 className="text-lg font-bold text-slate-800">Calculadoras y Recursos</h1>
+        <h1 className="text-lg font-bold text-slate-800">Recursos Técnicos</h1>
         <a href="/checklist" target="_blank" rel="noopener"
           className="btn btn-outline btn-sm ml-auto">
           <CheckSquare size={13} /> Checklist tablero

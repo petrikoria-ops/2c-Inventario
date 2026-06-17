@@ -699,9 +699,11 @@ function StepImporting() {
 }
 
 // ─── Paso 7: Resultado ────────────────────────────────────────
-function StepDone({ result, onReset }: { result: ImportResult; onReset: () => void }) {
-  const router = useRouter()
-  const total  = result.inserted + result.updated
+function StepDone({ result, onReset, importType }: { result: ImportResult; onReset: () => void; importType: ImportType }) {
+  const router  = useRouter()
+  const total   = result.inserted + result.updated
+  const destHref  = importType === 'herramientas' ? '/herramientas' : '/materiales'
+  const destLabel = importType === 'herramientas' ? 'Ver herramientas →' : 'Ver materiales →'
   return (
     <div className="max-w-lg">
       <div className={`rounded-xl p-6 mb-5 text-center border ${total > 0 ? 'bg-green-50 border-green-200' : 'bg-slate-50 border-slate-200'}`}>
@@ -731,7 +733,7 @@ function StepDone({ result, onReset }: { result: ImportResult; onReset: () => vo
         </div>
       )}
       <div className="flex gap-3">
-        <button onClick={() => router.push('/materiales')} className="btn btn-primary">Ver materiales →</button>
+        <button onClick={() => router.push(destHref)} className="btn btn-primary">{destLabel}</button>
         <button onClick={onReset} className="btn btn-outline">Importar otro archivo</button>
       </div>
     </div>
@@ -974,7 +976,7 @@ export default function ImportarMateriales() {
         />
       )}
       {step === 'importing' && <StepImporting />}
-      {step === 'done'      && result && <StepDone result={result} onReset={reset} />}
+      {step === 'done'      && result && <StepDone result={result} onReset={reset} importType={type!} />}
     </div>
   )
 }
