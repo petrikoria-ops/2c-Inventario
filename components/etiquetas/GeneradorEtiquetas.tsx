@@ -1,4 +1,4 @@
-'use client'
+﻿'use client'
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { Tag, Printer, RotateCcw, Sliders } from 'lucide-react'
 
@@ -35,22 +35,32 @@ const PREVIEW_W = 620   // ancho fijo del área de preview en pantalla
 function printCSS(tamano: 'a4l' | 'a5l') {
   return `
 @media screen {
+  /* Off-screen pero NO display:none — permite que las imágenes carguen */
   .print-labels { position: absolute; left: -9999px; top: 0; }
 }
 @media print {
-  body > *        { display: none !important; }
-  body            { display: block !important; }
-  main            { display: block !important; margin: 0 !important; padding: 0 !important; }
-  main > *        { display: none !important; }
-  main .print-labels-root { display: block !important; }
-  .print-labels   { display: block !important; position: static !important; left: 0 !important; }
-  .etiqueta {
-    display: flex !important; flex-direction: column !important;
-    width: 100vw; height: 100vh;
-    page-break-after: always; break-after: page;
-    box-sizing: border-box; overflow: hidden;
+  /* Traer el área de impresión al flujo normal */
+  .print-labels {
+    position: static !important;
+    left:     0     !important;
+    top:      0     !important;
+    display:  block !important;
   }
-  .etiqueta:last-child { page-break-after: avoid; break-after: avoid; }
+  /* Cada etiqueta = una página */
+  .etiqueta {
+    display:          flex          !important;
+    flex-direction:   column        !important;
+    width:            100%          !important;
+    height:           100vh         !important;
+    page-break-after: always        !important;
+    break-after:      page          !important;
+    box-sizing:       border-box    !important;
+    overflow:         hidden        !important;
+  }
+  .etiqueta:last-child {
+    page-break-after: avoid !important;
+    break-after:      avoid !important;
+  }
   @page { margin: 0; size: ${SIZES[tamano].page}; }
 }`
 }

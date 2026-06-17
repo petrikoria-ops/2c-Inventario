@@ -223,9 +223,19 @@
 
 /* ── Print global: ocultar sidebar/layout, solo mostrar contenido ── */
 @media print {
+  /* Ocultar sidebar y la UI marcada como no-imprimible */
   aside               { display: none !important; }
-  main                { margin-left: 0 !important; padding: 0 !important; }
-  body, html          { background: white !important; }
-  /* Clases utilitarias de impresión usadas en checklist y etiquetas */
   .no-print           { display: none !important; }
+
+  /* Resetear el wrapper flex del layout (div.flex.min-h-screen)
+     para que main tome todo el ancho sin margen de sidebar */
+  body > div          { display: block !important; }
+  main                { display: block !important;
+                        margin:   0    !important;
+                        padding:  0    !important;
+                        width:    100% !important; }
+
+  body, html          { background: white !important;
+                        margin:  0 !important;
+                        padding: 0 !important; }
 }
