@@ -269,9 +269,14 @@ interface CategoryReviewProps {
   acceptAll:   () => void
 }
 
+// Throttle: ≤25 req/min para respetar el límite de 30 RPM de Groq free tier.
+const AI_BATCH_SIZE  = 8     // ítems por llamada (≈300-400 tokens, bien dentro de TPM)
+const AI_BATCH_DELAY = 2500  // ms entre lotes = 24 req/min
+
 function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: CategoryReviewProps) {
   const { showToast } = useToast()
-  const [aiLoading, setAiLoading] = useState(false)
+  const [aiLoading,  setAiLoading]  = useState(false)
+  const [aiProgress, setAiProgress] = useState<{ done: number; total: number } | null>(null)
 
   if (matches.length === 0) return null
 
@@ -283,37 +288,62 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
   const handleAI = async () => {
     const unmatched = matches.filter(m => m.confidence === 'none' && !decisions[m.rowIdx])
     if (!unmatched.length) { showToast('No hay filas sin match para clasificar', 'info'); return }
+
+    // Dividir en lotes del lado del cliente
+    const batches: typeof unmatched[] = []
+    for (let i = 0; i < unmatched.length; i += AI_BATCH_SIZE)
+      batches.push(unmatched.slice(i, i + AI_BATCH_SIZE))
+
     setAiLoading(true)
+    setAiProgress({ done: 0, total: unmatched.length })
+    let classified = 0
+    let failed     = 0
+
     try {
-      const res = await fetch('/api/importar/classify', {
-        method:  'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body:    JSON.stringify({ items: unmatched.map(m => ({ rowIdx: m.rowIdx, descripcion: m.descripcion })) }),
-      })
-      if (res.status === 403) { showToast('Clasificación IA no activada en esta instalación', 'error'); return }
-      if (!res.ok) {
-        const err = await res.json()
-        throw new Error(err.error ?? 'Error en clasificación IA')
+      for (let b = 0; b < batches.length; b++) {
+        const batch = batches[b]
+        let res: Response
+        try {
+          res = await fetch('/api/importar/classify', {
+            method:  'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body:    JSON.stringify({ items: batch.map(m => ({ rowIdx: m.rowIdx, descripcion: m.descripcion })) }),
+          })
+        } catch {
+          failed += batch.length
+          setAiProgress({ done: Math.min((b + 1) * AI_BATCH_SIZE, unmatched.length), total: unmatched.length })
+          if (b < batches.length - 1) await new Promise(r => setTimeout(r, AI_BATCH_DELAY))
+          continue
+        }
+
+        if (res.status === 403) { showToast('Clasificación IA no activada en esta instalación', 'error'); break }
+
+        if (res.ok) {
+          const data: { rowIdx: number; suggested: string | null; failed?: boolean }[] = await res.json()
+          data.forEach(r => {
+            if (r.failed)    { failed++;    return }
+            if (r.suggested) { setDecision(r.rowIdx, r.suggested); classified++ }
+          })
+        } else {
+          failed += batch.length
+        }
+
+        setAiProgress({ done: Math.min((b + 1) * AI_BATCH_SIZE, unmatched.length), total: unmatched.length })
+
+        // Pausa entre lotes para no superar el RPM de Groq
+        if (b < batches.length - 1) await new Promise(r => setTimeout(r, AI_BATCH_DELAY))
       }
-      const data: { rowIdx: number; suggested: string | null; failed?: boolean }[] = await res.json()
-      let classified = 0
-      let failed     = 0
-      data.forEach(r => {
-        if (r.failed)      { failed++;    return }
-        if (r.suggested)   { setDecision(r.rowIdx, r.suggested); classified++ }
-      })
+
       const parts: string[] = []
       if (classified > 0) parts.push(`clasificó ${classified} de ${unmatched.length}`)
-      if (failed > 0)     parts.push(`${failed} sin procesar (lím. API) — revísalas manualmente`)
+      if (failed > 0)     parts.push(`${failed} sin procesar — revísalas manualmente`)
       if (parts.length === 0) parts.push('no pudo clasificar ningún material')
-      showToast(
-        `IA: ${parts.join(' · ')}`,
-        classified > 0 ? 'success' : 'error',
-      )
+      showToast(`IA: ${parts.join(' · ')}`, classified > 0 ? 'success' : 'error')
     } catch (e: any) {
       showToast('Error al clasificar con IA: ' + e.message, 'error')
     } finally {
       setAiLoading(false)
+      setAiProgress(null)
     }
   }
 
@@ -333,7 +363,11 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
           {AI_ENABLED && noneCount > 0 && (
             <button onClick={handleAI} disabled={aiLoading} className="btn btn-ghost btn-sm text-violet-700">
               {aiLoading ? <Loader2 size={12} className="animate-spin" /> : <Cpu size={12} />}
-              {aiLoading ? 'Clasificando…' : `Clasificar ${noneCount} sin match con IA`}
+              {aiLoading
+                ? aiProgress
+                    ? `Clasificando ${aiProgress.done} de ${aiProgress.total}…`
+                    : 'Iniciando…'
+                : `Clasificar ${noneCount} sin match con IA`}
             </button>
           )}
         </div>
@@ -768,7 +802,8 @@ export default function ImportarMateriales() {
     try {
       const XLSX = await import('xlsx')
       const data = await file.arrayBuffer()
-      const wb   = XLSX.read(data, { type: 'array' })
+      // cellDates: true → SheetJS convierte seriales de Excel en objetos Date
+      const wb   = XLSX.read(data, { type: 'array', cellDates: true })
       const ws   = wb.Sheets[wb.SheetNames[0]]
       const raw  = XLSX.utils.sheet_to_json<any[]>(ws, { header: 1, defval: null })
       if (raw.length < 2) { showToast('El archivo no tiene filas de datos.', 'error'); return }
@@ -777,7 +812,17 @@ export default function ImportarMateriales() {
       const rows = raw.slice(1)
         .map(row => {
           const obj: Record<string, any> = {}
-          hdrs.forEach((h, i) => { obj[h] = (row as any[])[i] ?? null })
+          hdrs.forEach((h, i) => {
+            let v = (row as any[])[i] ?? null
+            if (v instanceof Date && !isNaN(v.getTime())) {
+              // Normalizar a YYYY-MM-DD (sin conversión de zona horaria)
+              const y = v.getFullYear()
+              const m = String(v.getMonth() + 1).padStart(2, '0')
+              const d = String(v.getDate()).padStart(2, '0')
+              v = `${y}-${m}-${d}`
+            }
+            obj[h] = v
+          })
           return obj
         })
         .filter(row => Object.values(row).some(v => v != null && v !== ''))

@@ -220,3 +220,12 @@
   }
   .pag-btn:disabled { @apply opacity-40 cursor-default; }
 }
+
+/* ── Print global: ocultar sidebar/layout, solo mostrar contenido ── */
+@media print {
+  aside               { display: none !important; }
+  main                { margin-left: 0 !important; padding: 0 !important; }
+  body, html          { background: white !important; }
+  /* Clases utilitarias de impresión usadas en checklist y etiquetas */
+  .no-print           { display: none !important; }
+}

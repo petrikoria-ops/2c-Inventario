@@ -7,12 +7,11 @@ const ENABLED = process.env.AI_CLASSIFY_ENABLED === 'true'
 const MODEL   = 'llama-3.1-8b-instant'
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 
-// ── Configuración de lotes y rate limiting ─────────────────────
-// Groq free tier: 30 RPM, 30 000 TPM — más generoso que Gemini
-const BATCH_SIZE    = 15    // ítems por llamada
-const BATCH_DELAY   = 1000  // ms entre lotes (cortesía con el tier gratuito)
+// ── Configuración de reintentos (batching movido al cliente) ─────
+// El cliente envía un lote por llamada y controla el throttle (≤25 req/min).
+// El servidor solo reintenta ante 429 con backoff exponencial.
 const MAX_RETRIES   = 3     // reintentos ante 429
-const RETRY_BASE_MS = 3000  // backoff: 3 s → 6 s → 12 s
+const RETRY_BASE_MS = 2000  // backoff: 2 s → 4 s → 8 s
 
 // ──────────────────────────────────────────────────────────────
 interface ClassifyItem { rowIdx: number; descripcion: string }
@@ -204,7 +203,7 @@ export async function GET() {
   })
 }
 
-// ── Endpoint principal ─────────────────────────────────────────
+// ── Endpoint principal — un lote por llamada (batching en el cliente) ──
 export async function POST(req: NextRequest) {
   if (!ENABLED) {
     return NextResponse.json(
@@ -227,29 +226,11 @@ export async function POST(req: NextRequest) {
   const categories = VALID_CATEGORIES
   const catLower   = new Map(categories.map(c => [c.toLowerCase(), c]))
 
-  // Dividir en lotes
-  const batches: ClassifyItem[][] = []
-  for (let i = 0; i < items.length; i += BATCH_SIZE) batches.push(items.slice(i, i + BATCH_SIZE))
-
-  console.log(`[classify] ${items.length} ítems → ${batches.length} lote(s) · modelo: ${MODEL}`)
-
-  const results: ClassifyResult[] = []
-
-  for (let b = 0; b < batches.length; b++) {
-    const batch = batches[b]
-    console.log(`[classify] Lote ${b + 1}/${batches.length} (${batch.length} ítems)…`)
-
-    const batchResults = await callGroqBatch(batch, apiKey, categories, catLower)
-    results.push(...batchResults)
-
-    if (b < batches.length - 1) {
-      console.log(`[classify] Pausa ${BATCH_DELAY} ms…`)
-      await sleep(BATCH_DELAY)
-    }
-  }
+  console.log(`[classify] lote de ${items.length} ítem(s) · modelo: ${MODEL}`)
+  const results = await callGroqBatch(items, apiKey, categories, catLower)
 
   const failedCount = results.filter(r => r.failed).length
-  if (failedCount > 0) console.warn(`[classify] ${failedCount} ítem(s) no procesados`)
+  if (failedCount > 0) console.warn(`[classify] ${failedCount} ítem(s) fallaron`)
 
   return NextResponse.json(results)
 }
