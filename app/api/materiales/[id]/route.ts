@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 type Ctx = { params: { id: string } }
 
 export async function GET(_: NextRequest, { params }: Ctx) {
@@ -17,12 +19,14 @@ export async function GET(_: NextRequest, { params }: Ctx) {
 export async function PUT(req: NextRequest, { params }: Ctx) {
   const sb = getSupabaseServer()
   const body = await req.json()
-  const { error } = await sb
+  const { error, data } = await sb
     .from('materiales')
     .update({ ...body, stock_actual: undefined }) // stock solo via movimientos
     .eq('id', params.id)
+    .select('*,categorias(id,nombre,color),proveedores(id,nombre)')
+    .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
-  return NextResponse.json({ ok: true })
+  return NextResponse.json(data)
 }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {

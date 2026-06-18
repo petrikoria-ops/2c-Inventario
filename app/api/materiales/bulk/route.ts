@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // DELETE /api/materiales/bulk  — soft-delete múltiples ids
 // PATCH  /api/materiales/bulk  — actualizar campos en múltiples ids
 
@@ -29,11 +31,12 @@ export async function PATCH(req: NextRequest) {
   delete safeFields.stock_actual
 
   const sb = getSupabaseServer()
-  const { error } = await sb
+  const { error, data } = await sb
     .from('materiales')
     .update(safeFields)
     .in('id', ids)
+    .select('*,categorias(id,nombre,color),proveedores(id,nombre)')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, updated: ids.length })
+  return NextResponse.json({ ok: true, updated: ids.length, data: data ?? [] })
 }

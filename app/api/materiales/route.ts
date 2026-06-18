@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const sb = getSupabaseServer()
   const { searchParams: p } = new URL(req.url)
@@ -33,7 +35,11 @@ export async function GET(req: NextRequest) {
 export async function POST(req: NextRequest) {
   const sb = getSupabaseServer()
   const body = await req.json()
-  const { error, data } = await sb.from('materiales').insert(body).select().single()
+  const { error, data } = await sb
+    .from('materiales')
+    .insert(body)
+    .select('*,categorias(id,nombre,color),proveedores(id,nombre)')
+    .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
   return NextResponse.json(data, { status: 201 })
 }

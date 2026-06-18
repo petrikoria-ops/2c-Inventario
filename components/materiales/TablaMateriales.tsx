@@ -205,13 +205,16 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ ids, fields }),
       })
-      if (!res.ok) throw new Error((await res.json()).error)
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error)
+
+      const updatedById = new Map<number, Material>((json.data ?? []).map((m: Material) => [m.id, m]))
+      setMateriales(prev => prev.map(m => updatedById.get(m.id) ?? m))
+
       showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} actualizado${ids.length !== 1 ? 's' : ''}`, 'success')
       setModalBulkEdit(false)
       clearSelection()
       router.refresh()
-      const { data } = await (await fetch('/api/materiales?limit=500')).json()
-      if (data) setMateriales(data)
     } catch (e: any) {
       showToast(e.message, 'error')
     } finally {
@@ -231,18 +234,22 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       const method  = editando.id ? 'PUT' : 'POST'
       const url     = editando.id ? `/api/materiales/${editando.id}` : '/api/materiales'
       const payload = { ...editando, activo: true }
-      delete (payload as any).stock_actual
+      if (editando.id) delete (payload as any).stock_actual // editar: stock solo via movimientos
+      else payload.stock_actual = editando.stock_actual ?? 0  // crear: respeta "Stock inicial"
       delete (payload as any).categorias
       delete (payload as any).proveedores
 
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       if (!res.ok) throw new Error((await res.json()).error)
+      const saved: Material = await res.json()
+
+      setMateriales(prev =>
+        editando.id ? prev.map(m => m.id === editando.id ? saved : m) : [...prev, saved]
+      )
 
       showToast(editando.id ? 'Material actualizado' : 'Material creado', 'success')
       setModalForm(false)
       router.refresh()
-      const { data } = await (await fetch('/api/materiales?limit=500')).json()
-      setMateriales(data)
     } catch (e: any) {
       showToast(e.message, 'error')
     } finally {
