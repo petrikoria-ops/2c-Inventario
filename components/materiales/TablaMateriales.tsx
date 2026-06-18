@@ -242,6 +242,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) })
       if (!res.ok) throw new Error((await res.json()).error)
       const saved: Material = await res.json()
+      if (!saved?.id) throw new Error('El servidor no devolvió el material guardado')
 
       setMateriales(prev =>
         editando.id ? prev.map(m => m.id === editando.id ? saved : m) : [...prev, saved]
@@ -293,7 +294,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   // ── Historial ──────────────────────────────────────────────────
   const verHistorial = useCallback(async (mat: Material) => {
     setHistMat(mat)
-    const res  = await fetch(`/api/movimientos?material_id=${mat.id}&limit=100`)
+    const res  = await fetch(`/api/movimientos?material_id=${mat.id}&limit=100`, { cache: 'no-store' })
     const json = await res.json()
     setHistMovs(json.data ?? [])
     setModalHist(true)
