@@ -42,16 +42,18 @@ export async function POST(req: NextRequest) {
   const numero = `SC-${year}-${String(lastSeq + 1).padStart(3, '0')}`
 
   // Crear solicitud
+  // obra/supervisor/visitador/fecha_entrega solo se incluyen si vienen con
+  // valor — así esta ruta sigue funcionando aunque esas columnas todavía no
+  // existan en una base de datos donde no se haya corrido la migración.
+  const insertPayload: Record<string, unknown> = { numero, observaciones: observaciones || null }
+  if (obra)          insertPayload.obra = obra
+  if (supervisor)    insertPayload.supervisor = supervisor
+  if (visitador)     insertPayload.visitador = visitador
+  if (fecha_entrega) insertPayload.fecha_entrega = fecha_entrega
+
   const { data: sol, error: errSol } = await sb
     .from('solicitudes_compra')
-    .insert({
-      numero,
-      observaciones: observaciones || null,
-      obra: obra || null,
-      supervisor: supervisor || null,
-      visitador: visitador || null,
-      fecha_entrega: fecha_entrega || null,
-    })
+    .insert(insertPayload)
     .select()
     .single()
 
