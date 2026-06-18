@@ -21,7 +21,7 @@ export async function GET() {
 
 export async function POST(req: NextRequest) {
   const sb = getSupabaseServer()
-  const { items, observaciones } = await req.json()
+  const { items, observaciones, obra, supervisor, visitador, fecha_entrega } = await req.json()
 
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: 'Se requiere al menos un ítem' }, { status: 400 })
@@ -44,7 +44,14 @@ export async function POST(req: NextRequest) {
   // Crear solicitud
   const { data: sol, error: errSol } = await sb
     .from('solicitudes_compra')
-    .insert({ numero, observaciones: observaciones || null })
+    .insert({
+      numero,
+      observaciones: observaciones || null,
+      obra: obra || null,
+      supervisor: supervisor || null,
+      visitador: visitador || null,
+      fecha_entrega: fecha_entrega || null,
+    })
     .select()
     .single()
 

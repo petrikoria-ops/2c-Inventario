@@ -109,6 +109,10 @@ export interface SolicitudCompra {
   fecha: string
   estado: 'pendiente' | 'comprado'
   observaciones: string | null
+  obra: string | null
+  supervisor: string | null
+  visitador: string | null
+  fecha_entrega: string | null
   creado_en: string
   actualizado_en: string
   solicitudes_compra_items?: SolicitudCompraItem[]

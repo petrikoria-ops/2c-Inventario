@@ -34,7 +34,10 @@ export default async function SolicitudesPage() {
             {solicitudes.length === 0 && 'Sin solicitudes aún'}
           </p>
         </div>
-        <Link href="/solicitudes/nueva" className="btn btn-primary">+ Nueva solicitud</Link>
+        <div className="flex gap-2">
+          <Link href="/solicitudes/importar" className="btn btn-outline">Importar Excel</Link>
+          <Link href="/solicitudes/nueva" className="btn btn-primary">+ Nueva solicitud</Link>
+        </div>
       </div>
 
       <TablaSolicitudes initialData={solicitudes} />

@@ -31,6 +31,13 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
 
   const comprado = solicitud.estado === 'comprado'
 
+  const datosObra = [
+    solicitud.obra && ['Obra', solicitud.obra],
+    solicitud.supervisor && ['Supervisor de obra', solicitud.supervisor],
+    solicitud.visitador && ['Visitador', solicitud.visitador],
+    solicitud.fecha_entrega && ['Fecha de entrega', fechaCorta(solicitud.fecha_entrega)],
+  ].filter(Boolean) as [string, string][]
+
   return (
     <>
       <style>{`
@@ -104,6 +111,18 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
             </span>
           </div>
         </div>
+
+        {/* Datos de la obra */}
+        {datosObra.length > 0 && (
+          <div className="grid grid-cols-2 gap-3 mb-7">
+            {datosObra.map(([label, value]) => (
+              <div key={label}>
+                <p className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: '#909090' }}>{label}</p>
+                <p className="text-sm" style={{ color: '#181818' }}>{value}</p>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Tabla de ítems */}
         <div className="mb-8">
