@@ -8,7 +8,7 @@ import { clp, num } from '@/lib/utils'
 import { parseSolicitudExcel } from '@/lib/solicitudes/parseExcel'
 import type { Material } from '@/types'
 
-type Match = 'codigo' | 'descripcion' | 'sin_match'
+type Match = 'codigo' | 'descripcion' | 'ia' | 'sin_match'
 
 interface Row {
   codigo:             string
@@ -25,6 +25,7 @@ interface Row {
 const MATCH_BADGE: Record<Match, { label: string; cls: string }> = {
   codigo:      { label: '✓ por código',      cls: 'badge-green'  },
   descripcion: { label: '✓ por descripción', cls: 'badge-blue'   },
+  ia:          { label: '✓ por IA',          cls: 'badge-brand'  },
   sin_match:   { label: '⚠ sin coincidencia', cls: 'badge-yellow' },
 }
 
@@ -141,7 +142,7 @@ export default function ImportarSolicitudExcel() {
     setLinkingIdx(null)
   }
 
-  const counts = rows.reduce((acc, r) => { acc[r.match]++; return acc }, { codigo: 0, descripcion: 0, sin_match: 0 })
+  const counts = rows.reduce((acc, r) => { acc[r.match]++; return acc }, { codigo: 0, descripcion: 0, ia: 0, sin_match: 0 })
 
   const guardar = useCallback(async () => {
     if (rows.length === 0) { showToast('No hay ítems para guardar', 'error'); return }
@@ -249,6 +250,7 @@ export default function ImportarSolicitudExcel() {
       <div className="flex flex-wrap gap-2 mb-4">
         <span className="badge badge-green">{counts.codigo} por código</span>
         <span className="badge badge-blue">{counts.descripcion} por descripción</span>
+        {counts.ia > 0 && <span className="badge badge-brand">{counts.ia} por IA</span>}
         {counts.sin_match > 0 && <span className="badge badge-yellow">{counts.sin_match} sin coincidencia</span>}
         <span className="text-xs text-slate-400 self-center">— {rows.length} ítems en total</span>
       </div>
@@ -280,8 +282,10 @@ export default function ImportarSolicitudExcel() {
                   <td className="td text-slate-400">{r.unidad || '—'}</td>
                   <td className="td relative">
                     <span className={`badge text-[11px] ${MATCH_BADGE[r.match].cls}`}>{MATCH_BADGE[r.match].label}</span>
-                    {r.match === 'sin_match' && (
-                      <button className="btn-ghost btn-sm ml-1 text-xs" onClick={() => abrirVinculo(idx)}>Vincular</button>
+                    {(r.match === 'sin_match' || r.match === 'ia') && (
+                      <button className="btn-ghost btn-sm ml-1 text-xs" onClick={() => abrirVinculo(idx)}>
+                        {r.match === 'ia' ? 'Corregir' : 'Vincular'}
+                      </button>
                     )}
                     {linkingIdx === idx && (
                       <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl w-72 p-2">
@@ -322,6 +326,11 @@ export default function ImportarSolicitudExcel() {
         </div>
       </div>
 
+      {counts.ia > 0 && (
+        <div className="alert alert-blue mb-3">
+          {counts.ia} ítem{counts.ia !== 1 ? 's' : ''} emparejado{counts.ia !== 1 ? 's' : ''} por IA — son sugerencias, revísalos antes de guardar.
+        </div>
+      )}
       {counts.sin_match > 0 && (
         <div className="alert alert-yellow mb-4">
           <AlertTriangle size={15} />

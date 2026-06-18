@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { aiMatchUnmatched, candidatosPorSolapamiento } from '@/lib/solicitudes/aiMatch'
 
 export const dynamic = 'force-dynamic'
+
+const AI_ENABLED = process.env.AI_CLASSIFY_ENABLED === 'true'
 
 const PAGE_SIZE = 1000
 
@@ -14,6 +17,20 @@ interface InputItem {
   descripcion: string
   unidad:      string
   cantidad:    number
+}
+
+type MatchTipo = 'codigo' | 'descripcion' | 'ia' | 'sin_match'
+
+interface MatchedItem {
+  codigo:             string
+  descripcion:        string
+  unidad:             string
+  cantidad_pedida:    number
+  material_id:        number | null
+  stock_actual:       number | null
+  precio_unitario:    number | null
+  proveedor_sugerido: string | null
+  match:              MatchTipo
 }
 
 // Trae todos los materiales activos paginando con .range() — sin esto, un
@@ -53,9 +70,9 @@ export async function POST(req: NextRequest) {
     porDescripcion.set(normDesc(m.descripcion), m)
   }
 
-  const result = items.map(item => {
+  const result: MatchedItem[] = items.map(item => {
     const codigo = String(item.codigo ?? '').trim()
-    let match: 'codigo' | 'descripcion' | 'sin_match' = 'sin_match'
+    let match: MatchTipo = 'sin_match'
     let mat: any = null
 
     if (codigo) mat = porCodigo.get(normCodigo(codigo)) ?? null
@@ -78,5 +95,39 @@ export async function POST(req: NextRequest) {
     }
   })
 
-  return NextResponse.json({ items: result })
+  // ── Paso 2: para lo que no calzó por código/descripción exacta, intentar
+  // con IA (Groq) usando como candidatos solo materiales con palabras en
+  // común — opcional, nunca bloquea si no hay API key o falla la llamada.
+  const apiKey = process.env.GROQ_API_KEY
+  if (AI_ENABLED && apiKey) {
+    const sinMatchConCandidatos = result
+      .map((r, idx) => ({ idx, r }))
+      .filter(({ r }) => r.match === 'sin_match')
+      .map(({ idx, r }) => ({
+        idx,
+        descripcion: r.descripcion,
+        candidatos: candidatosPorSolapamiento(r.descripcion, materiales!),
+      }))
+
+    if (sinMatchConCandidatos.length > 0) {
+      const elegidos = await aiMatchUnmatched(sinMatchConCandidatos, apiKey)
+      elegidos.forEach((codigoElegido, idx) => {
+        if (!codigoElegido) return
+        const mat = porCodigo.get(normCodigo(codigoElegido))
+        if (!mat) return
+        result[idx] = {
+          ...result[idx],
+          codigo:             mat.codigo,
+          unidad:             result[idx].unidad || mat.unidad || '',
+          material_id:        mat.id,
+          stock_actual:       mat.stock_actual,
+          precio_unitario:    mat.precio_unitario,
+          proveedor_sugerido: mat.proveedores?.nombre ?? null,
+          match:              'ia',
+        }
+      })
+    }
+  }
+
+  return NextResponse.json({ items: result, aiEnabled: AI_ENABLED && !!apiKey })
 }
