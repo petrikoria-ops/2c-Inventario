@@ -8,22 +8,29 @@ export const dynamic = 'force-dynamic'
 const PAGE_SIZE = 1000
 
 // PostgREST aplica un tope implícito de filas por consulta; sin paginar,
-// el inventario se trunca en silencio al superarlo.
+// el inventario se trunca en silencio al superarlo. Con catálogos grandes
+// (2000+ filas) pedir las páginas en paralelo en vez de una por una corta
+// el tiempo de carga de N round-trips secuenciales a ~1.
 async function fetchAllMateriales(sb: ReturnType<typeof getSupabaseServer>) {
-  const rows: Material[] = []
-  let from = 0
-  while (true) {
-    const { data, error } = await sb
-      .from('materiales')
-      .select('*,categorias(id,nombre,color),proveedores(id,nombre)')
-      .eq('activo', true)
-      .order('codigo')
-      .range(from, from + PAGE_SIZE - 1)
-    if (error) return { rows: null, error }
-    rows.push(...(data ?? []))
-    if (!data || data.length < PAGE_SIZE) break
-    from += PAGE_SIZE
-  }
+  const base = () => sb.from('materiales').select('*,categorias(id,nombre,color),proveedores(id,nombre)').eq('activo', true)
+
+  const { count, error: countErr } = await sb
+    .from('materiales')
+    .select('id', { count: 'exact', head: true })
+    .eq('activo', true)
+  if (countErr) return { rows: null, error: countErr }
+
+  const totalPages = Math.max(1, Math.ceil((count ?? 0) / PAGE_SIZE))
+  const pageFetches = Array.from({ length: totalPages }, (_, i) => {
+    const from = i * PAGE_SIZE
+    return base().order('codigo').range(from, from + PAGE_SIZE - 1)
+  })
+
+  const results = await Promise.all(pageFetches)
+  const firstError = results.find(r => r.error)?.error
+  if (firstError) return { rows: null, error: firstError }
+
+  const rows = results.flatMap(r => r.data ?? []) as unknown as Material[]
   return { rows, error: null as null | { message: string } }
 }
 
