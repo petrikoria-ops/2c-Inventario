@@ -100,6 +100,7 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
                       className="btn btn-ghost btn-sm"
                       style={{ color: '#DC2626' }}
                       title="Eliminar solicitud"
+                      aria-label="Eliminar solicitud"
                     >
                       {deletingId === sol.id ? '…' : <Trash2 size={13} />}
                     </button>

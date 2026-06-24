@@ -476,43 +476,43 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
                   <>
                     {proyectos.length > 0 && (
                       <div>
-                        <label className="label">Autocompletar desde OT activa</label>
-                        <select className="select" value={proyId} onChange={e => handleProy(e.target.value)}>
+                        <label className="label" htmlFor="etiqueta-proyecto">Autocompletar desde OT activa</label>
+                        <select id="etiqueta-proyecto" className="select" value={proyId} onChange={e => handleProy(e.target.value)}>
                           <option value="">— Seleccionar proyecto —</option>
                           {proyectos.map(p => <option key={p.id} value={p.id}>{p.ot} — {p.nombre}</option>)}
                         </select>
                       </div>
                     )}
                     <div>
-                      <label className="label">Obra / Nombre del proyecto *</label>
-                      <input className="input" placeholder="Ej: Planta Molina — Coquimbo" value={form.obra} onChange={set('obra')} />
+                      <label className="label" htmlFor="etiqueta-obra">Obra / Nombre del proyecto *</label>
+                      <input id="etiqueta-obra" className="input" placeholder="Ej: Planta Molina — Coquimbo" value={form.obra} onChange={set('obra')} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="label">N° OT</label>
-                        <input className="input" placeholder="2026-014" value={form.ot} onChange={set('ot')} />
+                        <label className="label" htmlFor="etiqueta-ot">N° OT</label>
+                        <input id="etiqueta-ot" className="input" placeholder="2026-014" value={form.ot} onChange={set('ot')} />
                       </div>
                       <div>
-                        <label className="label">N° bultos / pallets</label>
-                        <input className="input" type="number" min="1" max="20" value={form.bultos} onChange={set('bultos')} />
+                        <label className="label" htmlFor="etiqueta-bultos">N° bultos / pallets</label>
+                        <input id="etiqueta-bultos" className="input" type="number" min="1" max="20" value={form.bultos} onChange={set('bultos')} />
                       </div>
                     </div>
                     <div>
-                      <label className="label">Cliente</label>
-                      <input className="input" placeholder="Ej: CMPC S.A." value={form.cliente} onChange={set('cliente')} />
+                      <label className="label" htmlFor="etiqueta-cliente">Cliente</label>
+                      <input id="etiqueta-cliente" className="input" placeholder="Ej: CMPC S.A." value={form.cliente} onChange={set('cliente')} />
                     </div>
                     <div>
-                      <label className="label">Identificación del pedido</label>
-                      <input className="input" placeholder="Tablero TG-01 / Materiales electrobarra" value={form.pedido} onChange={set('pedido')} />
+                      <label className="label" htmlFor="etiqueta-pedido">Identificación del pedido</label>
+                      <input id="etiqueta-pedido" className="input" placeholder="Tablero TG-01 / Materiales electrobarra" value={form.pedido} onChange={set('pedido')} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="label">Fecha</label>
-                        <input className="input" type="date" value={form.fecha} onChange={set('fecha')} />
+                        <label className="label" htmlFor="etiqueta-fecha">Fecha</label>
+                        <input id="etiqueta-fecha" className="input" type="date" value={form.fecha} onChange={set('fecha')} />
                       </div>
                       <div>
-                        <label className="label">Observaciones</label>
-                        <input className="input" placeholder="Frágil — vidrio" value={form.obs} onChange={set('obs')} />
+                        <label className="label" htmlFor="etiqueta-obs">Observaciones</label>
+                        <input id="etiqueta-obs" className="input" placeholder="Frágil — vidrio" value={form.obs} onChange={set('obs')} />
                       </div>
                     </div>
                   </>
@@ -522,50 +522,50 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
                 {form.template !== 'pallet' && (
                   <>
                     <div>
-                      <label className="label">Código (texto principal) *</label>
-                      <input className="input" placeholder={
+                      <label className="label" htmlFor="etiqueta-codigo">Código (texto principal) *</label>
+                      <input id="etiqueta-codigo" className="input" placeholder={
                         form.template === 'rack'    ? 'Ej: RACK-A01' :
                         form.template === 'cajon'   ? 'Ej: C-001' : 'Ej: EST-12'
                       } value={form.codigo} onChange={set('codigo')} />
                     </div>
                     <div>
-                      <label className="label">
+                      <label className="label" htmlFor="etiqueta-nombre">
                         {form.template === 'rack'    ? 'Descripción de ubicación' :
                          form.template === 'cajon'   ? 'Nombre del cajón / contenido' : 'Nombre'}
                       </label>
-                      <input className="input" placeholder={
+                      <input id="etiqueta-nombre" className="input" placeholder={
                         form.template === 'rack'    ? 'Ej: Estante A · Piso 1' :
                         form.template === 'cajon'   ? 'Ej: Tornillos M6' : 'Ej: Herramientas menores'
                       } value={form.nombre} onChange={set('nombre')} />
                     </div>
                     {(form.template === 'cajon' || form.template === 'generica') && (
                       <div>
-                        <label className="label">Detalle adicional (opcional)</label>
-                        <input className="input" placeholder="Ej: × 25mm · Caja 100 un." value={form.detalle} onChange={set('detalle')} />
+                        <label className="label" htmlFor="etiqueta-detalle">Detalle adicional (opcional)</label>
+                        <input id="etiqueta-detalle" className="input" placeholder="Ej: × 25mm · Caja 100 un." value={form.detalle} onChange={set('detalle')} />
                       </div>
                     )}
                     {form.template === 'generica' && (
                       <div>
-                        <label className="label">Descripción (opcional)</label>
-                        <input className="input" placeholder="Descripción larga…" value={form.descripcion} onChange={set('descripcion')} />
+                        <label className="label" htmlFor="etiqueta-descripcion">Descripción (opcional)</label>
+                        <input id="etiqueta-descripcion" className="input" placeholder="Descripción larga…" value={form.descripcion} onChange={set('descripcion')} />
                       </div>
                     )}
                     {form.template === 'generica' && (
                       <div className="grid grid-cols-2 gap-3">
                         <div>
-                          <label className="label">Ancho etiqueta (mm)</label>
-                          <input className="input" type="number" min="30" max="200" value={form.anchoMm} onChange={set('anchoMm')} />
+                          <label className="label" htmlFor="etiqueta-ancho-mm">Ancho etiqueta (mm)</label>
+                          <input id="etiqueta-ancho-mm" className="input" type="number" min="30" max="200" value={form.anchoMm} onChange={set('anchoMm')} />
                         </div>
                         <div>
-                          <label className="label">Alto etiqueta (mm)</label>
-                          <input className="input" type="number" min="20" max="200" value={form.altoMm} onChange={set('altoMm')} />
+                          <label className="label" htmlFor="etiqueta-alto-mm">Alto etiqueta (mm)</label>
+                          <input id="etiqueta-alto-mm" className="input" type="number" min="20" max="200" value={form.altoMm} onChange={set('altoMm')} />
                         </div>
                       </div>
                     )}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="label">Cantidad de etiquetas</label>
-                        <input className="input" type="number" min="1" max="200" value={form.cantidad} onChange={set('cantidad')} />
+                        <label className="label" htmlFor="etiqueta-cantidad">Cantidad de etiquetas</label>
+                        <input id="etiqueta-cantidad" className="input" type="number" min="1" max="200" value={form.cantidad} onChange={set('cantidad')} />
                       </div>
                       <div className="pt-4">
                         <span className="text-xs text-slate-500">
@@ -578,8 +578,8 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
 
                 {/* Tamaño de hoja — siempre visible */}
                 <div>
-                  <label className="label">Tamaño de hoja</label>
-                  <select className="select" value={form.tamano} onChange={set('tamano')}>
+                  <label className="label" htmlFor="etiqueta-tamano">Tamaño de hoja</label>
+                  <select id="etiqueta-tamano" className="select" value={form.tamano} onChange={set('tamano')}>
                     {SHEET_OPTIONS[form.template].map(k => (
                       <option key={k} value={k}>{SHEET_LABELS[k]}</option>
                     ))}
@@ -603,8 +603,8 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
 
                 {/* Fuente tipográfica */}
                 <div>
-                  <label className="label">Tipografía</label>
-                  <select className="select text-xs" value={form.font} onChange={set('font')}>
+                  <label className="label" htmlFor="etiqueta-font">Tipografía</label>
+                  <select id="etiqueta-font" className="select text-xs" value={form.font} onChange={set('font')}>
                     {FONTS.map(f => <option key={f.value} value={f.value} style={{ fontFamily: f.value }}>{f.label}</option>)}
                   </select>
                 </div>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { escapeOrFilterValue } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +19,10 @@ export async function GET(req: NextRequest) {
       { count: 'exact' }
     )
 
-  if (q) query = query.or(`numero.ilike.%${q}%,usuario.ilike.%${q}%`)
+  if (q) {
+    const safeQ = escapeOrFilterValue(q)
+    query = query.or(`numero.ilike."%${safeQ}%",usuario.ilike."%${safeQ}%"`)
+  }
 
   const { data, count, error } = await query
     .order('fecha', { ascending: false })

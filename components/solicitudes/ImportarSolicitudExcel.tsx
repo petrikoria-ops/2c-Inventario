@@ -228,20 +228,20 @@ export default function ImportarSolicitudExcel() {
         <div className="panel-header"><h2>Datos de la solicitud</h2></div>
         <div className="p-4 grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Obra</label>
-            <input className="input" value={obra} onChange={e => setObra(e.target.value)} />
+            <label className="label" htmlFor="importar-solicitud-obra">Obra</label>
+            <input id="importar-solicitud-obra" className="input" value={obra} onChange={e => setObra(e.target.value)} />
           </div>
           <div>
-            <label className="label">Supervisor de obra</label>
-            <input className="input" value={supervisor} onChange={e => setSupervisor(e.target.value)} />
+            <label className="label" htmlFor="importar-solicitud-supervisor">Supervisor de obra</label>
+            <input id="importar-solicitud-supervisor" className="input" value={supervisor} onChange={e => setSupervisor(e.target.value)} />
           </div>
           <div>
-            <label className="label">Visitador</label>
-            <input className="input" value={visitador} onChange={e => setVisitador(e.target.value)} />
+            <label className="label" htmlFor="importar-solicitud-visitador">Visitador</label>
+            <input id="importar-solicitud-visitador" className="input" value={visitador} onChange={e => setVisitador(e.target.value)} />
           </div>
           <div>
-            <label className="label">Fecha de entrega</label>
-            <input className="input" type="date" value={fechaEntrega} onChange={e => setFechaEntrega(e.target.value)} />
+            <label className="label" htmlFor="importar-solicitud-fecha-entrega">Fecha de entrega</label>
+            <input id="importar-solicitud-fecha-entrega" className="input" type="date" value={fechaEntrega} onChange={e => setFechaEntrega(e.target.value)} />
           </div>
         </div>
       </div>
@@ -293,7 +293,7 @@ export default function ImportarSolicitudExcel() {
                           <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
                           <input autoFocus value={linkQuery} onChange={e => buscarParaVincular(e.target.value)}
                             placeholder="Buscar material…" className="input text-sm w-full pl-7" />
-                          <button onClick={() => setLinkingIdx(null)} className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                          <button onClick={() => setLinkingIdx(null)} aria-label="Cerrar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
                             <X size={12} />
                           </button>
                         </div>

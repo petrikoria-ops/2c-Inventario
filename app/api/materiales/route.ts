@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { estaBajoMinimo, escapeOrFilterValue } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -27,7 +28,10 @@ export async function GET(req: NextRequest) {
         .from('materiales')
         .select('*,categorias(id,nombre,color),proveedores(id,nombre)')
         .eq('activo', true)
-      if (q) query = query.or(`codigo.ilike.%${q}%,descripcion.ilike.%${q}%,codigo_barras.ilike.%${q}%`)
+      if (q) {
+        const safeQ = escapeOrFilterValue(q)
+        query = query.or(`codigo.ilike."%${safeQ}%",descripcion.ilike."%${safeQ}%",codigo_barras.ilike."%${safeQ}%"`)
+      }
       if (categoriaId) query = query.eq('categoria_id', categoriaId)
 
       const { data, error } = await query.order('codigo').range(from, from + PAGE_SIZE - 1)
@@ -36,7 +40,7 @@ export async function GET(req: NextRequest) {
       if (!data || data.length < PAGE_SIZE) break
       from += PAGE_SIZE
     }
-    const filtered = all.filter(m => m.stock_actual <= m.stock_minimo)
+    const filtered = all.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo))
     return NextResponse.json({ data: filtered, total: filtered.length, page: 1, limit: filtered.length })
   }
 
@@ -45,7 +49,10 @@ export async function GET(req: NextRequest) {
     .select('*,categorias(id,nombre,color),proveedores(id,nombre)', { count: 'exact' })
     .eq('activo', true)
 
-  if (q) query = query.or(`codigo.ilike.%${q}%,descripcion.ilike.%${q}%,codigo_barras.ilike.%${q}%`)
+  if (q) {
+    const safeQ = escapeOrFilterValue(q)
+    query = query.or(`codigo.ilike."%${safeQ}%",descripcion.ilike."%${safeQ}%",codigo_barras.ilike."%${safeQ}%"`)
+  }
   if (categoriaId) query = query.eq('categoria_id', categoriaId)
 
   const { data, count, error } = await query.order('codigo').range(offset, offset + limit - 1)

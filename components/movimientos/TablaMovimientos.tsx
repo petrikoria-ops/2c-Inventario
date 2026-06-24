@@ -136,8 +136,8 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
       <Modal open={modalOpen} title="Registrar movimiento" onClose={() => setModalOpen(false)} onSave={registrar} saveLabel="Registrar" saving={saving}>
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
-            <label className="label">Buscar material *</label>
-            <input className="input" placeholder="Escribe código o nombre (mín. 2 caracteres)…" value={busqMat} onChange={e => { setBusqMat(e.target.value); setForm(p => ({ ...p, material_id: '' })) }} />
+            <label className="label" htmlFor="movimiento-buscar-material">Buscar material *</label>
+            <input id="movimiento-buscar-material" className="input" placeholder="Escribe código o nombre (mín. 2 caracteres)…" value={busqMat} onChange={e => { setBusqMat(e.target.value); setForm(p => ({ ...p, material_id: '' })) }} />
             {matsFiltradas.length > 0 && (
               <div className="border border-slate-200 rounded-md mt-1 max-h-36 overflow-y-auto shadow-sm">
                 {matsFiltradas.map(m => (
@@ -152,30 +152,30 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
             {matSeleccionada && <p className="text-xs text-blue-700 mt-1">Stock actual: {num(matSeleccionada.stock_actual)} {matSeleccionada.unidad}</p>}
           </div>
           <div>
-            <label className="label">Tipo *</label>
-            <select className="select" value={form.tipo} onChange={e => setForm(p => ({ ...p, tipo: e.target.value }))}>
+            <label className="label" htmlFor="movimiento-tipo">Tipo *</label>
+            <select id="movimiento-tipo" className="select" value={form.tipo} onChange={e => setForm(p => ({ ...p, tipo: e.target.value }))}>
               <option value="salida">Salida</option><option value="entrada">Entrada</option>
               <option value="devolucion">Devolución</option><option value="ajuste">Ajuste</option>
             </select>
           </div>
           <div>
-            <label className="label">{form.tipo === 'ajuste' ? 'Nuevo stock *' : 'Cantidad *'}</label>
-            <input className="input" type="number" min="0" step="1" value={form.cantidad} onChange={e => setForm(p => ({ ...p, cantidad: e.target.value }))} />
+            <label className="label" htmlFor="movimiento-cantidad">{form.tipo === 'ajuste' ? 'Nuevo stock *' : 'Cantidad *'}</label>
+            <input id="movimiento-cantidad" className="input" type="number" min="0" step="1" value={form.cantidad} onChange={e => setForm(p => ({ ...p, cantidad: e.target.value }))} />
           </div>
           <div className="col-span-2">
-            <label className="label">Proyecto / OT</label>
-            <select className="select" value={form.proyecto_id} onChange={e => setForm(p => ({ ...p, proyecto_id: e.target.value }))}>
+            <label className="label" htmlFor="movimiento-proyecto">Proyecto / OT</label>
+            <select id="movimiento-proyecto" className="select" value={form.proyecto_id} onChange={e => setForm(p => ({ ...p, proyecto_id: e.target.value }))}>
               <option value="">Sin proyecto</option>
               {proyectos.map(p => <option key={p.id} value={p.id}>{p.ot} — {p.nombre}</option>)}
             </select>
           </div>
           <div>
-            <label className="label">Usuario</label>
-            <input className="input" value={form.usuario} onChange={e => setForm(p => ({ ...p, usuario: e.target.value }))} />
+            <label className="label" htmlFor="movimiento-usuario">Usuario</label>
+            <input id="movimiento-usuario" className="input" value={form.usuario} onChange={e => setForm(p => ({ ...p, usuario: e.target.value }))} />
           </div>
           <div className="col-span-2">
-            <label className="label">Motivo</label>
-            <input className="input" value={form.motivo} onChange={e => setForm(p => ({ ...p, motivo: e.target.value }))} placeholder="Ej: Consumo tablero OT-2026-001" />
+            <label className="label" htmlFor="movimiento-motivo">Motivo</label>
+            <input id="movimiento-motivo" className="input" value={form.motivo} onChange={e => setForm(p => ({ ...p, motivo: e.target.value }))} placeholder="Ej: Consumo tablero OT-2026-001" />
           </div>
         </div>
       </Modal>

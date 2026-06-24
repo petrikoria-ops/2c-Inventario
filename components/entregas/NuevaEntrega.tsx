@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Package, AlertTriangle, Handshake } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
-import { num, clp } from '@/lib/utils'
+import { num, clp, estaBajoMinimo } from '@/lib/utils'
 import type { Material } from '@/types'
 
 interface EntregaItem {
@@ -134,14 +134,14 @@ export default function NuevaEntrega() {
         <div className="panel-header"><h2>Datos de la entrega</h2></div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="label">Persona que retira <span className="text-red-500">*</span></label>
-            <input className="input w-full" value={persona}
+            <label className="label" htmlFor="entrega-persona">Persona que retira <span className="text-red-500">*</span></label>
+            <input id="entrega-persona" className="input w-full" value={persona}
               onChange={e => setPersona(e.target.value)}
               placeholder="Nombre completo de quien retira…" />
           </div>
           <div>
-            <label className="label">Destino / Motivo</label>
-            <input className="input w-full" value={destino}
+            <label className="label" htmlFor="entrega-destino">Destino / Motivo</label>
+            <input id="entrega-destino" className="input w-full" value={destino}
               onChange={e => setDestino(e.target.value)}
               placeholder="Ej: Obra Molina, mantenimiento equipo…" />
           </div>

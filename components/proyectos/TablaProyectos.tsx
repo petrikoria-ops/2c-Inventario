@@ -108,16 +108,16 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_entrega)}</td>
                   <td className="td-r font-medium text-slate-700">{clp(calcCosto(p.costo_total))}</td>
                   <td className="td"><div className="flex gap-0.5">
-                    <button className="btn-icon" title="Ver movimientos" onClick={() => verDetalle(p)}>
+                    <button className="btn-icon" title="Ver movimientos" aria-label="Ver movimientos" onClick={() => verDetalle(p)}>
                       <ScrollText size={13} />
                     </button>
-                    <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad">
+                    <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad" aria-label="Factibilidad">
                       <ClipboardCheck size={13} />
                     </a>
-                    <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
+                    <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
                       <Pencil size={13} />
                     </button>
-                    <button className="btn-icon" title="Eliminar" onClick={() => eliminar(p)}>
+                    <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
                       <Trash2 size={13} />
                     </button>
                   </div></td>
@@ -132,17 +132,17 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
       <Modal open={modalOpen} title={editando.id ? `Editar — ${editando.ot}` : 'Nueva Orden de Trabajo'}
         onClose={() => setModalOpen(false)} onSave={guardar} saving={saving}>
         <div className="grid grid-cols-2 gap-3">
-          <div><label className="label">N° OT *</label><input className="input" value={editando.ot??''} onChange={e=>setEditando(p=>({...p,ot:e.target.value}))} placeholder="OT-2026-005" /></div>
-          <div><label className="label">Estado</label>
-            <select className="select" value={editando.estado??'en_proceso'} onChange={e=>setEditando(p=>({...p,estado:e.target.value as any}))}>
+          <div><label className="label" htmlFor="proyecto-ot">N° OT *</label><input id="proyecto-ot" className="input" value={editando.ot??''} onChange={e=>setEditando(p=>({...p,ot:e.target.value}))} placeholder="OT-2026-005" /></div>
+          <div><label className="label" htmlFor="proyecto-estado">Estado</label>
+            <select id="proyecto-estado" className="select" value={editando.estado??'en_proceso'} onChange={e=>setEditando(p=>({...p,estado:e.target.value as any}))}>
               {ESTADOS.map(e=><option key={e} value={e}>{e.replace('_',' ')}</option>)}
             </select>
           </div>
-          <div className="col-span-2"><label className="label">Nombre / Tablero *</label><input className="input" value={editando.nombre??''} onChange={e=>setEditando(p=>({...p,nombre:e.target.value}))} /></div>
-          <div className="col-span-2"><label className="label">Cliente</label><input className="input" value={editando.cliente??''} onChange={e=>setEditando(p=>({...p,cliente:e.target.value}))} /></div>
-          <div><label className="label">Fecha inicio</label><input type="date" className="input" value={editando.fecha_inicio??''} onChange={e=>setEditando(p=>({...p,fecha_inicio:e.target.value}))} /></div>
-          <div><label className="label">Fecha entrega</label><input type="date" className="input" value={editando.fecha_entrega??''} onChange={e=>setEditando(p=>({...p,fecha_entrega:e.target.value}))} /></div>
-          <div className="col-span-2"><label className="label">Notas</label><textarea className="textarea" value={editando.notas??''} onChange={e=>setEditando(p=>({...p,notas:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proyecto-nombre">Nombre / Tablero *</label><input id="proyecto-nombre" className="input" value={editando.nombre??''} onChange={e=>setEditando(p=>({...p,nombre:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proyecto-cliente">Cliente</label><input id="proyecto-cliente" className="input" value={editando.cliente??''} onChange={e=>setEditando(p=>({...p,cliente:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="proyecto-fecha-inicio">Fecha inicio</label><input id="proyecto-fecha-inicio" type="date" className="input" value={editando.fecha_inicio??''} onChange={e=>setEditando(p=>({...p,fecha_inicio:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="proyecto-fecha-entrega">Fecha entrega</label><input id="proyecto-fecha-entrega" type="date" className="input" value={editando.fecha_entrega??''} onChange={e=>setEditando(p=>({...p,fecha_entrega:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proyecto-notas">Notas</label><textarea id="proyecto-notas" className="textarea" value={editando.notas??''} onChange={e=>setEditando(p=>({...p,notas:e.target.value}))} /></div>
         </div>
       </Modal>
 

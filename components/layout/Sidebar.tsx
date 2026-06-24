@@ -85,27 +85,31 @@ export function SidebarContent({ onNav }: { onNav?: () => void }) {
         </div>
       </div>
 
-      {/* Nav */}
-      <nav className="flex-1 overflow-y-auto py-3">
-        {NAV.map(group => (
-          <div key={group.section} className="mb-1">
-            <div className="text-[10px] uppercase tracking-widest font-semibold px-4 pt-3 pb-1"
-              style={{ color: '#4A5260' }}>
-              {group.section}
+      {/* Nav — con degradado inferior que insinúa que hay más opciones al desplazar */}
+      <div className="relative flex-1 min-h-0">
+        <nav className="h-full overflow-y-auto py-3">
+          {NAV.map(group => (
+            <div key={group.section} className="mb-1">
+              <div className="text-[10px] uppercase tracking-widest font-semibold px-4 pt-3 pb-1"
+                style={{ color: '#4A5260' }}>
+                {group.section}
+              </div>
+              {group.links.map(({ href, Icon, label }) => {
+                const active = pathname === href || (href !== '/' && pathname.startsWith(href))
+                return (
+                  <Link key={href} href={href} onClick={onNav}
+                    className={`nav-link ${active ? 'active' : ''}`}>
+                    <Icon size={15} strokeWidth={2} className="flex-shrink-0" />
+                    <span>{label}</span>
+                  </Link>
+                )
+              })}
             </div>
-            {group.links.map(({ href, Icon, label }) => {
-              const active = pathname === href || (href !== '/' && pathname.startsWith(href))
-              return (
-                <Link key={href} href={href} onClick={onNav}
-                  className={`nav-link ${active ? 'active' : ''}`}>
-                  <Icon size={15} strokeWidth={2} className="flex-shrink-0" />
-                  <span>{label}</span>
-                </Link>
-              )
-            })}
-          </div>
-        ))}
-      </nav>
+          ))}
+        </nav>
+        <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6"
+          style={{ background: 'linear-gradient(to bottom, transparent, #2E333A)' }} />
+      </div>
 
       {/* Cerrar sesión */}
       <button
@@ -129,19 +133,32 @@ export default function Sidebar() {
 
   return (
     <>
-      {/* Hamburguesa móvil */}
-      <button
-        onClick={() => setOpen(true)}
-        className="md:hidden fixed top-3 left-3 z-[300] p-2 rounded-lg text-white shadow-lg"
+      {/* Barra superior móvil — reemplaza el botón flotante que tapaba el
+          título de cada página; reserva su propio espacio (ver AppShell). */}
+      <header
+        className="mobile-topbar md:hidden fixed top-0 left-0 right-0 h-14 z-[300] flex items-center gap-3 px-3 shadow-md"
         style={{ backgroundColor: '#2E333A' }}
-        aria-label="Abrir menú"
       >
-        <Menu size={18} />
-      </button>
+        <button
+          onClick={() => setOpen(true)}
+          className="p-2 rounded-lg text-white transition-colors hover:bg-white/10 flex-shrink-0"
+          aria-label="Abrir menú"
+        >
+          <Menu size={20} />
+        </button>
+        <div className="flex items-center gap-2 min-w-0">
+          <Image src="/logo-2c.png" alt="2C Montajes" width={24} height={24}
+            style={{ width: 24, height: 24, objectFit: 'contain' }} priority />
+          <span className="text-white font-bold text-[13px] truncate">2C Inventario</span>
+        </div>
+      </header>
 
       {/* Overlay móvil */}
       {open && (
-        <div className="md:hidden fixed inset-0 bg-black/50 z-[250]" onClick={() => setOpen(false)} />
+        <div
+          className="md:hidden fixed inset-0 bg-black/50 backdrop-blur-[2px] z-[250] transition-opacity"
+          onClick={() => setOpen(false)}
+        />
       )}
 
       {/* Sidebar escritorio */}
@@ -152,13 +169,13 @@ export default function Sidebar() {
 
       {/* Sidebar móvil (drawer) */}
       <aside
-        className={`md:hidden flex flex-col w-56 fixed top-0 left-0 h-screen z-[300]
-                    transition-transform duration-200 ${open ? 'translate-x-0' : '-translate-x-full'}`}
+        className={`md:hidden flex flex-col w-64 fixed top-0 left-0 h-screen z-[300] rounded-r-2xl overflow-hidden
+                    shadow-2xl transition-transform duration-300 ease-out ${open ? 'translate-x-0' : '-translate-x-full'}`}
         style={{ backgroundColor: '#2E333A' }}
       >
         <div className="flex justify-end p-3">
           <button onClick={() => setOpen(false)} style={{ color: '#6B7480' }}
-            className="p-1.5 rounded hover:bg-[#3D4450] transition-colors">
+            className="p-1.5 rounded hover:bg-[#3D4450] transition-colors" aria-label="Cerrar menú">
             <X size={16} />
           </button>
         </div>

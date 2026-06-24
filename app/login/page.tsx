@@ -39,16 +39,18 @@ function LoginForm() {
 
         <div className="space-y-3">
           <div>
-            <label className="label">Email</label>
+            <label className="label" htmlFor="login-email">Email</label>
             <input
+              id="login-email"
               type="email" required autoFocus className="input"
               value={email} onChange={e => setEmail(e.target.value)}
               placeholder="tucorreo@2c.cl"
             />
           </div>
           <div>
-            <label className="label">Contraseña</label>
+            <label className="label" htmlFor="login-password">Contraseña</label>
             <input
+              id="login-password"
               type="password" required className="input"
               value={password} onChange={e => setPassword(e.target.value)}
               placeholder="••••••••"

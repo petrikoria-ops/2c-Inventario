@@ -89,11 +89,11 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
                   <td className="td text-xs text-slate-500">{t.telefono ?? '—'}</td>
                   <td className="td">
                     <div className="flex gap-0.5">
-                      <button className="btn-icon" title="Editar"
+                      <button className="btn-icon" title="Editar" aria-label="Editar"
                         onClick={() => { setEditando({ ...t }); setModalOpen(true) }}>
                         <Pencil size={13} />
                       </button>
-                      <button className="btn-icon" title="Desactivar" onClick={() => eliminar(t)}>
+                      <button className="btn-icon" title="Desactivar" aria-label="Desactivar" onClick={() => eliminar(t)}>
                         <Trash2 size={13} />
                       </button>
                     </div>
@@ -112,22 +112,22 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
         onClose={() => setModalOpen(false)} onSave={guardar} saving={saving}>
         <div className="grid grid-cols-2 gap-3">
           <div className="col-span-2">
-            <label className="label">Nombre completo *</label>
-            <input className="input" value={editando.nombre ?? ''} onChange={e => setEditando(p => ({ ...p, nombre: e.target.value }))} />
+            <label className="label" htmlFor="trabajador-nombre">Nombre completo *</label>
+            <input id="trabajador-nombre" className="input" value={editando.nombre ?? ''} onChange={e => setEditando(p => ({ ...p, nombre: e.target.value }))} />
           </div>
           <div>
-            <label className="label">RUT</label>
-            <input className="input" placeholder="12.345.678-9" value={editando.rut ?? ''}
+            <label className="label" htmlFor="trabajador-rut">RUT</label>
+            <input id="trabajador-rut" className="input" placeholder="12.345.678-9" value={editando.rut ?? ''}
               onChange={e => setEditando(p => ({ ...p, rut: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Cargo</label>
-            <input className="input" placeholder="Técnico, Operario…" value={editando.cargo ?? ''}
+            <label className="label" htmlFor="trabajador-cargo">Cargo</label>
+            <input id="trabajador-cargo" className="input" placeholder="Técnico, Operario…" value={editando.cargo ?? ''}
               onChange={e => setEditando(p => ({ ...p, cargo: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Teléfono</label>
-            <input className="input" value={editando.telefono ?? ''}
+            <label className="label" htmlFor="trabajador-telefono">Teléfono</label>
+            <input id="trabajador-telefono" className="input" value={editando.telefono ?? ''}
               onChange={e => setEditando(p => ({ ...p, telefono: e.target.value }))} />
           </div>
         </div>

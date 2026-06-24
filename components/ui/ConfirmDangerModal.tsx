@@ -33,10 +33,11 @@ export default function ConfirmDangerModal({
         <p className="text-sm text-slate-600">{message}</p>
       </div>
       <div className="mt-4">
-        <label className="label">
+        <label className="label" htmlFor="confirm-danger-input">
           Escribe <strong className="text-red-600">{confirmWord}</strong> para confirmar
         </label>
         <input
+          id="confirm-danger-input"
           autoFocus
           className="input"
           value={text}

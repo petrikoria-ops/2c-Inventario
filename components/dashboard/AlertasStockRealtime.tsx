@@ -2,7 +2,8 @@
 import { useEffect, useState } from 'react'
 import { AlertTriangle, CheckCircle, Wifi, WifiOff } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
-import { num } from '@/lib/utils'
+import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
+import { num, estaBajoMinimo } from '@/lib/utils'
 import Link from 'next/link'
 
 interface Alerta {
@@ -13,6 +14,11 @@ interface Alerta {
   stock_minimo: number
   ubicacion: string | null
 }
+
+// El panel del dashboard es un resumen, no el listado completo — se muestran
+// solo los más urgentes (menor stock primero) y el resto se ve en
+// /materiales?bajo_minimo=1, que sí pagina la tabla completa.
+const MAX_VISIBLES = 50
 
 export default function AlertasStockRealtime({ initialAlertas }: { initialAlertas: Alerta[] }) {
   const [alertas, setAlertas]       = useState<Alerta[]>(initialAlertas)
@@ -27,13 +33,12 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
         'postgres_changes',
         { event: '*', schema: 'public', table: 'materiales' },
         async () => {
-          const { data: mats, error } = await sb
-            .from('materiales')
-            .select('id,codigo,descripcion,stock_actual,stock_minimo,ubicacion')
-            .eq('activo', true)
-          if (error) { setRealtimeOk(false); return }
-          if (mats) {
-            setAlertas((mats as Alerta[]).filter(m => m.stock_actual <= m.stock_minimo))
+          try {
+            const mats = await fetchAllMateriales<Alerta>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion')
+            setAlertas(mats.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo)))
+            setRealtimeOk(true)
+          } catch {
+            setRealtimeOk(false)
           }
         }
       )
@@ -53,6 +58,8 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
       </div>
     )
   }
+
+  const visibles = [...alertas].sort((a, b) => a.stock_actual - b.stock_actual).slice(0, MAX_VISIBLES)
 
   return (
     <div className="panel mb-5">
@@ -85,7 +92,7 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
             </tr>
           </thead>
           <tbody>
-            {alertas.map(a => (
+            {visibles.map(a => (
               <tr key={a.id} className="bg-red-50/40 hover:bg-red-50 transition-colors">
                 <td className="td"><span className="code">{a.codigo}</span></td>
                 <td className="td font-medium text-red-900">{a.descripcion}</td>
@@ -102,6 +109,11 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
           </tbody>
         </table>
       </div>
+      {alertas.length > MAX_VISIBLES && (
+        <div className="px-4 py-3 text-xs text-slate-500 border-t" style={{ borderColor: '#eceef1' }}>
+          Mostrando los {MAX_VISIBLES} con menor stock de {alertas.length} en total — <Link href="/materiales?bajo_minimo=1" className="underline font-medium">ver todos →</Link>
+        </div>
+      )}
     </div>
   )
 }

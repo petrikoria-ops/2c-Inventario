@@ -73,10 +73,10 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
                   <td className="td">{p.email ? <a href={`mailto:${p.email}`} className="text-blue-600 hover:underline text-xs">{p.email}</a> : '—'}</td>
                   <td className="td"><span className="badge badge-blue">{p.plazo_dias}d</span></td>
                   <td className="td"><div className="flex gap-0.5">
-                    <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
+                    <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
                       <Pencil size={13} />
                     </button>
-                    <button className="btn-icon" title="Eliminar" onClick={() => eliminar(p)}>
+                    <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
                       <Trash2 size={13} />
                     </button>
                   </div></td>
@@ -93,14 +93,14 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
       <Modal open={modalOpen} title={editando.id ? `Editar — ${editando.nombre}` : 'Nuevo proveedor'}
         onClose={() => setModalOpen(false)} onSave={guardar} saving={saving}>
         <div className="grid grid-cols-2 gap-3">
-          <div className="col-span-2"><label className="label">Nombre *</label><input className="input" value={editando.nombre??''} onChange={e=>setEditando(p=>({...p,nombre:e.target.value}))} /></div>
-          <div><label className="label">RUT</label><input className="input" value={editando.rut??''} onChange={e=>setEditando(p=>({...p,rut:e.target.value}))} placeholder="76.123.456-7" /></div>
-          <div><label className="label">Plazo entrega (días)</label><input type="number" className="input" min="1" value={editando.plazo_dias??7} onChange={e=>setEditando(p=>({...p,plazo_dias:parseInt(e.target.value)}))} /></div>
-          <div><label className="label">Contacto</label><input className="input" value={editando.contacto??''} onChange={e=>setEditando(p=>({...p,contacto:e.target.value}))} /></div>
-          <div><label className="label">Teléfono</label><input className="input" value={editando.telefono??''} onChange={e=>setEditando(p=>({...p,telefono:e.target.value}))} /></div>
-          <div className="col-span-2"><label className="label">Email</label><input type="email" className="input" value={editando.email??''} onChange={e=>setEditando(p=>({...p,email:e.target.value}))} /></div>
-          <div className="col-span-2"><label className="label">Dirección</label><input className="input" value={editando.direccion??''} onChange={e=>setEditando(p=>({...p,direccion:e.target.value}))} /></div>
-          <div className="col-span-2"><label className="label">Notas</label><textarea className="textarea" value={editando.notas??''} onChange={e=>setEditando(p=>({...p,notas:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proveedor-nombre">Nombre *</label><input id="proveedor-nombre" className="input" value={editando.nombre??''} onChange={e=>setEditando(p=>({...p,nombre:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="proveedor-rut">RUT</label><input id="proveedor-rut" className="input" value={editando.rut??''} onChange={e=>setEditando(p=>({...p,rut:e.target.value}))} placeholder="76.123.456-7" /></div>
+          <div><label className="label" htmlFor="proveedor-plazo-dias">Plazo entrega (días)</label><input id="proveedor-plazo-dias" type="number" className="input" min="1" value={editando.plazo_dias??7} onChange={e=>setEditando(p=>({...p,plazo_dias:parseInt(e.target.value)}))} /></div>
+          <div><label className="label" htmlFor="proveedor-contacto">Contacto</label><input id="proveedor-contacto" className="input" value={editando.contacto??''} onChange={e=>setEditando(p=>({...p,contacto:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="proveedor-telefono">Teléfono</label><input id="proveedor-telefono" className="input" value={editando.telefono??''} onChange={e=>setEditando(p=>({...p,telefono:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proveedor-email">Email</label><input id="proveedor-email" type="email" className="input" value={editando.email??''} onChange={e=>setEditando(p=>({...p,email:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proveedor-direccion">Dirección</label><input id="proveedor-direccion" className="input" value={editando.direccion??''} onChange={e=>setEditando(p=>({...p,direccion:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="proveedor-notas">Notas</label><textarea id="proveedor-notas" className="textarea" value={editando.notas??''} onChange={e=>setEditando(p=>({...p,notas:e.target.value}))} /></div>
         </div>
       </Modal>
     </>

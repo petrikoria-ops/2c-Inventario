@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
+import { estaBajoMinimo, escapeOrFilterValue } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -77,7 +79,7 @@ async function runQuery(intent: Intent): Promise<QueryResult> {
       const { data } = await sb.from('materiales')
         .select('codigo,descripcion,stock_actual,stock_minimo,unidad,ubicacion')
         .eq('activo', true).order('stock_actual', { ascending: true }).limit(200)
-      const rows = (data ?? []).filter((m: any) => m.stock_actual <= m.stock_minimo)
+      const rows = (data ?? []).filter((m: any) => estaBajoMinimo(m.stock_actual, m.stock_minimo))
         .slice(0, 25)
         .map((m: any) => ({ Código: m.codigo, Descripción: m.descripcion, Stock: m.stock_actual, Mínimo: m.stock_minimo, Un: m.unidad, Ubicación: m.ubicacion ?? '—' }))
       return { rows, columnas: ['Código', 'Descripción', 'Stock', 'Mínimo', 'Un', 'Ubicación'], titulo: 'Materiales bajo stock mínimo', empty: 'No hay materiales bajo el stock mínimo. ¡Inventario en orden!' }
@@ -130,23 +132,24 @@ async function runQuery(intent: Intent): Promise<QueryResult> {
     }
 
     case 'resumen': {
-      const [matsRes, herRes, provRes] = await Promise.all([
-        sb.from('materiales').select('stock_actual,stock_minimo,precio_unitario').eq('activo', true),
+      const [mats, herRes, provRes] = await Promise.all([
+        fetchAllMateriales<{ stock_actual: number; stock_minimo: number; precio_unitario: number | null }>(
+          sb, 'stock_actual,stock_minimo,precio_unitario',
+        ),
         sb.from('herramientas').select('estado').eq('activo', true),
         sb.from('proyectos').select('id').eq('estado', 'en_proceso'),
       ])
-      const mats     = matsRes.data ?? []
       const hers     = herRes.data ?? []
-      const alertas  = mats.filter((m: any) => m.stock_actual <= m.stock_minimo).length
-      const valorTotal = mats.reduce((s: number, m: any) => s + (m.stock_actual * (m.precio_unitario ?? 0)), 0)
+      const alertas  = mats.filter((m) => estaBajoMinimo(m.stock_actual, m.stock_minimo)).length
+      const valorTotal = mats.reduce((s: number, m) => s + (m.stock_actual * (m.precio_unitario ?? 0)), 0)
       const enRepar  = hers.filter((h: any) => h.estado === 'en_reparacion').length
       const rows = [
-        { Métrica: 'Total materiales activos',     Valor: mats.length },
-        { Métrica: 'Materiales bajo stock mínimo', Valor: alertas },
-        { Métrica: 'Valor estimado inventario',    Valor: valorTotal.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }) },
-        { Métrica: 'Herramientas activas',         Valor: hers.length },
-        { Métrica: 'Herramientas en reparación',   Valor: enRepar },
-        { Métrica: 'Proyectos activos',            Valor: provRes.data?.length ?? 0 },
+        { Métrica: 'Total materiales activos (cantidad de ítems)',     Valor: mats.length },
+        { Métrica: 'Materiales bajo stock mínimo (cantidad de ítems)', Valor: alertas },
+        { Métrica: 'Valor estimado inventario (monto en pesos CLP)',   Valor: valorTotal.toLocaleString('es-CL', { style: 'currency', currency: 'CLP', maximumFractionDigits: 0 }) },
+        { Métrica: 'Herramientas activas (cantidad de ítems)',         Valor: hers.length },
+        { Métrica: 'Herramientas en reparación (cantidad de ítems)',   Valor: enRepar },
+        { Métrica: 'Proyectos activos (cantidad de ítems)',            Valor: provRes.data?.length ?? 0 },
       ]
       return { rows, columnas: ['Métrica', 'Valor'], titulo: 'Resumen del inventario', empty: '' }
     }
@@ -168,10 +171,11 @@ async function runQuery(intent: Intent): Promise<QueryResult> {
 
     case 'buscar_herramienta': {
       const q = intent.q ?? ''
+      const safeQ = escapeOrFilterValue(q)
       const { data } = await sb.from('herramientas')
         .select('codigo,descripcion,marca,modelo,estado,responsable,ubicacion')
         .eq('activo', true)
-        .or(`codigo.ilike.%${q}%,descripcion.ilike.%${q}%`)
+        .or(`codigo.ilike."%${safeQ}%",descripcion.ilike."%${safeQ}%"`)
         .order('codigo').limit(15)
       const rows = (data ?? []).map((h: any) => ({
         Código: h.codigo, Descripción: h.descripcion,
@@ -183,10 +187,11 @@ async function runQuery(intent: Intent): Promise<QueryResult> {
 
     case 'buscar_material': {
       const q = intent.q ?? ''
+      const safeQ = escapeOrFilterValue(q)
       const { data } = await sb.from('materiales')
         .select('codigo,descripcion,stock_actual,unidad,ubicacion,precio_unitario,categorias(nombre)')
         .eq('activo', true)
-        .or(`codigo.ilike.%${q}%,descripcion.ilike.%${q}%`)
+        .or(`codigo.ilike."%${safeQ}%",descripcion.ilike."%${safeQ}%"`)
         .order('codigo').limit(15)
       const rows = (data ?? []).map((m: any) => ({
         Código: m.codigo, Descripción: m.descripcion,
@@ -223,8 +228,11 @@ async function generarRespuesta(
         'Eres un asistente de inventario para 2C Montajes y Proyectos Eléctricos. ' +
         'Respondes preguntas sobre materiales, herramientas, proyectos y movimientos. ' +
         'SIEMPRE usas ÚNICAMENTE los datos proporcionados — NUNCA inventas información. ' +
+        'NUNCA hagas cálculos aritméticos propios (sumas, restas, multiplicaciones) sobre los ' +
+        'datos — cada fila ya trae su valor final calculado; cítalo tal como aparece, sin combinarlo ' +
+        'con otras filas. No confundas una cantidad de ítems con un monto en pesos: son métricas distintas. ' +
         'Responde en español, de forma concisa y directa. ' +
-        'Si hay datos, haz un resumen breve (2-3 oraciones); la tabla ya se muestra al usuario. ' +
+        'Si hay datos, haz un resumen breve (2-3 oraciones) citando los valores literalmente; la tabla ya se muestra al usuario. ' +
         'Si no hay datos, explica claramente que no hay registros.',
     },
     {

@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils'
+import { cn, estaBajoMinimo } from '@/lib/utils'
 
 export function BadgeTipo({ tipo }: { tipo: string }) {
   const map: Record<string, [string, string]> = {
@@ -35,7 +35,7 @@ export function BadgeEstadoProy({ estado }: { estado: string }) {
 }
 
 export function BadgeStock({ actual, minimo }: { actual: number; minimo: number }) {
-  if (actual <= 0)      return <span className="badge badge-red">Sin stock</span>
-  if (actual <= minimo) return <span className="badge badge-yellow">Bajo mínimo</span>
+  if (actual <= 0) return <span className="badge badge-red">Sin stock</span>
+  if (estaBajoMinimo(actual, minimo)) return <span className="badge badge-yellow">Bajo mínimo</span>
   return <span className="badge badge-green">OK</span>
 }

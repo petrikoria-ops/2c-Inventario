@@ -1,6 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaMovimientos from '@/components/movimientos/TablaMovimientos'
+import type { Metadata } from 'next'
 
+export const metadata: Metadata = { title: 'Movimientos — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
 export default async function MovimientosPage() {

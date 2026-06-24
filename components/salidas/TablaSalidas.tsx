@@ -63,10 +63,10 @@ export default function TablaSalidas({ initialData }: { initialData: any[] }) {
                 <td className="td text-right font-medium">{v.vales_despacho_items?.length ?? 0}</td>
                 <td className="td">
                   <div className="flex gap-0.5">
-                    <a href={`/salidas/${v.id}/imprimir`} className="btn-icon" title="Ver / Imprimir">
+                    <a href={`/salidas/${v.id}/imprimir`} className="btn-icon" title="Ver / Imprimir" aria-label="Ver / Imprimir">
                       <Printer size={13} />
                     </a>
-                    <button onClick={() => eliminar(v)} className="btn-icon" title="Eliminar">
+                    <button onClick={() => eliminar(v)} className="btn-icon" title="Eliminar" aria-label="Eliminar">
                       <Trash2 size={13} />
                     </button>
                   </div>

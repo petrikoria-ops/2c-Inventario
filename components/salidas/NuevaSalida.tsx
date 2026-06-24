@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Package, AlertTriangle } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
-import { num, clp } from '@/lib/utils'
+import { num, clp, estaBajoMinimo } from '@/lib/utils'
 import type { Material, Proyecto } from '@/types'
 
 interface SalidaItem {
@@ -136,8 +136,8 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
         <div className="panel-header"><h2>Datos del despacho</h2></div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-3 gap-3">
           <div>
-            <label className="label">Proyecto / OT</label>
-            <select className="select w-full" value={proyectoId} onChange={e => setProyectoId(e.target.value)}>
+            <label className="label" htmlFor="salida-proyecto">Proyecto / OT</label>
+            <select id="salida-proyecto" className="select w-full" value={proyectoId} onChange={e => setProyectoId(e.target.value)}>
               <option value="">Sin proyecto</option>
               {proyectos.map(p => (
                 <option key={p.id} value={p.id}>{p.ot} — {p.nombre}</option>
@@ -145,12 +145,12 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
             </select>
           </div>
           <div>
-            <label className="label">Solicitado por</label>
-            <input className="input w-full" value={usuario} onChange={e => setUsuario(e.target.value)} placeholder="Nombre…" />
+            <label className="label" htmlFor="salida-usuario">Solicitado por</label>
+            <input id="salida-usuario" className="input w-full" value={usuario} onChange={e => setUsuario(e.target.value)} placeholder="Nombre…" />
           </div>
           <div>
-            <label className="label">Motivo</label>
-            <input className="input w-full" value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ej: Armado tablero…" />
+            <label className="label" htmlFor="salida-motivo">Motivo</label>
+            <input id="salida-motivo" className="input w-full" value={motivo} onChange={e => setMotivo(e.target.value)} placeholder="Ej: Armado tablero…" />
           </div>
         </div>
       </div>
@@ -184,7 +184,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
                     <span className="text-xs text-slate-400 flex-shrink-0">{mat.unidad}</span>
                     <span className={`text-xs font-medium flex-shrink-0 ${
                       mat.stock_actual <= 0 ? 'text-red-600' :
-                      mat.stock_actual <= mat.stock_minimo ? 'text-yellow-600' : 'text-green-600'
+                      estaBajoMinimo(mat.stock_actual, mat.stock_minimo) ? 'text-yellow-600' : 'text-green-600'
                     }`}>
                       Stock: {num(mat.stock_actual, 0)}
                     </span>

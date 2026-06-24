@@ -1,5 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaProyectos from '@/components/proyectos/TablaProyectos'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Obras activas — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
 export default async function ProyectosPage() {

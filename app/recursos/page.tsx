@@ -1,5 +1,5 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import {
   Calculator, Zap, Thermometer, Layers, Wrench,
   BookOpen, Search, AlertTriangle, ExternalLink, Info,
@@ -108,6 +108,7 @@ type TabId = typeof TABS[number]['id']
 
 // ═══════════════════════════════════════════════════════════════════════
 export default function RecursosPage() {
+  useEffect(() => { document.title = 'Recursos Técnicos — 2C Inventario' }, [])
   const [tab, setTab]   = useState<TabId>('calc')
 
   // Calculator states
@@ -183,15 +184,15 @@ export default function RecursosPage() {
                 {label:'Sección (mm²)', key:'s', type:'select', opts:[1.5,2.5,4,6,10,16,25,35,50,70]},
               ].map(f=>(
                 <div key={f.key}>
-                  <label className="label">{f.label}</label>
+                  <label className="label" htmlFor={`recursos-caida-${f.key}`}>{f.label}</label>
                   {f.type==='select'
-                    ? <select className="select text-xs" value={(ct as any)[f.key]} onChange={e=>{
+                    ? <select id={`recursos-caida-${f.key}`} className="select text-xs" value={(ct as any)[f.key]} onChange={e=>{
                         const v = parseFloat(e.target.value)
                         setCt(p=>({...p,[f.key]:v, ...(f.key==='v' ? { tri: v===380 } : {})}))
                       }}>
                         {f.opts!.map(o=><option key={o}>{o}</option>)}
                       </select>
-                    : <input type="number" className="input text-xs" value={(ct as any)[f.key]} onChange={e=>setCt(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />}
+                    : <input id={`recursos-caida-${f.key}`} type="number" className="input text-xs" value={(ct as any)[f.key]} onChange={e=>setCt(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />}
                 </div>
               ))}
             </div>
@@ -222,8 +223,8 @@ export default function RecursosPage() {
                 {label:'Tensión (V)',     key:'v'},
               ].map(f=>(
                 <div key={f.key}>
-                  <label className="label">{f.label}</label>
-                  <input type="number" className="input text-xs" value={(sc as any)[f.key]} onChange={e=>setSc(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />
+                  <label className="label" htmlFor={`recursos-seccion-${f.key}`}>{f.label}</label>
+                  <input id={`recursos-seccion-${f.key}`} type="number" className="input text-xs" value={(sc as any)[f.key]} onChange={e=>setSc(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />
                 </div>
               ))}
             </div>
@@ -254,8 +255,8 @@ export default function RecursosPage() {
                 {label:'Factor servicio',key:'fs'},
               ].map(f=>(
                 <div key={f.key}>
-                  <label className="label">{f.label}</label>
-                  <input type="number" className="input text-xs" step="0.01" value={(dp as any)[f.key]} onChange={e=>setDp(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />
+                  <label className="label" htmlFor={`recursos-proteccion-${f.key}`}>{f.label}</label>
+                  <input id={`recursos-proteccion-${f.key}`} type="number" className="input text-xs" step="0.01" value={(dp as any)[f.key]} onChange={e=>setDp(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />
                 </div>
               ))}
             </div>

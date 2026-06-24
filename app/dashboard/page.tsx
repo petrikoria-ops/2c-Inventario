@@ -1,13 +1,19 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import AlertasStockRealtime from '@/components/dashboard/AlertasStockRealtime'
-import { clp, fechaHora, num } from '@/lib/utils'
+import { clp, fechaHora, num, estaBajoMinimo } from '@/lib/utils'
 import { BadgeTipo, BadgeEstadoProy } from '@/components/ui/Badge'
 import {
   Package, AlertTriangle, DollarSign, ClipboardList,
   CheckCircle, Wrench, Search, ShoppingCart, PackageOpen,
   ArrowUpDown, type LucideIcon,
 } from 'lucide-react'
+import type { Material } from '@/types'
+import type { Metadata } from 'next'
 
+type MaterialDashboard = Pick<Material, 'id' | 'codigo' | 'descripcion' | 'stock_actual' | 'stock_minimo' | 'ubicacion' | 'precio_unitario'>
+
+export const metadata: Metadata = { title: 'Métricas — 2C Inventario' }
 export const dynamic   = 'force-dynamic'
 export const revalidate = 0
 
@@ -20,7 +26,7 @@ export default async function DashboardPage() {
 
   const [
     { count: totalItems },
-    { data: materiales },
+    materiales,
     { count: herEnRep },
     { count: herExtraviadas },
     { count: herOperativas },
@@ -31,7 +37,7 @@ export default async function DashboardPage() {
     salidasRes,
   ] = await Promise.all([
     sb.from('materiales').select('*', { count: 'exact', head: true }).eq('activo', true),
-    sb.from('materiales').select('id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario').eq('activo', true),
+    fetchAllMateriales<MaterialDashboard>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario'),
     sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion'),
     sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'extraviada'),
     sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'operativa'),
@@ -45,8 +51,8 @@ export default async function DashboardPage() {
     sb.from('vales_despacho').select('*', { count: 'exact', head: true }).gte('fecha', startOfMonth),
   ])
 
-  const alertas         = (materiales ?? []).filter(m => m.stock_actual <= m.stock_minimo)
-  const valorInventario = (materiales ?? []).reduce((s, m) => s + m.stock_actual * m.precio_unitario, 0)
+  const alertas         = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo))
+  const valorInventario = materiales.reduce((s, m) => s + m.stock_actual * (m.precio_unitario ?? 0), 0)
   const solicPend       = solicRes.error   ? 0 : (solicRes.count   ?? 0)
   const salidasMes      = salidasRes.error ? 0 : (salidasRes.count ?? 0)
 
@@ -68,8 +74,16 @@ export default async function DashboardPage() {
   ]
 
   return (
-    <div className="p-5">
-      <h1 className="text-lg font-bold text-slate-800 mb-4">Métricas</h1>
+    <div className="p-5 md:p-7">
+      <div className="flex items-center gap-3 mb-6">
+        <div className="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 bg-white border" style={{ borderColor: '#E8EAED' }}>
+          <ClipboardList size={18} style={{ color: '#2E333A' }} />
+        </div>
+        <div>
+          <h1 className="text-lg font-bold text-slate-800 leading-tight">Métricas</h1>
+          <p className="text-sm text-slate-500">Resumen general del inventario</p>
+        </div>
+      </div>
 
       {/* Stats grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 mb-5">

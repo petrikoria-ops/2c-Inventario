@@ -242,10 +242,10 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
                     </td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...h }); setModalOpen(true) }}>
+                        <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...h }); setModalOpen(true) }}>
                           <Pencil size={13} />
                         </button>
-                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(h)}>
+                        <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(h)}>
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -265,20 +265,20 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
       <Modal open={modalOpen} title={editando.id ? `Editar — ${editando.codigo}` : 'Nueva herramienta'}
         onClose={() => setModalOpen(false)} onSave={guardar} saving={saving}>
         <div className="grid grid-cols-2 gap-3">
-          <div><label className="label">Código *</label><input className="input" value={editando.codigo??''} onChange={e=>setEditando(p=>({...p,codigo:e.target.value}))} /></div>
-          <div><label className="label">Estado</label>
-            <select className="select" value={editando.estado??'operativa'} onChange={e=>setEditando(p=>({...p,estado:e.target.value as any}))}>
+          <div><label className="label" htmlFor="herramienta-codigo">Código *</label><input id="herramienta-codigo" className="input" value={editando.codigo??''} onChange={e=>setEditando(p=>({...p,codigo:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-estado">Estado</label>
+            <select id="herramienta-estado" className="select" value={editando.estado??'operativa'} onChange={e=>setEditando(p=>({...p,estado:e.target.value as any}))}>
               {ESTADOS.map(e=><option key={e} value={e}>{e.replace('_',' ')}</option>)}
             </select>
           </div>
-          <div className="col-span-2"><label className="label">Descripción *</label><input className="input" value={editando.descripcion??''} onChange={e=>setEditando(p=>({...p,descripcion:e.target.value}))} /></div>
-          <div><label className="label">Marca</label><input className="input" value={editando.marca??''} onChange={e=>setEditando(p=>({...p,marca:e.target.value}))} /></div>
-          <div><label className="label">Modelo</label><input className="input" value={editando.modelo??''} onChange={e=>setEditando(p=>({...p,modelo:e.target.value}))} /></div>
-          <div><label className="label">Responsable</label><input className="input" value={editando.responsable??''} onChange={e=>setEditando(p=>({...p,responsable:e.target.value}))} /></div>
-          <div><label className="label">Ubicación</label><input className="input" value={editando.ubicacion??''} onChange={e=>setEditando(p=>({...p,ubicacion:e.target.value}))} /></div>
-          <div><label className="label">Última mantención</label><input type="date" className="input" value={fechaCorta(editando.fecha_ultima_mant)} onChange={e=>setEditando(p=>({...p,fecha_ultima_mant:e.target.value}))} /></div>
-          <div><label className="label">Frecuencia mant. (días)</label><input type="number" className="input" min="1" value={editando.frecuencia_mant_dias??365} onChange={e=>setEditando(p=>({...p,frecuencia_mant_dias:parseInt(e.target.value)}))} /></div>
-          <div className="col-span-2"><label className="label">Notas</label><textarea className="textarea" value={editando.notas??''} onChange={e=>setEditando(p=>({...p,notas:e.target.value}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="herramienta-descripcion">Descripción *</label><input id="herramienta-descripcion" className="input" value={editando.descripcion??''} onChange={e=>setEditando(p=>({...p,descripcion:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-marca">Marca</label><input id="herramienta-marca" className="input" value={editando.marca??''} onChange={e=>setEditando(p=>({...p,marca:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-modelo">Modelo</label><input id="herramienta-modelo" className="input" value={editando.modelo??''} onChange={e=>setEditando(p=>({...p,modelo:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-responsable">Responsable</label><input id="herramienta-responsable" className="input" value={editando.responsable??''} onChange={e=>setEditando(p=>({...p,responsable:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-ubicacion">Ubicación</label><input id="herramienta-ubicacion" className="input" value={editando.ubicacion??''} onChange={e=>setEditando(p=>({...p,ubicacion:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-ultima-mant">Última mantención</label><input id="herramienta-ultima-mant" type="date" className="input" value={fechaCorta(editando.fecha_ultima_mant)} onChange={e=>setEditando(p=>({...p,fecha_ultima_mant:e.target.value}))} /></div>
+          <div><label className="label" htmlFor="herramienta-frecuencia-mant">Frecuencia mant. (días)</label><input id="herramienta-frecuencia-mant" type="number" className="input" min="1" value={editando.frecuencia_mant_dias??365} onChange={e=>setEditando(p=>({...p,frecuencia_mant_dias:parseInt(e.target.value)}))} /></div>
+          <div className="col-span-2"><label className="label" htmlFor="herramienta-notas">Notas</label><textarea id="herramienta-notas" className="textarea" value={editando.notas??''} onChange={e=>setEditando(p=>({...p,notas:e.target.value}))} /></div>
         </div>
       </Modal>
 
@@ -289,26 +289,26 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
         <p className="text-xs text-slate-500 mb-4">Solo se actualizarán los campos que completes.</p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Estado</label>
-            <select className="select" value={bulkFields.estado ?? ''}
+            <label className="label" htmlFor="herramienta-bulk-estado">Estado</label>
+            <select id="herramienta-bulk-estado" className="select" value={bulkFields.estado ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, estado: e.target.value }))}>
               <option value="">— no cambiar —</option>
               {ESTADOS.map(e => <option key={e} value={e}>{e.replace('_', ' ')}</option>)}
             </select>
           </div>
           <div>
-            <label className="label">Responsable</label>
-            <input className="input" placeholder="— no cambiar —" value={bulkFields.responsable ?? ''}
+            <label className="label" htmlFor="herramienta-bulk-responsable">Responsable</label>
+            <input id="herramienta-bulk-responsable" className="input" placeholder="— no cambiar —" value={bulkFields.responsable ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, responsable: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Ubicación</label>
-            <input className="input" placeholder="— no cambiar —" value={bulkFields.ubicacion ?? ''}
+            <label className="label" htmlFor="herramienta-bulk-ubicacion">Ubicación</label>
+            <input id="herramienta-bulk-ubicacion" className="input" placeholder="— no cambiar —" value={bulkFields.ubicacion ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, ubicacion: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Frecuencia mant. (días)</label>
-            <input className="input" type="number" min="1" placeholder="— no cambiar —"
+            <label className="label" htmlFor="herramienta-bulk-frecuencia-mant">Frecuencia mant. (días)</label>
+            <input id="herramienta-bulk-frecuencia-mant" className="input" type="number" min="1" placeholder="— no cambiar —"
               value={bulkFields.frecuencia_mant_dias ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, frecuencia_mant_dias: e.target.value }))} />
           </div>

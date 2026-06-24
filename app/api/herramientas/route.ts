@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { escapeOrFilterValue } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,7 +10,10 @@ export async function GET(req: NextRequest) {
   const q      = p.get('q') ?? ''
   const estado = p.get('estado') ?? ''
   let query = sb.from('herramientas').select('*').eq('activo', true)
-  if (q)      query = query.or(`codigo.ilike.%${q}%,descripcion.ilike.%${q}%`)
+  if (q) {
+    const safeQ = escapeOrFilterValue(q)
+    query = query.or(`codigo.ilike."%${safeQ}%",descripcion.ilike."%${safeQ}%"`)
+  }
   if (estado) query = query.eq('estado', estado)
   const { data, error } = await query.order('codigo')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

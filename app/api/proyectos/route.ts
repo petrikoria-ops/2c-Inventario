@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { escapeOrFilterValue } from '@/lib/utils'
 
 export const dynamic = 'force-dynamic'
 
@@ -12,7 +13,10 @@ export async function GET(req: NextRequest) {
     *,
     costo_total:movimientos(tipo, cantidad, precio_unit)
   `)
-  if (q)      query = query.or(`ot.ilike.%${q}%,nombre.ilike.%${q}%,cliente.ilike.%${q}%`)
+  if (q) {
+    const safeQ = escapeOrFilterValue(q)
+    query = query.or(`ot.ilike."%${safeQ}%",nombre.ilike."%${safeQ}%",cliente.ilike."%${safeQ}%"`)
+  }
   if (estado) query = query.eq('estado', estado)
   const { data, error } = await query.order('creado_en', { ascending: false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })

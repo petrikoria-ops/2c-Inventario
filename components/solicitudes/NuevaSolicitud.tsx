@@ -3,7 +3,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Zap, ClipboardList } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
-import { num, clp } from '@/lib/utils'
+import { num, clp, estaBajoMinimo } from '@/lib/utils'
 import type { Material } from '@/types'
 
 interface SolicitudItem {
@@ -194,7 +194,7 @@ export default function NuevaSolicitud() {
                     <span className="code text-xs flex-shrink-0 w-24 truncate">{mat.codigo}</span>
                     <span className="text-sm text-slate-800 flex-1 min-w-0 truncate">{mat.descripcion}</span>
                     <span className="text-xs text-slate-400 flex-shrink-0">{mat.unidad}</span>
-                    <span className={`text-xs font-medium flex-shrink-0 ${mat.stock_actual <= mat.stock_minimo ? 'text-red-600' : 'text-green-600'}`}>
+                    <span className={`text-xs font-medium flex-shrink-0 ${estaBajoMinimo(mat.stock_actual, mat.stock_minimo) ? 'text-red-600' : 'text-green-600'}`}>
                       Stock: {num(mat.stock_actual, 0)}
                     </span>
                   </button>
@@ -244,7 +244,7 @@ export default function NuevaSolicitud() {
                   <tr key={it.material_id} className="tr-hover">
                     <td className="td"><span className="code">{it.codigo}</span></td>
                     <td className="td">{it.descripcion}</td>
-                    <td className={`td-r font-medium ${it.stock_actual <= it.stock_minimo ? 'text-red-600' : 'text-slate-600'}`}>
+                    <td className={`td-r font-medium ${estaBajoMinimo(it.stock_actual, it.stock_minimo) ? 'text-red-600' : 'text-slate-600'}`}>
                       {num(it.stock_actual, 0)}
                     </td>
                     <td className="td-r text-slate-400">{num(it.stock_minimo, 0)}</td>

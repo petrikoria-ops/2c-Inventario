@@ -39,3 +39,16 @@ export function diasHastaMant(fechaUlt: string | null, frecDias: number | null):
 export function cn(...classes: (string | undefined | false | null)[]): string {
   return classes.filter(Boolean).join(' ')
 }
+
+// Un material con stock_minimo = 0 no tiene un umbral configurado todavía
+// (típico tras una importación masiva) — no debe contar como alerta real.
+export function estaBajoMinimo(stockActual: number, stockMinimo: number): boolean {
+  return stockMinimo > 0 && stockActual <= stockMinimo
+}
+
+// Escapa valores antes de interpolarlos en un filtro .or()/.and() de
+// PostgREST: una coma o paréntesis sin escapar rompe la sintaxis del
+// filtro o altera las condiciones combinadas. Ver postgrest.org (Filtering).
+export function escapeOrFilterValue(value: string): string {
+  return value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')
+}

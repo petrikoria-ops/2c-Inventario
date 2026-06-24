@@ -8,7 +8,7 @@ import {
 import Modal from '@/components/ui/Modal'
 import ConfirmDangerModal from '@/components/ui/ConfirmDangerModal'
 import { BadgeStock, BadgeTipo } from '@/components/ui/Badge'
-import { clp, num, fechaHora } from '@/lib/utils'
+import { clp, num, fechaHora, estaBajoMinimo } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
 import type { Categoria, Material, Proveedor, Proyecto, Movimiento } from '@/types'
 
@@ -89,8 +89,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       if (provFiltro && String(m.proveedor_id) !== provFiltro) return false
       if (ubicFiltro && !(m.ubicacion?.toLowerCase().includes(ubLow))) return false
 
-      if (stockEstado === 'ok'   && m.stock_actual < m.stock_minimo)  return false
-      if (stockEstado === 'bajo' && m.stock_actual >= m.stock_minimo) return false
+      if (stockEstado === 'ok'   && estaBajoMinimo(m.stock_actual, m.stock_minimo))  return false
+      if (stockEstado === 'bajo' && !estaBajoMinimo(m.stock_actual, m.stock_minimo)) return false
       if (stockEstado === 'cero' && m.stock_actual !== 0)             return false
 
       if (!isNaN(stockD) && m.stock_actual < stockD) return false
@@ -461,7 +461,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 const isSelected = selectedIds.has(m.id)
                 return (
                   <tr key={m.id}
-                    className={`tr-hover ${isSelected ? 'bg-amber-50/60' : m.stock_actual <= m.stock_minimo ? 'bg-red-50/60' : ''}`}>
+                    className={`tr-hover ${isSelected ? 'bg-amber-50/60' : estaBajoMinimo(m.stock_actual, m.stock_minimo) ? 'bg-red-50/60' : ''}`}>
                     <td className="td" style={{ padding: '0 10px' }}>
                       <input type="checkbox" checked={isSelected} onChange={() => toggleOne(m.id)} className="cursor-pointer" />
                     </td>
@@ -486,17 +486,17 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                     <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" title="Registrar movimiento"
+                        <button className="btn-icon" title="Registrar movimiento" aria-label="Registrar movimiento"
                           onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}>
                           <ArrowUpDown size={13} />
                         </button>
-                        <button className="btn-icon" title="Ver historial" onClick={() => verHistorial(m)}>
+                        <button className="btn-icon" title="Ver historial" aria-label="Ver historial" onClick={() => verHistorial(m)}>
                           <ScrollText size={13} />
                         </button>
-                        <button className="btn-icon" title="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>
+                        <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>
                           <Pencil size={13} />
                         </button>
-                        <button className="btn-icon" title="Eliminar" onClick={() => eliminar(m)}>
+                        <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(m)}>
                           <Trash2 size={13} />
                         </button>
                       </div>
@@ -524,61 +524,61 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
         {editando && (
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="label">Código *</label>
-              <input className="input" value={editando.codigo ?? ''} onChange={e => setEditando(p => ({ ...p!, codigo: e.target.value }))} placeholder="CON-001" />
+              <label className="label" htmlFor="material-codigo">Código *</label>
+              <input id="material-codigo" className="input" value={editando.codigo ?? ''} onChange={e => setEditando(p => ({ ...p!, codigo: e.target.value }))} placeholder="CON-001" />
             </div>
             <div>
-              <label className="label">Unidad *</label>
-              <select className="select" value={editando.unidad ?? 'UN'} onChange={e => setEditando(p => ({ ...p!, unidad: e.target.value }))}>
+              <label className="label" htmlFor="material-unidad">Unidad *</label>
+              <select id="material-unidad" className="select" value={editando.unidad ?? 'UN'} onChange={e => setEditando(p => ({ ...p!, unidad: e.target.value }))}>
                 {UNIDADES.map(u => <option key={u}>{u}</option>)}
               </select>
             </div>
             <div className="col-span-2">
-              <label className="label">Descripción *</label>
-              <input className="input" value={editando.descripcion ?? ''} onChange={e => setEditando(p => ({ ...p!, descripcion: e.target.value }))} placeholder="Descripción completa del material" />
+              <label className="label" htmlFor="material-descripcion">Descripción *</label>
+              <input id="material-descripcion" className="input" value={editando.descripcion ?? ''} onChange={e => setEditando(p => ({ ...p!, descripcion: e.target.value }))} placeholder="Descripción completa del material" />
             </div>
             <div>
-              <label className="label">Categoría</label>
-              <select className="select" value={editando.categoria_id ?? ''} onChange={e => setEditando(p => ({ ...p!, categoria_id: e.target.value ? Number(e.target.value) : null }))}>
+              <label className="label" htmlFor="material-categoria">Categoría</label>
+              <select id="material-categoria" className="select" value={editando.categoria_id ?? ''} onChange={e => setEditando(p => ({ ...p!, categoria_id: e.target.value ? Number(e.target.value) : null }))}>
                 <option value="">Sin categoría</option>
                 {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
               </select>
             </div>
             <div>
-              <label className="label">Proveedor</label>
-              <select className="select" value={editando.proveedor_id ?? ''} onChange={e => setEditando(p => ({ ...p!, proveedor_id: e.target.value ? Number(e.target.value) : null }))}>
+              <label className="label" htmlFor="material-proveedor">Proveedor</label>
+              <select id="material-proveedor" className="select" value={editando.proveedor_id ?? ''} onChange={e => setEditando(p => ({ ...p!, proveedor_id: e.target.value ? Number(e.target.value) : null }))}>
                 <option value="">Sin proveedor</option>
                 {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
               </select>
             </div>
             {!editando.id && (
               <div>
-                <label className="label">Stock inicial</label>
-                <input className="input" type="number" min="0" value={editando.stock_actual ?? 0}
+                <label className="label" htmlFor="material-stock-inicial">Stock inicial</label>
+                <input id="material-stock-inicial" className="input" type="number" min="0" value={editando.stock_actual ?? 0}
                   onChange={e => setEditando(p => ({ ...p!, stock_actual: parseFloat(e.target.value) || 0 }))} />
               </div>
             )}
             <div>
-              <label className="label">Stock mínimo</label>
-              <input className="input" type="number" min="0" value={editando.stock_minimo ?? 0}
+              <label className="label" htmlFor="material-stock-minimo">Stock mínimo</label>
+              <input id="material-stock-minimo" className="input" type="number" min="0" value={editando.stock_minimo ?? 0}
                 onChange={e => setEditando(p => ({ ...p!, stock_minimo: parseFloat(e.target.value) || 0 }))} />
             </div>
             <div>
-              <label className="label">Precio unitario (CLP)</label>
-              <input className="input" type="number" min="0" value={editando.precio_unitario ?? 0}
+              <label className="label" htmlFor="material-precio-unitario">Precio unitario (CLP)</label>
+              <input id="material-precio-unitario" className="input" type="number" min="0" value={editando.precio_unitario ?? 0}
                 onChange={e => setEditando(p => ({ ...p!, precio_unitario: parseFloat(e.target.value) || 0 }))} />
             </div>
             <div>
-              <label className="label">Ubicación física</label>
-              <input className="input" value={editando.ubicacion ?? ''} onChange={e => setEditando(p => ({ ...p!, ubicacion: e.target.value }))} placeholder="Est.A / Cajón 1" />
+              <label className="label" htmlFor="material-ubicacion">Ubicación física</label>
+              <input id="material-ubicacion" className="input" value={editando.ubicacion ?? ''} onChange={e => setEditando(p => ({ ...p!, ubicacion: e.target.value }))} placeholder="Est.A / Cajón 1" />
             </div>
             <div>
-              <label className="label">Código de barras / QR</label>
-              <input className="input" value={editando.codigo_barras ?? ''} onChange={e => setEditando(p => ({ ...p!, codigo_barras: e.target.value }))} />
+              <label className="label" htmlFor="material-codigo-barras">Código de barras / QR</label>
+              <input id="material-codigo-barras" className="input" value={editando.codigo_barras ?? ''} onChange={e => setEditando(p => ({ ...p!, codigo_barras: e.target.value }))} />
             </div>
             <div className="col-span-2">
-              <label className="label">Notas</label>
-              <textarea className="textarea" value={editando.notas ?? ''} onChange={e => setEditando(p => ({ ...p!, notas: e.target.value }))} />
+              <label className="label" htmlFor="material-notas">Notas</label>
+              <textarea id="material-notas" className="textarea" value={editando.notas ?? ''} onChange={e => setEditando(p => ({ ...p!, notas: e.target.value }))} />
             </div>
             {editando.id && <p className="col-span-2 text-xs text-slate-400">Para cambiar el stock use "Registrar movimiento".</p>}
           </div>
@@ -594,8 +594,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
         </p>
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="label">Categoría</label>
-            <select className="select" value={bulkFields.categoria_id ?? ''}
+            <label className="label" htmlFor="material-bulk-categoria">Categoría</label>
+            <select id="material-bulk-categoria" className="select" value={bulkFields.categoria_id ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, categoria_id: e.target.value }))}>
               <option value="">— no cambiar —</option>
               <option value="__clear">Sin categoría</option>
@@ -603,8 +603,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             </select>
           </div>
           <div>
-            <label className="label">Proveedor</label>
-            <select className="select" value={bulkFields.proveedor_id ?? ''}
+            <label className="label" htmlFor="material-bulk-proveedor">Proveedor</label>
+            <select id="material-bulk-proveedor" className="select" value={bulkFields.proveedor_id ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, proveedor_id: e.target.value }))}>
               <option value="">— no cambiar —</option>
               <option value="__clear">Sin proveedor</option>
@@ -612,19 +612,19 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             </select>
           </div>
           <div className="col-span-2">
-            <label className="label">Ubicación física</label>
-            <input className="input" placeholder="— no cambiar —" value={bulkFields.ubicacion ?? ''}
+            <label className="label" htmlFor="material-bulk-ubicacion">Ubicación física</label>
+            <input id="material-bulk-ubicacion" className="input" placeholder="— no cambiar —" value={bulkFields.ubicacion ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, ubicacion: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Stock mínimo</label>
-            <input className="input" type="number" min="0" placeholder="— no cambiar —"
+            <label className="label" htmlFor="material-bulk-stock-minimo">Stock mínimo</label>
+            <input id="material-bulk-stock-minimo" className="input" type="number" min="0" placeholder="— no cambiar —"
               value={bulkFields.stock_minimo ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, stock_minimo: e.target.value }))} />
           </div>
           <div>
-            <label className="label">Precio unitario (CLP)</label>
-            <input className="input" type="number" min="0" placeholder="— no cambiar —"
+            <label className="label" htmlFor="material-bulk-precio-unitario">Precio unitario (CLP)</label>
+            <input id="material-bulk-precio-unitario" className="input" type="number" min="0" placeholder="— no cambiar —"
               value={bulkFields.precio_unitario ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, precio_unitario: e.target.value }))} />
           </div>
@@ -641,8 +641,8 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="label">Tipo *</label>
-                <select className="select" value={movForm.tipo} onChange={e => setMovForm(p => ({ ...p, tipo: e.target.value }))}>
+                <label className="label" htmlFor="material-mov-tipo">Tipo *</label>
+                <select id="material-mov-tipo" className="select" value={movForm.tipo} onChange={e => setMovForm(p => ({ ...p, tipo: e.target.value }))}>
                   <option value="salida">↓ Salida (consumo)</option>
                   <option value="entrada">↑ Entrada (compra)</option>
                   <option value="devolucion">↩ Devolución</option>
@@ -650,24 +650,24 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 </select>
               </div>
               <div>
-                <label className="label">{movForm.tipo === 'ajuste' ? 'Nuevo stock total *' : 'Cantidad *'}</label>
-                <input className="input" type="number" min="0" step="1" value={movForm.cantidad}
+                <label className="label" htmlFor="material-mov-cantidad">{movForm.tipo === 'ajuste' ? 'Nuevo stock total *' : 'Cantidad *'}</label>
+                <input id="material-mov-cantidad" className="input" type="number" min="0" step="1" value={movForm.cantidad}
                   onChange={e => setMovForm(p => ({ ...p, cantidad: e.target.value }))} />
               </div>
               <div className="col-span-2">
-                <label className="label">Proyecto / OT</label>
-                <select className="select" value={movForm.proyecto_id} onChange={e => setMovForm(p => ({ ...p, proyecto_id: e.target.value }))}>
+                <label className="label" htmlFor="material-mov-proyecto">Proyecto / OT</label>
+                <select id="material-mov-proyecto" className="select" value={movForm.proyecto_id} onChange={e => setMovForm(p => ({ ...p, proyecto_id: e.target.value }))}>
                   <option value="">Sin proyecto</option>
                   {proyectos.map(p => <option key={p.id} value={p.id}>{p.ot} — {p.nombre}</option>)}
                 </select>
               </div>
               <div>
-                <label className="label">Usuario</label>
-                <input className="input" value={movForm.usuario} onChange={e => setMovForm(p => ({ ...p, usuario: e.target.value }))} />
+                <label className="label" htmlFor="material-mov-usuario">Usuario</label>
+                <input id="material-mov-usuario" className="input" value={movForm.usuario} onChange={e => setMovForm(p => ({ ...p, usuario: e.target.value }))} />
               </div>
               <div className="col-span-2">
-                <label className="label">Motivo</label>
-                <input className="input" value={movForm.motivo} onChange={e => setMovForm(p => ({ ...p, motivo: e.target.value }))} placeholder="Ej: Consumo tablero OT-2026-001" />
+                <label className="label" htmlFor="material-mov-motivo">Motivo</label>
+                <input id="material-mov-motivo" className="input" value={movForm.motivo} onChange={e => setMovForm(p => ({ ...p, motivo: e.target.value }))} placeholder="Ej: Consumo tablero OT-2026-001" />
               </div>
             </div>
           </>

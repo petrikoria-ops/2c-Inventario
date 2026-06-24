@@ -1,5 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaSalidas from '@/components/salidas/TablaSalidas'
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = { title: 'Salidas — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
 export default async function SalidasPage() {

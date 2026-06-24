@@ -330,26 +330,26 @@ export default function FactibilidadProyecto({
             <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Agregar ítem manual</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div>
-                <label className="label">Código *</label>
-                <input className="input w-full text-sm" value={manual.codigo}
+                <label className="label" htmlFor="factibilidad-manual-codigo">Código *</label>
+                <input id="factibilidad-manual-codigo" className="input w-full text-sm" value={manual.codigo}
                   onChange={e => setManual(p => ({ ...p, codigo: e.target.value.toUpperCase() }))}
                   placeholder="CON-001" />
               </div>
               <div className="md:col-span-2">
-                <label className="label">Descripción *</label>
-                <input className="input w-full text-sm" value={manual.descripcion}
+                <label className="label" htmlFor="factibilidad-manual-descripcion">Descripción *</label>
+                <input id="factibilidad-manual-descripcion" className="input w-full text-sm" value={manual.descripcion}
                   onChange={e => setManual(p => ({ ...p, descripcion: e.target.value }))}
                   placeholder="Cable THHN 2.5mm…" />
               </div>
               <div>
-                <label className="label">Unidad</label>
-                <input className="input w-full text-sm" value={manual.unidad}
+                <label className="label" htmlFor="factibilidad-manual-unidad">Unidad</label>
+                <input id="factibilidad-manual-unidad" className="input w-full text-sm" value={manual.unidad}
                   onChange={e => setManual(p => ({ ...p, unidad: e.target.value }))}
                   placeholder="m / UN / kg…" />
               </div>
               <div>
-                <label className="label">Cantidad req.</label>
-                <input type="number" min="0.01" step="1" className="input w-full text-sm"
+                <label className="label" htmlFor="factibilidad-manual-cantidad">Cantidad req.</label>
+                <input id="factibilidad-manual-cantidad" type="number" min="0.01" step="1" className="input w-full text-sm"
                   value={manual.cantidad_requerida}
                   onChange={e => setManual(p => ({ ...p, cantidad_requerida: parseFloat(e.target.value) || 1 }))} />
               </div>

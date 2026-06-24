@@ -217,7 +217,7 @@ export default function ChatAgente() {
       <div className="p-4 border-t border-slate-200 bg-slate-50">
         <div className="flex gap-2 items-end">
           {mensajes.length > 0 && (
-            <button onClick={limpiar} title="Limpiar historial"
+            <button onClick={limpiar} title="Limpiar historial" aria-label="Limpiar historial"
               className="btn btn-ghost btn-sm flex-shrink-0 self-end mb-0.5">
               <Trash2 size={13} />
             </button>
@@ -237,7 +237,8 @@ export default function ChatAgente() {
           <button onClick={() => enviar()}
             disabled={cargando || !input.trim()}
             className="btn btn-primary flex-shrink-0 self-end"
-            style={{ height: 42 }}>
+            style={{ height: 42 }}
+            aria-label="Enviar consulta">
             {cargando
               ? <Loader2 size={15} className="animate-spin" />
               : <Send size={15} />}

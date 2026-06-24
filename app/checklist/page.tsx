@@ -1,5 +1,5 @@
 'use client'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Printer, CheckSquare, RotateCcw } from 'lucide-react'
 
 // ─── Checklist data ────────────────────────────────────────────────────
@@ -84,6 +84,7 @@ const PRINT_CSS = `
 `
 
 export default function ChecklistPage() {
+  useEffect(() => { document.title = 'Checklist tablero — 2C Inventario' }, [])
   // Tablero form data
   const [form, setForm] = useState({
     ot:        '',
@@ -138,28 +139,28 @@ export default function ChecklistPage() {
             </div>
             <div className="p-4 grid grid-cols-2 md:grid-cols-3 gap-3">
               <div>
-                <label className="label">N° OT</label>
-                <input className="input w-full" placeholder="OT-2026-001" value={form.ot}
+                <label className="label" htmlFor="checklist-ot">N° OT</label>
+                <input id="checklist-ot" className="input w-full" placeholder="OT-2026-001" value={form.ot}
                   onChange={e => setForm(p => ({ ...p, ot: e.target.value }))} />
               </div>
               <div className="md:col-span-2">
-                <label className="label">Nombre del tablero</label>
-                <input className="input w-full" placeholder="Tablero TG-01 Galpón Norte" value={form.tablero}
+                <label className="label" htmlFor="checklist-tablero">Nombre del tablero</label>
+                <input id="checklist-tablero" className="input w-full" placeholder="Tablero TG-01 Galpón Norte" value={form.tablero}
                   onChange={e => setForm(p => ({ ...p, tablero: e.target.value }))} />
               </div>
               <div>
-                <label className="label">Cliente</label>
-                <input className="input w-full" placeholder="Empresa cliente" value={form.cliente}
+                <label className="label" htmlFor="checklist-cliente">Cliente</label>
+                <input id="checklist-cliente" className="input w-full" placeholder="Empresa cliente" value={form.cliente}
                   onChange={e => setForm(p => ({ ...p, cliente: e.target.value }))} />
               </div>
               <div>
-                <label className="label">Técnico responsable</label>
-                <input className="input w-full" placeholder="Nombre técnico" value={form.tecnico}
+                <label className="label" htmlFor="checklist-tecnico">Técnico responsable</label>
+                <input id="checklist-tecnico" className="input w-full" placeholder="Nombre técnico" value={form.tecnico}
                   onChange={e => setForm(p => ({ ...p, tecnico: e.target.value }))} />
               </div>
               <div>
-                <label className="label">Fecha de inspección</label>
-                <input type="date" className="input w-full" value={form.fecha}
+                <label className="label" htmlFor="checklist-fecha">Fecha de inspección</label>
+                <input id="checklist-fecha" type="date" className="input w-full" value={form.fecha}
                   onChange={e => setForm(p => ({ ...p, fecha: e.target.value }))} />
               </div>
             </div>

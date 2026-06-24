@@ -125,8 +125,8 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
         <div className="panel-header"><h2>Trabajador responsable</h2></div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div>
-            <label className="label">Seleccionar trabajador</label>
-            <select className="select w-full" value={trabajadorId}
+            <label className="label" htmlFor="entregar-herramientas-trabajador">Seleccionar trabajador</label>
+            <select id="entregar-herramientas-trabajador" className="select w-full" value={trabajadorId}
               onChange={e => setTrabId(e.target.value)}>
               <option value="">— Escribir nombre manualmente —</option>
               {trabajadores.map(t => (
@@ -138,8 +138,8 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
           </div>
           {!trabajadorId && (
             <div>
-              <label className="label">Nombre <span className="text-red-500">*</span></label>
-              <input className="input w-full" value={usuario}
+              <label className="label" htmlFor="entregar-herramientas-nombre">Nombre <span className="text-red-500">*</span></label>
+              <input id="entregar-herramientas-nombre" className="input w-full" value={usuario}
                 onChange={e => setUsuario(e.target.value)}
                 placeholder="Nombre completo del receptor…" />
             </div>

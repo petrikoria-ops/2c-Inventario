@@ -2,7 +2,9 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaMateriales from '@/components/materiales/TablaMateriales'
 import { AlertTriangle } from 'lucide-react'
 import type { Material } from '@/types'
+import type { Metadata } from 'next'
 
+export const metadata: Metadata = { title: 'Materiales — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
 const PAGE_SIZE = 1000
