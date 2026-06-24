@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VALID_CATEGORIES } from '@/lib/importar/categorias-map'
 
+export const dynamic = 'force-dynamic'
+
 // Activar con AI_CLASSIFY_ENABLED=true y GROQ_API_KEY en .env.local
 // API key gratuita en console.groq.com  (formato: gsk_...)
 const ENABLED = process.env.AI_CLASSIFY_ENABLED === 'true'

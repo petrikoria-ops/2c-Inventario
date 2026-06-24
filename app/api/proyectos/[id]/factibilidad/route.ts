@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 type EstadoItem = 'ok' | 'parcial' | 'sin_stock' | 'no_registrado'
 
 type Ctx = { params: { id: string } }

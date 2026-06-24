@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/herramientas/entregar
 // Body: { herramientas: [{id, codigo, descripcion, notas?}], trabajador_id, trabajador_nombre, usuario, observaciones }
 // Efecto: crea entrega, actualiza responsable en cada herramienta
@@ -20,23 +22,33 @@ export async function POST(req: NextRequest) {
     .like('numero', `EH-${year}-%`)
     .order('numero', { ascending: false })
     .limit(1)
-  const lastSeq = last?.[0]?.numero ? parseInt(last[0].numero.split('-')[2] ?? '0', 10) : 0
-  const numero  = `EH-${year}-${String(lastSeq + 1).padStart(3, '0')}`
+  const baseSeq = last?.[0]?.numero ? parseInt(last[0].numero.split('-')[2] ?? '0', 10) : 0
 
-  // Crear registro de entrega
-  const { data: entrega, error: entregaErr } = await sb
-    .from('entregas_herramientas')
-    .insert({
-      numero,
-      trabajador_id:    trabajador_id || null,
-      trabajador_nombre: trabajador_nombre.trim(),
-      usuario:          usuario || 'admin',
-      observaciones:    observaciones || null,
-    })
-    .select()
-    .single()
+  // Si dos entregas se crean casi simultáneamente pueden calcular el mismo
+  // número (count+1 sin transacción) — se reintenta con el siguiente ante
+  // una colisión de UNIQUE en vez de fallar la entrega completa.
+  let entrega: any = null
+  let numero = ''
+  let entregaErr: { message: string } | null = null
+  for (let i = 0; i <= 3; i++) {
+    numero = `EH-${year}-${String(baseSeq + 1 + i).padStart(3, '0')}`
+    const res = await sb
+      .from('entregas_herramientas')
+      .insert({
+        numero,
+        trabajador_id:    trabajador_id || null,
+        trabajador_nombre: trabajador_nombre.trim(),
+        usuario:          usuario || 'admin',
+        observaciones:    observaciones || null,
+      })
+      .select()
+      .single()
+    if (!res.error) { entrega = res.data; entregaErr = null; break }
+    entregaErr = res.error
+    if (res.error.code !== '23505') break
+  }
 
-  if (entregaErr) return NextResponse.json({ error: entregaErr.message }, { status: 500 })
+  if (entregaErr || !entrega) return NextResponse.json({ error: entregaErr?.message ?? 'Error al crear la entrega' }, { status: 500 })
 
   // Insertar ítems
   const itemsRows = herramientas.map((h: any) => ({

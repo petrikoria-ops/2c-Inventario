@@ -1,6 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/materiales/check
 // Body: { codigos: string[] }
 // Returns: { existing: string[] }

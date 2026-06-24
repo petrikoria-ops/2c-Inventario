@@ -94,6 +94,8 @@ const ALIASES: Record<ImportType, Record<string, string>> = {
   },
 }
 
+const MAX_FILE_BYTES = 15 * 1024 * 1024 // 15MB — un Excel/CSV real de inventario nunca debería pesar más
+
 function normHeader(h: string): string {
   return h.toLowerCase().trim().replace(/\s+/g, '_').normalize('NFD').replace(/[̀-ͯ]/g, '')
 }
@@ -642,7 +644,7 @@ function StepReview(p: ReviewProps) {
           <div className="divide-y divide-slate-100">
             {analysis.dbConflicts.map((c: any) => {
               const res: ConflictRes = p.conflictRes[c.rowIdx] ?? (c.sameTable ? 'update' : 'skip')
-              const existFields = Object.keys(c.existing).filter(k => k !== 'codigo')
+              const existFields = Object.keys(c.existing).filter(k => k !== 'codigo' && k !== 'activo')
               return (
                 <div key={c.rowIdx} className="p-4">
                   <div className="flex items-center gap-2 mb-3">
@@ -650,6 +652,11 @@ function StepReview(p: ReviewProps) {
                     {c.sameTable
                       ? <span className="badge badge-blue text-[10px]">existe en {c.tableSource}</span>
                       : <span className="badge badge-red text-[10px]">existe en otra tabla: {c.tableSource}</span>}
+                    {c.existing.activo === false && (
+                      <span className="badge badge-gray text-[10px]" title="Este código quedó ocupado por un ítem eliminado anteriormente">
+                        eliminado anteriormente
+                      </span>
+                    )}
                     <span className="text-xs text-slate-400">· fila {c.rowNum}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
@@ -799,6 +806,10 @@ export default function ImportarMateriales() {
 
   // Parsear archivo con SheetJS
   const handleFile = useCallback(async (file: File) => {
+    if (file.size > MAX_FILE_BYTES) {
+      showToast(`El archivo pesa ${(file.size / 1024 / 1024).toFixed(1)}MB — el máximo permitido es 15MB.`, 'error')
+      return
+    }
     try {
       const XLSX = await import('xlsx')
       const data = await file.arrayBuffer()
@@ -815,10 +826,12 @@ export default function ImportarMateriales() {
           hdrs.forEach((h, i) => {
             let v = (row as any[])[i] ?? null
             if (v instanceof Date && !isNaN(v.getTime())) {
-              // Normalizar a YYYY-MM-DD (sin conversión de zona horaria)
-              const y = v.getFullYear()
-              const m = String(v.getMonth() + 1).padStart(2, '0')
-              const d = String(v.getDate()).padStart(2, '0')
+              // Normalizar a YYYY-MM-DD usando getters UTC: SheetJS devuelve
+              // estas fechas en UTC, y los getters locales (getFullYear, etc.)
+              // pueden restar un día en zonas horarias negativas como Chile.
+              const y = v.getUTCFullYear()
+              const m = String(v.getUTCMonth() + 1).padStart(2, '0')
+              const d = String(v.getUTCDate()).padStart(2, '0')
               v = `${y}-${m}-${d}`
             }
             obj[h] = v

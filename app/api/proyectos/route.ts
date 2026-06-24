@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(req: NextRequest) {
   const sb = getSupabaseServer()
   const { searchParams: p } = new URL(req.url)
@@ -8,7 +10,7 @@ export async function GET(req: NextRequest) {
   const estado = p.get('estado') ?? ''
   let query = sb.from('proyectos').select(`
     *,
-    costo_total:movimientos(cantidad, precio_unit)
+    costo_total:movimientos(tipo, cantidad, precio_unit)
   `)
   if (q)      query = query.or(`ot.ilike.%${q}%,nombre.ilike.%${q}%,cliente.ilike.%${q}%`)
   if (estado) query = query.eq('estado', estado)

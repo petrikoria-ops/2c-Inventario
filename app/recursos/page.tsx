@@ -86,9 +86,13 @@ const CATALOGOS = [
 ]
 
 // ─── Calculators ──────────────────────────────────────────────────────
+// Caída de tensión: monofásico usa el factor 2 (ida y vuelta por el mismo
+// conductor); trifásico usa √3 (corriente de línea, tensión entre fases).
+// Antes se usaba siempre 2, lo que sobre-dimensiona en trifásico pero no
+// coincide con la fórmula oficial RIC para ese caso.
 const RHO = 0.0172
-function calcCaida(v:number,i:number,l:number,s:number){const dV=(2*RHO*l*i)/s;const pct=(dV/v)*100;return{dV,pct,ok:pct<=3}}
-function seccionMin(i:number,l:number,pct:number,v:number){const dVmax=v*(pct/100);const s=(2*RHO*l*i)/dVmax;const n=[1.5,2.5,4,6,10,16,25,35,50,70,95,120];return{s,elegido:n.find(x=>x>=s)??n[n.length-1]}}
+function calcCaida(v:number,i:number,l:number,s:number,tri:boolean){const factor=tri?Math.sqrt(3):2;const dV=(factor*RHO*l*i)/s;const pct=(dV/v)*100;return{dV,pct,ok:pct<=3}}
+function seccionMin(i:number,l:number,pct:number,v:number,tri:boolean){const factor=tri?Math.sqrt(3):2;const dVmax=v*(pct/100);const s=(factor*RHO*l*i)/dVmax;const n=[1.5,2.5,4,6,10,16,25,35,50,70,95,120];return{s,elegido:n.find(x=>x>=s)??n[n.length-1]}}
 function calcBreaker(p:number,v:number,fp:number,fs:number,tri:boolean){const In=tri?p/(Math.sqrt(3)*v*fp):p/(v*fp);const Ib=In*fs;const n=[6,10,16,20,25,32,40,50,63,80,100,125,160,200,250];return{In,Ib,breaker:n.find(x=>x>=Ib)??n[n.length-1]}}
 
 // ─── Tabs ──────────────────────────────────────────────────────────────
@@ -107,9 +111,9 @@ export default function RecursosPage() {
   const [tab, setTab]   = useState<TabId>('calc')
 
   // Calculator states
-  const [ct, setCt]   = useState({ v:220, i:20, l:50, s:2.5 })
+  const [ct, setCt]   = useState({ v:220, i:20, l:50, s:2.5, tri:false })
   const [ctR, setCtR] = useState<ReturnType<typeof calcCaida>|null>(null)
-  const [sc, setSc]   = useState({ i:30, l:30, pct:3, v:220 })
+  const [sc, setSc]   = useState({ i:30, l:30, pct:3, v:220, tri:false })
   const [scR, setScR] = useState<ReturnType<typeof seccionMin>|null>(null)
   const [dp, setDp]   = useState({ p:5000, v:220, fp:0.85, fs:1.25, tri:false })
   const [dpR, setDpR] = useState<ReturnType<typeof calcBreaker>|null>(null)
@@ -181,20 +185,27 @@ export default function RecursosPage() {
                 <div key={f.key}>
                   <label className="label">{f.label}</label>
                   {f.type==='select'
-                    ? <select className="select text-xs" value={(ct as any)[f.key]} onChange={e=>setCt(p=>({...p,[f.key]:parseFloat(e.target.value)}))}>
+                    ? <select className="select text-xs" value={(ct as any)[f.key]} onChange={e=>{
+                        const v = parseFloat(e.target.value)
+                        setCt(p=>({...p,[f.key]:v, ...(f.key==='v' ? { tri: v===380 } : {})}))
+                      }}>
                         {f.opts!.map(o=><option key={o}>{o}</option>)}
                       </select>
                     : <input type="number" className="input text-xs" value={(ct as any)[f.key]} onChange={e=>setCt(p=>({...p,[f.key]:parseFloat(e.target.value)}))} />}
                 </div>
               ))}
             </div>
-            <button className="btn btn-primary btn-sm w-full mb-2" onClick={()=>setCtR(calcCaida(ct.v,ct.i,ct.l,ct.s))}>Calcular</button>
+            <label className="flex items-center gap-2 text-xs text-slate-600 mb-3 cursor-pointer">
+              <input type="checkbox" checked={ct.tri} onChange={e=>setCt(p=>({...p,tri:e.target.checked}))} className="accent-blue-700" />
+              Sistema trifásico (√3 × V) — se marca solo al elegir 380V
+            </label>
+            <button className="btn btn-primary btn-sm w-full mb-2" onClick={()=>setCtR(calcCaida(ct.v,ct.i,ct.l,ct.s,ct.tri))}>Calcular</button>
             {ctR && (
               <div className={`rounded-lg px-3 py-2 text-sm font-medium text-center ${ctR.ok?'bg-green-100 text-green-800':'bg-red-100 text-red-800'}`}>
                 ΔV = {ctR.dV.toFixed(2)} V ({ctR.pct.toFixed(2)}%) — {ctR.ok?'Dentro del límite':'Excede 3%'}
               </div>
             )}
-            <p className="text-xs text-slate-400 mt-2">ρ cobre = 0.0172 Ω·mm²/m | Límite RIC ≤ 3%</p>
+            <p className="text-xs text-slate-400 mt-2">ρ cobre = 0.0172 Ω·mm²/m | Factor {ct.tri?'√3 (trifásico)':'2 (monofásico)'} | Límite RIC ≤ 3%</p>
           </div>
 
           {/* Sección mínima */}
@@ -216,13 +227,17 @@ export default function RecursosPage() {
                 </div>
               ))}
             </div>
-            <button className="btn btn-primary btn-sm w-full mb-2" onClick={()=>setScR(seccionMin(sc.i,sc.l,sc.pct,sc.v))}>Calcular</button>
+            <label className="flex items-center gap-2 text-xs text-slate-600 mb-3 cursor-pointer">
+              <input type="checkbox" checked={sc.tri} onChange={e=>setSc(p=>({...p,tri:e.target.checked}))} className="accent-blue-700" />
+              Sistema trifásico (√3 × V)
+            </label>
+            <button className="btn btn-primary btn-sm w-full mb-2" onClick={()=>setScR(seccionMin(sc.i,sc.l,sc.pct,sc.v,sc.tri))}>Calcular</button>
             {scR && (
               <div className="bg-blue-50 text-blue-800 rounded-lg px-3 py-2 text-sm font-medium text-center">
                 S mín. = {scR.s.toFixed(2)} mm² → usar <strong>{scR.elegido} mm²</strong>
               </div>
             )}
-            <p className="text-xs text-slate-400 mt-2">S = (2 × ρ × L × I) / ΔV<sub>máx</sub></p>
+            <p className="text-xs text-slate-400 mt-2">S = ({sc.tri?'√3':'2'} × ρ × L × I) / ΔV<sub>máx</sub></p>
           </div>
 
           {/* Dimensionar protección */}

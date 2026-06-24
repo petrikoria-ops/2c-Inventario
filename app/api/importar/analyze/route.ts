@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { classifyByRules } from '@/lib/importar/categorias-map'
 
+export const dynamic = 'force-dynamic'
+
 // ─── Constantes ───────────────────────────────────────────────
 const ESTADOS_HER = ['operativa', 'en_reparacion', 'extraviada', 'dada_de_baja'] as const
 
@@ -215,12 +217,16 @@ export async function POST(req: NextRequest) {
     .map(r => String(r.codigo))
     .filter((v, i, a) => a.indexOf(v) === i)   // dedup
 
+  // Sin filtro de activo: el código sigue ocupado en la base aunque la fila
+  // esté soft-deleted (activo:false), así que también cuenta como conflicto
+  // — si no, se clasifica como "insertar nuevo" y la base lo rechaza por el
+  // UNIQUE constraint de codigo.
   const [matRes, herRes] = await Promise.all([
     validCodigos.length
-      ? sb.from('materiales').select('codigo,descripcion,stock_actual,stock_minimo,precio_unitario,unidad,ubicacion').in('codigo', validCodigos).eq('activo', true)
+      ? sb.from('materiales').select('codigo,descripcion,stock_actual,stock_minimo,precio_unitario,unidad,ubicacion,activo').in('codigo', validCodigos)
       : { data: [] as any[], error: null },
     validCodigos.length
-      ? sb.from('herramientas').select('codigo,descripcion,estado,responsable,ubicacion').in('codigo', validCodigos).eq('activo', true)
+      ? sb.from('herramientas').select('codigo,descripcion,estado,responsable,ubicacion,activo').in('codigo', validCodigos)
       : { data: [] as any[], error: null },
   ])
 

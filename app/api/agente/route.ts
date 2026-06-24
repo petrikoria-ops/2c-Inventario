@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions'
 const MODEL         = 'llama-3.1-8b-instant'
 
@@ -16,10 +18,10 @@ interface Intent { type: IntentType; q?: string; nombre?: string }
 function detectIntent(text: string): Intent {
   const l = text.toLowerCase()
 
-  if (/bajo\s+stock|bajo\s+m[ií]nimo|alert|escas|poco\s+stock|reponer|cr[ií]tic/.test(l))
+  if (/bajo\s+stock|stock\s+bajo|bajo\s+m[ií]nimo|alert|escas|poco\s+stock|reponer|cr[ií]tic/.test(l))
     return { type: 'stock_bajo' }
 
-  if (/sin\s+stock|agotado|stock\s*0|sin\s+existencia/.test(l))
+  if (/sin\s+stock|agotado|stock\s*(?:0|cero)|cero\s+stock|sin\s+existencia/.test(l))
     return { type: 'sin_stock' }
 
   if (/en\s+reparaci[oó]n|reparaci[oó]n|averiad|dañad/.test(l))
@@ -44,7 +46,7 @@ function detectIntent(text: string): Intent {
   if (/herramienta|equipo\b/.test(l)) {
     const terms = text
       .replace(/[¿?]/g, '')
-      .replace(/\b(?:busca|buscar|hay|tiene|existe|tenemos?|cuál|qué|las?|los?|una?|herramienta|equipo|s|de)\b/gi, ' ')
+      .replace(/\b(?:busca|buscar|hay|tiene|existe|tenemos?|cuál|qué|quien|quién|las?|los?|una?|herramienta|equipo|s|de)\b/gi, ' ')
       .replace(/\s+/g, ' ').trim()
     return { type: 'buscar_herramienta', q: terms.length >= 2 ? terms : l }
   }
@@ -52,7 +54,7 @@ function detectIntent(text: string): Intent {
   // Default: buscar material por texto
   const terms = text
     .replace(/[¿?]/g, '')
-    .replace(/\b(?:busca|buscar|hay|existe|tenemos?|cuál|qué|tienes?|material|materiales?|hay|una?)\b/gi, ' ')
+    .replace(/\b(?:busca|buscar|hay|existe|tenemos?|cuál|qué|quien|quién|tienes?|material|materiales?|hay|una?)\b/gi, ' ')
     .replace(/\s+/g, ' ').trim()
   if (terms.length >= 2) return { type: 'buscar_material', q: terms }
 

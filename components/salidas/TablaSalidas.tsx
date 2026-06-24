@@ -17,7 +17,7 @@ export default function TablaSalidas({ initialData }: { initialData: any[] }) {
     ), [items, q])
 
   const eliminar = useCallback(async (v: any) => {
-    if (!confirm(`¿Eliminar vale ${v.numero}?\n\nNota: el stock no se revertirá automáticamente.`)) return
+    if (!confirm(`¿Eliminar vale ${v.numero}?\n\nEl stock entregado se restituirá automáticamente.`)) return
     const res = await fetch(`/api/salidas/${v.id}`, { method: 'DELETE' })
     if (!res.ok) { showToast('Error al eliminar', 'error'); return }
     setItems(prev => prev.filter(x => x.id !== v.id))

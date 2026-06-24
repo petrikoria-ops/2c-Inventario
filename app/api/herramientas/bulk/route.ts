@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 // DELETE /api/herramientas/bulk  — soft-delete múltiples ids
 // PATCH  /api/herramientas/bulk  — actualizar campos en múltiples ids
 

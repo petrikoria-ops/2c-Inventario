@@ -1,6 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
 
+export const dynamic = 'force-dynamic'
+
 // POST /api/materiales/upsert
 // Body: { rows: MappedRow[], updateStock: boolean }
 // Returns: { added, updated, errors }

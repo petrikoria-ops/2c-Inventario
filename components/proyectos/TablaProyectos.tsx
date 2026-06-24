@@ -10,9 +10,16 @@ import type { Movimiento, Proyecto } from '@/types'
 const ESTADOS = ['presupuesto','en_proceso','terminado','entregado','cancelado']
 const BLANK: Partial<Proyecto> = { estado: 'en_proceso' }
 
+// Solo "salida" representa consumo real del proyecto; "devolucion" debe
+// restar ese consumo. "entrada"/"ajuste" no son costo atribuible al proyecto.
 const calcCosto = (movs: unknown): number =>
   Array.isArray(movs)
-    ? (movs as any[]).reduce((s, m) => s + (m.cantidad ?? 0) * (m.precio_unit ?? 0), 0)
+    ? (movs as any[]).reduce((s, m) => {
+        const monto = (m.cantidad ?? 0) * (m.precio_unit ?? 0)
+        if (m.tipo === 'salida')     return s + monto
+        if (m.tipo === 'devolucion') return s - monto
+        return s
+      }, 0)
     : 0
 
 export default function TablaProyectos({ initialData }: { initialData: Proyecto[] }) {

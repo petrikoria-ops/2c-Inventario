@@ -6,6 +6,7 @@ import {
   ChevronUp, ChevronDown, SlidersHorizontal,
 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
+import ConfirmDangerModal from '@/components/ui/ConfirmDangerModal'
 import { BadgeStock, BadgeTipo } from '@/components/ui/Badge'
 import { clp, num, fechaHora } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
@@ -170,19 +171,27 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
   const clearSelection = () => setSelectedIds(new Set())
 
   // ── Bulk delete ────────────────────────────────────────────────
+  const [modalBulkDelete, setModalBulkDelete] = useState(false)
+  const [bulkDeleting,    setBulkDeleting]    = useState(false)
+
   const bulkDelete = useCallback(async () => {
     const ids = Array.from(selectedIds)
     if (!ids.length) return
-    if (!confirm(`¿Eliminar ${ids.length} material${ids.length !== 1 ? 'es' : ''}? Esta acción no se puede deshacer.`)) return
-    const res = await fetch('/api/materiales/bulk', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
-    })
-    if (!res.ok) { showToast('Error al eliminar', 'error'); return }
-    setMateriales(prev => prev.filter(m => !ids.includes(m.id)))
-    clearSelection()
-    showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} eliminado${ids.length !== 1 ? 's' : ''}`, 'success')
+    setBulkDeleting(true)
+    try {
+      const res = await fetch('/api/materiales/bulk', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+      if (!res.ok) { showToast('Error al eliminar', 'error'); return }
+      setMateriales(prev => prev.filter(m => !ids.includes(m.id)))
+      clearSelection()
+      setModalBulkDelete(false)
+      showToast(`${ids.length} material${ids.length !== 1 ? 'es' : ''} eliminado${ids.length !== 1 ? 's' : ''}`, 'success')
+    } finally {
+      setBulkDeleting(false)
+    }
   }, [selectedIds, showToast])
 
   // ── Bulk edit ─────────────────────────────────────────────────
@@ -330,7 +339,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               onClick={() => { setBulkFields({}); setModalBulkEdit(true) }}>
               <Pencil size={12} /> Editar selección
             </button>
-            <button className="btn btn-sm btn-danger" onClick={bulkDelete}>
+            <button className="btn btn-sm btn-danger" onClick={() => setModalBulkDelete(true)}>
               <Trash2 size={12} /> Eliminar selección
             </button>
             <button className="btn btn-ghost btn-sm ml-auto" onClick={clearSelection}>
@@ -690,6 +699,16 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
           {!histMovs.length && <p className="text-center py-6 text-slate-400">Sin movimientos registrados</p>}
         </div>
       </Modal>
+
+      {/* ── Confirmación reforzada de eliminación masiva ──────────── */}
+      <ConfirmDangerModal
+        open={modalBulkDelete}
+        title="Eliminar materiales seleccionados"
+        message={`Vas a eliminar ${numSelected} material${numSelected !== 1 ? 'es' : ''}. Esta acción no se puede deshacer.`}
+        confirming={bulkDeleting}
+        onConfirm={bulkDelete}
+        onClose={() => setModalBulkDelete(false)}
+      />
     </>
   )
 }

@@ -3,6 +3,7 @@ import { useState, useMemo, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Wrench, Search, Pencil, Trash2, X } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
+import ConfirmDangerModal from '@/components/ui/ConfirmDangerModal'
 import { BadgeEstadoHer } from '@/components/ui/Badge'
 import { diasHastaMant, fechaCorta } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
@@ -52,19 +53,27 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
   const clearSelection = () => setSelectedIds(new Set())
 
   // ── Bulk delete ────────────────────────────────────────────────
+  const [modalBulkDelete, setModalBulkDelete] = useState(false)
+  const [bulkDeleting,    setBulkDeleting]    = useState(false)
+
   const bulkDelete = useCallback(async () => {
     const ids = Array.from(selectedIds)
     if (!ids.length) return
-    if (!confirm(`¿Eliminar ${ids.length} herramienta${ids.length !== 1 ? 's' : ''}?`)) return
-    const res = await fetch('/api/herramientas/bulk', {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ids }),
-    })
-    if (!res.ok) { showToast('Error al eliminar', 'error'); return }
-    setItems(prev => prev.filter(h => !ids.includes(h.id)))
-    clearSelection()
-    showToast(`${ids.length} herramienta${ids.length !== 1 ? 's' : ''} eliminada${ids.length !== 1 ? 's' : ''}`, 'success')
+    setBulkDeleting(true)
+    try {
+      const res = await fetch('/api/herramientas/bulk', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      })
+      if (!res.ok) { showToast('Error al eliminar', 'error'); return }
+      setItems(prev => prev.filter(h => !ids.includes(h.id)))
+      clearSelection()
+      setModalBulkDelete(false)
+      showToast(`${ids.length} herramienta${ids.length !== 1 ? 's' : ''} eliminada${ids.length !== 1 ? 's' : ''}`, 'success')
+    } finally {
+      setBulkDeleting(false)
+    }
   }, [selectedIds, showToast])
 
   // ── Bulk edit ─────────────────────────────────────────────────
@@ -165,7 +174,7 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
               onClick={() => { setBulkFields({}); setModalBulkEdit(true) }}>
               <Pencil size={12} /> Editar selección
             </button>
-            <button className="btn btn-sm btn-danger" onClick={bulkDelete}>
+            <button className="btn btn-sm btn-danger" onClick={() => setModalBulkDelete(true)}>
               <Trash2 size={12} /> Eliminar selección
             </button>
             <button className="btn btn-ghost btn-sm ml-auto" onClick={clearSelection}>
@@ -305,6 +314,16 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
           </div>
         </div>
       </Modal>
+
+      {/* ── Confirmación reforzada de eliminación masiva ──────────── */}
+      <ConfirmDangerModal
+        open={modalBulkDelete}
+        title="Eliminar herramientas seleccionadas"
+        message={`Vas a eliminar ${numSelected} herramienta${numSelected !== 1 ? 's' : ''}. Esta acción no se puede deshacer.`}
+        confirming={bulkDeleting}
+        onConfirm={bulkDelete}
+        onClose={() => setModalBulkDelete(false)}
+      />
     </>
   )
 }

@@ -37,7 +37,7 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
           }
         }
       )
-      .subscribe((status) => {
+      .subscribe((status: string) => {
         if (status === 'SUBSCRIBED')                               setRealtimeOk(true)
         if (status === 'CHANNEL_ERROR' || status === 'TIMED_OUT') setRealtimeOk(false)
       })

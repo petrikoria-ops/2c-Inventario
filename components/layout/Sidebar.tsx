@@ -1,14 +1,15 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { usePathname } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart,
-  Calculator, CheckSquare, Tag, Menu, X,
+  Calculator, CheckSquare, Tag, Menu, X, LogOut,
 } from 'lucide-react'
+import { getSupabaseBrowser } from '@/lib/supabase/client'
 import type { LucideIcon } from 'lucide-react'
 
 interface NavLink  { href: string; Icon: LucideIcon; label: string }
@@ -56,6 +57,14 @@ const NAV: NavGroup[] = [
 
 export function SidebarContent({ onNav }: { onNav?: () => void }) {
   const pathname = usePathname()
+  const router    = useRouter()
+
+  const cerrarSesion = async () => {
+    await getSupabaseBrowser().auth.signOut()
+    router.replace('/login')
+    router.refresh()
+  }
+
   return (
     <>
       {/* Marca */}
@@ -97,6 +106,15 @@ export function SidebarContent({ onNav }: { onNav?: () => void }) {
           </div>
         ))}
       </nav>
+
+      {/* Cerrar sesión */}
+      <button
+        onClick={cerrarSesion}
+        className="flex items-center gap-2 px-4 py-2.5 mx-2 mb-1 rounded-md text-xs transition-colors hover:bg-[#3D4450]"
+        style={{ color: '#9AA3AE' }}
+      >
+        <LogOut size={14} /> Cerrar sesión
+      </button>
 
       {/* Footer empresa */}
       <div className="px-4 py-3 border-t text-[10px] leading-snug" style={{ borderColor: '#3A3F47', color: '#4A5260' }}>

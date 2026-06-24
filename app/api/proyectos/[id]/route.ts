@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 type Ctx = { params: { id: string } }
 
 export async function GET(_: NextRequest, { params }: Ctx) {

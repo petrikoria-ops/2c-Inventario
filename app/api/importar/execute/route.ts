@@ -1,11 +1,43 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+
 type ActionType = 'insert' | 'update' | 'skip'
 interface Action {
   rowIdx:  number
   action:  ActionType
   data:    Record<string, any>
+}
+
+// Inserta/actualiza en un solo statement (rápido). Si el lote falla — por
+// ejemplo, una fila choca con un código que ya existe y no se detectó como
+// conflicto — Postgres revierte TODO el lote. Para no perder las filas
+// válidas por culpa de una sola, se reintenta fila por fila y se reporta
+// solo la(s) que realmente fallan.
+async function bulkResilient(
+  sb: ReturnType<typeof getSupabaseServer>,
+  table: string,
+  rows: any[],
+  mode: 'insert' | 'upsert',
+): Promise<{ count: number; errors: { codigo: string; error: string }[] }> {
+  if (!rows.length) return { count: 0, errors: [] }
+
+  const bulk = mode === 'insert'
+    ? await sb.from(table).insert(rows)
+    : await sb.from(table).upsert(rows, { onConflict: 'codigo' })
+  if (!bulk.error) return { count: rows.length, errors: [] }
+
+  let count = 0
+  const errors: { codigo: string; error: string }[] = []
+  for (const row of rows) {
+    const r = mode === 'insert'
+      ? await sb.from(table).insert(row)
+      : await sb.from(table).upsert(row, { onConflict: 'codigo' })
+    if (r.error) errors.push({ codigo: row.codigo ?? '?', error: r.error.message })
+    else count++
+  }
+  return { count, errors }
 }
 
 // ─── Materiales ──────────────────────────────────────────────
@@ -74,14 +106,14 @@ async function executeMateriales(actions: Action[], sb: ReturnType<typeof getSup
 
   let inserted = 0, updated = 0
   if (toInsert.length) {
-    const { error } = await sb.from('materiales').insert(toInsert)
-    if (error) return { inserted, updated, errors: [...errors, { codigo: '—', error: error.message }] }
-    inserted = toInsert.length
+    const r = await bulkResilient(sb, 'materiales', toInsert, 'insert')
+    inserted = r.count
+    errors.push(...r.errors)
   }
   if (toUpdate.length) {
-    const { error } = await sb.from('materiales').upsert(toUpdate, { onConflict: 'codigo' })
-    if (error) return { inserted, updated, errors: [...errors, { codigo: '—', error: error.message }] }
-    updated = toUpdate.length
+    const r = await bulkResilient(sb, 'materiales', toUpdate, 'upsert')
+    updated = r.count
+    errors.push(...r.errors)
   }
   return { inserted, updated, errors }
 }
@@ -128,14 +160,14 @@ async function executeHerramientas(actions: Action[], sb: ReturnType<typeof getS
 
   let inserted = 0, updated = 0
   if (toInsert.length) {
-    const { error } = await sb.from('herramientas').insert(toInsert)
-    if (error) return { inserted, updated, errors: [...errors, { codigo: '—', error: error.message }] }
-    inserted = toInsert.length
+    const r = await bulkResilient(sb, 'herramientas', toInsert, 'insert')
+    inserted = r.count
+    errors.push(...r.errors)
   }
   if (toUpdate.length) {
-    const { error } = await sb.from('herramientas').upsert(toUpdate, { onConflict: 'codigo' })
-    if (error) return { inserted, updated, errors: [...errors, { codigo: '—', error: error.message }] }
-    updated = toUpdate.length
+    const r = await bulkResilient(sb, 'herramientas', toUpdate, 'upsert')
+    updated = r.count
+    errors.push(...r.errors)
   }
   return { inserted, updated, errors }
 }
