@@ -3,6 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/layout/AppShell'
 import { ToastProvider } from '@/contexts/ToastContext'
+import { getPerfil } from '@/lib/auth/permisos.server'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -19,12 +20,14 @@ export const metadata: Metadata = {
   },
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const perfil = await getPerfil()
+
   return (
     <html lang="es" className={inter.variable}>
       <body>
         <ToastProvider>
-          <AppShell>{children}</AppShell>
+          <AppShell perfil={perfil}>{children}</AppShell>
         </ToastProvider>
       </body>
     </html>

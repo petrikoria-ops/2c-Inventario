@@ -1,7 +1,8 @@
 # 2C Inventario — Contexto para Claude Code
 
-Sistema de gestión de inventario para **2C Montajes y Proyectos Eléctricos**.
-Lee este archivo al inicio de cada sesión antes de tocar cualquier código.
+Sistema de gestión interna para **2C Montajes y Proyectos Eléctricos**. Nació como inventario y se está ampliando a una app de toda la empresa (Bodega, Taller, Oficina Técnica, Prevención, RRHH, Directiva). Lee este archivo al inicio de cada sesión antes de tocar cualquier código.
+
+**Si vas a trabajar en un departamento específico**, lee también su doc en `docs/departamentos/` (ver tabla en la sección "Roles y Departamentos" más abajo) — ahí está el detalle de roles, permisos y pendientes de esa área sin recargar este archivo con las 24 combinaciones de puesto que existen en la empresa.
 
 ---
 
@@ -10,18 +11,47 @@ Lee este archivo al inicio de cada sesión antes de tocar cualquier código.
 | Capa | Tecnología |
 |---|---|
 | Framework | Next.js 14 App Router (`^14.2.20`) |
-| Base de datos | Supabase (PostgreSQL + PostgREST) |
+| Base de datos | Supabase (PostgreSQL + PostgREST + Auth) |
 | Lenguaje | TypeScript 5 |
 | Estilos | Tailwind CSS + clases utilitarias propias en `globals.css` |
 | Iconos | `lucide-react ^1.20.0` — **sin sufijo `Icon`** (ej. `Handshake`, no `HandshakeIcon`) |
+| Email | `nodemailer` vía SMTP de la empresa (solo para notificar al Administrador de software) |
 | Runtime | Node.js / Vercel-ready |
 
-**Variables de entorno necesarias:**
+**Variables de entorno necesarias** (detalle y comentarios en `.env.example`):
 ```
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_ANON_KEY=
-GROQ_API_KEY=          # opcional — el agente IA funciona sin él
+SUPABASE_SERVICE_ROLE_KEY=    # server-only — invitar usuarios desde /admin/solicitudes
+SMTP_HOST= / SMTP_PORT= / SMTP_USER= / SMTP_PASS=   # aviso de solicitudes al admin
+ADMIN_SOFTWARE_EMAIL=         # a quién le llega el aviso de cada solicitud
+NEXT_PUBLIC_SITE_URL=         # para armar links absolutos en los correos
+GROQ_API_KEY=                 # opcional — el agente IA funciona sin él
 ```
+
+---
+
+## Roles y Departamentos
+
+Antes cualquier usuario autenticado tenía acceso total. Desde la migración `supabase/migration_roles_y_perfiles.sql` existe la tabla `perfiles` (departamento + puesto + nivel_acceso por usuario) y `lib/auth/permisos.ts` (tipos, `getPerfil()`, `puedeVer()`/`puedeEditar()`, mapa de módulos por departamento).
+
+**Niveles de acceso** (de menor a mayor): `visualizacion` (solo lectura) → `operador` → `encargado` → `jefe_departamento` → `directiva` (lectura total cross-depto) → `admin_software` / `master` (acceso total + el segundo además gestiona usuarios).
+
+**Docs por departamento** (léelos solo si vas a trabajar ahí):
+
+| Departamento | Doc | Roles |
+|---|---|---|
+| Bodega | `docs/departamentos/bodega.md` | Ayudante, Chofer-bodeguero, Encargado, Ayudante de encargado |
+| Taller | `docs/departamentos/taller.md` | Ayudante de maestro, Maestro tablerista, Encargado, Ayudante de encargado |
+| Oficina Técnica | `docs/departamentos/oficina-tecnica.md` | Jefe, Proyectista/ingeniero, Ayudante de jefe, Técnico junior |
+| Prevención | `docs/departamentos/prevencion.md` | Prevencionista |
+| Recursos Humanos | `docs/departamentos/rrhh.md` | Jefe, Asistente, Practicante |
+| Directiva | `docs/departamentos/directiva.md` | Dueño, Jefe directivo, Jefe ejecutivo, Supervisor eléctrico, Ingeniero visitante |
+| Administración de software | `docs/departamentos/admin-software.md` | Administrador de software (gestiona usuarios/roles, no es un departamento operativo) |
+
+**Enrolamiento**: `/solicitar-acceso` (público) → genera código y avisa por correo al `ADMIN_SOFTWARE_EMAIL` → el Administrador de software lo aprueba en `/admin/solicitudes` (logueado + código correcto) → se crea el `perfil` y se invita al usuario por correo (Supabase Admin API, `lib/supabase/admin.ts`). Usuarios sin perfil quedan confinados a `/pendiente-aprobacion` por el middleware.
+
+**Módulo de referencia con permisos ya aplicados**: Materiales (`TablaMateriales.tsx` + sus rutas API) — usa el mismo patrón (`requireEditable('materiales')` server-side, prop `editable` en el componente) al extender permisos a otros módulos.
 
 ---
 
@@ -286,10 +316,12 @@ Colores de marca:
 ## Pendiente / Próximas funciones
 
 - [ ] **SQL Supabase** (ejecutar manualmente): crear tablas `trabajadores`, `entregas_herramientas`, `entregas_herramientas_items` — scripts arriba en la sección de cada módulo
+- [ ] **SQL Supabase** (ejecutar manualmente): `supabase/migration_roles_y_perfiles.sql` — roles/perfiles, ver sección "Roles y Departamentos"
+- [ ] Configurar `SUPABASE_SERVICE_ROLE_KEY` y `SMTP_*`/`ADMIN_SOFTWARE_EMAIL` en Vercel — sin esto el enrolamiento no invita usuarios ni avisa por correo
+- [ ] Aplicar permisos por departamento al resto de los módulos (hoy solo Materiales tiene el patrón completo) — uno por sesión, ver docs/departamentos/
 - [ ] Notificaciones push cuando stock cae bajo mínimo
 - [ ] Asignación de materiales a proyecto con seguimiento de consumo real vs planificado
 - [ ] Histórico de entregas de herramientas por trabajador
-- [ ] Login / autenticación (Supabase Auth) — hoy sin control de acceso
 - [ ] Multi-empresa / multi-bodega
 - [ ] App móvil o PWA para escaneo de códigos de barra
 

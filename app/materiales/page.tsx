@@ -1,6 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaMateriales from '@/components/materiales/TablaMateriales'
 import { AlertTriangle } from 'lucide-react'
+import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Material } from '@/types'
 import type { Metadata } from 'next'
 
@@ -44,12 +45,17 @@ export default async function MaterialesPage() {
     { data: categorias },
     { data: proveedores },
     { data: proyectos },
+    perfil,
   ] = await Promise.all([
     fetchAllMateriales(sb),
     sb.from('categorias').select('*').order('nombre'),
     sb.from('proveedores').select('id,nombre').eq('activo', true).order('nombre'),
     sb.from('proyectos').select('id,ot,nombre,estado').in('estado', ['en_proceso','presupuesto']).order('ot'),
+    getPerfil(),
   ])
+
+  // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
+  const editable = !perfil || puedeEditar(perfil, 'materiales')
 
   return (
     <div className="p-5">
@@ -64,6 +70,7 @@ export default async function MaterialesPage() {
         categorias={categorias ?? []}
         proveedores={proveedores ?? []}
         proyectos={proyectos ?? []}
+        editable={editable}
       />
     </div>
   )

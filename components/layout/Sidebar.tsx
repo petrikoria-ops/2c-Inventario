@@ -7,57 +7,69 @@ import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart,
-  Calculator, CheckSquare, Tag, Menu, X, LogOut,
+  Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
+import { puedeVer, type Perfil, type Modulo } from '@/lib/auth/permisos'
 import type { LucideIcon } from 'lucide-react'
 
-interface NavLink  { href: string; Icon: LucideIcon; label: string }
+interface NavLink  { href: string; Icon: LucideIcon; label: string; modulo?: Modulo }
 interface NavGroup { section: string; links: NavLink[] }
 
+// modulo: undefined = siempre visible para cualquier perfil (ej. Inicio).
 const NAV: NavGroup[] = [
   {
     section: 'Principal',
     links: [
       { href: '/',          Icon: Home,             label: 'Inicio' },
-      { href: '/dashboard', Icon: LayoutDashboard,  label: 'Métricas' },
+      { href: '/dashboard', Icon: LayoutDashboard,  label: 'Métricas', modulo: 'metricas' },
     ],
   },
   {
     section: 'Inventario',
     links: [
-      { href: '/materiales',   Icon: Package,     label: 'Materiales' },
-      { href: '/herramientas',          Icon: Wrench,    label: 'Herramientas'           },
-      { href: '/herramientas/entregar', Icon: HardHat,  label: 'Entregar herramientas'  },
-      { href: '/trabajadores',          Icon: Users,    label: 'Trabajadores'           },
-      { href: '/movimientos',  Icon: ArrowUpDown,  label: 'Movimientos' },
-      { href: '/importar',     Icon: Upload,       label: 'Importar' },
-      { href: '/salidas',         Icon: PackageOpen, label: 'Salidas'            },
-      { href: '/entregas/nueva', Icon: Handshake,   label: 'Entrega por mano'  },
+      { href: '/materiales',   Icon: Package,     label: 'Materiales', modulo: 'materiales' },
+      { href: '/herramientas',          Icon: Wrench,    label: 'Herramientas',          modulo: 'herramientas' },
+      { href: '/herramientas/entregar', Icon: HardHat,  label: 'Entregar herramientas', modulo: 'herramientas' },
+      { href: '/trabajadores',          Icon: Users,    label: 'Trabajadores',          modulo: 'trabajadores' },
+      { href: '/movimientos',  Icon: ArrowUpDown,  label: 'Movimientos', modulo: 'movimientos' },
+      { href: '/importar',     Icon: Upload,       label: 'Importar',    modulo: 'materiales' },
+      { href: '/salidas',         Icon: PackageOpen, label: 'Salidas',           modulo: 'movimientos' },
+      { href: '/entregas/nueva', Icon: Handshake,   label: 'Entrega por mano', modulo: 'movimientos' },
     ],
   },
   {
     section: 'Gestión',
     links: [
-      { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros' },
-      { href: '/proveedores', Icon: Building2,     label: 'Proveedores' },
-      { href: '/solicitudes', Icon: ShoppingCart,  label: 'Compras' },
+      { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros', modulo: 'proyectos' },
+      { href: '/proveedores', Icon: Building2,     label: 'Proveedores', modulo: 'proveedores' },
+      { href: '/solicitudes', Icon: ShoppingCart,  label: 'Compras',     modulo: 'compras' },
     ],
   },
   {
     section: 'Recursos',
     links: [
-      { href: '/recursos',   Icon: Calculator,   label: 'Recursos Técnicos' },
-      { href: '/checklist',  Icon: CheckSquare,  label: 'Checklist tablero' },
-      { href: '/etiquetas',  Icon: Tag,          label: 'Etiquetas de obra'  },
-      { href: '/agente',     Icon: Bot,          label: 'Agente IA'          },
+      { href: '/recursos',   Icon: Calculator,   label: 'Recursos Técnicos', modulo: 'recursos_tecnicos' },
+      { href: '/checklist',  Icon: CheckSquare,  label: 'Checklist tablero', modulo: 'checklist' },
+      { href: '/etiquetas',  Icon: Tag,          label: 'Etiquetas de obra', modulo: 'etiquetas' },
+      { href: '/agente',     Icon: Bot,          label: 'Agente IA',         modulo: 'agente' },
     ],
   },
 ]
 
-export function SidebarContent({ onNav }: { onNav?: () => void }) {
+export function SidebarContent({ perfil, onNav }: { perfil: Perfil | null; onNav?: () => void }) {
   const pathname = usePathname()
   const router    = useRouter()
+
+  const esAdmin = perfil?.nivel_acceso === 'admin_software' || perfil?.nivel_acceso === 'master'
+
+  const grupos = NAV
+    .map(g => ({ ...g, links: g.links.filter(l => !l.modulo || !perfil || puedeVer(perfil, l.modulo)) }))
+    .filter(g => g.links.length > 0)
+    .concat(esAdmin ? [{
+      section: 'Administración',
+      links: [{ href: '/admin/solicitudes', Icon: UserCog, label: 'Gestión de usuarios' }],
+    }] : [])
 
   const cerrarSesion = async () => {
     await getSupabaseBrowser().auth.signOut()
@@ -81,14 +93,16 @@ export function SidebarContent({ onNav }: { onNav?: () => void }) {
         </div>
         <div className="min-w-0">
           <div className="text-white font-bold text-[13px] leading-tight truncate">2C Montajes</div>
-          <div className="text-[11px] leading-tight" style={{ color: '#6B7480' }}>Inventario General</div>
+          <div className="text-[11px] leading-tight truncate" style={{ color: '#6B7480' }}>
+            {perfil ? perfil.puesto : 'Inventario General'}
+          </div>
         </div>
       </div>
 
       {/* Nav — con degradado inferior que insinúa que hay más opciones al desplazar */}
       <div className="relative flex-1 min-h-0">
         <nav className="h-full overflow-y-auto py-3">
-          {NAV.map(group => (
+          {grupos.map(group => (
             <div key={group.section} className="mb-1">
               <div className="text-[10px] uppercase tracking-widest font-semibold px-4 pt-3 pb-1"
                 style={{ color: '#4A5260' }}>
@@ -128,7 +142,7 @@ export function SidebarContent({ onNav }: { onNav?: () => void }) {
   )
 }
 
-export default function Sidebar() {
+export default function Sidebar({ perfil }: { perfil: Perfil | null }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -164,7 +178,7 @@ export default function Sidebar() {
       {/* Sidebar escritorio */}
       <aside className="hidden md:flex flex-col w-56 fixed top-0 left-0 h-screen z-[200]"
         style={{ backgroundColor: '#2E333A' }}>
-        <SidebarContent />
+        <SidebarContent perfil={perfil} />
       </aside>
 
       {/* Sidebar móvil (drawer) */}
@@ -179,7 +193,7 @@ export default function Sidebar() {
             <X size={16} />
           </button>
         </div>
-        <SidebarContent onNav={() => setOpen(false)} />
+        <SidebarContent perfil={perfil} onNav={() => setOpen(false)} />
       </aside>
     </>
   )

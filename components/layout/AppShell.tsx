@@ -1,17 +1,20 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
+import type { Perfil } from '@/lib/auth/permisos'
 
-// /login no lleva sidebar — se detecta por ruta para no tener que mover
+// Páginas sin sidebar — se detecta por ruta para no tener que mover
 // todas las carpetas de app/ a un route group separado.
-export default function AppShell({ children }: { children: React.ReactNode }) {
+const SIN_SIDEBAR = ['/login', '/solicitar-acceso', '/pendiente-aprobacion']
+
+export default function AppShell({ children, perfil }: { children: React.ReactNode; perfil: Perfil | null }) {
   const pathname = usePathname()
 
-  if (pathname === '/login') return <>{children}</>
+  if (SIN_SIDEBAR.includes(pathname)) return <>{children}</>
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar />
+      <Sidebar perfil={perfil} />
       {/* pt-14 reserva el alto de la barra superior móvil (fixed) para que
           el título de cada página nunca quede tapado por ella. */}
       <main className="flex-1 md:ml-56 min-h-screen flex flex-col pt-14 md:pt-0">

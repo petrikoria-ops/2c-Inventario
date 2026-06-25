@@ -17,6 +17,7 @@ interface Props {
   categorias:  Categoria[]
   proveedores: Pick<Proveedor, 'id' | 'nombre'>[]
   proyectos:   Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]
+  editable?: boolean
 }
 
 type SortField = 'codigo' | 'descripcion' | 'categoria' | 'stock' | 'precio'
@@ -24,7 +25,7 @@ type SortDir   = 'asc' | 'desc'
 
 const UNIDADES = ['UN', 'MT', 'ML', 'KG', 'JGO', 'RLL', 'PAR']
 
-export default function TablaMateriales({ initialData, categorias, proveedores, proyectos }: Props) {
+export default function TablaMateriales({ initialData, categorias, proveedores, proyectos, editable = true }: Props) {
   const router      = useRouter()
   const { showToast } = useToast()
 
@@ -321,15 +322,23 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
           <h2>Materiales</h2>
           <div className="flex gap-2 ml-auto">
             <a href="/api/export/materiales" className="btn btn-outline btn-sm"><Download size={13} /> CSV</a>
-            <button className="btn btn-primary btn-sm"
-              onClick={() => { setEditando({ unidad: 'UN', stock_actual: 0, stock_minimo: 0, precio_unitario: 0 }); setModalForm(true) }}>
-              + Nuevo
-            </button>
+            {editable && (
+              <button className="btn btn-primary btn-sm"
+                onClick={() => { setEditando({ unidad: 'UN', stock_actual: 0, stock_minimo: 0, precio_unitario: 0 }); setModalForm(true) }}>
+                + Nuevo
+              </button>
+            )}
           </div>
         </div>
 
+        {!editable && (
+          <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+            Tu perfil tiene acceso de solo lectura a Materiales — no puedes crear, editar ni eliminar.
+          </div>
+        )}
+
         {/* ── Barra de selección múltiple ──────────────────────── */}
-        {numSelected > 0 && (
+        {editable && numSelected > 0 && (
           <div className="flex items-center gap-3 px-4 py-2.5 border-b"
             style={{ background: '#FFF8E0', borderColor: '#F0C000' }}>
             <span className="text-sm font-semibold" style={{ color: '#2E333A' }}>
@@ -426,13 +435,15 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               <tr>
                 {/* Checkbox select-all */}
                 <th className="th" style={{ width: 36, padding: '0 10px' }}>
-                  <input type="checkbox"
-                    checked={allFilteredSelected}
-                    ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
-                    onChange={toggleAll}
-                    className="cursor-pointer"
-                    title={allFilteredSelected ? 'Deseleccionar todos' : 'Seleccionar todos visibles'}
-                  />
+                  {editable && (
+                    <input type="checkbox"
+                      checked={allFilteredSelected}
+                      ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
+                      onChange={toggleAll}
+                      className="cursor-pointer"
+                      title={allFilteredSelected ? 'Deseleccionar todos' : 'Seleccionar todos visibles'}
+                    />
+                  )}
                 </th>
                 <th className="th cursor-pointer select-none" onClick={() => handleSort('codigo')}>
                   <span className="inline-flex items-center">Código{sortIcon('codigo')}</span>
@@ -463,7 +474,9 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                   <tr key={m.id}
                     className={`tr-hover ${isSelected ? 'bg-amber-50/60' : estaBajoMinimo(m.stock_actual, m.stock_minimo) ? 'bg-red-50/60' : ''}`}>
                     <td className="td" style={{ padding: '0 10px' }}>
-                      <input type="checkbox" checked={isSelected} onChange={() => toggleOne(m.id)} className="cursor-pointer" />
+                      {editable && (
+                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(m.id)} className="cursor-pointer" />
+                      )}
                     </td>
                     <td className="td"><span className="code">{m.codigo}</span></td>
                     <td className="td">
@@ -486,19 +499,25 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                     <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" title="Registrar movimiento" aria-label="Registrar movimiento"
-                          onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}>
-                          <ArrowUpDown size={13} />
-                        </button>
+                        {editable && (
+                          <button className="btn-icon" title="Registrar movimiento" aria-label="Registrar movimiento"
+                            onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}>
+                            <ArrowUpDown size={13} />
+                          </button>
+                        )}
                         <button className="btn-icon" title="Ver historial" aria-label="Ver historial" onClick={() => verHistorial(m)}>
                           <ScrollText size={13} />
                         </button>
-                        <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>
-                          <Pencil size={13} />
-                        </button>
-                        <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(m)}>
-                          <Trash2 size={13} />
-                        </button>
+                        {editable && (
+                          <>
+                            <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>
+                              <Pencil size={13} />
+                            </button>
+                            <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(m)}>
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

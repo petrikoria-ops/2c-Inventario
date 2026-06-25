@@ -3,6 +3,7 @@ import Image from 'next/image'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { num, estaBajoMinimo } from '@/lib/utils'
+import { getPerfil, puedeVer, type Modulo } from '@/lib/auth/permisos.server'
 import {
   PackageOpen, ShoppingCart, ArrowUpDown, Package,
   ClipboardList, Wrench, AlertTriangle, CheckCircle,
@@ -13,42 +14,49 @@ import {
 export const dynamic   = 'force-dynamic'
 export const revalidate = 0
 
-interface Accion { href: string; Icon: LucideIcon; title: string; desc: string; color: string }
+interface Accion { href: string; Icon: LucideIcon; title: string; desc: string; color: string; modulo: Modulo }
 interface Grupo  { titulo: string; acciones: Accion[] }
 
 const GRUPOS: Grupo[] = [
   {
     titulo: 'Operación diaria',
     acciones: [
-      { href: '/salidas/nueva',     Icon: PackageOpen,  title: 'Nuevo despacho',       desc: 'Registrar salida de materiales',     color: 'bg-blue-600'    },
-      { href: '/entregas/nueva',    Icon: Handshake,    title: 'Entrega por mano',     desc: 'Sin proyecto, descuenta stock',      color: 'bg-cyan-700'    },
-      { href: '/movimientos',       Icon: ArrowUpDown,  title: 'Movimiento',           desc: 'Entrada, ajuste o devolución',       color: 'bg-violet-600'  },
-      { href: '/solicitudes/nueva', Icon: ShoppingCart, title: 'Solicitud de compra',  desc: 'Pedir materiales al proveedor',      color: 'bg-emerald-600' },
-      { href: '/herramientas/entregar', Icon: HardHat,  title: 'Entregar herramientas', desc: 'Comprobante + actualiza responsable', color: 'bg-orange-700'  },
+      { href: '/salidas/nueva',     Icon: PackageOpen,  title: 'Nuevo despacho',       desc: 'Registrar salida de materiales',     color: 'bg-blue-600',    modulo: 'movimientos' },
+      { href: '/entregas/nueva',    Icon: Handshake,    title: 'Entrega por mano',     desc: 'Sin proyecto, descuenta stock',      color: 'bg-cyan-700',    modulo: 'movimientos' },
+      { href: '/movimientos',       Icon: ArrowUpDown,  title: 'Movimiento',           desc: 'Entrada, ajuste o devolución',       color: 'bg-violet-600',  modulo: 'movimientos' },
+      { href: '/solicitudes/nueva', Icon: ShoppingCart, title: 'Solicitud de compra',  desc: 'Pedir materiales al proveedor',      color: 'bg-emerald-600', modulo: 'compras' },
+      { href: '/herramientas/entregar', Icon: HardHat,  title: 'Entregar herramientas', desc: 'Comprobante + actualiza responsable', color: 'bg-orange-700', modulo: 'herramientas' },
     ],
   },
   {
     titulo: 'Inventario y obras',
     acciones: [
-      { href: '/materiales',   Icon: Package,       title: 'Inventario General', desc: 'Ver y gestionar materiales',       color: 'bg-slate-600' },
-      { href: '/herramientas', Icon: Wrench,        title: 'Herramientas',       desc: 'Estado y ubicación de equipos',    color: 'bg-rose-600'  },
-      { href: '/proyectos',    Icon: ClipboardList, title: 'Obras activas',      desc: 'Tableros y factibilidad de obra',  color: 'bg-amber-600' },
-      { href: '/trabajadores', Icon: Users,         title: 'Trabajadores',       desc: 'Personal asignado a herramientas', color: 'bg-slate-500' },
+      { href: '/materiales',   Icon: Package,       title: 'Inventario General', desc: 'Ver y gestionar materiales',       color: 'bg-slate-600', modulo: 'materiales' },
+      { href: '/herramientas', Icon: Wrench,        title: 'Herramientas',       desc: 'Estado y ubicación de equipos',    color: 'bg-rose-600',  modulo: 'herramientas' },
+      { href: '/proyectos',    Icon: ClipboardList, title: 'Obras activas',      desc: 'Tableros y factibilidad de obra',  color: 'bg-amber-600', modulo: 'proyectos' },
+      { href: '/trabajadores', Icon: Users,         title: 'Trabajadores',       desc: 'Personal asignado a herramientas', color: 'bg-slate-500', modulo: 'trabajadores' },
     ],
   },
   {
     titulo: 'Recursos',
     acciones: [
-      { href: '/recursos',  Icon: Calculator,  title: 'Recursos Técnicos', desc: 'Calculadoras eléctricas y normas',  color: 'bg-indigo-600' },
-      { href: '/checklist', Icon: CheckSquare, title: 'Checklist tablero', desc: 'Verificación eléctrica imprimible', color: 'bg-teal-600'   },
-      { href: '/etiquetas', Icon: Tag,         title: 'Etiquetas de obra', desc: 'Pallets y bultos imprimibles',      color: 'bg-yellow-600' },
-      { href: '/agente',    Icon: Bot,         title: 'Agente IA',         desc: 'Consultas en lenguaje natural',     color: 'bg-purple-600' },
+      { href: '/recursos',  Icon: Calculator,  title: 'Recursos Técnicos', desc: 'Calculadoras eléctricas y normas',  color: 'bg-indigo-600', modulo: 'recursos_tecnicos' },
+      { href: '/checklist', Icon: CheckSquare, title: 'Checklist tablero', desc: 'Verificación eléctrica imprimible', color: 'bg-teal-600',   modulo: 'checklist' },
+      { href: '/etiquetas', Icon: Tag,         title: 'Etiquetas de obra', desc: 'Pallets y bultos imprimibles',      color: 'bg-yellow-600', modulo: 'etiquetas' },
+      { href: '/agente',    Icon: Bot,         title: 'Agente IA',         desc: 'Consultas en lenguaje natural',     color: 'bg-purple-600', modulo: 'agente' },
     ],
   },
 ]
 
+const NOMBRE_DEPARTAMENTO: Record<string, string> = {
+  bodega: 'Bodega', taller: 'Taller', oficina_tecnica: 'Oficina Técnica',
+  prevencion: 'Prevención', rrhh: 'Recursos Humanos', directiva: 'Directiva',
+  admin_software: 'Administración de software',
+}
+
 export default async function HomePage() {
   const sb = getSupabaseServer()
+  const perfil = await getPerfil()
 
   const [
     materiales,
@@ -63,6 +71,12 @@ export default async function HomePage() {
   const alertas   = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo)).length
   const solicPend = solicRes.error ? 0 : (solicRes.count ?? 0)
 
+  // Sin perfil (no debería pasar — el middleware ya redirige a
+  // /pendiente-aprobacion) se ve todo, igual que antes de tener roles.
+  const grupos = GRUPOS
+    .map(g => ({ ...g, acciones: g.acciones.filter(a => !perfil || puedeVer(perfil, a.modulo)) }))
+    .filter(g => g.acciones.length > 0)
+
   return (
     <div className="p-5 md:p-7 w-full">
       {/* Cabecera */}
@@ -72,7 +86,9 @@ export default async function HomePage() {
         </div>
         <div>
           <h1 className="text-xl font-bold leading-tight" style={{ color: '#2E333A' }}>2C Montajes y Proyectos Eléctricos</h1>
-          <p className="text-sm text-slate-500">Inventario General</p>
+          <p className="text-sm text-slate-500">
+            {perfil ? `${NOMBRE_DEPARTAMENTO[perfil.departamento] ?? perfil.departamento} — ${perfil.puesto}` : 'Inventario General'}
+          </p>
         </div>
       </div>
 
@@ -123,7 +139,7 @@ export default async function HomePage() {
       </div>
 
       {/* Accesos agrupados por tipo de tarea, en vez de una sola grilla plana */}
-      {GRUPOS.map(grupo => (
+      {grupos.map(grupo => (
         <div key={grupo.titulo} className="mb-8">
           <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">{grupo.titulo}</h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">

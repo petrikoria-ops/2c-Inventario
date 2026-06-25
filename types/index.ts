@@ -197,3 +197,16 @@ export interface DashboardStats {
     proyectos: Pick<Proyecto, 'ot'> | null
   })[]
 }
+
+export interface SolicitudEnrolamiento {
+  id: number
+  nombre_completo: string
+  email: string
+  departamento_solicitado: string
+  puesto_solicitado: string
+  codigo_verificacion: string
+  estado: 'pendiente' | 'aprobada' | 'rechazada'
+  creado_en: string
+  resuelto_en: string | null
+  resuelto_por: string | null
+}

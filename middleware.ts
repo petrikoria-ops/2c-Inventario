@@ -33,16 +33,40 @@ export async function middleware(req: NextRequest) {
 
   const { data: { session } } = await supabase.auth.getSession()
 
-  const isLoginPage = req.nextUrl.pathname === '/login'
+  const path = req.nextUrl.pathname
+  const isPublicPage  = path === '/login' || path === '/solicitar-acceso'
+  const isPendingPage = path === '/pendiente-aprobacion'
 
-  if (!session && !isLoginPage) {
+  if (!session && !isPublicPage) {
     const url = req.nextUrl.clone()
     url.pathname = '/login'
-    url.searchParams.set('next', req.nextUrl.pathname)
+    url.searchParams.set('next', path)
     return NextResponse.redirect(url)
   }
 
-  if (session && isLoginPage) {
+  // Con sesión, pero todavía sin perfil asignado (cuenta recién invitada,
+  // o de un usuario creado antes de que existiera este sistema de roles):
+  // se le confina a /pendiente-aprobacion en vez de dejarlo ver páginas
+  // rotas o sin datos por culpa de RLS.
+  if (session && !isPublicPage) {
+    const { data: perfil } = await supabase
+      .from('perfiles').select('id').eq('id', session.user.id).maybeSingle()
+
+    if (!perfil && !isPendingPage) {
+      const url = req.nextUrl.clone()
+      url.pathname = '/pendiente-aprobacion'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+    if (perfil && isPendingPage) {
+      const url = req.nextUrl.clone()
+      url.pathname = '/'
+      url.search = ''
+      return NextResponse.redirect(url)
+    }
+  }
+
+  if (session && isPublicPage) {
     const url = req.nextUrl.clone()
     url.pathname = '/'
     url.search = ''
