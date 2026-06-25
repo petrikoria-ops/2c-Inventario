@@ -53,6 +53,10 @@ Antes cualquier usuario autenticado tenía acceso total. Desde la migración `su
 
 **Módulo de referencia con permisos ya aplicados**: Materiales (`TablaMateriales.tsx` + sus rutas API) — usa el mismo patrón (`requireEditable('materiales')` server-side, prop `editable` en el componente) al extender permisos a otros módulos.
 
+## Log de errores
+
+`supabase/migration_error_log.sql` (ejecutar manualmente) crea `error_log`. `lib/errors/logError.ts` inserta sin pedir la fila de vuelta (mismo motivo que `solicitudes_enrolamiento`: el que loguea el error rara vez es admin, y RLS solo deja ver/resolver a `admin_software`/`master`). Aplicado como referencia en `app/api/agente/route.ts` y `app/api/admin/solicitudes/[id]/aprobar/route.ts` — replicar el mismo `try/catch` + `logError()` en otras rutas según se necesite, no es necesario envolver las 30+ rutas de una sola vez. Panel en `/admin/errors`, badge de pendientes en el Sidebar (solo admin).
+
 ---
 
 ## Arquitectura

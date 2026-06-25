@@ -4,6 +4,7 @@ import './globals.css'
 import AppShell from '@/components/layout/AppShell'
 import { ToastProvider } from '@/contexts/ToastContext'
 import { getPerfil } from '@/lib/auth/permisos.server'
+import { getSupabaseServer } from '@/lib/supabase/server'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -23,11 +24,18 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const perfil = await getPerfil()
 
+  let erroresPendientes = 0
+  if (perfil && (perfil.nivel_acceso === 'admin_software' || perfil.nivel_acceso === 'master')) {
+    const sb = getSupabaseServer()
+    const { count } = await sb.from('error_log').select('*', { count: 'exact', head: true }).eq('resuelto', false)
+    erroresPendientes = count ?? 0
+  }
+
   return (
     <html lang="es" className={inter.variable}>
       <body>
         <ToastProvider>
-          <AppShell perfil={perfil}>{children}</AppShell>
+          <AppShell perfil={perfil} erroresPendientes={erroresPendientes}>{children}</AppShell>
         </ToastProvider>
       </body>
     </html>

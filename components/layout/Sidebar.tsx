@@ -7,13 +7,13 @@ import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart,
-  Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog,
+  Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { puedeVer, type Perfil, type Modulo } from '@/lib/auth/permisos'
 import type { LucideIcon } from 'lucide-react'
 
-interface NavLink  { href: string; Icon: LucideIcon; label: string; modulo?: Modulo }
+interface NavLink  { href: string; Icon: LucideIcon; label: string; modulo?: Modulo; badge?: number }
 interface NavGroup { section: string; links: NavLink[] }
 
 // modulo: undefined = siempre visible para cualquier perfil (ej. Inicio).
@@ -57,7 +57,7 @@ const NAV: NavGroup[] = [
   },
 ]
 
-export function SidebarContent({ perfil, onNav }: { perfil: Perfil | null; onNav?: () => void }) {
+export function SidebarContent({ perfil, erroresPendientes = 0, onNav }: { perfil: Perfil | null; erroresPendientes?: number; onNav?: () => void }) {
   const pathname = usePathname()
   const router    = useRouter()
 
@@ -68,7 +68,10 @@ export function SidebarContent({ perfil, onNav }: { perfil: Perfil | null; onNav
     .filter(g => g.links.length > 0)
     .concat(esAdmin ? [{
       section: 'Administración',
-      links: [{ href: '/admin/solicitudes', Icon: UserCog, label: 'Gestión de usuarios' }],
+      links: [
+        { href: '/admin/solicitudes', Icon: UserCog, label: 'Gestión de usuarios' },
+        { href: '/admin/errors', Icon: AlertOctagon, label: 'Log de errores', badge: erroresPendientes || undefined },
+      ],
     }] : [])
 
   const cerrarSesion = async () => {
@@ -108,13 +111,14 @@ export function SidebarContent({ perfil, onNav }: { perfil: Perfil | null; onNav
                 style={{ color: '#4A5260' }}>
                 {group.section}
               </div>
-              {group.links.map(({ href, Icon, label }) => {
+              {group.links.map(({ href, Icon, label, badge }) => {
                 const active = pathname === href || (href !== '/' && pathname.startsWith(href))
                 return (
                   <Link key={href} href={href} onClick={onNav}
                     className={`nav-link ${active ? 'active' : ''}`}>
                     <Icon size={15} strokeWidth={2} className="flex-shrink-0" />
-                    <span>{label}</span>
+                    <span className="flex-1">{label}</span>
+                    {!!badge && <span className="badge badge-red text-[10px] px-1.5">{badge}</span>}
                   </Link>
                 )
               })}
@@ -142,7 +146,7 @@ export function SidebarContent({ perfil, onNav }: { perfil: Perfil | null; onNav
   )
 }
 
-export default function Sidebar({ perfil }: { perfil: Perfil | null }) {
+export default function Sidebar({ perfil, erroresPendientes = 0 }: { perfil: Perfil | null; erroresPendientes?: number }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -178,7 +182,7 @@ export default function Sidebar({ perfil }: { perfil: Perfil | null }) {
       {/* Sidebar escritorio */}
       <aside className="hidden md:flex flex-col w-56 fixed top-0 left-0 h-screen z-[200]"
         style={{ backgroundColor: '#2E333A' }}>
-        <SidebarContent perfil={perfil} />
+        <SidebarContent perfil={perfil} erroresPendientes={erroresPendientes} />
       </aside>
 
       {/* Sidebar móvil (drawer) */}
@@ -193,7 +197,7 @@ export default function Sidebar({ perfil }: { perfil: Perfil | null }) {
             <X size={16} />
           </button>
         </div>
-        <SidebarContent perfil={perfil} onNav={() => setOpen(false)} />
+        <SidebarContent perfil={perfil} erroresPendientes={erroresPendientes} onNav={() => setOpen(false)} />
       </aside>
     </>
   )

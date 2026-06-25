@@ -7,7 +7,12 @@ import type { Proveedor } from '@/types'
 
 const BLANK: Partial<Proveedor> = { plazo_dias: 7, activo: true }
 
-export default function TablaProveedores({ initialData }: { initialData: Proveedor[] }) {
+interface Props {
+  initialData: Proveedor[]
+  editable?: boolean
+}
+
+export default function TablaProveedores({ initialData, editable = true }: Props) {
   const { showToast } = useToast()
   const [items, setItems]         = useState<Proveedor[]>(initialData)
   const [q, setQ]                 = useState('')
@@ -49,8 +54,15 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
         <div className="panel-header">
           <Building2 size={14} style={{ color: '#909090', flexShrink: 0 }} />
           <h2>Proveedores</h2>
-          <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nuevo</button>
+          {editable && (
+            <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nuevo</button>
+          )}
         </div>
+        {!editable && (
+          <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+            Tu perfil tiene acceso de solo lectura a Proveedores — no puedes crear, editar ni eliminar.
+          </div>
+        )}
         <div className="filters">
           <div className="relative">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
@@ -73,12 +85,16 @@ export default function TablaProveedores({ initialData }: { initialData: Proveed
                   <td className="td">{p.email ? <a href={`mailto:${p.email}`} className="text-blue-600 hover:underline text-xs">{p.email}</a> : '—'}</td>
                   <td className="td"><span className="badge badge-blue">{p.plazo_dias}d</span></td>
                   <td className="td"><div className="flex gap-0.5">
-                    <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
-                      <Pencil size={13} />
-                    </button>
-                    <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
-                      <Trash2 size={13} />
-                    </button>
+                    {editable && (
+                      <>
+                        <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
+                          <Pencil size={13} />
+                        </button>
+                        <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
+                          <Trash2 size={13} />
+                        </button>
+                      </>
+                    )}
                   </div></td>
                 </tr>
               ))}

@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getPerfil } from '@/lib/auth/permisos.server'
+import { logError } from '@/lib/errors/logError'
 
 export const dynamic = 'force-dynamic'
 
@@ -36,6 +37,11 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   // para que defina su contraseña y quede con sesión iniciada.
   const { data: invite, error: errInvite } = await admin.auth.admin.inviteUserByEmail(solicitud.email)
   if (errInvite || !invite.user) {
+    await logError({
+      mensaje: `Fallo al invitar usuario para solicitud #${params.id}: ${errInvite?.message ?? 'sin user'}`,
+      archivo: 'app/api/admin/solicitudes/[id]/aprobar/route.ts',
+      usuario: perfil.email,
+    })
     return NextResponse.json({ error: errInvite?.message ?? 'No se pudo invitar al usuario.' }, { status: 500 })
   }
 
@@ -47,7 +53,14 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     puesto: solicitud.puesto_solicitado,
     nivel_acceso,
   })
-  if (errPerfil) return NextResponse.json({ error: errPerfil.message }, { status: 500 })
+  if (errPerfil) {
+    await logError({
+      mensaje: `Fallo al crear perfil tras invitar a ${solicitud.email}: ${errPerfil.message}`,
+      archivo: 'app/api/admin/solicitudes/[id]/aprobar/route.ts',
+      usuario: perfil.email,
+    })
+    return NextResponse.json({ error: errPerfil.message }, { status: 500 })
+  }
 
   await sb.from('solicitudes_enrolamiento')
     .update({ estado: 'aprobada', resuelto_en: new Date().toISOString(), resuelto_por: perfil.id })

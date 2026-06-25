@@ -4,7 +4,12 @@ import { PackageOpen, Search, Printer, Trash2 } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { fechaHora } from '@/lib/utils'
 
-export default function TablaSalidas({ initialData }: { initialData: any[] }) {
+interface Props {
+  initialData: any[]
+  editable?: boolean
+}
+
+export default function TablaSalidas({ initialData, editable = true }: Props) {
   const [items, setItems] = useState<any[]>(initialData)
   const [q, setQ]         = useState('')
   const { showToast } = useToast()
@@ -29,8 +34,13 @@ export default function TablaSalidas({ initialData }: { initialData: any[] }) {
       <div className="panel-header">
         <PackageOpen size={14} style={{ color: '#909090', flexShrink: 0 }} />
         <h2>Vales de despacho</h2>
-        <a href="/salidas/nueva" className="btn btn-primary btn-sm">+ Nuevo despacho</a>
+        {editable && <a href="/salidas/nueva" className="btn btn-primary btn-sm">+ Nuevo despacho</a>}
       </div>
+      {!editable && (
+        <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+          Tu perfil tiene acceso de solo lectura a Salidas — no puedes crear ni eliminar vales de despacho.
+        </div>
+      )}
       <div className="filters">
         <div className="relative">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: '#BBBBBB' }} />
@@ -66,9 +76,11 @@ export default function TablaSalidas({ initialData }: { initialData: any[] }) {
                     <a href={`/salidas/${v.id}/imprimir`} className="btn-icon" title="Ver / Imprimir" aria-label="Ver / Imprimir">
                       <Printer size={13} />
                     </a>
-                    <button onClick={() => eliminar(v)} className="btn-icon" title="Eliminar" aria-label="Eliminar">
-                      <Trash2 size={13} />
-                    </button>
+                    {editable && (
+                      <button onClick={() => eliminar(v)} className="btn-icon" title="Eliminar" aria-label="Eliminar">
+                        <Trash2 size={13} />
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

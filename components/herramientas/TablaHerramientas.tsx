@@ -12,7 +12,12 @@ import type { Herramienta } from '@/types'
 const ESTADOS = ['operativa','en_reparacion','extraviada','dada_de_baja']
 const BLANK: Partial<Herramienta> = { estado: 'operativa', frecuencia_mant_dias: 365 }
 
-export default function TablaHerramientas({ initialData }: { initialData: Herramienta[] }) {
+interface Props {
+  initialData: Herramienta[]
+  editable?: boolean
+}
+
+export default function TablaHerramientas({ initialData, editable = true }: Props) {
   const router                    = useRouter()
   const { showToast }             = useToast()
   const [items, setItems]         = useState<Herramienta[]>(initialData)
@@ -160,11 +165,19 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
         <div className="panel-header">
           <Wrench size={14} style={{ color: '#909090', flexShrink: 0 }} />
           <h2>Herramientas</h2>
-          <button className="btn btn-primary btn-sm ml-auto" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva</button>
+          {editable && (
+            <button className="btn btn-primary btn-sm ml-auto" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva</button>
+          )}
         </div>
 
+        {!editable && (
+          <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+            Tu perfil tiene acceso de solo lectura a Herramientas — no puedes crear, editar ni eliminar.
+          </div>
+        )}
+
         {/* ── Barra de selección múltiple ──────────────────────── */}
-        {numSelected > 0 && (
+        {editable && numSelected > 0 && (
           <div className="flex items-center gap-3 px-4 py-2.5 border-b"
             style={{ background: '#FFF8E0', borderColor: '#F0C000' }}>
             <span className="text-sm font-semibold" style={{ color: '#2E333A' }}>
@@ -202,12 +215,14 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
             <thead>
               <tr>
                 <th className="th" style={{ width: 36, padding: '0 10px' }}>
-                  <input type="checkbox"
-                    checked={allFilteredSelected}
-                    ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
-                    onChange={toggleAll}
-                    className="cursor-pointer"
-                  />
+                  {editable && (
+                    <input type="checkbox"
+                      checked={allFilteredSelected}
+                      ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
+                      onChange={toggleAll}
+                      className="cursor-pointer"
+                    />
+                  )}
                 </th>
                 <th className="th">Código</th>
                 <th className="th">Descripción</th>
@@ -226,7 +241,9 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
                 return (
                   <tr key={h.id} className={`tr-hover ${isSelected ? 'bg-amber-50/60' : ''}`}>
                     <td className="td" style={{ padding: '0 10px' }}>
-                      <input type="checkbox" checked={isSelected} onChange={() => toggleOne(h.id)} className="cursor-pointer" />
+                      {editable && (
+                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(h.id)} className="cursor-pointer" />
+                      )}
                     </td>
                     <td className="td"><span className="code">{h.codigo}</span></td>
                     <td className="td font-medium">{h.descripcion}</td>
@@ -242,12 +259,16 @@ export default function TablaHerramientas({ initialData }: { initialData: Herram
                     </td>
                     <td className="td">
                       <div className="flex gap-0.5">
-                        <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...h }); setModalOpen(true) }}>
-                          <Pencil size={13} />
-                        </button>
-                        <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(h)}>
-                          <Trash2 size={13} />
-                        </button>
+                        {editable && (
+                          <>
+                            <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...h }); setModalOpen(true) }}>
+                              <Pencil size={13} />
+                            </button>
+                            <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(h)}>
+                              <Trash2 size={13} />
+                            </button>
+                          </>
+                        )}
                       </div>
                     </td>
                   </tr>

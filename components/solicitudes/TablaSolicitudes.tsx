@@ -9,7 +9,12 @@ import type { SolicitudCompra } from '@/types'
 
 type SolicitudRow = SolicitudCompra & { items_count: number }
 
-export default function TablaSolicitudes({ initialData }: { initialData: SolicitudRow[] }) {
+interface Props {
+  initialData: SolicitudRow[]
+  editable?: boolean
+}
+
+export default function TablaSolicitudes({ initialData, editable = true }: Props) {
   const [rows, setRows] = useState<SolicitudRow[]>(initialData)
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const { showToast } = useToast()
@@ -47,13 +52,18 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
         <ClipboardList size={36} className="mx-auto mb-3" style={{ color: '#D8D8D8' }} />
         <p className="font-medium mb-1 text-slate-500">No hay solicitudes de compra</p>
         <p className="text-sm mb-4 text-slate-400">Crea una para comenzar a gestionar tus compras</p>
-        <Link href="/solicitudes/nueva" className="btn btn-primary btn-sm">+ Nueva solicitud</Link>
+        {editable && <Link href="/solicitudes/nueva" className="btn btn-primary btn-sm">+ Nueva solicitud</Link>}
       </div>
     )
   }
 
   return (
     <div className="panel">
+      {!editable && (
+        <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+          Tu perfil tiene acceso de solo lectura a Compras — no puedes crear, editar ni eliminar solicitudes.
+        </div>
+      )}
       <div className="overflow-x-auto">
         <table className="w-full">
           <thead>
@@ -77,14 +87,20 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
                   <span className="badge badge-blue">{sol.items_count}</span>
                 </td>
                 <td className="td">
-                  <button
-                    onClick={() => toggleEstado(sol)}
-                    title="Clic para cambiar estado"
-                    className={`badge cursor-pointer hover:opacity-80 transition-opacity select-none
-                      ${sol.estado === 'comprado' ? 'badge-green' : 'badge-yellow'}`}
-                  >
-                    {sol.estado === 'comprado' ? 'Comprado' : 'Pendiente'}
-                  </button>
+                  {editable ? (
+                    <button
+                      onClick={() => toggleEstado(sol)}
+                      title="Clic para cambiar estado"
+                      className={`badge cursor-pointer hover:opacity-80 transition-opacity select-none
+                        ${sol.estado === 'comprado' ? 'badge-green' : 'badge-yellow'}`}
+                    >
+                      {sol.estado === 'comprado' ? 'Comprado' : 'Pendiente'}
+                    </button>
+                  ) : (
+                    <span className={`badge ${sol.estado === 'comprado' ? 'badge-green' : 'badge-yellow'}`}>
+                      {sol.estado === 'comprado' ? 'Comprado' : 'Pendiente'}
+                    </span>
+                  )}
                 </td>
                 <td className="td text-sm text-slate-500 max-w-[220px] truncate" title={sol.observaciones ?? ''}>
                   {sol.observaciones ?? '—'}
@@ -94,16 +110,18 @@ export default function TablaSolicitudes({ initialData }: { initialData: Solicit
                     <Link href={`/solicitudes/${sol.id}/imprimir`} className="btn btn-ghost btn-sm" title="Ver e imprimir">
                       <Printer size={13} /> Ver
                     </Link>
-                    <button
-                      onClick={() => handleDelete(sol.id, sol.numero)}
-                      disabled={deletingId === sol.id}
-                      className="btn btn-ghost btn-sm"
-                      style={{ color: '#DC2626' }}
-                      title="Eliminar solicitud"
-                      aria-label="Eliminar solicitud"
-                    >
-                      {deletingId === sol.id ? '…' : <Trash2 size={13} />}
-                    </button>
+                    {editable && (
+                      <button
+                        onClick={() => handleDelete(sol.id, sol.numero)}
+                        disabled={deletingId === sol.id}
+                        className="btn btn-ghost btn-sm"
+                        style={{ color: '#DC2626' }}
+                        title="Eliminar solicitud"
+                        aria-label="Eliminar solicitud"
+                      >
+                        {deletingId === sol.id ? '…' : <Trash2 size={13} />}
+                      </button>
+                    )}
                   </div>
                 </td>
               </tr>

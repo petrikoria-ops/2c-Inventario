@@ -1,6 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaSolicitudes from '@/components/solicitudes/TablaSolicitudes'
 import Link from 'next/link'
+import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
 import type { SolicitudCompra } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -8,10 +9,16 @@ export const metadata = { title: 'Solicitudes de compra — 2C Inventario' }
 
 export default async function SolicitudesPage() {
   const sb = getSupabaseServer()
-  const { data } = await sb
-    .from('solicitudes_compra')
-    .select('*, solicitudes_compra_items(id)')
-    .order('creado_en', { ascending: false })
+  const [{ data }, perfil] = await Promise.all([
+    sb
+      .from('solicitudes_compra')
+      .select('*, solicitudes_compra_items(id)')
+      .order('creado_en', { ascending: false }),
+    getPerfil(),
+  ])
+
+  // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
+  const editable = !perfil || puedeEditar(perfil, 'compras')
 
   const solicitudes = (data ?? []).map(s => ({
     ...s,
@@ -34,13 +41,15 @@ export default async function SolicitudesPage() {
             {solicitudes.length === 0 && 'Sin solicitudes aún'}
           </p>
         </div>
-        <div className="flex gap-2">
-          <Link href="/solicitudes/importar" className="btn btn-outline">Importar Excel</Link>
-          <Link href="/solicitudes/nueva" className="btn btn-primary">+ Nueva solicitud</Link>
-        </div>
+        {editable && (
+          <div className="flex gap-2">
+            <Link href="/solicitudes/importar" className="btn btn-outline">Importar Excel</Link>
+            <Link href="/solicitudes/nueva" className="btn btn-primary">+ Nueva solicitud</Link>
+          </div>
+        )}
       </div>
 
-      <TablaSolicitudes initialData={solicitudes} />
+      <TablaSolicitudes initialData={solicitudes} editable={editable} />
     </div>
   )
 }

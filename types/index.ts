@@ -210,3 +210,17 @@ export interface SolicitudEnrolamiento {
   resuelto_en: string | null
   resuelto_por: string | null
 }
+
+export interface ErrorLog {
+  id: number
+  creado_en: string
+  usuario_id: string | null
+  usuario: string | null
+  departamento: string | null
+  archivo: string | null
+  mensaje: string
+  stack: string | null
+  resuelto: boolean
+  resuelto_en: string | null
+  resuelto_por: string | null
+}

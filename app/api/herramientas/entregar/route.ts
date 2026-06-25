@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { requireEditable } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,6 +9,8 @@ export const dynamic = 'force-dynamic'
 // Efecto: crea entrega, actualiza responsable en cada herramienta
 
 export async function POST(req: NextRequest) {
+  const denegado = await requireEditable('herramientas')
+  if (denegado) return denegado
   const sb = getSupabaseServer()
   const { herramientas, trabajador_id, trabajador_nombre, usuario, observaciones } = await req.json()
 

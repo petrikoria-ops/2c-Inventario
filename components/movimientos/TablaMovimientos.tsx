@@ -11,9 +11,10 @@ interface Props {
   initialData: Movimiento[]
   materiales: Pick<Material, 'id' | 'codigo' | 'descripcion' | 'stock_actual' | 'unidad'>[]
   proyectos: Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]
+  editable?: boolean
 }
 
-export default function TablaMovimientos({ initialData, materiales, proyectos }: Props) {
+export default function TablaMovimientos({ initialData, materiales, proyectos, editable = true }: Props) {
   const { showToast } = useToast()
   const [movimientos, setMovimientos] = useState<Movimiento[]>(initialData)
   const [filtroTipo, setFiltroTipo]   = useState('')
@@ -80,13 +81,21 @@ export default function TablaMovimientos({ initialData, materiales, proyectos }:
             <a href="/api/export/movimientos" className="btn btn-ghost btn-sm">
               <Download size={13} /> CSV
             </a>
-            <button className="btn btn-primary btn-sm" onClick={() => {
-              setForm({ material_id:'', tipo:'salida', cantidad:'1', proyecto_id:'', usuario:'admin', motivo:'' })
-              setBusqMat('')
-              setModalOpen(true)
-            }}>+ Registrar</button>
+            {editable && (
+              <button className="btn btn-primary btn-sm" onClick={() => {
+                setForm({ material_id:'', tipo:'salida', cantidad:'1', proyecto_id:'', usuario:'admin', motivo:'' })
+                setBusqMat('')
+                setModalOpen(true)
+              }}>+ Registrar</button>
+            )}
           </div>
         </div>
+
+        {!editable && (
+          <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+            Tu perfil tiene acceso de solo lectura a Movimientos — no puedes registrar movimientos nuevos.
+          </div>
+        )}
         <div className="filters">
           <select className="select w-auto" value={filtroTipo} onChange={e => setFiltroTipo(e.target.value)}>
             <option value="">Todos los tipos</option>

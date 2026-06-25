@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo, escapeOrFilterValue } from '@/lib/utils'
+import { logError } from '@/lib/errors/logError'
 
 export const dynamic = 'force-dynamic'
 
@@ -276,18 +277,27 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  const result = await runQuery(intent)
+  try {
+    const result = await runQuery(intent)
 
-  const apiKey = process.env.GROQ_API_KEY
-  const respuesta = apiKey
-    ? await generarRespuesta(pregunta, intent, result, apiKey)
-    : fallbackMensaje(intent, result)
+    const apiKey = process.env.GROQ_API_KEY
+    const respuesta = apiKey
+      ? await generarRespuesta(pregunta, intent, result, apiKey)
+      : fallbackMensaje(intent, result)
 
-  return NextResponse.json({
-    respuesta,
-    intent:   intent.type,
-    rows:     result.rows,
-    columnas: result.columnas,
-    titulo:   result.titulo,
-  })
+    return NextResponse.json({
+      respuesta,
+      intent:   intent.type,
+      rows:     result.rows,
+      columnas: result.columnas,
+      titulo:   result.titulo,
+    })
+  } catch (err: any) {
+    await logError({
+      mensaje: `Agente IA falló con intent="${intent.type}": ${err?.message ?? err}`,
+      stack: err?.stack,
+      archivo: 'app/api/agente/route.ts',
+    })
+    return NextResponse.json({ error: 'El agente no pudo procesar la consulta. Intenta de nuevo.' }, { status: 500 })
+  }
 }
