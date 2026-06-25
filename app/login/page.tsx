@@ -2,6 +2,7 @@
 import { useState, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import Link from 'next/link'
 import { Loader2 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 
@@ -65,6 +66,9 @@ function LoginForm() {
         <button type="submit" disabled={loading} className="btn btn-primary w-full mt-5 justify-center">
           {loading ? <><Loader2 size={14} className="animate-spin" /> Entrando…</> : 'Entrar'}
         </button>
+        <Link href="/solicitar-acceso" className="block text-center text-xs text-slate-400 mt-4 hover:text-slate-600">
+          ¿Eres nuevo en la empresa? Solicita tu acceso
+        </Link>
       </form>
     </div>
   )
