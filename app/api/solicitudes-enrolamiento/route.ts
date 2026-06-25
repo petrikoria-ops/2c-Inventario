@@ -19,7 +19,12 @@ export async function POST(req: NextRequest) {
   const codigo = generarCodigo()
   const sb = getSupabaseServer()
 
-  const { data, error } = await sb
+  // Sin .select() después del insert: quien solicita acceso es anon (sin
+  // sesión) y la única política de SELECT de esta tabla es para el
+  // Administrador de software — pedir la fila de vuelta (RETURNING)
+  // exige también permiso de lectura, y eso hacía fallar el insert
+  // completo con un error de RLS aunque el INSERT en sí estuviera permitido.
+  const { error } = await sb
     .from('solicitudes_enrolamiento')
     .insert({
       nombre_completo: nombre_completo.trim(),
@@ -28,8 +33,6 @@ export async function POST(req: NextRequest) {
       puesto_solicitado,
       codigo_verificacion: codigo,
     })
-    .select('id')
-    .single()
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
 
@@ -52,5 +55,5 @@ export async function POST(req: NextRequest) {
     })
   }
 
-  return NextResponse.json({ ok: true, id: data.id })
+  return NextResponse.json({ ok: true })
 }
