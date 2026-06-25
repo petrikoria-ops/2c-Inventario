@@ -1,16 +1,18 @@
 import nodemailer from 'nodemailer'
 
+export interface SendMailResult { ok: boolean; error?: string }
+
 // Envía correo por el SMTP de la empresa (Gmail/Workspace u otro).
 // Sin las variables de entorno configuradas, no rompe el flujo que lo
 // llama — solo registra en consola que el correo no se pudo enviar,
 // para que /solicitar-acceso siga funcionando (crea la solicitud en la
 // base) mientras se terminan de configurar las credenciales SMTP.
-export async function sendMail(opts: { to: string; subject: string; html: string }): Promise<boolean> {
+export async function sendMail(opts: { to: string; subject: string; html: string }): Promise<SendMailResult> {
   const { SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS } = process.env
 
   if (!SMTP_HOST || !SMTP_USER || !SMTP_PASS) {
     console.warn('[sendMail] SMTP no configurado — no se envió el correo a', opts.to)
-    return false
+    return { ok: false, error: 'Faltan variables SMTP_HOST/SMTP_USER/SMTP_PASS en el entorno.' }
   }
 
   const transporter = nodemailer.createTransport({
@@ -27,9 +29,9 @@ export async function sendMail(opts: { to: string; subject: string; html: string
       subject: opts.subject,
       html: opts.html,
     })
-    return true
-  } catch (err) {
+    return { ok: true }
+  } catch (err: any) {
     console.error('[sendMail] Error enviando correo:', err)
-    return false
+    return { ok: false, error: err?.message ?? String(err) }
   }
 }
