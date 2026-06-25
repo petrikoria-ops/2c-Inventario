@@ -87,9 +87,11 @@ export default function PanelUsuarios({ initialData, miId }: { initialData: Perf
               {editando !== u.id && (
                 <div className="flex gap-2 flex-shrink-0">
                   <button className="btn btn-outline btn-sm" onClick={() => abrir(u)}><Pencil size={12} /> Editar</button>
-                  <button className="btn btn-sm" style={{ color: u.activo ? '#DC2626' : '#059669' }} onClick={() => toggleActivo(u)}>
-                    <Power size={12} /> {u.activo ? 'Desactivar' : 'Reactivar'}
-                  </button>
+                  {u.id !== miId && (
+                    <button className="btn btn-sm" style={{ color: u.activo ? '#DC2626' : '#059669' }} onClick={() => toggleActivo(u)}>
+                      <Power size={12} /> {u.activo ? 'Desactivar' : 'Reactivar'}
+                    </button>
+                  )}
                 </div>
               )}
             </div>

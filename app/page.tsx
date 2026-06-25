@@ -3,11 +3,17 @@ import Image from 'next/image'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { num, estaBajoMinimo } from '@/lib/utils'
-import { getPerfil, puedeVer, type Modulo } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, type Modulo, type Departamento, type Perfil } from '@/lib/auth/permisos.server'
+import WidgetBodega from '@/components/hub/WidgetBodega'
+import WidgetTaller from '@/components/hub/WidgetTaller'
+import WidgetOficinaTecnica from '@/components/hub/WidgetOficinaTecnica'
+import WidgetPrevencion from '@/components/hub/WidgetPrevencion'
+import WidgetRRHH from '@/components/hub/WidgetRRHH'
+import WidgetDirectiva from '@/components/hub/WidgetDirectiva'
 import {
   PackageOpen, ShoppingCart, ArrowUpDown, Package,
   ClipboardList, Wrench, AlertTriangle, CheckCircle,
-  Calculator, CheckSquare, Tag, Handshake, HardHat, Users, Bot,
+  Calculator, CheckSquare, Tag, Handshake, HardHat, Users, Bot, Eye,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -54,9 +60,39 @@ const NOMBRE_DEPARTAMENTO: Record<string, string> = {
   admin_software: 'Administración de software',
 }
 
-export default async function HomePage() {
+// Departamentos operativos previsualizables desde el hub de
+// admin_software/master — admin_software en sí no es un departamento
+// con herramientas propias, no aparece en el selector.
+const DEPARTAMENTOS_OPERATIVOS: Departamento[] = ['bodega', 'taller', 'oficina_tecnica', 'prevencion', 'rrhh', 'directiva']
+
+const WIDGETS: Record<Departamento, (() => Promise<JSX.Element>) | null> = {
+  bodega: WidgetBodega,
+  taller: WidgetTaller,
+  oficina_tecnica: WidgetOficinaTecnica,
+  prevencion: WidgetPrevencion,
+  rrhh: WidgetRRHH,
+  directiva: WidgetDirectiva,
+  admin_software: null,
+}
+
+export default async function HomePage({ searchParams }: { searchParams: { depto?: string } }) {
   const sb = getSupabaseServer()
   const perfil = await getPerfil()
+
+  const esAdminTotal = perfil?.nivel_acceso === 'master' || perfil?.nivel_acceso === 'admin_software'
+  const deptoParam = searchParams?.depto as Departamento | undefined
+  const deptoPreview = esAdminTotal && deptoParam && DEPARTAMENTOS_OPERATIVOS.includes(deptoParam) ? deptoParam : undefined
+
+  // Para decidir qué accesos/herramientas mostrar se usa un perfil
+  // "efectivo": el real, o uno simulado con el departamento elegido en
+  // el selector (solo admin_software/master pueden simularlo). Esto no
+  // cambia los permisos reales de edición — esos siguen siendo los del
+  // perfil real vía requireEditable() en cada API.
+  const perfilEfectivo: Perfil | null = deptoPreview && perfil
+    ? { ...perfil, departamento: deptoPreview, nivel_acceso: 'jefe_departamento' }
+    : perfil
+
+  const departamentoMostrado = deptoPreview ?? perfil?.departamento
 
   const [
     materiales,
@@ -74,8 +110,10 @@ export default async function HomePage() {
   // Sin perfil (no debería pasar — el middleware ya redirige a
   // /pendiente-aprobacion) se ve todo, igual que antes de tener roles.
   const grupos = GRUPOS
-    .map(g => ({ ...g, acciones: g.acciones.filter(a => !perfil || puedeVer(perfil, a.modulo)) }))
+    .map(g => ({ ...g, acciones: g.acciones.filter(a => !perfilEfectivo || puedeVer(perfilEfectivo, a.modulo)) }))
     .filter(g => g.acciones.length > 0)
+
+  const Widget = departamentoMostrado ? WIDGETS[departamentoMostrado as Departamento] : null
 
   return (
     <div className="p-5 md:p-7 w-full">
@@ -91,6 +129,24 @@ export default async function HomePage() {
           </p>
         </div>
       </div>
+
+      {/* Selector de departamento — solo admin_software/master, para
+          previsualizar y operar el hub de cualquier área. */}
+      {esAdminTotal && (
+        <div className="flex items-center gap-2 mb-6 flex-wrap">
+          <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+            <Eye size={13} /> Ver como:
+          </span>
+          <Link href="/" className={`btn btn-sm ${!deptoPreview ? 'btn-secondary' : 'btn-outline'}`}>
+            {NOMBRE_DEPARTAMENTO[perfil!.departamento] ?? 'Mi vista'}
+          </Link>
+          {DEPARTAMENTOS_OPERATIVOS.filter(d => d !== perfil!.departamento).map(d => (
+            <Link key={d} href={`/?depto=${d}`} className={`btn btn-sm ${deptoPreview === d ? 'btn-secondary' : 'btn-outline'}`}>
+              {NOMBRE_DEPARTAMENTO[d]}
+            </Link>
+          ))}
+        </div>
+      )}
 
       {/* Alerta de stock */}
       {alertas > 0 && (
@@ -137,6 +193,16 @@ export default async function HomePage() {
           </div>
         </div>
       </div>
+
+      {/* Herramientas propias del departamento — el "hub personalizado" */}
+      {Widget && (
+        <div className="mb-8">
+          <h2 className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+            Herramientas de {NOMBRE_DEPARTAMENTO[departamentoMostrado as string] ?? ''}
+          </h2>
+          <Widget />
+        </div>
+      )}
 
       {/* Accesos agrupados por tipo de tarea, en vez de una sola grilla plana */}
       {grupos.map(grupo => (
