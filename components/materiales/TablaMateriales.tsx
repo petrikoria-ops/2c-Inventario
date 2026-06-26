@@ -10,6 +10,7 @@ import ConfirmDangerModal from '@/components/ui/ConfirmDangerModal'
 import { BadgeStock, BadgeTipo } from '@/components/ui/Badge'
 import { clp, num, fechaHora, estaBajoMinimo } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
+import { useProgressiveList } from '@/hooks/useProgressiveList'
 import type { Categoria, Material, Proveedor, Proyecto, Movimiento } from '@/types'
 
 interface Props {
@@ -120,6 +121,9 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
     return result
   }, [materiales, q, catFiltro, provFiltro, ubicFiltro, stockEstado,
       stockDesde, stockHasta, precioDesde, precioHasta, sortField, sortDir])
+
+  // Carga progresiva: pinta de a poco para que el inventario grande aparezca al instante.
+  const { visible, hasMore, sentinelRef, loadMore, total } = useProgressiveList(filtered, 60)
 
   const hasFilters = !!(q || catFiltro || provFiltro || ubicFiltro || stockEstado || stockDesde || stockHasta || precioDesde || precioHasta)
 
@@ -467,7 +471,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               </tr>
             </thead>
             <tbody>
-              {filtered.map(m => {
+              {visible.map(m => {
                 const cat      = m.categorias as any
                 const isSelected = selectedIds.has(m.id)
                 return (
@@ -535,6 +539,22 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
             </tbody>
           </table>
         </div>
+
+        {/* Pie de carga progresiva */}
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-center gap-3 px-4 py-3 border-t" style={{ borderColor: '#EEF0F2' }}>
+            <span className="text-xs text-slate-400">
+              Mostrando {visible.length} de {num(total, 0)}
+            </span>
+            {hasMore && (
+              <button className="btn btn-outline btn-sm" onClick={loadMore}>
+                Cargar más
+              </button>
+            )}
+            {/* Sentinela: al acercarse, carga el siguiente bloque solo */}
+            <div ref={sentinelRef} aria-hidden className="w-px h-px" />
+          </div>
+        )}
       </div>
 
       {/* ── Modal CRUD ─────────────────────────────────────────── */}

@@ -10,7 +10,9 @@ import {
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
-import { puedeVer, type Perfil, type Modulo } from '@/lib/auth/permisos'
+import { puedeVer, type Perfil, type Modulo, type Departamento } from '@/lib/auth/permisos'
+import { getDeptConfig } from '@/lib/departamentos/config'
+import VerComoSelector from './VerComoSelector'
 import type { LucideIcon } from 'lucide-react'
 
 interface NavLink  { href: string; Icon: LucideIcon; label: string; modulo?: Modulo; badge?: number }
@@ -57,11 +59,17 @@ const NAV: NavGroup[] = [
   },
 ]
 
-export function SidebarContent({ perfil, erroresPendientes = 0, onNav }: { perfil: Perfil | null; erroresPendientes?: number; onNav?: () => void }) {
+export function SidebarContent({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0, onNav }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number; onNav?: () => void }) {
   const pathname = usePathname()
   const router    = useRouter()
 
+  // Navegación según el perfil EFECTIVO (real o simulado). El acceso de admin
+  // se evalúa con el perfil REAL para no perder el panel de administración por
+  // estar simulando, salvo que se quiera ver la barra tal cual la vería el área.
   const esAdmin = perfil?.nivel_acceso === 'admin_software' || perfil?.nivel_acceso === 'master'
+  const cfg = getDeptConfig(perfil?.departamento)
+  const DeptIcon = cfg.Icon
+  const simulando = !!verComo
 
   const grupos = NAV
     .map(g => ({ ...g, links: g.links.filter(l => !l.modulo || !perfil || puedeVer(perfil, l.modulo)) }))
@@ -101,6 +109,32 @@ export function SidebarContent({ perfil, erroresPendientes = 0, onNav }: { perfi
           </div>
         </div>
       </div>
+
+      {/* Identidad del departamento — chip con color del área */}
+      {perfil && (
+        <Link
+          href="/"
+          onClick={onNav}
+          className={`group flex items-center gap-2.5 mx-3 mt-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:brightness-110 ${simulando ? 'ring-2 ring-[#F0C000]' : ''}`}
+          style={{ background: `linear-gradient(120deg, ${cfg.grad[0]}, ${cfg.grad[1]})` }}
+        >
+          <div className="w-7 h-7 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
+            <DeptIcon size={15} className="text-white" />
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[10px] uppercase tracking-widest text-white/70 leading-none mb-0.5">
+              {simulando ? 'Viendo como' : 'Mi área'}
+            </div>
+            <div className="text-[13px] font-bold text-white leading-tight truncate">{cfg.nombre}</div>
+          </div>
+          <Home size={13} className="text-white/60 group-hover:text-white transition-colors flex-shrink-0" />
+        </Link>
+      )}
+
+      {/* Control "Ver como" — solo master / admin_software */}
+      {puedeSimular && (
+        <VerComoSelector verComo={verComo} variant="sidebar" onNavigate={onNav} />
+      )}
 
       {/* Nav — con degradado inferior que insinúa que hay más opciones al desplazar */}
       <div className="relative flex-1 min-h-0">
@@ -146,7 +180,7 @@ export function SidebarContent({ perfil, erroresPendientes = 0, onNav }: { perfi
   )
 }
 
-export default function Sidebar({ perfil, erroresPendientes = 0 }: { perfil: Perfil | null; erroresPendientes?: number }) {
+export default function Sidebar({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0 }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -182,7 +216,7 @@ export default function Sidebar({ perfil, erroresPendientes = 0 }: { perfil: Per
       {/* Sidebar escritorio */}
       <aside className="hidden md:flex flex-col w-56 fixed top-0 left-0 h-screen z-[200]"
         style={{ backgroundColor: '#2E333A' }}>
-        <SidebarContent perfil={perfil} erroresPendientes={erroresPendientes} />
+        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} />
       </aside>
 
       {/* Sidebar móvil (drawer) */}
@@ -197,7 +231,7 @@ export default function Sidebar({ perfil, erroresPendientes = 0 }: { perfil: Per
             <X size={16} />
           </button>
         </div>
-        <SidebarContent perfil={perfil} erroresPendientes={erroresPendientes} onNav={() => setOpen(false)} />
+        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} onNav={() => setOpen(false)} />
       </aside>
     </>
   )

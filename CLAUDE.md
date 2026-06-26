@@ -102,6 +102,31 @@ Main:    flex-1 md:ml-56
 
 ---
 
+## Home = Cockpit por departamento
+
+La home (`app/page.tsx`) ya **no** es una grilla genérica igual para todos: arma un "centro de operaciones" según el departamento del usuario (o el que un admin elija en "Entrar como"). Cada área entra a su propio espacio con identidad visual, tareas frecuentes y herramientas agrupadas.
+
+- **Fuente de verdad de la experiencia**: `lib/departamentos/config.ts` — por cada departamento define identidad (`nombre`, `lema`, `Icon`, `grad` [gradiente], `acento`), `acciones` rápidas (el "listo para resolver") y `herramientas` agrupadas en secciones. Cada acción/herramienta declara su `modulo` y se filtra con `puedeVer(perfilEfectivo, modulo)`. Para añadir/quitar accesos de un área se edita SOLO este archivo, no la home.
+- **Identidad ≠ permisos**: `config.ts` es la cara estética/UX; el control de acceso real sigue en `lib/auth/permisos.ts`. Un admin (`master`/`admin_software`) puede previsualizar cualquier área, pero la edición real la siguen gobernando los `requireEditable()` del perfil real.
+
+### "Ver como" (previsualización por departamento, global y persistente)
+
+`master` y `admin_software` pueden navegar TODA la app como la vería cada departamento, para evaluar la experiencia real de cada área. Se eligen desde el selector "Ver como" (barra lateral en cualquier página + pills en el inicio).
+
+- **Persistencia**: cookie `ver_como` (no `?depto=`). La fija/borra `POST /api/ver-como` (solo admin). Así la barra lateral, el inicio y la visibilidad se adaptan en TODA la navegación, no solo en el inicio.
+- **Resolución**: `lib/auth/verComo.ts` → `getContextoUsuario()` devuelve `{ real, efectivo, puedeSimular, verComo }`. El `efectivo` simula `departamento = verComo` y `nivel_acceso = 'jefe_departamento'` (el alcance máximo del área). `layout.tsx` pasa `efectivo` a `AppShell`/`Sidebar`; las páginas que se adaptan usan `getContextoUsuario()`.
+- **Seguridad**: la simulación SOLO cambia lo que se ve. Las APIs siguen validando con el perfil REAL vía `requireEditable()` — un admin simulando "bodega" no pierde su poder de edición.
+- **Constantes client-safe**: `DEPARTAMENTOS_OPERATIVOS` y `NOMBRE_DEPARTAMENTO` viven en `lib/auth/deptInfo.ts` (sin `next/headers`), para poder importarlas desde el Client Component `VerComoSelector`. `verComo.ts` (servidor) las re-exporta.
+
+### Listas con carga progresiva
+
+Las tablas grandes (Materiales, Movimientos, Herramientas) ya no pintan todas las filas de golpe. `hooks/useProgressiveList.ts` recibe la lista ya filtrada/ordenada en memoria y devuelve `{ visible, hasMore, sentinelRef, loadMore, total }`: pinta 60 e incrementa al acercarse el `sentinelRef` (IntersectionObserver) o al pulsar "Cargar más". Se reinicia solo al cambiar filtros/orden/datos. Para aplicarlo a otra tabla: `const { visible, ... } = useProgressiveList(filtered)`, renderizar `visible.map` en vez de `filtered.map`, y agregar el pie con contador + sentinela.
+- **Secciones de la home**: `CockpitHeader` (hero con gradiente del área) → KPIs "Pulso de la empresa" (`CountUp`) → "¿Qué necesitas hacer?" (acciones rápidas, `.accion-card`) → "Tu panel en vivo" (los `components/hub/Widget*` existentes) → "Herramientas de [área]" (secciones con `.tool-card`, reveladas al hacer scroll).
+- **Animación**: keyframes y utilidades en `globals.css` (`.anim-fade-up`, `.stagger`, `.cockpit-hero`, `.accion-card`, `.tool-card`, `.reveal`). `components/ui/Reveal.tsx` (IntersectionObserver) y `components/ui/CountUp.tsx` (contador) son los únicos client components nuevos. Todo respeta `prefers-reduced-motion`.
+- **Sidebar**: muestra un chip con la identidad del área (gradiente + icono del departamento) que enlaza al cockpit. La navegación se sigue filtrando por `puedeVer`.
+
+---
+
 ## Módulos implementados
 
 ### Inventario de Materiales `/materiales`

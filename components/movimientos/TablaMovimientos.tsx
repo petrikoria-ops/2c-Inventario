@@ -5,6 +5,7 @@ import Modal from '@/components/ui/Modal'
 import { BadgeTipo } from '@/components/ui/Badge'
 import { num, fechaHora } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
+import { useProgressiveList } from '@/hooks/useProgressiveList'
 import type { Movimiento, Material, Proyecto } from '@/types'
 
 interface Props {
@@ -36,6 +37,8 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
       return true
     })
   }, [movimientos, filtroTipo, desde, hasta])
+
+  const { visible, hasMore, sentinelRef, loadMore, total } = useProgressiveList(filtered, 60)
 
   const matsFiltradas = useMemo(() =>
     busqMat.length >= 2
@@ -122,7 +125,7 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
               </tr>
             </thead>
             <tbody>
-              {filtered.map(m => (
+              {visible.map(m => (
                 <tr key={m.id} className="tr-hover">
                   <td className="td whitespace-nowrap text-xs text-slate-500">{fechaHora(m.fecha)}</td>
                   <td className="td"><BadgeTipo tipo={m.tipo} /></td>
@@ -140,6 +143,14 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
             </tbody>
           </table>
         </div>
+
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-center gap-3 px-4 py-3 border-t" style={{ borderColor: '#EEF0F2' }}>
+            <span className="text-xs text-slate-400">Mostrando {visible.length} de {num(total, 0)}</span>
+            {hasMore && <button className="btn btn-outline btn-sm" onClick={loadMore}>Cargar más</button>}
+            <div ref={sentinelRef} aria-hidden className="w-px h-px" />
+          </div>
+        )}
       </div>
 
       <Modal open={modalOpen} title="Registrar movimiento" onClose={() => setModalOpen(false)} onSave={registrar} saveLabel="Registrar" saving={saving}>
