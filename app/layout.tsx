@@ -3,7 +3,7 @@ import { Inter } from 'next/font/google'
 import './globals.css'
 import AppShell from '@/components/layout/AppShell'
 import { ToastProvider } from '@/contexts/ToastContext'
-import { getPerfil } from '@/lib/auth/permisos.server'
+import { getContextoUsuario } from '@/lib/auth/verComo'
 import { getSupabaseServer } from '@/lib/supabase/server'
 
 const inter = Inter({
@@ -22,10 +22,11 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const perfil = await getPerfil()
+  const { efectivo, puedeSimular, verComo } = await getContextoUsuario()
 
+  // El conteo de errores pendientes depende del rol REAL (no del simulado).
   let erroresPendientes = 0
-  if (perfil && (perfil.nivel_acceso === 'admin_software' || perfil.nivel_acceso === 'master')) {
+  if (puedeSimular) {
     const sb = getSupabaseServer()
     const { count } = await sb.from('error_log').select('*', { count: 'exact', head: true }).eq('resuelto', false)
     erroresPendientes = count ?? 0
@@ -35,7 +36,12 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     <html lang="es" className={inter.variable}>
       <body>
         <ToastProvider>
-          <AppShell perfil={perfil} erroresPendientes={erroresPendientes}>{children}</AppShell>
+          <AppShell
+            perfil={efectivo}
+            puedeSimular={puedeSimular}
+            verComo={verComo}
+            erroresPendientes={erroresPendientes}
+          >{children}</AppShell>
         </ToastProvider>
       </body>
     </html>

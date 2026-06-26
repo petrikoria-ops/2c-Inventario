@@ -7,6 +7,7 @@ import ConfirmDangerModal from '@/components/ui/ConfirmDangerModal'
 import { BadgeEstadoHer } from '@/components/ui/Badge'
 import { diasHastaMant, fechaCorta } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
+import { useProgressiveList } from '@/hooks/useProgressiveList'
 import type { Herramienta } from '@/types'
 
 const ESTADOS = ['operativa','en_reparacion','extraviada','dada_de_baja']
@@ -41,6 +42,8 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
       const me = !filtroEst || h.estado === filtroEst
       return mq && me
     }), [items, q, filtroEst])
+
+  const { visible, hasMore, sentinelRef, loadMore, total } = useProgressiveList(filtered, 60)
 
   // ── Selección ─────────────────────────────────────────────────
   const allFilteredSelected = filtered.length > 0 && filtered.every(h => selectedIds.has(h.id))
@@ -235,7 +238,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
               </tr>
             </thead>
             <tbody>
-              {filtered.map(h => {
+              {visible.map(h => {
                 const dias       = diasHastaMant(h.fecha_ultima_mant, h.frecuencia_mant_dias)
                 const isSelected = selectedIds.has(h.id)
                 return (
@@ -280,6 +283,14 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
             </tbody>
           </table>
         </div>
+
+        {filtered.length > 0 && (
+          <div className="flex items-center justify-center gap-3 px-4 py-3 border-t" style={{ borderColor: '#EEF0F2' }}>
+            <span className="text-xs text-slate-400">Mostrando {visible.length} de {total}</span>
+            {hasMore && <button className="btn btn-outline btn-sm" onClick={loadMore}>Cargar más</button>}
+            <div ref={sentinelRef} aria-hidden className="w-px h-px" />
+          </div>
+        )}
       </div>
 
       {/* ── Modal CRUD ─────────────────────────────────────────── */}
