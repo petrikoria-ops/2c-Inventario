@@ -282,6 +282,66 @@ export interface VerificacionRic {
   verificaciones_ric_items?: VerificacionRicItem[]
 }
 
+export interface CatalogoHallazgo {
+  id: string
+  checklist_n: number | null
+  categoria: string | null
+  keywords: string[]
+  diagnostico: string
+  tipo: string | null
+  riesgo: string | null
+  nivel: 'CRITICO' | 'ALTO' | 'MEDIO' | 'BAJO' | null
+  norma: string | null
+  medidas_mp: string[]
+  medida_texto: string | null
+  origen: string | null
+  creado_en: string
+}
+
+export interface InspeccionPrevencionItem {
+  id: number
+  inspeccion_id: number
+  n: number | null
+  item: string
+  categoria: string | null
+  resultado: 'cumple' | 'no_cumple' | 'na' | null
+  detalle: string | null
+  nivel: 'CRITICO' | 'ALTO' | 'MEDIO' | 'BAJO' | null
+  norma: string | null
+  medidas_mp: string[]
+  medida_texto: string | null
+  responsable: string | null
+  plazo: string | null
+  catalogo_id: string | null
+  foto_url: string | null
+  orden: number
+  actualizado_en: string
+}
+
+export interface InspeccionPrevencion {
+  id: number
+  numero: string
+  proyecto_id: number | null
+  centro_trabajo: string
+  direccion: string | null
+  comuna: string | null
+  mandante: string | null
+  lugares_inspeccionados: string | null
+  fecha: string
+  prevencionista: string | null
+  dirigido_a: string | null
+  n_trabajadores: string | null
+  introduccion: string | null
+  observaciones_generales: string | null
+  firma_prevencionista: string | null
+  firma_encargado: string | null
+  estado: 'en_progreso' | 'completa'
+  creado_por: string | null
+  creado_en: string
+  actualizado_en: string
+  inspecciones_prevencion_items?: InspeccionPrevencionItem[]
+}
+
 export interface ErrorLog {
   id: number
   creado_en: string

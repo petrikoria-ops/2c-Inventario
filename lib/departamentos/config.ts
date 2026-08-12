@@ -16,7 +16,7 @@ import {
   PackageOpen, Handshake, ArrowUpDown, ShoppingCart, HardHat, Tag,
   Package, Wrench, Users, Upload, Building2, ClipboardList, ListChecks,
   Calculator, CheckSquare, Bot,
-  ShieldCheck, BarChart3, Warehouse, Hammer,
+  ShieldCheck, ShieldAlert, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
 } from 'lucide-react'
 
@@ -174,12 +174,14 @@ const PREVENCION: DeptConfig = {
   grad: ['#047857', '#10B981'],
   acento: A.verde,
   acciones: [
+    { href: '/prevencion-riesgos', Icon: ShieldAlert, titulo: 'Inspecciones de faena', desc: 'Checklist DS 594 y hallazgos', modulo: 'prevencion_riesgos', acento: A.verde },
     { href: '/checklist',   Icon: CheckSquare, titulo: 'Checklist tablero', desc: 'Verificación eléctrica imprimible', modulo: 'checklist', acento: A.teal },
     { href: '/recursos',    Icon: Calculator,  titulo: 'Recursos técnicos', desc: 'Normas y cálculos de respaldo', modulo: 'recursos_tecnicos', acento: A.indigo },
     { href: '/herramientas',Icon: Wrench,      titulo: 'Estado de equipos', desc: 'Mantención y equipos con problema', modulo: 'herramientas', acento: A.naranja },
   ],
   herramientas: [
     { titulo: 'Seguridad', items: [
+      { href: '/prevencion-riesgos', Icon: ShieldAlert, titulo: 'Inspecciones de faena', desc: 'Checklist DS 594, hallazgos y medidas correctivas', modulo: 'prevencion_riesgos' },
       { href: '/checklist', Icon: CheckSquare, titulo: 'Checklist tablero', desc: 'Armado y pruebas por obra', modulo: 'checklist' },
       { href: '/recursos',  Icon: Calculator,  titulo: 'Recursos técnicos', desc: 'Normativa de respaldo', modulo: 'recursos_tecnicos' },
     ]},

@@ -67,7 +67,7 @@ export type Modulo =
   | 'materiales' | 'herramientas' | 'movimientos' | 'proveedores' | 'compras'
   | 'proyectos' | 'trabajadores' | 'recursos_tecnicos' | 'checklist'
   | 'etiquetas' | 'agente' | 'metricas'
-  | 'avance_obra' | 'verificacion_ric'
+  | 'avance_obra' | 'verificacion_ric' | 'prevencion_riesgos'
 
 type AccesoModulo = 'no' | 'lectura' | 'completo'
 
@@ -90,6 +90,7 @@ const MODULOS_POR_DEPARTAMENTO: Record<Departamento, Partial<Record<Modulo, Acce
   },
   prevencion: {
     herramientas: 'lectura', recursos_tecnicos: 'completo', checklist: 'completo',
+    prevencion_riesgos: 'completo',
   },
   rrhh: {
     trabajadores: 'completo',
@@ -98,7 +99,7 @@ const MODULOS_POR_DEPARTAMENTO: Record<Departamento, Partial<Record<Modulo, Acce
     materiales: 'lectura', herramientas: 'lectura', movimientos: 'lectura',
     proveedores: 'lectura', compras: 'lectura', proyectos: 'lectura',
     trabajadores: 'lectura', agente: 'completo', metricas: 'completo',
-    avance_obra: 'completo', verificacion_ric: 'completo',
+    avance_obra: 'completo', verificacion_ric: 'completo', prevencion_riesgos: 'lectura',
   },
   admin_software: {},
 }

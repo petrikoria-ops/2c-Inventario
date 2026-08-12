@@ -6,7 +6,7 @@ import { useState } from 'react'
 import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
-  ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck,
+  ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert,
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
@@ -46,6 +46,7 @@ const NAV: NavGroup[] = [
       { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros', modulo: 'proyectos' },
       { href: '/avance-obra', Icon: ListChecks,    label: 'Avance de obra',     modulo: 'avance_obra' },
       { href: '/verificacion-ric', Icon: ShieldCheck, label: 'Verificación RIC', modulo: 'verificacion_ric' },
+      { href: '/prevencion-riesgos', Icon: ShieldAlert, label: 'Inspección de riesgos', modulo: 'prevencion_riesgos' },
       { href: '/proveedores', Icon: Building2,     label: 'Proveedores', modulo: 'proveedores' },
       { href: '/solicitudes', Icon: ShoppingCart,  label: 'Compras',     modulo: 'compras' },
     ],
