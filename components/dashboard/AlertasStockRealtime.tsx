@@ -96,9 +96,9 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
               <tr key={a.id} className="bg-red-50/40 hover:bg-red-50 transition-colors">
                 <td className="td"><span className="code">{a.codigo}</span></td>
                 <td className="td font-medium text-red-900">{a.descripcion}</td>
-                <td className="td text-xs text-slate-500">{a.ubicacion ?? '—'}</td>
+                <td className="td text-xs text-brand-n500">{a.ubicacion ?? '—'}</td>
                 <td className="td-r font-bold text-red-700">{num(a.stock_actual)}</td>
-                <td className="td-r text-slate-500">{num(a.stock_minimo)}</td>
+                <td className="td-r text-brand-n500">{num(a.stock_minimo)}</td>
                 <td className="td">
                   {a.stock_actual <= 0
                     ? <span className="badge badge-red">Sin stock</span>
@@ -110,7 +110,7 @@ export default function AlertasStockRealtime({ initialAlertas }: { initialAlerta
         </table>
       </div>
       {alertas.length > MAX_VISIBLES && (
-        <div className="px-4 py-3 text-xs text-slate-500 border-t" style={{ borderColor: '#eceef1' }}>
+        <div className="px-4 py-3 text-xs text-brand-n500 border-t" style={{ borderColor: '#eceef1' }}>
           Mostrando los {MAX_VISIBLES} con menor stock de {alertas.length} en total — <Link href="/materiales?bajo_minimo=1" className="underline font-medium">ver todos →</Link>
         </div>
       )}

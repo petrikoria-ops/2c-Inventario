@@ -211,6 +211,77 @@ export interface SolicitudEnrolamiento {
   resuelto_por: string | null
 }
 
+export interface ProyectoTrabajador {
+  id: number
+  proyecto_id: number
+  trabajador_id: number
+  rol_en_obra: string | null
+  fecha_asignacion: string
+  activo: boolean
+  creado_en: string
+  trabajadores?: Pick<Trabajador, 'id' | 'nombre' | 'cargo' | 'telefono'> | null
+}
+
+export interface AvanceObraItem {
+  id: number
+  avance_id: number
+  orden: number
+  etapa: string
+  descripcion: string | null
+  fecha_estimada: string | null
+  completado: boolean
+  completado_por: string | null
+  completado_por_nombre: string | null
+  completado_en: string | null
+  creado_en: string
+}
+
+export interface AvanceObra {
+  id: number
+  proyecto_id: number
+  creado_por: string | null
+  creado_por_nombre: string | null
+  notas: string | null
+  creado_en: string
+  actualizado_en: string
+  avances_obra_items?: AvanceObraItem[]
+}
+
+export interface VerificacionRicItem {
+  id: number
+  verificacion_id: number
+  bloque: string
+  tipo: 'verificacion' | 'foto' | 'nota'
+  orden: number
+  texto: string
+  resultado: 'pasa' | 'no_pasa' | 'na' | null
+  foto_tomada: boolean
+  foto_url: string | null
+  notas: string | null
+  actualizado_en: string
+}
+
+export interface VerificacionRic {
+  id: number
+  numero: string
+  proyecto_id: number | null
+  proyecto_nombre: string | null
+  cliente_mandante: string | null
+  ubicacion: string | null
+  fecha_visita: string
+  inspectores: string | null
+  num_tableros: number | null
+  estado: 'en_progreso' | 'completa'
+  declaracion_conformidad: boolean
+  firma_nombre: string | null
+  firma_rut: string | null
+  firma_cargo: string | null
+  creado_por: string | null
+  creado_en: string
+  actualizado_en: string
+  verificaciones_ric_items?: VerificacionRicItem[]
+}
+
 export interface ErrorLog {
   id: number
   creado_en: string

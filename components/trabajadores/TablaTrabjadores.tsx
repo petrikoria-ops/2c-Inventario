@@ -59,7 +59,7 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
     <>
       <div className="panel">
         <div className="panel-header">
-          <Users size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <Users size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Trabajadores</h2>
           <a href="/herramientas/entregar" className="btn btn-outline btn-sm ml-auto">
             Entregar herramientas →
@@ -84,9 +84,9 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
               {items.map(t => (
                 <tr key={t.id} className="tr-hover">
                   <td className="td font-medium">{t.nombre}</td>
-                  <td className="td text-xs text-slate-500">{t.rut ?? '—'}</td>
-                  <td className="td text-xs text-slate-500">{t.cargo ?? '—'}</td>
-                  <td className="td text-xs text-slate-500">{t.telefono ?? '—'}</td>
+                  <td className="td text-xs text-brand-n500">{t.rut ?? '—'}</td>
+                  <td className="td text-xs text-brand-n500">{t.cargo ?? '—'}</td>
+                  <td className="td text-xs text-brand-n500">{t.telefono ?? '—'}</td>
                   <td className="td">
                     <div className="flex gap-0.5">
                       <button className="btn-icon" title="Editar" aria-label="Editar"
@@ -101,7 +101,7 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
                 </tr>
               ))}
               {!items.length && (
-                <tr><td colSpan={5} className="text-center py-10 text-slate-400">Sin trabajadores registrados</td></tr>
+                <tr><td colSpan={5} className="text-center py-10 text-brand-n500">Sin trabajadores registrados</td></tr>
               )}
             </tbody>
           </table>

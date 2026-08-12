@@ -85,7 +85,7 @@ export default function ChatAgente() {
               </div>
               <div className="bg-white rounded-xl rounded-tl-none px-4 py-3 shadow-sm border border-slate-100 max-w-lg">
                 <p className="text-sm font-semibold text-slate-800 mb-1">Hola, soy tu asistente de inventario</p>
-                <p className="text-sm text-slate-500 leading-relaxed">
+                <p className="text-sm text-brand-n500 leading-relaxed">
                   Puedo consultarte el inventario en tiempo real: buscar materiales, ver alertas de stock,
                   herramientas por responsable, proyectos activos y más.
                   Los datos son reales — nunca invento información.
@@ -94,7 +94,7 @@ export default function ChatAgente() {
             </div>
 
             <div>
-              <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3 px-1">
+              <p className="text-xs font-semibold text-brand-n500 uppercase tracking-widest mb-3 px-1">
                 Preguntas frecuentes — haz clic para enviar
               </p>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -138,7 +138,7 @@ export default function ChatAgente() {
               {m.rows && m.rows.length > 0 && m.columnas && (
                 <div className="w-full overflow-x-auto rounded-xl border border-slate-200 shadow-sm">
                   {m.titulo && (
-                    <div className="px-3 py-2 text-xs font-semibold text-slate-500 border-b border-slate-100 bg-slate-50">
+                    <div className="px-3 py-2 text-xs font-semibold text-brand-n500 border-b border-slate-100 bg-slate-50">
                       {m.titulo} — {m.rows.length} registro{m.rows.length !== 1 ? 's' : ''}
                     </div>
                   )}
@@ -171,7 +171,7 @@ export default function ChatAgente() {
 
               {/* Resultado vacío de Supabase */}
               {m.rows && m.rows.length === 0 && !m.error && (
-                <div className="text-xs text-slate-400 px-1">Sin datos que mostrar en la tabla.</div>
+                <div className="text-xs text-brand-n500 px-1">Sin datos que mostrar en la tabla.</div>
               )}
             </div>
 
@@ -244,7 +244,7 @@ export default function ChatAgente() {
               : <Send size={15} />}
           </button>
         </div>
-        <p className="text-[10px] text-slate-400 mt-1.5 px-1">
+        <p className="text-[10px] text-brand-n500 mt-1.5 px-1">
           Datos en tiempo real desde Supabase · Solo lectura · Enter para enviar, Shift+Enter nueva línea
         </p>
       </div>

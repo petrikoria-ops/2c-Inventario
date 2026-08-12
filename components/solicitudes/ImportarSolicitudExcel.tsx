@@ -180,7 +180,7 @@ export default function ImportarSolicitudExcel() {
         <div className="flex items-center gap-3 mb-5">
           <div>
             <h1 className="text-lg font-bold text-slate-800">Importar solicitud desde Excel</h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-brand-n500">
               Sube la planilla estándar que envía el supervisor de terreno (hoja "MATERIALES")
             </p>
           </div>
@@ -198,13 +198,13 @@ export default function ImportarSolicitudExcel() {
           {loading ? (
             <>
               <Loader2 size={32} className="animate-spin" style={{ color: '#F0C000' }} />
-              <p className="text-sm text-slate-500">Leyendo planilla y emparejando materiales…</p>
+              <p className="text-sm text-brand-n500">Leyendo planilla y emparejando materiales…</p>
             </>
           ) : (
             <>
               <Upload size={32} style={{ color: '#BBBBBB' }} />
               <p className="text-sm font-medium text-slate-600">Arrastra el archivo aquí o haz clic para elegirlo</p>
-              <p className="text-xs text-slate-400">.xlsx / .xls</p>
+              <p className="text-xs text-brand-n500">.xlsx / .xls</p>
             </>
           )}
           <input ref={fileInputRef} type="file" accept=".xlsx,.xls" className="hidden" onChange={onFileChange} />
@@ -218,7 +218,7 @@ export default function ImportarSolicitudExcel() {
       <div className="flex items-center gap-3 mb-5">
         <div>
           <h1 className="text-lg font-bold text-slate-800">Revisar solicitud importada</h1>
-          <p className="text-sm text-slate-500">Verifica los datos antes de guardar</p>
+          <p className="text-sm text-brand-n500">Verifica los datos antes de guardar</p>
         </div>
         <button onClick={() => setStep('upload')} className="btn btn-ghost btn-sm ml-auto">← Subir otro archivo</button>
       </div>
@@ -252,7 +252,7 @@ export default function ImportarSolicitudExcel() {
         <span className="badge badge-blue">{counts.descripcion} por descripción</span>
         {counts.ia > 0 && <span className="badge badge-brand">{counts.ia} por IA</span>}
         {counts.sin_match > 0 && <span className="badge badge-yellow">{counts.sin_match} sin coincidencia</span>}
-        <span className="text-xs text-slate-400 self-center">— {rows.length} ítems en total</span>
+        <span className="text-xs text-brand-n500 self-center">— {rows.length} ítems en total</span>
       </div>
 
       {/* Tabla de ítems */}
@@ -279,7 +279,7 @@ export default function ImportarSolicitudExcel() {
                       onChange={e => updateRow(idx, 'cantidad_pedida', parseFloat(e.target.value) || 1)}
                       className="input text-right text-sm w-20" />
                   </td>
-                  <td className="td text-slate-400">{r.unidad || '—'}</td>
+                  <td className="td text-brand-n500">{r.unidad || '—'}</td>
                   <td className="td relative">
                     <span className={`badge text-[11px] ${MATCH_BADGE[r.match].cls}`}>{MATCH_BADGE[r.match].label}</span>
                     {(r.match === 'sin_match' || r.match === 'ia') && (
@@ -290,24 +290,24 @@ export default function ImportarSolicitudExcel() {
                     {linkingIdx === idx && (
                       <div className="absolute z-50 top-full left-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl w-72 p-2">
                         <div className="relative mb-1">
-                          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-slate-400" />
+                          <Search size={12} className="absolute left-2 top-1/2 -translate-y-1/2 text-brand-n500" />
                           <input autoFocus value={linkQuery} onChange={e => buscarParaVincular(e.target.value)}
                             placeholder="Buscar material…" className="input text-sm w-full pl-7" />
-                          <button onClick={() => setLinkingIdx(null)} aria-label="Cerrar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400">
+                          <button onClick={() => setLinkingIdx(null)} aria-label="Cerrar búsqueda" className="absolute right-2 top-1/2 -translate-y-1/2 text-brand-n500">
                             <X size={12} />
                           </button>
                         </div>
-                        {linkSearching && <p className="text-xs text-slate-400 px-1">Buscando…</p>}
+                        {linkSearching && <p className="text-xs text-brand-n500 px-1">Buscando…</p>}
                         <div className="max-h-48 overflow-y-auto">
                           {linkResults.map(mat => (
                             <button key={mat.id} onMouseDown={e => { e.preventDefault(); vincularMaterial(idx, mat) }}
                               className="w-full text-left px-2 py-1.5 hover:bg-blue-50 rounded text-xs flex flex-col">
                               <span className="font-medium text-slate-700">{mat.descripcion}</span>
-                              <span className="text-slate-400">{mat.codigo} · {mat.unidad}</span>
+                              <span className="text-brand-n500">{mat.codigo} · {mat.unidad}</span>
                             </button>
                           ))}
                           {!linkSearching && linkQuery.length >= 2 && linkResults.length === 0 && (
-                            <p className="text-xs text-slate-400 px-1 py-1">Sin resultados</p>
+                            <p className="text-xs text-brand-n500 px-1 py-1">Sin resultados</p>
                           )}
                         </div>
                       </div>

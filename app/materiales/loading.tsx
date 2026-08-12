@@ -10,10 +10,10 @@ export default function LoadingMateriales() {
     <div className="p-5">
       <div className="panel">
         <div className="panel-header">
-          <Plug size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <Plug size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Materiales</h2>
         </div>
-        <div className="flex flex-col items-center justify-center gap-3 py-20 text-slate-400">
+        <div className="flex flex-col items-center justify-center gap-3 py-20 text-brand-n500">
           <Loader2 size={28} className="animate-spin" style={{ color: '#F0C000' }} />
           <p className="text-sm">Cargando inventario desde la base de datos…</p>
         </div>

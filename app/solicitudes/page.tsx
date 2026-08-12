@@ -34,7 +34,7 @@ export default async function SolicitudesPage() {
       <div className="flex items-center justify-between mb-5">
         <div>
           <h1 className="text-lg font-bold text-slate-800">Solicitudes de compra</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-brand-n500">
             {pendientes > 0 && <span className="text-yellow-600 font-medium">{pendientes} pendiente{pendientes !== 1 ? 's' : ''}</span>}
             {pendientes > 0 && compradas > 0 && ' · '}
             {compradas > 0 && <span className="text-green-600">{compradas} comprada{compradas !== 1 ? 's' : ''}</span>}

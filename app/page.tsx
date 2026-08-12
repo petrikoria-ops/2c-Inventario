@@ -117,7 +117,7 @@ export default async function HomePage() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight"><CountUp value={alertas} /></div>
-            <div className="text-xs text-slate-500 font-medium">Alertas de stock</div>
+            <div className="text-xs text-brand-n500 font-medium">Alertas de stock</div>
           </div>
         </div>
 
@@ -127,17 +127,17 @@ export default async function HomePage() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight"><CountUp value={proyActivos ?? 0} /></div>
-            <div className="text-xs text-slate-500 font-medium">Obras en proceso</div>
+            <div className="text-xs text-brand-n500 font-medium">Obras en proceso</div>
           </div>
         </div>
 
         <div className="stat-card">
           <div className={`stat-icon flex items-center justify-center ${solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100'}`}>
-            <ShoppingCart size={18} style={{ color: solicPend > 0 ? '#EA580C' : '#909090' }} />
+            <ShoppingCart size={18} style={{ color: solicPend > 0 ? '#EA580C' : 'var(--n-500)' }} />
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight"><CountUp value={solicPend} /></div>
-            <div className="text-xs text-slate-500 font-medium">Compras pendientes</div>
+            <div className="text-xs text-brand-n500 font-medium">Compras pendientes</div>
           </div>
         </div>
       </div>
@@ -173,7 +173,7 @@ export default async function HomePage() {
                 </div>
                 <div>
                   <div className="font-semibold text-slate-800 text-[15px] leading-tight mb-0.5">{a.titulo}</div>
-                  <div className="text-xs text-slate-400 leading-snug">{a.desc}</div>
+                  <div className="text-xs text-brand-n500 leading-snug">{a.desc}</div>
                 </div>
               </Link>
             ))}
@@ -200,7 +200,7 @@ export default async function HomePage() {
           <div className="space-y-6">
             {secciones.map((s, idx) => (
               <Reveal key={s.titulo} delay={idx * 60}>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-2.5">{s.titulo}</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-brand-n500 mb-2.5">{s.titulo}</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                   {s.items.map(i => (
                     <Link key={i.href + i.titulo} href={i.href} className="tool-card group">
@@ -213,7 +213,7 @@ export default async function HomePage() {
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="font-semibold text-slate-800 text-[13px] leading-tight truncate group-hover:text-slate-900">{i.titulo}</div>
-                        <div className="text-[11px] text-slate-400 leading-snug truncate">{i.desc}</div>
+                        <div className="text-[11px] text-brand-n500 leading-snug truncate">{i.desc}</div>
                       </div>
                       <ArrowRight size={14} className="text-slate-300 flex-shrink-0 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
                     </Link>

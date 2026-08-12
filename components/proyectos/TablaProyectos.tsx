@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
-import { ClipboardList, Search, ScrollText, ClipboardCheck, Pencil, Trash2 } from 'lucide-react'
+import { ClipboardList, Search, ScrollText, ClipboardCheck, Building2, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeEstadoProy } from '@/components/ui/Badge'
 import { clp, fechaCorta, num } from '@/lib/utils'
@@ -76,7 +76,7 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
     <>
       <div className="panel">
         <div className="panel-header">
-          <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Obras activas — Tableros</h2>
           <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva OT</button>
         </div>
@@ -104,10 +104,13 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <td className="td font-medium">{p.nombre}</td>
                   <td className="td text-slate-600">{p.cliente ?? '—'}</td>
                   <td className="td"><BadgeEstadoProy estado={p.estado} /></td>
-                  <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_inicio)}</td>
-                  <td className="td text-xs text-slate-500">{fechaCorta(p.fecha_entrega)}</td>
+                  <td className="td text-xs text-brand-n500">{fechaCorta(p.fecha_inicio)}</td>
+                  <td className="td text-xs text-brand-n500">{fechaCorta(p.fecha_entrega)}</td>
                   <td className="td-r font-medium text-slate-700">{clp(calcCosto(p.costo_total))}</td>
                   <td className="td"><div className="flex gap-0.5">
+                    <a href={`/proyectos/${p.id}`} className="btn-icon" title="Ver obra" aria-label="Ver obra">
+                      <Building2 size={13} />
+                    </a>
                     <button className="btn-icon" title="Ver movimientos" aria-label="Ver movimientos" onClick={() => verDetalle(p)}>
                       <ScrollText size={13} />
                     </button>
@@ -123,7 +126,7 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   </div></td>
                 </tr>
               ))}
-              {!filtered.length && <tr><td colSpan={8} className="text-center py-10 text-slate-400">Sin proyectos</td></tr>}
+              {!filtered.length && <tr><td colSpan={8} className="text-center py-10 text-brand-n500">Sin proyectos</td></tr>}
             </tbody>
           </table>
         </div>
@@ -170,18 +173,18 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <tbody>
                     {detalle.movimientos.map(m=>(
                       <tr key={m.id} className="tr-hover">
-                        <td className="td text-xs text-slate-500">{fechaCorta(m.fecha)}</td>
+                        <td className="td text-xs text-brand-n500">{fechaCorta(m.fecha)}</td>
                         <td className="td"><span className="code">{(m.materiales as any)?.codigo}</span></td>
                         <td className="td">{(m.materiales as any)?.descripcion}</td>
-                        <td className="td-r">{num(m.cantidad)} <span className="text-slate-400 text-xs">{(m.materiales as any)?.unidad}</span></td>
-                        <td className="td-r text-slate-500">{clp(m.precio_unit)}</td>
+                        <td className="td-r">{num(m.cantidad)} <span className="text-brand-n500 text-xs">{(m.materiales as any)?.unidad}</span></td>
+                        <td className="td-r text-brand-n500">{clp(m.precio_unit)}</td>
                         <td className="td-r font-medium">{clp(m.cantidad*(m.precio_unit??0))}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </div>
-            ) : <p className="text-center py-6 text-slate-400">Sin materiales consumidos</p>}
+            ) : <p className="text-center py-6 text-brand-n500">Sin materiales consumidos</p>}
           </>
         )}
       </Modal>

@@ -129,7 +129,7 @@ function WizardBar({ step }: { step: Step }) {
           <div className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full
             ${i < cur  ? 'bg-blue-100 text-blue-700' : ''}
             ${i === cur ? 'bg-blue-700 text-white'   : ''}
-            ${i > cur  ? 'bg-slate-100 text-slate-400': ''}`}>
+            ${i > cur  ? 'bg-slate-100 text-brand-n500': ''}`}>
             <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[10px] font-bold
               ${i < cur  ? 'bg-blue-700 text-white'  : ''}
               ${i === cur ? 'bg-white text-blue-700'  : ''}
@@ -159,7 +159,7 @@ function StepTypeSelect({ onSelect }: { onSelect: (t: ImportType) => void }) {
             className="p-5 bg-white rounded-xl border-2 border-slate-200 hover:border-blue-500 hover:shadow-md transition-all text-left group">
             <div className="mb-2 text-blue-600 group-hover:text-blue-700"><opt.Icon size={28} /></div>
             <div className="font-semibold text-slate-800 group-hover:text-blue-700">{opt.title}</div>
-            <div className="text-xs text-slate-500 mt-1">{opt.desc}</div>
+            <div className="text-xs text-brand-n500 mt-1">{opt.desc}</div>
           </button>
         ))}
       </div>
@@ -183,9 +183,9 @@ function StepUpload({ type, onFile }: { type: ImportType; onFile: (f: File) => v
         className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all
           ${dragging ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-white hover:border-blue-400 hover:bg-blue-50/30'}`}
       >
-        <div className="mb-3 text-slate-400"><Upload size={40} /></div>
+        <div className="mb-3 text-brand-n500"><Upload size={40} /></div>
         <p className="font-semibold text-slate-700 mb-1">Arrastra tu archivo aquí o haz clic</p>
-        <p className="text-sm text-slate-400">Formatos: .xlsx · .xls · .csv</p>
+        <p className="text-sm text-brand-n500">Formatos: .xlsx · .xls · .csv</p>
         <input ref={fileRef} type="file" accept=".xlsx,.xls,.csv" className="hidden"
           onChange={(e: ChangeEvent<HTMLInputElement>) => handle(e.target.files?.[0])} />
       </div>
@@ -227,7 +227,7 @@ function StepMapping({
             <div key={appField} className="flex items-center gap-3">
               <div className="w-40 text-sm font-medium text-slate-700 flex-shrink-0">
                 {def.label}
-                {def.type === 'enum' && <span className="ml-1 text-xs text-slate-400">(operativa…)</span>}
+                {def.type === 'enum' && <span className="ml-1 text-xs text-brand-n500">(operativa…)</span>}
               </div>
               <select value={mapping[appField] ?? ''}
                 onChange={e => setMapping({ ...mapping, [appField]: e.target.value })}
@@ -258,7 +258,7 @@ function StepAnalyzing() {
     <div className="flex flex-col items-center justify-center py-16 gap-4">
       <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-700 rounded-full animate-spin" />
       <p className="font-medium text-slate-600">Validando datos y comprobando conflictos…</p>
-      <p className="text-sm text-slate-400">Consultando la base de datos</p>
+      <p className="text-sm text-brand-n500">Consultando la base de datos</p>
     </div>
   )
 }
@@ -354,7 +354,7 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
       <summary className="panel-header cursor-pointer list-none">
         <h2 className="flex items-center gap-1" style={{ color: '#2563EB' }}>
           <Tag size={13} /> Categorías sugeridas
-          <span className="ml-1 font-normal text-slate-500">({matches.length} sin asignar en archivo)</span>
+          <span className="ml-1 font-normal text-brand-n500">({matches.length} sin asignar en archivo)</span>
         </h2>
         <div className="flex gap-2 ml-auto flex-wrap">
           {altaCount > 0 && (
@@ -393,7 +393,7 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
               return (
                 <tr key={m.rowIdx}
                   className={`tr-hover ${m.confidence === 'alta' ? 'bg-green-50/20' : 'bg-amber-50/10'}`}>
-                  <td className="td text-slate-400">{m.rowNum}</td>
+                  <td className="td text-brand-n500">{m.rowNum}</td>
                   <td className="td"><span className="code">{m.codigo}</span></td>
                   <td className="td text-slate-700 max-w-xs truncate" title={m.descripcion}>{m.descripcion}</td>
                   <td className="td">
@@ -404,7 +404,7 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
                         </span>
                       )
                       : (
-                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-slate-500">
+                        <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-medium bg-slate-100 text-brand-n500">
                           Sin match
                         </span>
                       )
@@ -429,7 +429,7 @@ function CategoryReviewPanel({ matches, decisions, setDecision, acceptAll }: Cat
         </table>
       </div>
 
-      <div className="px-4 pb-3 text-xs text-slate-400 flex items-center gap-2">
+      <div className="px-4 pb-3 text-xs text-brand-n500 flex items-center gap-2">
         <span>{assignedCount} de {matches.length} con categoría asignada</span>
         {noneCount > 0 && !AI_ENABLED && (
           <span className="text-amber-600">
@@ -489,7 +489,7 @@ function StepReview(p: ReviewProps) {
               ${color === 'blue'  ? 'text-blue-700'  : ''}
               ${color === 'red'   ? 'text-red-700'   : ''}
               ${color === 'slate' ? 'text-slate-700' : ''}`}>{value}</p>
-            <p className="text-xs text-slate-500">{label}</p>
+            <p className="text-xs text-brand-n500">{label}</p>
           </div>
         ))}
       </div>
@@ -514,11 +514,11 @@ function StepReview(p: ReviewProps) {
               <tbody>
                 {analysis.errors.map((e: any, i: number) => (
                   <tr key={i} className="bg-red-50/40 tr-hover">
-                    <td className="td text-slate-400">{e.rowNum}</td>
+                    <td className="td text-brand-n500">{e.rowNum}</td>
                     <td className="td"><span className="code text-red-700">{e.codigo}</span></td>
                     <td className="td text-slate-600">{e.campo}</td>
                     <td className="td font-medium text-red-800">{e.problema}</td>
-                    <td className="td text-slate-500">{e.sugerencia}</td>
+                    <td className="td text-brand-n500">{e.sugerencia}</td>
                   </tr>
                 ))}
               </tbody>
@@ -554,21 +554,21 @@ function StepReview(p: ReviewProps) {
                   const approved = p.approvedCorrIds[c.id] !== false
                   return (
                     <tr key={c.id} className={`tr-hover ${approved ? 'bg-green-50/30' : 'bg-slate-50'}`}>
-                      <td className="td text-slate-400">{c.rowNum}</td>
+                      <td className="td text-brand-n500">{c.rowNum}</td>
                       <td className="td"><span className="code">{c.codigo}</span></td>
                       <td className="td text-slate-600">{c.campo}</td>
                       <td className="td">
                         <span className="line-through text-red-400 mr-1">{c.de}</span>
                         <span className="text-green-700 font-medium">→ {c.a}</span>
                       </td>
-                      <td className="td text-slate-500">{c.descripcion}</td>
+                      <td className="td text-brand-n500">{c.descripcion}</td>
                       <td className="td text-center">
                         <button
                           onClick={() => p.setApproved(c.id, !approved)}
                           className={`px-2 py-0.5 rounded text-xs font-medium border transition-colors
                             ${approved
                               ? 'bg-green-100 border-green-400 text-green-800 hover:bg-red-50 hover:border-red-300 hover:text-red-700'
-                              : 'bg-slate-100 border-slate-300 text-slate-500 hover:bg-green-50 hover:border-green-400 hover:text-green-700'}`}
+                              : 'bg-slate-100 border-slate-300 text-brand-n500 hover:bg-green-50 hover:border-green-400 hover:text-green-700'}`}
                         >
                           {approved
                             ? <span className="flex items-center gap-0.5"><Check size={10} /> Aprobada</span>
@@ -611,7 +611,7 @@ function StepReview(p: ReviewProps) {
             {analysis.fileDups.map((dup: any) => (
               <div key={dup.codigo} className="flex items-center gap-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
                 <span className="code font-bold text-orange-800">{dup.codigo}</span>
-                <span className="text-sm text-slate-500">aparece en filas: {dup.rowNums.join(', ')}</span>
+                <span className="text-sm text-brand-n500">aparece en filas: {dup.rowNums.join(', ')}</span>
                 <div className="flex gap-2 ml-auto text-xs">
                   {([
                     { v: 'keep-first', label: 'Conservar primera' },
@@ -657,14 +657,14 @@ function StepReview(p: ReviewProps) {
                         eliminado anteriormente
                       </span>
                     )}
-                    <span className="text-xs text-slate-400">· fila {c.rowNum}</span>
+                    <span className="text-xs text-brand-n500">· fila {c.rowNum}</span>
                   </div>
                   <div className="grid grid-cols-2 gap-3 mb-3">
                     <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-xs">
                       <p className="font-bold text-yellow-800 mb-1 flex items-center gap-1"><Database size={11} /> En base de datos</p>
                       {existFields.slice(0, 5).map(k => (
                         <div key={k} className="flex gap-1 py-0.5 border-b border-yellow-100 last:border-0">
-                          <span className="text-slate-400 w-24 flex-shrink-0">{k}:</span>
+                          <span className="text-brand-n500 w-24 flex-shrink-0">{k}:</span>
                           <span className="text-yellow-800 truncate">{String(c.existing[k] ?? '—')}</span>
                         </div>
                       ))}
@@ -675,8 +675,8 @@ function StepReview(p: ReviewProps) {
                         const incomingVal = c.incoming[k] ?? c.incoming[k.replace('_actual','').replace('_nombre','')]
                         return (
                           <div key={k} className="flex gap-1 py-0.5 border-b border-blue-100 last:border-0">
-                            <span className="text-slate-400 w-24 flex-shrink-0">{k}:</span>
-                            <span className={`truncate ${String(incomingVal ?? '') !== String(c.existing[k] ?? '') ? 'text-blue-700 font-medium' : 'text-slate-500'}`}>
+                            <span className="text-brand-n500 w-24 flex-shrink-0">{k}:</span>
+                            <span className={`truncate ${String(incomingVal ?? '') !== String(c.existing[k] ?? '') ? 'text-blue-700 font-medium' : 'text-brand-n500'}`}>
                               {String(incomingVal ?? '—')}
                             </span>
                           </div>
@@ -722,7 +722,7 @@ function StepReview(p: ReviewProps) {
         </button>
         <button onClick={p.onBack} className="btn btn-outline">← Ajustar mapeo</button>
         {skipCount > 0 && (
-          <span className="text-sm text-slate-400">{skipCount} fila{skipCount !== 1 ? 's' : ''} serán omitidas</span>
+          <span className="text-sm text-brand-n500">{skipCount} fila{skipCount !== 1 ? 's' : ''} serán omitidas</span>
         )}
       </div>
     </div>
@@ -755,9 +755,9 @@ function StepDone({ result, onReset, importType }: { result: ImportResult; onRes
         </div>
         <h2 className="text-xl font-bold text-slate-800 mb-2">Importación completada</h2>
         <div className="flex justify-center gap-6 text-sm">
-          <div><span className="text-2xl font-bold text-green-700">{result.inserted}</span><br /><span className="text-slate-500">insertados</span></div>
-          <div><span className="text-2xl font-bold text-blue-700">{result.updated}</span><br /><span className="text-slate-500">actualizados</span></div>
-          <div><span className="text-2xl font-bold text-slate-400">{result.skipped}</span><br /><span className="text-slate-500">omitidos</span></div>
+          <div><span className="text-2xl font-bold text-green-700">{result.inserted}</span><br /><span className="text-brand-n500">insertados</span></div>
+          <div><span className="text-2xl font-bold text-blue-700">{result.updated}</span><br /><span className="text-brand-n500">actualizados</span></div>
+          <div><span className="text-2xl font-bold text-brand-n500">{result.skipped}</span><br /><span className="text-brand-n500">omitidos</span></div>
         </div>
       </div>
       {result.errors.length > 0 && (
@@ -984,7 +984,7 @@ export default function ImportarMateriales() {
           <h1 className="text-lg font-bold text-slate-800">
             Importar {type === 'materiales' ? 'materiales' : type === 'herramientas' ? 'herramientas' : 'inventario'}
           </h1>
-          <p className="text-sm text-slate-500">Excel o CSV · validación completa antes de escribir</p>
+          <p className="text-sm text-brand-n500">Excel o CSV · validación completa antes de escribir</p>
         </div>
         {canGoBack && <button onClick={reset} className="btn btn-ghost btn-sm ml-auto">× Cancelar</button>}
       </div>

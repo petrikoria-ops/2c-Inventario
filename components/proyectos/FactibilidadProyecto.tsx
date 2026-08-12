@@ -269,7 +269,7 @@ export default function FactibilidadProyecto({
           <h1 className="text-lg font-bold text-slate-800">
             Factibilidad — {proyecto.ot}
           </h1>
-          <p className="text-sm text-slate-500">{proyecto.nombre}{proyecto.cliente ? ` · ${proyecto.cliente}` : ''}</p>
+          <p className="text-sm text-brand-n500">{proyecto.nombre}{proyecto.cliente ? ` · ${proyecto.cliente}` : ''}</p>
         </div>
       </div>
 
@@ -295,7 +295,7 @@ export default function FactibilidadProyecto({
         <div className="px-4 pt-3 pb-2">
           <div ref={searchRef} className="relative">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-n500 pointer-events-none">
                 {loadingSearch ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
               </span>
               <input ref={inputRef} type="text" value={query} onChange={e => setQuery(e.target.value)}
@@ -310,14 +310,14 @@ export default function FactibilidadProyecto({
                     className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors">
                     <span className="code text-xs flex-shrink-0 w-24 truncate">{mat.codigo}</span>
                     <span className="text-sm text-slate-800 flex-1 min-w-0 truncate">{mat.descripcion}</span>
-                    <span className="text-xs text-slate-400 flex-shrink-0">{mat.unidad}</span>
+                    <span className="text-xs text-brand-n500 flex-shrink-0">{mat.unidad}</span>
                     <span className="text-xs text-green-600 flex-shrink-0">Stock: {num(mat.stock_actual, 0)}</span>
                   </button>
                 ))}
               </div>
             )}
             {showDrop && suggestions.length === 0 && query.length >= 2 && !loadingSearch && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-slate-400 text-center">
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-brand-n500 text-center">
                 Sin resultados — usa «+ Agregar manual» para ítems no registrados
               </div>
             )}
@@ -327,7 +327,7 @@ export default function FactibilidadProyecto({
         {/* Formulario manual */}
         {showManual && (
           <div className="mx-4 mb-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Agregar ítem manual</p>
+            <p className="text-xs font-semibold text-brand-n500 uppercase tracking-wide mb-2">Agregar ítem manual</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
               <div>
                 <label className="label" htmlFor="factibilidad-manual-codigo">Código *</label>
@@ -385,7 +385,7 @@ export default function FactibilidadProyecto({
                     </tr>
                   ))}
                   {importPreview.length > 10 && (
-                    <tr><td colSpan={4} className="td text-center text-slate-400">… y {importPreview.length - 10} más</td></tr>
+                    <tr><td colSpan={4} className="td text-center text-brand-n500">… y {importPreview.length - 10} más</td></tr>
                   )}
                 </tbody>
               </table>
@@ -415,7 +415,7 @@ export default function FactibilidadProyecto({
                   <tr key={item.id} className="tr-hover">
                     <td className="td"><span className="code">{item.codigo}</span></td>
                     <td className="td">{item.descripcion}</td>
-                    <td className="td text-slate-400">{item.unidad}</td>
+                    <td className="td text-brand-n500">{item.unidad}</td>
                     <td className="td text-right">
                       <input type="number" min="0.01" step="1"
                         value={item.cantidad_requerida}
@@ -434,9 +434,9 @@ export default function FactibilidadProyecto({
             </table>
           </div>
         ) : (
-          <div className="py-10 text-center text-slate-400 px-4">
+          <div className="py-10 text-center text-brand-n500 px-4">
             <ClipboardList size={36} className="mx-auto mb-2" style={{ color: '#D8D8D8' }} />
-            <p className="font-medium text-slate-500 mb-1">BOM vacío</p>
+            <p className="font-medium text-brand-n500 mb-1">BOM vacío</p>
             <p className="text-sm">Busca materiales del inventario, agrégalos manualmente, o importa desde Excel</p>
           </div>
         )}
@@ -448,7 +448,7 @@ export default function FactibilidadProyecto({
               {evaluating ? <><Loader2 size={14} className="animate-spin" /> Evaluando…</> : <><Search size={14} /> Evaluar factibilidad</>}
             </button>
             {evalResult && (
-              <span className="ml-3 text-sm text-slate-500">
+              <span className="ml-3 text-sm text-brand-n500">
                 Última evaluación: {new Date().toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' })}
               </span>
             )}
@@ -492,13 +492,13 @@ export default function FactibilidadProyecto({
                   <tr key={item.id} className={`tr-hover ${item.faltante > 0 ? 'bg-red-50/50' : ''}`}>
                     <td className="td"><span className="code">{item.codigo}</span></td>
                     <td className="td">{item.descripcion}</td>
-                    <td className="td text-slate-400">{item.unidad}</td>
+                    <td className="td text-brand-n500">{item.unidad}</td>
                     <td className="td text-right font-medium">{num(item.cantidad_requerida, 2)}</td>
                     <td className={`td text-right font-medium ${
                       item.stock_actual === 0 ? 'text-red-600' :
                       item.stock_actual < item.cantidad_requerida ? 'text-yellow-600' : 'text-green-600'
                     }`}>
-                      {item.estado === 'no_registrado' ? <span className="text-slate-400">—</span> : num(item.stock_actual, 2)}
+                      {item.estado === 'no_registrado' ? <span className="text-brand-n500">—</span> : num(item.stock_actual, 2)}
                     </td>
                     <td className="td text-right font-medium text-red-600">
                       {item.faltante > 0 ? num(item.faltante, 2) : <span className="text-slate-300">—</span>}

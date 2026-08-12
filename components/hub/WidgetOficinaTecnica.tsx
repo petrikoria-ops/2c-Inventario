@@ -23,19 +23,19 @@ export default async function WidgetOficinaTecnica() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className="panel">
         <div className="panel-header">
-          <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Obras activas — factibilidad</h2>
           <Link href="/proyectos" className="btn btn-ghost btn-sm">Ver todas →</Link>
         </div>
         {!proyectos?.length ? (
-          <div className="p-6 text-center text-sm text-slate-400">No hay obras en presupuesto o en proceso.</div>
+          <div className="p-6 text-center text-sm text-brand-n500">No hay obras en presupuesto o en proceso.</div>
         ) : (
           <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
             {proyectos.map(p => (
               <div key={p.id} className="p-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-800 truncate"><span className="code mr-1">{p.ot}</span>{p.nombre}</div>
-                  <div className="text-xs text-slate-400 truncate">{p.cliente ?? 'Sin cliente'}</div>
+                  <div className="text-xs text-brand-n500 truncate">{p.cliente ?? 'Sin cliente'}</div>
                 </div>
                 <BadgeEstadoProy estado={p.estado} />
               </div>
@@ -46,12 +46,12 @@ export default async function WidgetOficinaTecnica() {
 
       <div className="panel">
         <div className="panel-header">
-          <ShoppingCart size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ShoppingCart size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Solicitudes de compra pendientes</h2>
           <Link href="/solicitudes" className="btn btn-ghost btn-sm">Ver todas →</Link>
         </div>
         {!solicitudes?.length ? (
-          <div className="p-6 text-center text-sm text-slate-400">No hay solicitudes pendientes.</div>
+          <div className="p-6 text-center text-sm text-brand-n500">No hay solicitudes pendientes.</div>
         ) : (
           <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
             {solicitudes.map(s => {
@@ -61,7 +61,7 @@ export default async function WidgetOficinaTecnica() {
                 <div key={s.id} className="p-3 flex items-center justify-between gap-3">
                   <div className="min-w-0">
                     <div className="text-sm font-medium text-slate-800 truncate"><span className="code mr-1">{s.numero}</span></div>
-                    <div className="text-xs text-slate-400 truncate">{proveedor ?? 'Sin proveedor sugerido'}</div>
+                    <div className="text-xs text-brand-n500 truncate">{proveedor ?? 'Sin proveedor sugerido'}</div>
                   </div>
                   <span className="badge badge-yellow flex-shrink-0">Pendiente</span>
                 </div>

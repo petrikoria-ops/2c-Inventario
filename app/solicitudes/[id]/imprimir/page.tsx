@@ -60,14 +60,14 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
         .doc-th-r { text-align: right; }
         .doc-td   { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid #ECEEF1; color: #181818; }
         .doc-td-r { padding: 9px 12px; font-size: 13px; border-bottom: 1px solid #ECEEF1; text-align: right; }
-        .doc-td-n { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid #ECEEF1; color: #909090; text-align: right; tabular-nums: all; }
+        .doc-td-n { padding: 9px 12px; font-size: 12px; border-bottom: 1px solid #ECEEF1; color: var(--n-500); text-align: right; tabular-nums: all; }
       `}</style>
 
       {/* Barra de acciones */}
       <div className="no-print sticky top-0 z-10 flex items-center gap-3 px-5 py-3 bg-white border-b border-slate-200 shadow-sm">
         <Link href="/solicitudes" className="btn btn-ghost btn-sm">← Volver</Link>
         <PrintButton />
-        <span className="text-sm text-slate-400 hidden sm:block">
+        <span className="text-sm text-brand-n500 hidden sm:block">
           Tip: en el diálogo de impresión elige "Guardar como PDF"
         </span>
         {!comprado && (
@@ -91,17 +91,17 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
               <h1 className="text-lg font-bold leading-tight" style={{ color: '#181818' }}>
                 2C MONTAJES Y PROYECTOS ELÉCTRICOS
               </h1>
-              <p className="text-xs mt-0.5" style={{ color: '#909090' }}>Inventario General</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--n-500)' }}>Inventario General</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#909090' }}>
+            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--n-500)' }}>
               Solicitud de Compra
             </p>
             <p className="text-3xl font-bold leading-tight" style={{ color: '#F0C000' }}>
               {solicitud.numero}
             </p>
-            <p className="text-sm mt-1" style={{ color: '#909090' }}>Fecha: {fechaLarga}</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--n-500)' }}>Fecha: {fechaLarga}</p>
             <span className={`inline-block mt-2 px-3 py-0.5 rounded-full text-xs font-semibold border ${
               comprado
                 ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
@@ -117,7 +117,7 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
           <div className="grid grid-cols-2 gap-3 mb-7">
             {datosObra.map(([label, value]) => (
               <div key={label}>
-                <p className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: '#909090' }}>{label}</p>
+                <p className="text-[10px] uppercase tracking-widest font-semibold" style={{ color: 'var(--n-500)' }}>{label}</p>
                 <p className="text-sm" style={{ color: '#181818' }}>{value}</p>
               </div>
             ))}
@@ -148,10 +148,10 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
                   </td>
                   <td className="doc-td" style={{ fontWeight: 500 }}>{item.descripcion}</td>
                   <td className="doc-td-r" style={{ fontWeight: 700 }}>{num(item.cantidad_pedida, 2)}</td>
-                  <td className="doc-td" style={{ color: '#909090', fontSize: 12 }}>{item.unidad ?? '—'}</td>
+                  <td className="doc-td" style={{ color: 'var(--n-500)', fontSize: 12 }}>{item.unidad ?? '—'}</td>
                   <td className="doc-td" style={{ color: '#4A5260' }}>{item.proveedor_sugerido ?? '—'}</td>
                   {hayPrecios && (
-                    <td className="doc-td-r" style={{ color: '#909090' }}>
+                    <td className="doc-td-r" style={{ color: 'var(--n-500)' }}>
                       {item.precio_unitario ? clp(item.precio_unitario) : '—'}
                     </td>
                   )}
@@ -181,7 +181,7 @@ export default async function ImprimirPage({ params }: { params: { id: string } 
 
         {/* Observaciones */}
         <div className="mb-10">
-          <p className="text-[10px] uppercase tracking-widest font-semibold mb-2" style={{ color: '#909090' }}>
+          <p className="text-[10px] uppercase tracking-widest font-semibold mb-2" style={{ color: 'var(--n-500)' }}>
             Observaciones
           </p>
           <div className="p-3 rounded-lg min-h-[52px] text-sm"

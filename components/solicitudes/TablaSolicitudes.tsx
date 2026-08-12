@@ -50,8 +50,8 @@ export default function TablaSolicitudes({ initialData, editable = true }: Props
     return (
       <div className="panel py-16 text-center">
         <ClipboardList size={36} className="mx-auto mb-3" style={{ color: '#D8D8D8' }} />
-        <p className="font-medium mb-1 text-slate-500">No hay solicitudes de compra</p>
-        <p className="text-sm mb-4 text-slate-400">Crea una para comenzar a gestionar tus compras</p>
+        <p className="font-medium mb-1 text-brand-n500">No hay solicitudes de compra</p>
+        <p className="text-sm mb-4 text-brand-n500">Crea una para comenzar a gestionar tus compras</p>
         {editable && <Link href="/solicitudes/nueva" className="btn btn-primary btn-sm">+ Nueva solicitud</Link>}
       </div>
     )
@@ -102,7 +102,7 @@ export default function TablaSolicitudes({ initialData, editable = true }: Props
                     </span>
                   )}
                 </td>
-                <td className="td text-sm text-slate-500 max-w-[220px] truncate" title={sol.observaciones ?? ''}>
+                <td className="td text-sm text-brand-n500 max-w-[220px] truncate" title={sol.observaciones ?? ''}>
                   {sol.observaciones ?? '—'}
                 </td>
                 <td className="td">

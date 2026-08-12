@@ -67,6 +67,7 @@ export type Modulo =
   | 'materiales' | 'herramientas' | 'movimientos' | 'proveedores' | 'compras'
   | 'proyectos' | 'trabajadores' | 'recursos_tecnicos' | 'checklist'
   | 'etiquetas' | 'agente' | 'metricas'
+  | 'avance_obra' | 'verificacion_ric'
 
 type AccesoModulo = 'no' | 'lectura' | 'completo'
 
@@ -97,12 +98,26 @@ const MODULOS_POR_DEPARTAMENTO: Record<Departamento, Partial<Record<Modulo, Acce
     materiales: 'lectura', herramientas: 'lectura', movimientos: 'lectura',
     proveedores: 'lectura', compras: 'lectura', proyectos: 'lectura',
     trabajadores: 'lectura', agente: 'completo', metricas: 'completo',
+    avance_obra: 'completo', verificacion_ric: 'completo',
   },
   admin_software: {},
 }
 
 const NIVELES_TOTALES: NivelAcceso[] = ['admin_software', 'master']
 const NIVELES_CON_METRICAS: NivelAcceso[] = ['jefe_departamento', 'directiva', 'admin_software', 'master']
+
+// Excepción puntual y documentada: nivel_acceso === 'visualizacion' normalmente
+// nunca edita nada (regla de abajo en puedeEditar). El puesto "Ingeniero
+// visitante" (Visitador de obra, dpto. directiva) sí necesita generar
+// solicitudes de compra y crear/editar el avance y la verificación RIC de
+// sus obras, pese a tener nivel de solo lectura. Se centraliza acá — el
+// único lugar del sistema que mira `puesto` en vez de `departamento`/
+// `nivel_acceso` — en vez de repartir comparaciones de string sueltas por
+// rutas y componentes. Si esta tabla crece mucho más allá de 1-2 entradas,
+// reconsiderar un modelo de permisos por puesto en vez de por departamento.
+const EXCEPCIONES_EDICION_POR_PUESTO: Partial<Record<string, Modulo[]>> = {
+  'Ingeniero visitante': ['compras', 'avance_obra', 'verificacion_ric'],
+}
 
 export function puedeVer(perfil: Perfil, modulo: Modulo): boolean {
   if (NIVELES_TOTALES.includes(perfil.nivel_acceso)) return true
@@ -113,7 +128,33 @@ export function puedeVer(perfil: Perfil, modulo: Modulo): boolean {
 
 export function puedeEditar(perfil: Perfil, modulo: Modulo): boolean {
   if (NIVELES_TOTALES.includes(perfil.nivel_acceso)) return true
-  if (perfil.nivel_acceso === 'visualizacion' || perfil.nivel_acceso === 'directiva') return false
+  if (perfil.nivel_acceso === 'visualizacion' || perfil.nivel_acceso === 'directiva') {
+    return EXCEPCIONES_EDICION_POR_PUESTO[perfil.puesto]?.includes(modulo) ?? false
+  }
   const acceso = MODULOS_POR_DEPARTAMENTO[perfil.departamento]?.[modulo] ?? 'no'
   return acceso === 'completo'
+}
+
+// Helpers de lectura (no de autorización) para diferenciar UX entre los dos
+// puestos de terreno dentro de directiva — el Visitador estructura el plan
+// de avance (agrega/edita/borra etapas), el Supervisor solo marca las
+// etapas como completadas. La API sigue gateada a nivel de módulo
+// (requireEditable('avance_obra')) para ambos — esta distinción es de
+// interfaz, no un candado de seguridad duro. Ver plan en
+// docs/departamentos/directiva.md si hace falta endurecerlo a futuro.
+export function esVisitadorDeObra(perfil: Perfil | null): boolean {
+  return perfil?.puesto === 'Ingeniero visitante'
+}
+
+export function esSupervisorDeObra(perfil: Perfil | null): boolean {
+  return perfil?.puesto === 'Supervisor eléctrico'
+}
+
+// Quién ve los controles de "estructurar" el plan de avance (agregar/editar/
+// borrar etapas): el Visitador, o un admin/master usando su acceso total
+// (por ejemplo para corregir un plan a pedido del Visitador). Un Supervisor
+// eléctrico sin ser además admin NO cae acá — solo marca etapas.
+export function puedeEstructurarAvance(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  return esVisitadorDeObra(perfil) || NIVELES_TOTALES.includes(perfil.nivel_acceso)
 }

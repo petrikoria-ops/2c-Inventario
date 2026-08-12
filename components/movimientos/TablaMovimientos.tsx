@@ -78,7 +78,7 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
     <>
       <div className="panel">
         <div className="panel-header">
-          <ArrowUpDown size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ArrowUpDown size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Movimientos de inventario</h2>
           <div className="flex gap-2">
             <a href="/api/export/movimientos" className="btn btn-ghost btn-sm">
@@ -104,11 +104,11 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
             <option value="">Todos los tipos</option>
             {['entrada','salida','ajuste','devolucion'].map(t => <option key={t} value={t}>{t}</option>)}
           </select>
-          <div className="flex items-center gap-1 text-xs text-slate-500">
+          <div className="flex items-center gap-1 text-xs text-brand-n500">
             Desde <input type="date" className="input" value={desde} onChange={e => setDesde(e.target.value)} />
             Hasta <input type="date" className="input" value={hasta} onChange={e => setHasta(e.target.value)} />
           </div>
-          <span className="text-xs text-slate-400 ml-auto self-center">{filtered.length} resultado(s)</span>
+          <span className="text-xs text-brand-n500 ml-auto self-center">{filtered.length} resultado(s)</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">
@@ -127,26 +127,26 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
             <tbody>
               {visible.map(m => (
                 <tr key={m.id} className="tr-hover">
-                  <td className="td whitespace-nowrap text-xs text-slate-500">{fechaHora(m.fecha)}</td>
+                  <td className="td whitespace-nowrap text-xs text-brand-n500">{fechaHora(m.fecha)}</td>
                   <td className="td"><BadgeTipo tipo={m.tipo} /></td>
                   <td className="td"><span className="code">{(m.materiales as any)?.codigo}</span></td>
                   <td className="td text-slate-700">{(m.materiales as any)?.descripcion}</td>
-                  <td className="td-r font-medium">{num(m.cantidad)} <span className="text-slate-400 text-xs">{(m.materiales as any)?.unidad}</span></td>
-                  <td className="td-r text-slate-500">{num(m.stock_antes)}</td>
+                  <td className="td-r font-medium">{num(m.cantidad)} <span className="text-brand-n500 text-xs">{(m.materiales as any)?.unidad}</span></td>
+                  <td className="td-r text-brand-n500">{num(m.stock_antes)}</td>
                   <td className="td-r text-slate-700 font-medium">{num(m.stock_despues)}</td>
-                  <td className="td"><span className="code text-slate-400 text-[11px]">{(m.proyectos as any)?.ot ?? '—'}</span></td>
-                  <td className="td text-xs text-slate-500">{m.usuario}</td>
-                  <td className="td text-xs text-slate-500 max-w-[180px] truncate">{m.motivo ?? '—'}</td>
+                  <td className="td"><span className="code text-brand-n500 text-[11px]">{(m.proyectos as any)?.ot ?? '—'}</span></td>
+                  <td className="td text-xs text-brand-n500">{m.usuario}</td>
+                  <td className="td text-xs text-brand-n500 max-w-[180px] truncate">{m.motivo ?? '—'}</td>
                 </tr>
               ))}
-              {!filtered.length && <tr><td colSpan={10} className="text-center py-10 text-slate-400">Sin movimientos registrados</td></tr>}
+              {!filtered.length && <tr><td colSpan={10} className="text-center py-10 text-brand-n500">Sin movimientos registrados</td></tr>}
             </tbody>
           </table>
         </div>
 
         {filtered.length > 0 && (
           <div className="flex items-center justify-center gap-3 px-4 py-3 border-t" style={{ borderColor: '#EEF0F2' }}>
-            <span className="text-xs text-slate-400">Mostrando {visible.length} de {num(total, 0)}</span>
+            <span className="text-xs text-brand-n500">Mostrando {visible.length} de {num(total, 0)}</span>
             {hasMore && <button className="btn btn-outline btn-sm" onClick={loadMore}>Cargar más</button>}
             <div ref={sentinelRef} aria-hidden className="w-px h-px" />
           </div>
@@ -164,7 +164,7 @@ export default function TablaMovimientos({ initialData, materiales, proyectos, e
                   <div key={m.id} className="px-3 py-2 text-sm cursor-pointer hover:bg-blue-50 border-b border-slate-100 last:border-0 flex justify-between"
                     onClick={() => { setForm(p => ({ ...p, material_id: String(m.id) })); setBusqMat(`${m.codigo} — ${m.descripcion}`) }}>
                     <span><span className="code">{m.codigo}</span> {m.descripcion}</span>
-                    <span className="text-slate-400 text-xs">Stock: {num(m.stock_actual)} {m.unidad}</span>
+                    <span className="text-brand-n500 text-xs">Stock: {num(m.stock_actual)} {m.unidad}</span>
                   </div>
                 ))}
               </div>

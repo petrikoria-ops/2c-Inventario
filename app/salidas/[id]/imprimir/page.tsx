@@ -46,7 +46,7 @@ export default async function ImprimirValePage({ params }: { params: { id: strin
       {/* Barra de acciones */}
       <div className="no-print flex items-center gap-3 p-4 bg-white border-b border-slate-200 shadow-sm">
         <a href="/salidas" className="btn btn-ghost btn-sm">← Volver</a>
-        <span className="text-sm text-slate-500 flex-1">
+        <span className="text-sm text-brand-n500 flex-1">
           Vale de despacho <strong className="text-slate-800">{vale.numero}</strong>
         </span>
         <PrintButton />
@@ -65,19 +65,19 @@ export default async function ImprimirValePage({ params }: { params: { id: strin
               <p className="font-bold text-base" style={{ color: '#181818' }}>
                 2C MONTAJES Y PROYECTOS ELÉCTRICOS
               </p>
-              <p className="text-xs mt-0.5" style={{ color: '#909090' }}>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--n-500)' }}>
                 Inventario General
               </p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#909090' }}>
+            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--n-500)' }}>
               Vale de Despacho
             </p>
             <p className="text-3xl font-bold leading-tight" style={{ color: '#F0C000' }}>
               {vale.numero}
             </p>
-            <p className="text-sm mt-1" style={{ color: '#909090' }}>{fechaCorta(vale.fecha)}</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--n-500)' }}>{fechaCorta(vale.fecha)}</p>
           </div>
         </div>
 
@@ -88,16 +88,16 @@ export default async function ImprimirValePage({ params }: { params: { id: strin
         <div className="grid grid-cols-2 gap-6 mb-7 text-sm">
           {proy && (
             <div>
-              <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#909090' }}>
+              <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>
                 Proyecto / OT
               </p>
               <p className="font-semibold" style={{ color: '#181818' }}>{proy.ot}</p>
               <p style={{ color: '#4A5260' }}>{proy.nombre}</p>
-              {proy.cliente && <p style={{ color: '#909090' }}>{proy.cliente}</p>}
+              {proy.cliente && <p style={{ color: 'var(--n-500)' }}>{proy.cliente}</p>}
             </div>
           )}
           <div>
-            <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#909090' }}>
+            <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>
               Entregado a
             </p>
             <p className="font-semibold" style={{ color: '#181818' }}>{vale.usuario || '—'}</p>
@@ -125,9 +125,9 @@ export default async function ImprimirValePage({ params }: { params: { id: strin
                 </td>
                 <td className="doc-td" style={{ color: '#181818' }}>{item.descripcion}</td>
                 <td className="doc-td-r" style={{ fontWeight: 600 }}>{num(item.cantidad_entregada, 2)}</td>
-                <td className="doc-td" style={{ color: '#909090', fontSize: 12 }}>{item.unidad}</td>
+                <td className="doc-td" style={{ color: 'var(--n-500)', fontSize: 12 }}>{item.unidad}</td>
                 {total > 0 && (
-                  <td className="doc-td-r" style={{ color: '#909090' }}>{clp(item.precio_unit)}</td>
+                  <td className="doc-td-r" style={{ color: 'var(--n-500)' }}>{clp(item.precio_unit)}</td>
                 )}
                 {total > 0 && (
                   <td className="doc-td-r" style={{ fontWeight: 600 }}>

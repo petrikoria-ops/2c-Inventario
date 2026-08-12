@@ -46,26 +46,26 @@ export default function SolicitarAccesoPage() {
 
   if (enviado) {
     return (
-      <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F5F6F7' }}>
+      <main className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F5F6F7' }}>
         <div className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm text-center">
           <CheckCircle2 size={40} className="mx-auto mb-3" style={{ color: '#059669' }} />
           <h1 className="text-lg font-bold mb-2" style={{ color: '#2E333A' }}>Solicitud enviada</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-brand-n500">
             Se notificó al Administrador de software. Cuando apruebe tu solicitud te llegará un correo a <strong>{email}</strong> para crear tu contraseña y entrar al sistema.
           </p>
           <Link href="/login" className="btn btn-outline w-full justify-center mt-5">Volver al inicio de sesión</Link>
         </div>
-      </div>
+      </main>
     )
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F5F6F7' }}>
+    <main className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F5F6F7' }}>
       <form onSubmit={submit} className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm">
         <div className="flex flex-col items-center mb-6">
           <Image src="/logo-2c.png" alt="2C Montajes" width={48} height={48} priority />
           <h1 className="text-lg font-bold mt-3" style={{ color: '#2E333A' }}>Solicitar acceso</h1>
-          <p className="text-sm text-slate-500 text-center">Pide tu cuenta para 2C — un administrador la revisa y te invita por correo</p>
+          <p className="text-sm text-brand-n500 text-center">Pide tu cuenta para 2C — un administrador la revisa y te invita por correo</p>
         </div>
 
         <div className="space-y-3">
@@ -102,10 +102,10 @@ export default function SolicitarAccesoPage() {
         <button type="submit" disabled={loading} className="btn btn-primary w-full mt-5 justify-center">
           {loading ? <><Loader2 size={14} className="animate-spin" /> Enviando…</> : 'Enviar solicitud'}
         </button>
-        <Link href="/login" className="block text-center text-xs text-slate-400 mt-4 hover:text-slate-600">
+        <Link href="/login" className="block text-center text-xs text-brand-n500 mt-4 hover:text-slate-600">
           ¿Ya tienes cuenta? Inicia sesión
         </Link>
       </form>
-    </div>
+    </main>
   )
 }

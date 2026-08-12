@@ -25,7 +25,7 @@ export default async function WidgetDirectiva() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight">{num(matActivos ?? 0, 0)}</div>
-            <div className="text-xs text-slate-500 font-medium">Materiales activos</div>
+            <div className="text-xs text-brand-n500 font-medium">Materiales activos</div>
           </div>
         </div>
 
@@ -35,7 +35,7 @@ export default async function WidgetDirectiva() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight">{clp(valorInventario)}</div>
-            <div className="text-xs text-slate-500 font-medium">Valor de inventario</div>
+            <div className="text-xs text-brand-n500 font-medium">Valor de inventario</div>
           </div>
         </div>
 
@@ -45,7 +45,7 @@ export default async function WidgetDirectiva() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight">{num(herOperativas ?? 0, 0)}</div>
-            <div className="text-xs text-slate-500 font-medium">Herramientas operativas</div>
+            <div className="text-xs text-brand-n500 font-medium">Herramientas operativas</div>
           </div>
         </div>
 
@@ -55,7 +55,7 @@ export default async function WidgetDirectiva() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight">{num(proyEnProceso ?? 0, 0)}</div>
-            <div className="text-xs text-slate-500 font-medium">Proyectos en proceso</div>
+            <div className="text-xs text-brand-n500 font-medium">Proyectos en proceso</div>
           </div>
         </div>
       </div>

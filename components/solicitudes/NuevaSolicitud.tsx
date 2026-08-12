@@ -146,7 +146,7 @@ export default function NuevaSolicitud() {
       <div className="flex items-center gap-3 mb-5">
         <div>
           <h1 className="text-lg font-bold text-slate-800">Nueva solicitud de compra</h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-brand-n500">
             Busca materiales o usa "Autollenar" para agregar todos los ítems bajo stock mínimo
           </p>
         </div>
@@ -168,7 +168,7 @@ export default function NuevaSolicitud() {
         <div className="p-4">
           <div ref={searchRef} className="relative">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-n500 pointer-events-none">
                 {loadingSearch ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
               </span>
               <input
@@ -193,7 +193,7 @@ export default function NuevaSolicitud() {
                   >
                     <span className="code text-xs flex-shrink-0 w-24 truncate">{mat.codigo}</span>
                     <span className="text-sm text-slate-800 flex-1 min-w-0 truncate">{mat.descripcion}</span>
-                    <span className="text-xs text-slate-400 flex-shrink-0">{mat.unidad}</span>
+                    <span className="text-xs text-brand-n500 flex-shrink-0">{mat.unidad}</span>
                     <span className={`text-xs font-medium flex-shrink-0 ${estaBajoMinimo(mat.stock_actual, mat.stock_minimo) ? 'text-red-600' : 'text-green-600'}`}>
                       Stock: {num(mat.stock_actual, 0)}
                     </span>
@@ -202,7 +202,7 @@ export default function NuevaSolicitud() {
               </div>
             )}
             {showDrop && suggestions.length === 0 && query.length >= 2 && !loadingSearch && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-slate-400 text-center">
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-brand-n500 text-center">
                 Sin resultados para «{query}»
               </div>
             )}
@@ -247,7 +247,7 @@ export default function NuevaSolicitud() {
                     <td className={`td-r font-medium ${estaBajoMinimo(it.stock_actual, it.stock_minimo) ? 'text-red-600' : 'text-slate-600'}`}>
                       {num(it.stock_actual, 0)}
                     </td>
-                    <td className="td-r text-slate-400">{num(it.stock_minimo, 0)}</td>
+                    <td className="td-r text-brand-n500">{num(it.stock_minimo, 0)}</td>
                     <td className="td-r">
                       <input
                         type="number"
@@ -258,7 +258,7 @@ export default function NuevaSolicitud() {
                         className="input text-right text-sm w-24"
                       />
                     </td>
-                    <td className="td text-slate-400">{it.unidad}</td>
+                    <td className="td text-brand-n500">{it.unidad}</td>
                     <td className="td">
                       <input
                         type="text"
@@ -268,7 +268,7 @@ export default function NuevaSolicitud() {
                         className="input text-sm w-full"
                       />
                     </td>
-                    <td className="td-r text-slate-400">
+                    <td className="td-r text-brand-n500">
                       {it.precio_unitario ? clp(it.precio_unitario) : '—'}
                     </td>
                     <td className="td text-center">
@@ -287,9 +287,9 @@ export default function NuevaSolicitud() {
           </div>
         </div>
       ) : (
-        <div className="panel mb-4 py-12 text-center text-slate-400">
+        <div className="panel mb-4 py-12 text-center text-brand-n500">
           <ClipboardList size={36} className="mx-auto mb-2" style={{ color: '#D8D8D8' }} />
-          <p className="font-medium mb-1 text-slate-500">Sin ítems todavía</p>
+          <p className="font-medium mb-1 text-brand-n500">Sin ítems todavía</p>
           <p className="text-sm">Usa el buscador de arriba o el botón "Autollenar"</p>
         </div>
       )}

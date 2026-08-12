@@ -69,7 +69,7 @@ export default async function DashboardPage() {
     { Icon: CheckCircle,   label: 'Her. operativas',     value: num(herOperativas ?? 0, 0), bg: 'bg-green-100',  iconColor: '#059669' },
     { Icon: Wrench,        label: 'Her. en reparación',  value: num(herEnRep      ?? 0, 0), bg: 'bg-orange-100', iconColor: '#EA580C' },
     { Icon: Search,        label: 'Her. extraviadas',    value: num(herExtraviadas ?? 0, 0), bg: 'bg-red-100',   iconColor: '#DC2626' },
-    { Icon: ShoppingCart,  label: 'Compras pendientes',  value: num(solicPend,         0), bg: solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100', iconColor: solicPend > 0 ? '#EA580C' : '#909090' },
+    { Icon: ShoppingCart,  label: 'Compras pendientes',  value: num(solicPend,         0), bg: solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100', iconColor: solicPend > 0 ? '#EA580C' : 'var(--n-500)' },
     { Icon: PackageOpen,   label: 'Salidas este mes',    value: num(salidasMes,        0), bg: 'bg-violet-100', iconColor: '#7C3AED' },
   ]
 
@@ -81,7 +81,7 @@ export default async function DashboardPage() {
         </div>
         <div>
           <h1 className="text-lg font-bold text-slate-800 leading-tight">Métricas</h1>
-          <p className="text-sm text-slate-500">Resumen general del inventario</p>
+          <p className="text-sm text-brand-n500">Resumen general del inventario</p>
         </div>
       </div>
 
@@ -94,7 +94,7 @@ export default async function DashboardPage() {
             </div>
             <div>
               <div className="text-xl font-bold text-slate-800 leading-tight">{s.value}</div>
-              <div className="text-xs text-slate-500 font-medium">{s.label}</div>
+              <div className="text-xs text-brand-n500 font-medium">{s.label}</div>
             </div>
           </div>
         ))}
@@ -104,7 +104,7 @@ export default async function DashboardPage() {
       {Object.keys(proyPorEstado).length > 0 && (
         <div className="panel mb-5">
           <div className="panel-header">
-            <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
+            <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
             <h2>Proyectos por estado</h2>
             <a href="/proyectos" className="btn btn-ghost btn-sm">Ver todos →</a>
           </div>
@@ -125,7 +125,7 @@ export default async function DashboardPage() {
       {/* Últimos movimientos */}
       <div className="panel">
         <div className="panel-header">
-          <ArrowUpDown size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ArrowUpDown size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Últimos movimientos</h2>
           <a href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</a>
         </div>
@@ -144,19 +144,19 @@ export default async function DashboardPage() {
             <tbody>
               {(ultMov ?? []).map(m => (
                 <tr key={m.id} className="tr-hover">
-                  <td className="td"><span className="text-xs text-slate-500 whitespace-nowrap">{fechaHora(m.fecha)}</span></td>
+                  <td className="td"><span className="text-xs text-brand-n500 whitespace-nowrap">{fechaHora(m.fecha)}</span></td>
                   <td className="td"><BadgeTipo tipo={m.tipo} /></td>
                   <td className="td">
                     <span className="code">{(m.materiales as any)?.codigo}</span>
-                    <span className="text-slate-500 text-xs ml-1">{(m.materiales as any)?.descripcion}</span>
+                    <span className="text-brand-n500 text-xs ml-1">{(m.materiales as any)?.descripcion}</span>
                   </td>
-                  <td className="td-r text-sm font-medium">{num(m.cantidad)} <span className="text-slate-400 text-xs">{(m.materiales as any)?.unidad}</span></td>
-                  <td className="td text-xs text-slate-500">{m.usuario ?? '—'}</td>
-                  <td className="td"><span className="code text-slate-500">{(m.proyectos as any)?.ot ?? '—'}</span></td>
+                  <td className="td-r text-sm font-medium">{num(m.cantidad)} <span className="text-brand-n500 text-xs">{(m.materiales as any)?.unidad}</span></td>
+                  <td className="td text-xs text-brand-n500">{m.usuario ?? '—'}</td>
+                  <td className="td"><span className="code text-brand-n500">{(m.proyectos as any)?.ot ?? '—'}</span></td>
                 </tr>
               ))}
               {!ultMov?.length && (
-                <tr><td colSpan={6} className="text-center py-8 text-slate-400">Sin movimientos registrados</td></tr>
+                <tr><td colSpan={6} className="text-center py-8 text-brand-n500">Sin movimientos registrados</td></tr>
               )}
             </tbody>
           </table>

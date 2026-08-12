@@ -32,7 +32,7 @@ export default function TablaSalidas({ initialData, editable = true }: Props) {
   return (
     <div className="panel">
       <div className="panel-header">
-        <PackageOpen size={14} style={{ color: '#909090', flexShrink: 0 }} />
+        <PackageOpen size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
         <h2>Vales de despacho</h2>
         {editable && <a href="/salidas/nueva" className="btn btn-primary btn-sm">+ Nuevo despacho</a>}
       </div>
@@ -62,14 +62,14 @@ export default function TablaSalidas({ initialData, editable = true }: Props) {
             {filtered.map(v => (
               <tr key={v.id} className="tr-hover">
                 <td className="td"><span className="code">{v.numero}</span></td>
-                <td className="td text-xs text-slate-500">{fechaHora(v.fecha)}</td>
+                <td className="td text-xs text-brand-n500">{fechaHora(v.fecha)}</td>
                 <td className="td text-slate-600">
                   {v.proyectos
                     ? <><span className="code text-xs">{v.proyectos.ot}</span> {v.proyectos.nombre}</>
-                    : <span className="text-slate-400">—</span>}
+                    : <span className="text-brand-n500">—</span>}
                 </td>
                 <td className="td">{v.usuario}</td>
-                <td className="td text-slate-500 text-sm">{v.motivo ?? '—'}</td>
+                <td className="td text-brand-n500 text-sm">{v.motivo ?? '—'}</td>
                 <td className="td text-right font-medium">{v.vales_despacho_items?.length ?? 0}</td>
                 <td className="td">
                   <div className="flex gap-0.5">
@@ -86,7 +86,7 @@ export default function TablaSalidas({ initialData, editable = true }: Props) {
               </tr>
             ))}
             {!filtered.length && (
-              <tr><td colSpan={7} className="text-center py-10 text-slate-400">Sin vales de despacho registrados</td></tr>
+              <tr><td colSpan={7} className="text-center py-10 text-brand-n500">Sin vales de despacho registrados</td></tr>
             )}
           </tbody>
         </table>

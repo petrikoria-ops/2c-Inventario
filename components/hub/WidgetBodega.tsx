@@ -30,7 +30,7 @@ export default async function WidgetBodega() {
           <Link href="/materiales?bajo_minimo=1" className="btn btn-ghost btn-sm">Ver todos →</Link>
         </div>
         {bajoMinimo.length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-400">Ningún material está bajo su mínimo configurado.</div>
+          <div className="p-6 text-center text-sm text-brand-n500">Ningún material está bajo su mínimo configurado.</div>
         ) : (
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -41,8 +41,8 @@ export default async function WidgetBodega() {
                     <td className="td"><span className="code">{m.codigo}</span></td>
                     <td className="td font-medium text-red-900">{m.descripcion}</td>
                     <td className="td-r font-bold text-red-700">{num(m.stock_actual)}</td>
-                    <td className="td-r text-slate-500">{num(m.stock_minimo)}</td>
-                    <td className="td text-xs text-slate-500">{m.ubicacion ?? '—'}</td>
+                    <td className="td-r text-brand-n500">{num(m.stock_minimo)}</td>
+                    <td className="td text-xs text-brand-n500">{m.ubicacion ?? '—'}</td>
                   </tr>
                 ))}
               </tbody>
@@ -58,7 +58,7 @@ export default async function WidgetBodega() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight">{num(despachosMes ?? 0, 0)}</div>
-            <div className="text-xs text-slate-500 font-medium">Despachos este mes</div>
+            <div className="text-xs text-brand-n500 font-medium">Despachos este mes</div>
           </div>
         </div>
         <div className="stat-card">
@@ -67,7 +67,7 @@ export default async function WidgetBodega() {
           </div>
           <div>
             <div className="text-xl font-bold text-slate-800 leading-tight">{num(herRepar ?? 0, 0)}</div>
-            <div className="text-xs text-slate-500 font-medium">Herramientas en reparación</div>
+            <div className="text-xs text-brand-n500 font-medium">Herramientas en reparación</div>
           </div>
         </div>
       </div>

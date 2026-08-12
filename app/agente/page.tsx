@@ -14,7 +14,7 @@ export default function AgentePage() {
         </div>
         <div>
           <h1 className="text-sm font-bold text-slate-800">Agente IA de inventario</h1>
-          <p className="text-xs text-slate-400">Consultas en lenguaje natural · datos reales · solo lectura</p>
+          <p className="text-xs text-brand-n500">Consultas en lenguaje natural · datos reales · solo lectura</p>
         </div>
       </div>
 

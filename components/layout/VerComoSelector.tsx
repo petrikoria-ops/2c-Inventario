@@ -79,7 +79,7 @@ export default function VerComoSelector({
   // variant pills (inicio)
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-xs font-semibold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+      <span className="text-xs font-semibold text-brand-n500 uppercase tracking-widest flex items-center gap-1.5">
         <Eye size={13} /> Ver como:
       </span>
       <button

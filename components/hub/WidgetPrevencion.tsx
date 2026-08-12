@@ -17,12 +17,12 @@ export default async function WidgetPrevencion() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className="panel">
         <div className="panel-header">
-          <ShieldAlert size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ShieldAlert size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Herramientas con problema</h2>
           <Link href="/herramientas" className="btn btn-ghost btn-sm">Ver todas →</Link>
         </div>
         {!herramientas?.length ? (
-          <div className="p-6 text-center text-sm text-slate-400">No hay herramientas en reparación ni extraviadas.</div>
+          <div className="p-6 text-center text-sm text-brand-n500">No hay herramientas en reparación ni extraviadas.</div>
         ) : (
           <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
             {herramientas.map(h => (
@@ -39,11 +39,11 @@ export default async function WidgetPrevencion() {
 
       <div className="panel">
         <div className="panel-header">
-          <CheckSquare size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <CheckSquare size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Checklist tablero</h2>
         </div>
         <div className="p-6 flex flex-col items-center justify-center text-center gap-3">
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-brand-n500">
             Usa la checklist de armado y pruebas para dejar registro de cada tablero antes de su entrega.
           </p>
           <Link href="/checklist" className="btn btn-primary btn-sm">

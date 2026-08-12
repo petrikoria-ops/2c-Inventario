@@ -166,7 +166,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
     <>
       <div className="panel">
         <div className="panel-header">
-          <Wrench size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <Wrench size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Herramientas</h2>
           {editable && (
             <button className="btn btn-primary btn-sm ml-auto" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva</button>
@@ -208,7 +208,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
             <option value="">Todos los estados</option>
             {ESTADOS.map(e => <option key={e} value={e}>{e.replace('_',' ')}</option>)}
           </select>
-          <span className="text-xs text-slate-400 ml-auto self-center">
+          <span className="text-xs text-brand-n500 ml-auto self-center">
             Mostrando <strong>{filtered.length}</strong> de {items.length}
           </span>
         </div>
@@ -224,6 +224,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
                       ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
                       onChange={toggleAll}
                       className="cursor-pointer"
+                      aria-label={allFilteredSelected ? 'Deseleccionar todas las herramientas visibles' : 'Seleccionar todas las herramientas visibles'}
                     />
                   )}
                 </th>
@@ -245,15 +246,16 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
                   <tr key={h.id} className={`tr-hover ${isSelected ? 'bg-amber-50/60' : ''}`}>
                     <td className="td" style={{ padding: '0 10px' }}>
                       {editable && (
-                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(h.id)} className="cursor-pointer" />
+                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(h.id)} className="cursor-pointer"
+                          aria-label={`Seleccionar ${h.codigo} — ${h.descripcion}`} />
                       )}
                     </td>
                     <td className="td"><span className="code">{h.codigo}</span></td>
                     <td className="td font-medium">{h.descripcion}</td>
-                    <td className="td text-xs text-slate-500">{[h.marca, h.modelo].filter(Boolean).join(' ')}</td>
+                    <td className="td text-xs text-brand-n500">{[h.marca, h.modelo].filter(Boolean).join(' ')}</td>
                     <td className="td"><BadgeEstadoHer estado={h.estado} /></td>
                     <td className="td text-xs">{h.responsable ?? '—'}</td>
-                    <td className="td text-xs text-slate-500">{h.ubicacion ?? '—'}</td>
+                    <td className="td text-xs text-brand-n500">{h.ubicacion ?? '—'}</td>
                     <td className="td">
                       {dias === null ? '—' :
                         dias < 0  ? <span className="badge badge-red">Vencida {Math.abs(dias)}d</span> :
@@ -278,7 +280,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
                 )
               })}
               {!filtered.length && (
-                <tr><td colSpan={9} className="text-center py-10 text-slate-400">Sin herramientas registradas</td></tr>
+                <tr><td colSpan={9} className="text-center py-10 text-brand-n500">Sin herramientas registradas</td></tr>
               )}
             </tbody>
           </table>
@@ -286,7 +288,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
 
         {filtered.length > 0 && (
           <div className="flex items-center justify-center gap-3 px-4 py-3 border-t" style={{ borderColor: '#EEF0F2' }}>
-            <span className="text-xs text-slate-400">Mostrando {visible.length} de {total}</span>
+            <span className="text-xs text-brand-n500">Mostrando {visible.length} de {total}</span>
             {hasMore && <button className="btn btn-outline btn-sm" onClick={loadMore}>Cargar más</button>}
             <div ref={sentinelRef} aria-hidden className="w-px h-px" />
           </div>
@@ -318,7 +320,7 @@ export default function TablaHerramientas({ initialData, editable = true }: Prop
       <Modal open={modalBulkEdit}
         title={`Editar ${numSelected} herramienta${numSelected !== 1 ? 's' : ''} seleccionada${numSelected !== 1 ? 's' : ''}`}
         onClose={() => setModalBulkEdit(false)} onSave={bulkEdit} saveLabel="Aplicar cambios" saving={bulkSaving}>
-        <p className="text-xs text-slate-500 mb-4">Solo se actualizarán los campos que completes.</p>
+        <p className="text-xs text-brand-n500 mb-4">Solo se actualizarán los campos que completes.</p>
         <div className="grid grid-cols-2 gap-3">
           <div>
             <label className="label" htmlFor="herramienta-bulk-estado">Estado</label>

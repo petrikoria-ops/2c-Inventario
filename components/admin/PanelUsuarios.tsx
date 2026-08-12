@@ -77,10 +77,10 @@ export default function PanelUsuarios({ initialData, miId }: { initialData: Perf
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="min-w-0">
                 <div className="text-sm font-medium text-slate-800 truncate">
-                  {u.nombre_completo} <span className="text-slate-400 font-normal">— {u.email}</span>
+                  {u.nombre_completo} <span className="text-brand-n500 font-normal">— {u.email}</span>
                   {!u.activo && <span className="badge badge-gray ml-2">Inactivo</span>}
                 </div>
-                <div className="text-xs text-slate-400">
+                <div className="text-xs text-brand-n500">
                   {NOMBRE_DEPARTAMENTO[u.departamento] ?? u.departamento} · {u.puesto} · <span className="font-medium">{u.nivel_acceso}</span>
                 </div>
               </div>
