@@ -24,24 +24,58 @@ export default function CrearPasswordPage() {
     const sb = getSupabaseBrowser()
 
     const establecerSesion = async () => {
-      const code = new URLSearchParams(window.location.search).get('code')
+      // Formato PKCE: ?code=...
+      const query = new URLSearchParams(window.location.search)
+      const code = query.get('code')
+
       if (code) {
         const { error } = await sb.auth.exchangeCodeForSession(code)
         if (error) {
+          console.error('Error al intercambiar código de invitación:', error)
           setInvalido(true)
           setReady(true)
           return
         }
+      } else {
+        // Formato implícito: #access_token=...&refresh_token=...
+        const hash = new URLSearchParams(window.location.hash.substring(1))
+        const accessToken = hash.get('access_token')
+        const refreshToken = hash.get('refresh_token')
+
+        if (accessToken && refreshToken) {
+          const { error } = await sb.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken,
+          })
+
+          if (error) {
+            console.error('Error al guardar sesión de invitación:', error)
+            setInvalido(true)
+            setReady(true)
+            return
+          }
+
+          // Limpia los tokens de la barra del navegador después de guardarlos.
+          window.history.replaceState({}, document.title, '/crear-password')
+        }
       }
-      // Si el link vino con tokens en el hash (#access_token=...), el
-      // cliente ya los detecta y arma la sesión solo al inicializarse.
-      const { data: { session } } = await sb.auth.getSession()
-      if (!session) setInvalido(true)
+
+      const {
+        data: { session },
+        error: sessionError,
+      } = await sb.auth.getSession()
+
+      if (sessionError || !session) {
+        console.error('No se encontró sesión de invitación:', sessionError)
+        setInvalido(true)
+      }
+
       setReady(true)
     }
 
     establecerSesion()
   }, [])
+
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()

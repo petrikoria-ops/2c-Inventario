@@ -37,15 +37,20 @@ export async function middleware(req: NextRequest) {
   // /crear-password también es pública: el link del correo de invitación
   // llega sin sesión (los tokens vienen en la URL) — la sesión recién se
   // arma en el navegador cuando esa página carga y procesa el código.
-  const isPublicPage  = path === '/login' || path === '/solicitar-acceso' || path === '/crear-password'
+  const isPublicPage =
+    path === '/login' ||
+    path === '/solicitar-acceso' ||
+    path === '/crear-password' ||
+    path === '/auth/callback'
+
   const isPendingPage = path === '/pendiente-aprobacion'
 
-  if (!session && !isPublicPage) {
-    const url = req.nextUrl.clone()
-    url.pathname = '/login'
-    url.searchParams.set('next', path)
-    return NextResponse.redirect(url)
-  }
+   if (session && isPublicPage && path !== '/crear-password' && path !== '/auth/callback') {
+     const url = req.nextUrl.clone()
+     url.pathname = '/'
+     url.search = ''
+     return NextResponse.redirect(url)
+   }
 
   // Con sesión, pero todavía sin perfil asignado (cuenta recién invitada,
   // o de un usuario creado antes de que existiera este sistema de roles):
