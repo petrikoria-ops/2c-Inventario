@@ -14,7 +14,7 @@ import type { LucideIcon } from 'lucide-react'
 import type { Departamento, Modulo } from '@/lib/auth/permisos'
 import {
   PackageOpen, Handshake, ArrowUpDown, ShoppingCart, HardHat, Tag,
-  Package, Wrench, Users, Upload, Building2, ClipboardList,
+  Package, Wrench, Users, Upload, Building2, ClipboardList, ListChecks,
   Calculator, CheckSquare, Bot,
   ShieldCheck, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
@@ -218,6 +218,8 @@ const DIRECTIVA: DeptConfig = {
   acciones: [
     { href: '/dashboard',  Icon: BarChart3,    titulo: 'Métricas',       desc: 'Indicadores de toda la empresa', modulo: 'metricas', acento: A.oro },
     { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras activas',  desc: 'Estado de cada proyecto', modulo: 'proyectos', acento: A.ambar },
+    { href: '/avance-obra', Icon: ListChecks,  titulo: 'Avance de obra', desc: 'Etapas por proyecto', modulo: 'avance_obra', acento: A.teal },
+    { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric', acento: A.verde },
     { href: '/agente',     Icon: Bot,          titulo: 'Agente IA',      desc: 'Pregunta por el negocio', modulo: 'agente', acento: A.violeta },
     { href: '/materiales', Icon: Package,      titulo: 'Inventario',     desc: 'Valor y existencias', modulo: 'materiales', acento: A.pizarra },
   ],
@@ -226,6 +228,10 @@ const DIRECTIVA: DeptConfig = {
       { href: '/dashboard',  Icon: FileBarChart, titulo: 'Métricas',      desc: 'KPIs y gráficos', modulo: 'metricas' },
       { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras activas', desc: 'Seguimiento de obras', modulo: 'proyectos' },
       { href: '/agente',     Icon: Bot,          titulo: 'Agente IA',     desc: 'Consultas del negocio', modulo: 'agente' },
+    ]},
+    { titulo: 'Terreno', items: [
+      { href: '/avance-obra',      Icon: ListChecks,  titulo: 'Avance de obra',    desc: 'Plan de etapas por obra', modulo: 'avance_obra' },
+      { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC',  desc: 'Verificación inicial y puesta en marcha', modulo: 'verificacion_ric' },
     ]},
     { titulo: 'Inventario y compras', items: [
       { href: '/materiales',  Icon: Package,      titulo: 'Materiales',   desc: 'Existencias y valor', modulo: 'materiales' },
@@ -270,6 +276,10 @@ const GENERAL: DeptConfig = {
       { href: '/proyectos',   Icon: ClipboardList, titulo: 'Obras activas', desc: 'Tableros', modulo: 'proyectos' },
       { href: '/solicitudes', Icon: ShoppingCart,  titulo: 'Compras',       desc: 'Solicitudes', modulo: 'compras' },
       { href: '/proveedores', Icon: Building2,     titulo: 'Proveedores',   desc: 'Catálogo', modulo: 'proveedores' },
+    ]},
+    { titulo: 'Terreno', items: [
+      { href: '/avance-obra',      Icon: ListChecks,  titulo: 'Avance de obra',   desc: 'Plan de etapas', modulo: 'avance_obra' },
+      { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric' },
     ]},
     { titulo: 'Recursos', items: [
       { href: '/recursos',  Icon: Calculator,  titulo: 'Recursos técnicos', desc: 'Calculadoras', modulo: 'recursos_tecnicos' },
