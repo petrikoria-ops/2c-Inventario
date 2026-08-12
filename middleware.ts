@@ -34,7 +34,10 @@ export async function middleware(req: NextRequest) {
   const { data: { session } } = await supabase.auth.getSession()
 
   const path = req.nextUrl.pathname
-  const isPublicPage  = path === '/login' || path === '/solicitar-acceso'
+  // /crear-password también es pública: el link del correo de invitación
+  // llega sin sesión (los tokens vienen en la URL) — la sesión recién se
+  // arma en el navegador cuando esa página carga y procesa el código.
+  const isPublicPage  = path === '/login' || path === '/solicitar-acceso' || path === '/crear-password'
   const isPendingPage = path === '/pendiente-aprobacion'
 
   if (!session && !isPublicPage) {

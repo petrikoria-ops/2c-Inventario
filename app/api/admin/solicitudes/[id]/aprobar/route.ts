@@ -33,9 +33,15 @@ export async function POST(req: NextRequest, { params }: Ctx) {
 
   const admin = getSupabaseAdmin()
 
-  // Invita al nuevo usuario — Supabase le manda un correo con un link
-  // para que defina su contraseña y quede con sesión iniciada.
-  const { data: invite, error: errInvite } = await admin.auth.admin.inviteUserByEmail(solicitud.email)
+  // Invita al nuevo usuario — Supabase le manda un correo con un link.
+  // redirectTo apunta a /crear-password: esa pantalla es la que de verdad
+  // le pide y guarda la contraseña (el link de Supabase por sí solo solo
+  // deja una sesión temporal, sin contraseña definida). Este mismo dominio
+  // debe estar en Supabase → Authentication → URL Configuration →
+  // Redirect URLs, si no Supabase ignora el redirectTo.
+  const { data: invite, error: errInvite } = await admin.auth.admin.inviteUserByEmail(solicitud.email, {
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? ''}/crear-password`,
+  })
   if (errInvite || !invite.user) {
     await logError({
       mensaje: `Fallo al invitar usuario para solicitud #${params.id}: ${errInvite?.message ?? 'sin user'}`,
