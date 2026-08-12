@@ -14,12 +14,12 @@ interface Props {
   editableProyecto: boolean
   editableAvance: boolean
   editableRic: boolean
-  esVisitador: boolean
+  puedeEstructurarAvance: boolean
 }
 
 export default function ProyectoHub({
   proyecto, initialTrabajadores, initialAvance, verificaciones,
-  editableProyecto, editableAvance, editableRic, esVisitador,
+  editableProyecto, editableAvance, editableRic, puedeEstructurarAvance,
 }: Props) {
   return (
     <div className="p-5 w-full max-w-5xl mx-auto">
@@ -41,7 +41,7 @@ export default function ProyectoHub({
       <div className="space-y-5">
         <TrabajadoresObra proyectoId={proyecto.id} initialData={initialTrabajadores} editable={editableProyecto} />
 
-        <AvanceObra proyectoId={proyecto.id} initialAvance={initialAvance} esVisitador={esVisitador} editable={editableAvance} />
+        <AvanceObra proyectoId={proyecto.id} initialAvance={initialAvance} puedeEstructurar={puedeEstructurarAvance} editable={editableAvance} />
 
         {/* Verificaciones RIC */}
         <div className="panel">

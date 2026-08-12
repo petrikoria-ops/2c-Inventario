@@ -1,6 +1,6 @@
 'use client'
 import { useState, useMemo, useCallback } from 'react'
-import { ClipboardList, Search, ScrollText, ClipboardCheck, Pencil, Trash2 } from 'lucide-react'
+import { ClipboardList, Search, ScrollText, ClipboardCheck, Building2, Pencil, Trash2 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { BadgeEstadoProy } from '@/components/ui/Badge'
 import { clp, fechaCorta, num } from '@/lib/utils'
@@ -108,6 +108,9 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                   <td className="td text-xs text-brand-n500">{fechaCorta(p.fecha_entrega)}</td>
                   <td className="td-r font-medium text-slate-700">{clp(calcCosto(p.costo_total))}</td>
                   <td className="td"><div className="flex gap-0.5">
+                    <a href={`/proyectos/${p.id}`} className="btn-icon" title="Ver obra" aria-label="Ver obra">
+                      <Building2 size={13} />
+                    </a>
                     <button className="btn-icon" title="Ver movimientos" aria-label="Ver movimientos" onClick={() => verDetalle(p)}>
                       <ScrollText size={13} />
                     </button>

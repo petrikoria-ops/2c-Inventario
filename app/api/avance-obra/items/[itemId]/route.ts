@@ -28,8 +28,8 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
     }
   }
   if (body.etapa !== undefined) patch.etapa = String(body.etapa).trim()
-  if (body.descripcion !== undefined) patch.descripcion = body.descripcion
-  if (body.fecha_estimada !== undefined) patch.fecha_estimada = body.fecha_estimada
+  if (body.descripcion !== undefined) patch.descripcion = body.descripcion || null
+  if (body.fecha_estimada !== undefined) patch.fecha_estimada = body.fecha_estimada || null
 
   const { data, error } = await sb
     .from('avances_obra_items')

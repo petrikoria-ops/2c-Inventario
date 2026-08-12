@@ -149,3 +149,12 @@ export function esVisitadorDeObra(perfil: Perfil | null): boolean {
 export function esSupervisorDeObra(perfil: Perfil | null): boolean {
   return perfil?.puesto === 'Supervisor eléctrico'
 }
+
+// Quién ve los controles de "estructurar" el plan de avance (agregar/editar/
+// borrar etapas): el Visitador, o un admin/master usando su acceso total
+// (por ejemplo para corregir un plan a pedido del Visitador). Un Supervisor
+// eléctrico sin ser además admin NO cae acá — solo marca etapas.
+export function puedeEstructurarAvance(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  return esVisitadorDeObra(perfil) || NIVELES_TOTALES.includes(perfil.nivel_acceso)
+}

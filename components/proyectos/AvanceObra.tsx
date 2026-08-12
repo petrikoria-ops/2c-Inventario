@@ -12,19 +12,17 @@ const ETAPA_VACIA: EtapaBorrador = { etapa: '', descripcion: '', fecha_estimada:
 interface Props {
   proyectoId: number
   initialAvance: (AvanceObraType & { avances_obra_items: AvanceObraItem[] }) | null
-  esVisitador: boolean
+  puedeEstructurar: boolean
   editable: boolean
 }
 
-export default function AvanceObra({ proyectoId, initialAvance, esVisitador, editable }: Props) {
+export default function AvanceObra({ proyectoId, initialAvance, puedeEstructurar, editable }: Props) {
   const [avance, setAvance] = useState(initialAvance)
   const [borrador, setBorrador] = useState<EtapaBorrador[]>([{ ...ETAPA_VACIA }])
   const [creando, setCreando] = useState(false)
   const [nuevaEtapa, setNuevaEtapa] = useState('')
   const { showToast } = useToast()
   const router = useRouter()
-
-  const puedeEstructurar = editable && esVisitador
 
   const crearPlan = useCallback(async () => {
     const etapas = borrador.filter(e => e.etapa.trim())

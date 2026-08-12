@@ -32,8 +32,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       avance_id: avance.id,
       orden: count ?? 0,
       etapa: body.etapa.trim(),
-      descripcion: body.descripcion ?? null,
-      fecha_estimada: body.fecha_estimada ?? null,
+      descripcion: body.descripcion || null,
+      fecha_estimada: body.fecha_estimada || null,
     })
     .select()
     .single()

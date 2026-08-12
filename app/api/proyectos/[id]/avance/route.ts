@@ -50,8 +50,8 @@ export async function POST(req: NextRequest, { params }: Ctx) {
       avance_id: avance.id,
       orden: i,
       etapa: String(e.etapa ?? '').trim(),
-      descripcion: e.descripcion ?? null,
-      fecha_estimada: e.fecha_estimada ?? null,
+      descripcion: e.descripcion || null,
+      fecha_estimada: e.fecha_estimada || null,
     })).filter(e => e.etapa)
 
     const { error: itemsError } = await sb.from('avances_obra_items').insert(toInsert)
