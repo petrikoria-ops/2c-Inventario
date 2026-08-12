@@ -115,7 +115,7 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
         <Wrench size={20} style={{ color: '#2E333A' }} />
         <div>
           <h1 className="text-lg font-bold text-slate-800">Entrega de herramientas</h1>
-          <p className="text-sm text-slate-500">Genera comprobante y actualiza el responsable de cada herramienta</p>
+          <p className="text-sm text-brand-n500">Genera comprobante y actualiza el responsable de cada herramienta</p>
         </div>
         <a href="/trabajadores" className="btn btn-ghost btn-sm ml-auto">← Trabajadores</a>
       </div>
@@ -153,7 +153,7 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
         <div className="p-4">
           <div ref={searchRef} className="relative">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-n500 pointer-events-none">
                 {loadingSearch ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
               </span>
               <input ref={inputRef} type="text" value={query}
@@ -170,14 +170,14 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
                     <span className="code text-xs flex-shrink-0 w-24 truncate">{h.codigo}</span>
                     <span className="text-sm text-slate-800 flex-1 min-w-0 truncate">{h.descripcion}</span>
                     {h.responsable && (
-                      <span className="text-xs text-slate-400 flex-shrink-0">Con: {h.responsable}</span>
+                      <span className="text-xs text-brand-n500 flex-shrink-0">Con: {h.responsable}</span>
                     )}
                   </button>
                 ))}
               </div>
             )}
             {showDrop && suggestions.length === 0 && query.length >= 2 && !loadingSearch && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-slate-400 text-center">
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-brand-n500 text-center">
                 Sin resultados operativos para «{query}»
               </div>
             )}
@@ -205,7 +205,7 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
                   <tr key={it.id} className="tr-hover">
                     <td className="td"><span className="code">{it.codigo}</span></td>
                     <td className="td font-medium">{it.descripcion}</td>
-                    <td className="td text-xs text-slate-400">{it.responsable ?? '—'}</td>
+                    <td className="td text-xs text-brand-n500">{it.responsable ?? '—'}</td>
                     <td className="td">
                       <input type="text" value={it.notas} onChange={e => updateNotas(idx, e.target.value)}
                         placeholder="Opcional…" className="input text-sm w-full" />
@@ -223,9 +223,9 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
           </div>
         </div>
       ) : (
-        <div className="panel mb-4 py-12 text-center text-slate-400">
+        <div className="panel mb-4 py-12 text-center text-brand-n500">
           <Wrench size={36} className="mx-auto mb-2" style={{ color: '#D8D8D8' }} />
-          <p className="font-medium mb-1 text-slate-500">Sin herramientas todavía</p>
+          <p className="font-medium mb-1 text-brand-n500">Sin herramientas todavía</p>
           <p className="text-sm">Usa el buscador para agregar herramientas operativas</p>
         </div>
       )}

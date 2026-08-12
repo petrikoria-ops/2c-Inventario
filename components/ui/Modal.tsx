@@ -44,7 +44,7 @@ export default function Modal({
           <h3 className="font-semibold flex-1 text-[15px]" style={{ color: '#181818' }}>{title}</h3>
           <button onClick={onClose}
             className="p-1.5 rounded transition-colors hover:bg-slate-100"
-            style={{ color: '#909090' }}
+            style={{ color: 'var(--n-500)' }}
             aria-label="Cerrar">
             <X size={16} strokeWidth={2} />
           </button>

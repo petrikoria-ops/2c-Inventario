@@ -29,7 +29,7 @@ export default async function ErroresAdminPage() {
         </div>
         <div>
           <h1 className="text-lg font-bold text-slate-800 leading-tight">Log de errores</h1>
-          <p className="text-sm text-slate-500">Excepciones reportadas por la aplicación (últimas 200)</p>
+          <p className="text-sm text-brand-n500">Excepciones reportadas por la aplicación (últimas 200)</p>
         </div>
       </div>
       <PanelErrores initialData={errores ?? []} />

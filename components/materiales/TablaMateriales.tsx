@@ -322,7 +322,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       <div className="panel">
         {/* Header */}
         <div className="panel-header">
-          <Plug size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <Plug size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Materiales</h2>
           <div className="flex gap-2 ml-auto">
             <a href="/api/export/materiales" className="btn btn-outline btn-sm"><Download size={13} /> CSV</a>
@@ -372,12 +372,12 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 value={q} onChange={e => setQ(e.target.value)} />
             </div>
 
-            <select className="select w-auto max-w-[180px]" value={catFiltro} onChange={e => setCatFiltro(e.target.value)}>
+            <select className="select w-auto" value={catFiltro} onChange={e => setCatFiltro(e.target.value)}>
               <option value="">Todas las categorías</option>
               {categorias.map(c => <option key={c.id} value={c.id}>{c.nombre}</option>)}
             </select>
 
-            <select className="select w-auto max-w-[160px]" value={provFiltro} onChange={e => setProvFiltro(e.target.value)}>
+            <select className="select w-auto" value={provFiltro} onChange={e => setProvFiltro(e.target.value)}>
               <option value="">Todos los proveedores</option>
               {proveedores.map(p => <option key={p.id} value={p.id}>{p.nombre}</option>)}
             </select>
@@ -395,7 +395,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               </button>
             )}
 
-            <span className="text-xs text-slate-400 ml-auto self-center whitespace-nowrap">
+            <span className="text-xs text-brand-n500 ml-auto self-center whitespace-nowrap">
               Mostrando <strong>{filtered.length}</strong> de {materiales.length}
             </span>
           </div>
@@ -412,7 +412,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               </datalist>
             </div>
 
-            <div className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap">
+            <div className="flex items-center gap-1 text-xs text-brand-n500 whitespace-nowrap">
               <span>Stock</span>
               <input className="input w-20 text-xs text-right" type="number" min="0" placeholder="desde"
                 value={stockDesde} onChange={e => setStockDesde(e.target.value)} />
@@ -421,7 +421,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 value={stockHasta} onChange={e => setStockHasta(e.target.value)} />
             </div>
 
-            <div className="flex items-center gap-1 text-xs text-slate-500 whitespace-nowrap">
+            <div className="flex items-center gap-1 text-xs text-brand-n500 whitespace-nowrap">
               <span>Precio (CLP)</span>
               <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="desde"
                 value={precioDesde} onChange={e => setPrecioDesde(e.target.value)} />
@@ -445,6 +445,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                       ref={el => { if (el) el.indeterminate = someSelected && !allFilteredSelected }}
                       onChange={toggleAll}
                       className="cursor-pointer"
+                      aria-label={allFilteredSelected ? 'Deseleccionar todos los materiales visibles' : 'Seleccionar todos los materiales visibles'}
                       title={allFilteredSelected ? 'Deseleccionar todos' : 'Seleccionar todos visibles'}
                     />
                   )}
@@ -479,14 +480,15 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                     className={`tr-hover ${isSelected ? 'bg-amber-50/60' : estaBajoMinimo(m.stock_actual, m.stock_minimo) ? 'bg-red-50/60' : ''}`}>
                     <td className="td" style={{ padding: '0 10px' }}>
                       {editable && (
-                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(m.id)} className="cursor-pointer" />
+                        <input type="checkbox" checked={isSelected} onChange={() => toggleOne(m.id)} className="cursor-pointer"
+                          aria-label={`Seleccionar ${m.codigo} — ${m.descripcion}`} />
                       )}
                     </td>
                     <td className="td"><span className="code">{m.codigo}</span></td>
                     <td className="td">
                       <span className="font-medium text-slate-800">{m.descripcion}</span>
                       {(m.proveedores as any)?.nombre && (
-                        <div className="text-xs text-slate-400">{(m.proveedores as any).nombre}</div>
+                        <div className="text-xs text-brand-n500">{(m.proveedores as any).nombre}</div>
                       )}
                     </td>
                     <td className="td">
@@ -494,11 +496,11 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                         ? <span className="badge text-[11px]" style={{ background: cat.color + '22', color: cat.color }}>{cat.nombre}</span>
                         : '—'}
                     </td>
-                    <td className="td text-xs text-slate-500">{m.ubicacion ?? '—'}</td>
+                    <td className="td text-xs text-brand-n500">{m.ubicacion ?? '—'}</td>
                     <td className="td-r font-semibold text-slate-800">
-                      {num(m.stock_actual)} <span className="text-slate-400 text-xs font-normal">{m.unidad}</span>
+                      {num(m.stock_actual)} <span className="text-brand-n500 text-xs font-normal">{m.unidad}</span>
                     </td>
-                    <td className="td-r text-slate-500">{num(m.stock_minimo)}</td>
+                    <td className="td-r text-brand-n500">{num(m.stock_minimo)}</td>
                     <td className="td"><BadgeStock actual={m.stock_actual} minimo={m.stock_minimo} /></td>
                     <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>
                     <td className="td">
@@ -529,7 +531,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               })}
               {!filtered.length && (
                 <tr>
-                  <td colSpan={10} className="text-center py-10 text-slate-400">
+                  <td colSpan={10} className="text-center py-10 text-brand-n500">
                     {hasFilters
                       ? 'Sin resultados con estos filtros. Prueba cambiando la búsqueda o limpiando los filtros.'
                       : 'Sin materiales registrados'}
@@ -543,7 +545,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
         {/* Pie de carga progresiva */}
         {filtered.length > 0 && (
           <div className="flex items-center justify-center gap-3 px-4 py-3 border-t" style={{ borderColor: '#EEF0F2' }}>
-            <span className="text-xs text-slate-400">
+            <span className="text-xs text-brand-n500">
               Mostrando {visible.length} de {num(total, 0)}
             </span>
             {hasMore && (
@@ -619,7 +621,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               <label className="label" htmlFor="material-notas">Notas</label>
               <textarea id="material-notas" className="textarea" value={editando.notas ?? ''} onChange={e => setEditando(p => ({ ...p!, notas: e.target.value }))} />
             </div>
-            {editando.id && <p className="col-span-2 text-xs text-slate-400">Para cambiar el stock use "Registrar movimiento".</p>}
+            {editando.id && <p className="col-span-2 text-xs text-brand-n500">Para cambiar el stock use "Registrar movimiento".</p>}
           </div>
         )}
       </Modal>
@@ -628,7 +630,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
       <Modal open={modalBulkEdit}
         title={`Editar ${numSelected} material${numSelected !== 1 ? 'es' : ''} seleccionado${numSelected !== 1 ? 's' : ''}`}
         onClose={() => setModalBulkEdit(false)} onSave={bulkEdit} saveLabel="Aplicar cambios" saving={bulkSaving}>
-        <p className="text-xs text-slate-500 mb-4">
+        <p className="text-xs text-brand-n500 mb-4">
           Solo se actualizarán los campos que completes. Los campos en blanco se dejan sin cambios.
         </p>
         <div className="grid grid-cols-2 gap-3">
@@ -727,15 +729,15 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 <div className="flex items-center gap-2">
                   <BadgeTipo tipo={m.tipo} />
                   <span className="font-medium text-slate-800">{num(m.cantidad)}</span>
-                  <span className="text-slate-400 text-xs">{m.motivo ?? 'Sin motivo'}</span>
+                  <span className="text-brand-n500 text-xs">{m.motivo ?? 'Sin motivo'}</span>
                 </div>
-                <div className="text-xs text-slate-400 mt-0.5">
+                <div className="text-xs text-brand-n500 mt-0.5">
                   {fechaHora(m.fecha)} · {m.usuario ?? '—'} · Stock: {num(m.stock_antes)} → {num(m.stock_despues)}
                 </div>
               </div>
             </div>
           ))}
-          {!histMovs.length && <p className="text-center py-6 text-slate-400">Sin movimientos registrados</p>}
+          {!histMovs.length && <p className="text-center py-6 text-brand-n500">Sin movimientos registrados</p>}
         </div>
       </Modal>
 

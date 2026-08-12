@@ -59,15 +59,15 @@ export default function PanelSolicitudes({ initialData }: { initialData: Solicit
     <div className="panel">
       <div className="panel-header"><h2>Solicitudes pendientes</h2><span className="badge badge-yellow">{pendientes.length}</span></div>
       {pendientes.length === 0 ? (
-        <div className="p-6 text-center text-sm text-slate-400">No hay solicitudes pendientes.</div>
+        <div className="p-6 text-center text-sm text-brand-n500">No hay solicitudes pendientes.</div>
       ) : (
         <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
           {pendientes.map(s => (
             <div key={s.id} className="p-4">
               <div className="flex items-center justify-between gap-3 flex-wrap">
                 <div>
-                  <div className="font-semibold text-sm text-slate-800">{s.nombre_completo} <span className="text-slate-400 font-normal">— {s.email}</span></div>
-                  <div className="text-xs text-slate-500 mt-0.5">{s.departamento_solicitado} · {s.puesto_solicitado} · {fechaHora(s.creado_en)}</div>
+                  <div className="font-semibold text-sm text-slate-800">{s.nombre_completo} <span className="text-brand-n500 font-normal">— {s.email}</span></div>
+                  <div className="text-xs text-brand-n500 mt-0.5">{s.departamento_solicitado} · {s.puesto_solicitado} · {fechaHora(s.creado_en)}</div>
                 </div>
                 {abierta !== s.id && (
                   <button className="btn btn-primary btn-sm" onClick={() => abrir(s)}>Revisar</button>
@@ -120,7 +120,7 @@ export default function PanelSolicitudes({ initialData }: { initialData: Solicit
           <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
             {resueltas.map(s => (
               <div key={s.id} className="p-3 flex items-center justify-between text-sm">
-                <span>{s.nombre_completo} <span className="text-slate-400">— {s.email}</span></span>
+                <span>{s.nombre_completo} <span className="text-brand-n500">— {s.email}</span></span>
                 <span className={`badge ${s.estado === 'aprobada' ? 'badge-green' : 'badge-red'}`}>{s.estado}</span>
               </div>
             ))}

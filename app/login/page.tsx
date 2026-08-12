@@ -30,12 +30,12 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F5F6F7' }}>
+    <main className="min-h-screen flex items-center justify-center p-4" style={{ background: '#F5F6F7' }}>
       <form onSubmit={submit} className="bg-white rounded-xl shadow-lg p-8 w-full max-w-sm">
         <div className="flex flex-col items-center mb-6">
           <Image src="/logo-2c.png" alt="2C Montajes" width={48} height={48} priority />
           <h1 className="text-lg font-bold mt-3" style={{ color: '#2E333A' }}>2C Inventario</h1>
-          <p className="text-sm text-slate-500">Inicia sesión para continuar</p>
+          <p className="text-sm text-brand-n500">Inicia sesión para continuar</p>
         </div>
 
         <div className="space-y-3">
@@ -66,11 +66,11 @@ function LoginForm() {
         <button type="submit" disabled={loading} className="btn btn-primary w-full mt-5 justify-center">
           {loading ? <><Loader2 size={14} className="animate-spin" /> Entrando…</> : 'Entrar'}
         </button>
-        <Link href="/solicitar-acceso" className="block text-center text-xs text-slate-400 mt-4 hover:text-slate-600">
+        <Link href="/solicitar-acceso" className="block text-center text-xs text-brand-n500 mt-4 hover:text-slate-600">
           ¿Eres nuevo en la empresa? Solicita tu acceso
         </Link>
       </form>
-    </div>
+    </main>
   )
 }
 

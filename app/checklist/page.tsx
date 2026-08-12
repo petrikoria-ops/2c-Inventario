@@ -173,7 +173,7 @@ export default function ChecklistPage() {
                 style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#059669' : '#F0C000' }} />
             </div>
             <span className="text-sm font-bold text-slate-700">{doneItems} / {totalItems}</span>
-            <span className="text-xs text-slate-400">{pct}%</span>
+            <span className="text-xs text-brand-n500">{pct}%</span>
           </div>
 
           {/* Checklist sections */}
@@ -193,7 +193,7 @@ export default function ChecklistPage() {
                         ${checks[k] ? 'bg-green-50/50' : 'hover:bg-slate-50'}`}>
                         <input type="checkbox" checked={!!checks[k]} onChange={() => toggle(k)}
                           className="w-4 h-4 flex-shrink-0 accent-green-600" />
-                        <span className={`text-sm ${checks[k] ? 'line-through text-slate-400' : 'text-slate-700'}`}>
+                        <span className={`text-sm ${checks[k] ? 'line-through text-brand-n500' : 'text-slate-700'}`}>
                           {item}
                         </span>
                       </label>

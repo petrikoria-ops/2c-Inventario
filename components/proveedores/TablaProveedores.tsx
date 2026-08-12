@@ -52,7 +52,7 @@ export default function TablaProveedores({ initialData, editable = true }: Props
     <>
       <div className="panel">
         <div className="panel-header">
-          <Building2 size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <Building2 size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Proveedores</h2>
           {editable && (
             <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nuevo</button>
@@ -79,7 +79,7 @@ export default function TablaProveedores({ initialData, editable = true }: Props
               {filtered.map(p => (
                 <tr key={p.id} className="tr-hover">
                   <td className="td font-medium">{p.nombre}</td>
-                  <td className="td text-xs text-slate-500">{p.rut ?? '—'}</td>
+                  <td className="td text-xs text-brand-n500">{p.rut ?? '—'}</td>
                   <td className="td">{p.contacto ?? '—'}</td>
                   <td className="td text-xs">{p.telefono ?? '—'}</td>
                   <td className="td">{p.email ? <a href={`mailto:${p.email}`} className="text-blue-600 hover:underline text-xs">{p.email}</a> : '—'}</td>
@@ -99,7 +99,7 @@ export default function TablaProveedores({ initialData, editable = true }: Props
                 </tr>
               ))}
               {!filtered.length && (
-                <tr><td colSpan={7} className="text-center py-10 text-slate-400">Sin proveedores registrados</td></tr>
+                <tr><td colSpan={7} className="text-center py-10 text-brand-n500">Sin proveedores registrados</td></tr>
               )}
             </tbody>
           </table>

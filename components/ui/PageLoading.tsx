@@ -6,7 +6,7 @@ import { Loader2 } from 'lucide-react'
 // como carga de datos, no como que la navegación esté trabada.
 export default function PageLoading() {
   return (
-    <div className="p-5 flex-1 flex flex-col items-center justify-center gap-3 py-24 text-slate-400">
+    <div className="p-5 flex-1 flex flex-col items-center justify-center gap-3 py-24 text-brand-n500">
       <Loader2 size={28} className="animate-spin" style={{ color: '#F0C000' }} />
       <p className="text-sm">Cargando…</p>
     </div>

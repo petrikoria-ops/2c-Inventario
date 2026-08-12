@@ -29,7 +29,7 @@ export default async function SolicitudesAdminPage() {
         </div>
         <div>
           <h1 className="text-lg font-bold text-slate-800 leading-tight">Gestión de usuarios</h1>
-          <p className="text-sm text-slate-500">Solicitudes de acceso, roles y cuentas activas</p>
+          <p className="text-sm text-brand-n500">Solicitudes de acceso, roles y cuentas activas</p>
         </div>
       </div>
       <div className="mb-6">

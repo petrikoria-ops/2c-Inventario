@@ -160,7 +160,7 @@ export default function RecursosPage() {
             className={`flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-t-md -mb-px border-b-2 transition-all
               ${tab === t.id
                 ? 'border-[#F0C000] text-[#2E333A] bg-amber-50/60'
-                : 'border-transparent text-slate-500 hover:text-slate-700 hover:border-slate-300'}`}>
+                : 'border-transparent text-brand-n500 hover:text-slate-700 hover:border-slate-300'}`}>
             <t.Icon size={13} />{t.label}
           </button>
         ))}
@@ -206,7 +206,7 @@ export default function RecursosPage() {
                 ΔV = {ctR.dV.toFixed(2)} V ({ctR.pct.toFixed(2)}%) — {ctR.ok?'Dentro del límite':'Excede 3%'}
               </div>
             )}
-            <p className="text-xs text-slate-400 mt-2">ρ cobre = 0.0172 Ω·mm²/m | Factor {ct.tri?'√3 (trifásico)':'2 (monofásico)'} | Límite RIC ≤ 3%</p>
+            <p className="text-xs text-brand-n500 mt-2">ρ cobre = 0.0172 Ω·mm²/m | Factor {ct.tri?'√3 (trifásico)':'2 (monofásico)'} | Límite RIC ≤ 3%</p>
           </div>
 
           {/* Sección mínima */}
@@ -238,7 +238,7 @@ export default function RecursosPage() {
                 S mín. = {scR.s.toFixed(2)} mm² → usar <strong>{scR.elegido} mm²</strong>
               </div>
             )}
-            <p className="text-xs text-slate-400 mt-2">S = ({sc.tri?'√3':'2'} × ρ × L × I) / ΔV<sub>máx</sub></p>
+            <p className="text-xs text-brand-n500 mt-2">S = ({sc.tri?'√3':'2'} × ρ × L × I) / ΔV<sub>máx</sub></p>
           </div>
 
           {/* Dimensionar protección */}
@@ -298,7 +298,7 @@ export default function RecursosPage() {
             <div className="panel-header">
               <Zap size={14} style={{ color:'#D97706', flexShrink:0 }} />
               <h2>Ampacidad referencial — cobre</h2>
-              <span className="text-xs text-slate-400 ml-auto">{filtAmp.length} fila(s)</span>
+              <span className="text-xs text-brand-n500 ml-auto">{filtAmp.length} fila(s)</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -312,15 +312,15 @@ export default function RecursosPage() {
                   {filtAmp.map(r=>(
                     <tr key={r.sec} className="tr-hover">
                       <td className="td"><span className="code font-bold">{r.sec} mm²</span></td>
-                      <td className="td text-slate-500">{r.awg} AWG</td>
+                      <td className="td text-brand-n500">{r.awg} AWG</td>
                       <td className="td text-right">
                         <span className="font-bold text-base" style={{ color:'#2E333A' }}>{r.amp}</span>
-                        <span className="text-xs text-slate-400 ml-1">A</span>
+                        <span className="text-xs text-brand-n500 ml-1">A</span>
                       </td>
                       <td className="td text-slate-600 text-sm">{r.uso}</td>
                     </tr>
                   ))}
-                  {!filtAmp.length && <tr><td colSpan={4} className="text-center py-6 text-slate-400">Sin resultados</td></tr>}
+                  {!filtAmp.length && <tr><td colSpan={4} className="text-center py-6 text-brand-n500">Sin resultados</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -328,9 +328,9 @@ export default function RecursosPage() {
 
           <div className="panel">
             <div className="panel-header">
-              <Zap size={14} style={{ color:'#909090', flexShrink:0 }} />
+              <Zap size={14} style={{ color:'var(--n-500)', flexShrink:0 }} />
               <h2>Conversión mm² ↔ AWG (estándar más cercano)</h2>
-              <span className="text-xs text-slate-400 ml-auto">{filtConv.length} fila(s)</span>
+              <span className="text-xs text-brand-n500 ml-auto">{filtConv.length} fila(s)</span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -345,7 +345,7 @@ export default function RecursosPage() {
                       <td className="td font-medium text-slate-700">{r.awg}</td>
                     </tr>
                   ))}
-                  {!filtConv.length && <tr><td colSpan={2} className="text-center py-6 text-slate-400">Sin resultados</td></tr>}
+                  {!filtConv.length && <tr><td colSpan={2} className="text-center py-6 text-brand-n500">Sin resultados</td></tr>}
                 </tbody>
               </table>
             </div>
@@ -383,9 +383,9 @@ export default function RecursosPage() {
                   {TERMOCONTRAIBLES.map(r=>(
                     <tr key={r.exp} className="tr-hover">
                       <td className="td text-right font-bold" style={{ color:'#2E333A' }}>{r.exp}</td>
-                      <td className="td text-right text-slate-500">{r.cont}</td>
+                      <td className="td text-right text-brand-n500">{r.cont}</td>
                       <td className="td"><span className="badge badge-blue">{r.rango}</span></td>
-                      <td className="td text-xs text-slate-500">Cable Ø entre {r.cont} y {r.exp} mm</td>
+                      <td className="td text-xs text-brand-n500">Cable Ø entre {r.cont} y {r.exp} mm</td>
                     </tr>
                   ))}
                 </tbody>
@@ -398,10 +398,10 @@ export default function RecursosPage() {
       {/* ── CANALIZACIONES ────────────────────────────────────── */}
       {tab === 'canal' && (
         <div className="space-y-3">
-          <p className="text-sm text-slate-500 mb-2">Guía de selección de canalizaciones eléctricas.</p>
+          <p className="text-sm text-brand-n500 mb-2">Guía de selección de canalizaciones eléctricas.</p>
           <div className="panel overflow-x-auto">
             <div className="panel-header">
-              <Layers size={14} style={{ color:'#909090', flexShrink:0 }} />
+              <Layers size={14} style={{ color:'var(--n-500)', flexShrink:0 }} />
               <h2>Tipos de canalizaciones</h2>
             </div>
             <table className="w-full">
@@ -450,7 +450,7 @@ export default function RecursosPage() {
             {/* Métrico */}
             <div className="panel">
               <div className="panel-header">
-                <Wrench size={14} style={{ color:'#909090', flexShrink:0 }} />
+                <Wrench size={14} style={{ color:'var(--n-500)', flexShrink:0 }} />
                 <h2>Pernería métrica</h2>
               </div>
               <div className="overflow-x-auto">
@@ -466,11 +466,11 @@ export default function RecursosPage() {
                       <tr key={r.rosca} className="tr-hover">
                         <td className="td"><span className="code font-bold">{r.rosca}</span></td>
                         <td className="td text-right text-slate-700">{r.corriente.toFixed(2)}</td>
-                        <td className="td text-right text-slate-500">{r.fino.toFixed(2)}</td>
+                        <td className="td text-right text-brand-n500">{r.fino.toFixed(2)}</td>
                         <td className="td text-right font-bold" style={{ color:'#2E333A' }}>{r.llave}</td>
                       </tr>
                     ))}
-                    {!filtPernM.length && <tr><td colSpan={4} className="text-center py-6 text-slate-400">Sin resultados</td></tr>}
+                    {!filtPernM.length && <tr><td colSpan={4} className="text-center py-6 text-brand-n500">Sin resultados</td></tr>}
                   </tbody>
                 </table>
               </div>
@@ -479,7 +479,7 @@ export default function RecursosPage() {
             {/* Pulgadas */}
             <div className="panel">
               <div className="panel-header">
-                <Wrench size={14} style={{ color:'#909090', flexShrink:0 }} />
+                <Wrench size={14} style={{ color:'var(--n-500)', flexShrink:0 }} />
                 <h2>Equivalencia pulgadas ↔ mm (diámetro)</h2>
               </div>
               <div className="overflow-x-auto">
@@ -525,7 +525,7 @@ export default function RecursosPage() {
             >
               <ExternalLink size={14} /> Portal RIC — SEC Chile (todos los pliegos)
             </a>
-            <p className="text-xs text-slate-400 mt-3">
+            <p className="text-xs text-brand-n500 mt-3">
               El enlace abre la página oficial de la SEC con todos los pliegos RIC disponibles para descarga.
             </p>
           </div>
@@ -533,7 +533,7 @@ export default function RecursosPage() {
           {/* Catálogos */}
           <div className="panel p-5">
             <div className="flex items-center gap-2 mb-3">
-              <ExternalLink size={16} style={{ color:'#909090' }} />
+              <ExternalLink size={16} style={{ color:'var(--n-500)' }} />
               <h2 className="text-base font-semibold text-slate-800">Catálogos de fabricantes</h2>
             </div>
             <div className="flex flex-col gap-2">

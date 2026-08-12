@@ -23,19 +23,19 @@ export default async function WidgetTaller() {
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
       <div className="panel">
         <div className="panel-header">
-          <Wrench size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <Wrench size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Próximas mantenciones de herramientas</h2>
           <Link href="/herramientas" className="btn btn-ghost btn-sm">Ver todas →</Link>
         </div>
         {conMantencion.length === 0 ? (
-          <div className="p-6 text-center text-sm text-slate-400">No hay mantenciones programadas todavía.</div>
+          <div className="p-6 text-center text-sm text-brand-n500">No hay mantenciones programadas todavía.</div>
         ) : (
           <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
             {conMantencion.map(h => (
               <div key={h.id} className="p-3 flex items-center justify-between gap-3">
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-800 truncate"><span className="code mr-1">{h.codigo}</span>{h.descripcion}</div>
-                  <div className="text-xs text-slate-400">{h.responsable ?? 'Sin responsable asignado'}</div>
+                  <div className="text-xs text-brand-n500">{h.responsable ?? 'Sin responsable asignado'}</div>
                 </div>
                 <span className={`badge flex-shrink-0 ${(h.dias ?? 0) < 0 ? 'badge-red' : (h.dias ?? 0) <= 7 ? 'badge-yellow' : 'badge-green'}`}>
                   {(h.dias ?? 0) < 0 ? `Vencida hace ${Math.abs(h.dias ?? 0)}d` : `En ${h.dias}d`}
@@ -48,12 +48,12 @@ export default async function WidgetTaller() {
 
       <div className="panel">
         <div className="panel-header">
-          <ClipboardList size={14} style={{ color: '#909090', flexShrink: 0 }} />
+          <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Obras activas — próximas entregas</h2>
           <Link href="/proyectos" className="btn btn-ghost btn-sm">Ver todas →</Link>
         </div>
         {!proyectos?.length ? (
-          <div className="p-6 text-center text-sm text-slate-400">No hay obras en proceso.</div>
+          <div className="p-6 text-center text-sm text-brand-n500">No hay obras en proceso.</div>
         ) : (
           <div className="divide-y" style={{ borderColor: '#ECEEF1' }}>
             {proyectos.map(p => (
@@ -61,7 +61,7 @@ export default async function WidgetTaller() {
                 <div className="min-w-0">
                   <div className="text-sm font-medium text-slate-800 truncate"><span className="code mr-1">{p.ot}</span>{p.nombre}</div>
                 </div>
-                <span className="text-xs text-slate-500 flex-shrink-0">{p.fecha_entrega ?? 'Sin fecha'}</span>
+                <span className="text-xs text-brand-n500 flex-shrink-0">{p.fecha_entrega ?? 'Sin fecha'}</span>
               </div>
             ))}
           </div>

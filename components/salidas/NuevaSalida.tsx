@@ -126,7 +126,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
       <div className="flex items-center gap-3 mb-5">
         <div>
           <h1 className="text-lg font-bold text-slate-800">Nuevo vale de despacho</h1>
-          <p className="text-sm text-slate-500">Registra la salida y descuenta el stock automáticamente</p>
+          <p className="text-sm text-brand-n500">Registra la salida y descuenta el stock automáticamente</p>
         </div>
         <a href="/salidas" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
       </div>
@@ -161,7 +161,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
         <div className="p-4">
           <div ref={searchRef} className="relative">
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
+              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-brand-n500 pointer-events-none">
                 {loadingSearch ? <Loader2 size={14} className="animate-spin" /> : <Search size={14} />}
               </span>
               <input
@@ -181,7 +181,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
                     className="w-full text-left px-4 py-2.5 hover:bg-blue-50 flex items-center gap-3 border-b border-slate-100 last:border-0 transition-colors">
                     <span className="code text-xs flex-shrink-0 w-24 truncate">{mat.codigo}</span>
                     <span className="text-sm text-slate-800 flex-1 min-w-0 truncate">{mat.descripcion}</span>
-                    <span className="text-xs text-slate-400 flex-shrink-0">{mat.unidad}</span>
+                    <span className="text-xs text-brand-n500 flex-shrink-0">{mat.unidad}</span>
                     <span className={`text-xs font-medium flex-shrink-0 ${
                       mat.stock_actual <= 0 ? 'text-red-600' :
                       estaBajoMinimo(mat.stock_actual, mat.stock_minimo) ? 'text-yellow-600' : 'text-green-600'
@@ -193,7 +193,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
               </div>
             )}
             {showDrop && suggestions.length === 0 && query.length >= 2 && !loadingSearch && (
-              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-slate-400 text-center">
+              <div className="absolute z-50 top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-lg shadow-xl p-4 text-sm text-brand-n500 text-center">
                 Sin resultados para «{query}»
               </div>
             )}
@@ -246,7 +246,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
                         />
                         {over && <p className="text-red-500 text-xs mt-0.5 text-right">Excede stock</p>}
                       </td>
-                      <td className="td text-slate-400">{it.unidad}</td>
+                      <td className="td text-brand-n500">{it.unidad}</td>
                       <td className="td text-center">
                         <button onClick={() => removeItem(idx)}
                           className="w-6 h-6 flex items-center justify-center rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors text-lg leading-none">
@@ -261,9 +261,9 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
           </div>
         </div>
       ) : (
-        <div className="panel mb-4 py-12 text-center text-slate-400">
+        <div className="panel mb-4 py-12 text-center text-brand-n500">
           <Package size={36} className="mx-auto mb-2" style={{ color: '#D8D8D8' }} />
-          <p className="font-medium mb-1 text-slate-500">Sin materiales todavía</p>
+          <p className="font-medium mb-1 text-brand-n500">Sin materiales todavía</p>
           <p className="text-sm">Usa el buscador para agregar materiales a despachar</p>
         </div>
       )}

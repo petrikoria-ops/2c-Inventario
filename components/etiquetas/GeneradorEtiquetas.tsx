@@ -246,7 +246,7 @@ function EtiquetaRack({ form, style }: { form: LabelForm; style: LabelStyle }) {
           <div style={{ fontSize:style.footerSize, color:'#4A5260', marginTop:2, fontWeight:600 }}>{form.nombre}</div>
         )}
         {form.detalle && (
-          <div style={{ fontSize:Math.max(style.footerSize - 1, 7), color:'#909090', marginTop:1 }}>{form.detalle}</div>
+          <div style={{ fontSize:Math.max(style.footerSize - 1, 7), color:'var(--n-500)', marginTop:1 }}>{form.detalle}</div>
         )}
       </div>
     </div>
@@ -270,7 +270,7 @@ function EtiquetaCajon({ form, style }: { form: LabelForm; style: LabelStyle }) 
           <div style={{ fontSize:style.footerSize, color:'#2E333A', marginTop:2, fontWeight:600 }}>{form.nombre}</div>
         )}
         {form.detalle && (
-          <div style={{ fontSize:Math.max(style.footerSize - 2, 6), color:'#909090' }}>{form.detalle}</div>
+          <div style={{ fontSize:Math.max(style.footerSize - 2, 6), color:'var(--n-500)' }}>{form.detalle}</div>
         )}
       </div>
     </div>
@@ -321,7 +321,7 @@ function StyleSlider({ label, value, min, max, step = 1, unit = 'px', onChange }
     <div>
       <div className="flex justify-between items-center mb-1">
         <span className="text-xs text-slate-600">{label}</span>
-        <span className="text-xs font-mono text-slate-500">{value}{unit}</span>
+        <span className="text-xs font-mono text-brand-n500">{value}{unit}</span>
       </div>
       <input type="range" min={min} max={max} step={step} value={value}
         onChange={e => onChange(Number(e.target.value))}
@@ -413,7 +413,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
           <Tag size={18} style={{ color:'#2E333A' }} />
           <div>
             <h1 className="text-lg font-bold text-slate-800">Etiquetas de obra</h1>
-            <p className="text-xs text-slate-400">
+            <p className="text-xs text-brand-n500">
               {form.template === 'pallet'
                 ? 'Pallets y bultos — una etiqueta por página'
                 : `Grilla ${gridCols} × ${getGridRows(form)} = ${pp} etiquetas por hoja`}
@@ -435,7 +435,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
             {/* Selector de plantilla */}
             <div className="panel">
               <div className="panel-header">
-                <LayoutGrid size={13} style={{ color:'#909090' }} />
+                <LayoutGrid size={13} style={{ color:'var(--n-500)' }} />
                 <h2>Tipo de etiqueta</h2>
               </div>
               <div className="p-3 grid grid-cols-2 gap-2">
@@ -444,14 +444,14 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
                     className={`px-3 py-2 rounded-lg text-xs font-semibold text-left transition-all border
                       ${form.template === t
                         ? 'border-amber-400 bg-amber-50 text-slate-800'
-                        : 'border-slate-200 bg-white text-slate-500 hover:border-slate-300'}`}>
+                        : 'border-slate-200 bg-white text-brand-n500 hover:border-slate-300'}`}>
                     {t === 'pallet'  && '📦 '}
                     {t === 'rack'    && '🗄️ '}
                     {t === 'cajon'   && '🗃️ '}
                     {t === 'generica'&& '✏️ '}
                     {TEMPLATE_LABELS[t]}
                     {t !== 'pallet' && (
-                      <span className="block text-[10px] font-normal text-slate-400 mt-0.5">
+                      <span className="block text-[10px] font-normal text-brand-n500 mt-0.5">
                         {t === 'rack'   && '95 × 45 mm'}
                         {t === 'cajon'  && '63 × 38 mm'}
                         {t === 'generica' && 'tamaño libre'}
@@ -465,7 +465,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
             {/* Formulario */}
             <div className="panel">
               <div className="panel-header">
-                <Tag size={13} style={{ color:'#909090' }} />
+                <Tag size={13} style={{ color:'var(--n-500)' }} />
                 <h2>Datos de la etiqueta</h2>
                 <button onClick={reset} className="btn btn-ghost btn-sm ml-auto"><RotateCcw size={12} /> Limpiar</button>
               </div>
@@ -568,7 +568,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
                         <input id="etiqueta-cantidad" className="input" type="number" min="1" max="200" value={form.cantidad} onChange={set('cantidad')} />
                       </div>
                       <div className="pt-4">
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs text-brand-n500">
                           → {pp} por hoja · {Math.ceil(total / pp)} hoja{Math.ceil(total / pp) !== 1 ? 's' : ''}
                         </span>
                       </div>
@@ -592,7 +592,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
             {/* Editor de apariencia */}
             <div className="panel">
               <div className="panel-header">
-                <Sliders size={13} style={{ color:'#909090' }} />
+                <Sliders size={13} style={{ color:'var(--n-500)' }} />
                 <h2>Apariencia</h2>
                 <button onClick={() => setLabelStyle(STYLE_DEFAULTS[form.template])}
                   className="btn btn-ghost btn-sm ml-auto text-xs">
@@ -633,7 +633,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
                 />
 
                 {form.template === 'pallet' && (
-                  <p className="text-[11px] text-slate-400 pt-1">
+                  <p className="text-[11px] text-brand-n500 pt-1">
                     También puedes arrastrar el nombre en la vista previa para reposicionarlo.
                   </p>
                 )}
@@ -644,7 +644,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
 
           {/* ── VISTA PREVIA ──────────────────────────────────────── */}
           <div>
-            <p className="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">
+            <p className="text-xs font-semibold text-brand-n500 uppercase tracking-widest mb-3">
               Vista previa
               {form.template === 'pallet' && (
                 <span className="ml-2 normal-case font-normal text-[10px]">
@@ -679,12 +679,12 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
 
             {/* Info impresión */}
             {form.template === 'pallet' && total > 1 && (
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-brand-n500 mt-2">
                 Al imprimir se generarán <strong>{total} páginas</strong>, una por cada pallet.
               </p>
             )}
             {form.template !== 'pallet' && (
-              <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-slate-500 space-y-1">
+              <div className="mt-3 p-3 bg-slate-50 border border-slate-200 rounded-lg text-xs text-brand-n500 space-y-1">
                 <p><strong className="text-slate-700">Tamaño:</strong>{' '}
                   {form.template === 'generica'
                     ? `${form.anchoMm} × ${form.altoMm} mm (configurable)`
@@ -693,7 +693,7 @@ export default function GeneradorEtiquetas({ proyectos }: Props) {
                 <p><strong className="text-slate-700">Hoja:</strong> {SHEET_LABELS[form.tamano]}</p>
                 <p><strong className="text-slate-700">Grilla:</strong> {gridCols} col × {getGridRows(form)} fil = {pp} etiquetas por hoja</p>
                 <p><strong className="text-slate-700">Total a imprimir:</strong> {total} etiquetas en {Math.ceil(total / pp)} hoja{Math.ceil(total / pp) !== 1 ? 's' : ''}</p>
-                <p className="text-[10px] text-slate-400 pt-1">Las líneas punteadas son guías de corte — no se imprimen en impresoras sin margen.</p>
+                <p className="text-[10px] text-brand-n500 pt-1">Las líneas punteadas son guías de corte — no se imprimen en impresoras sin margen.</p>
               </div>
             )}
           </div>

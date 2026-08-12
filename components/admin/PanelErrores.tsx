@@ -35,10 +35,10 @@ export default function PanelErrores({ initialData }: { initialData: ErrorLog[] 
     <div key={e.id} className="border-b" style={{ borderColor: '#ECEEF1' }}>
       <div className="flex items-center gap-3 p-3">
         <button className="flex-1 text-left flex items-center gap-2" onClick={() => setAbierto(abierto === e.id ? null : e.id)}>
-          {abierto === e.id ? <ChevronUp size={14} className="text-slate-400 flex-shrink-0" /> : <ChevronDown size={14} className="text-slate-400 flex-shrink-0" />}
+          {abierto === e.id ? <ChevronUp size={14} className="text-brand-n500 flex-shrink-0" /> : <ChevronDown size={14} className="text-brand-n500 flex-shrink-0" />}
           <div className="min-w-0">
             <div className="text-sm font-medium text-slate-800 truncate">{e.mensaje}</div>
-            <div className="text-xs text-slate-400">
+            <div className="text-xs text-brand-n500">
               {fechaHora(e.creado_en)} · {e.archivo ?? 'archivo desconocido'} · {e.usuario ?? 'usuario desconocido'}
               {e.departamento ? ` · ${e.departamento}` : ''}
             </div>
@@ -61,7 +61,7 @@ export default function PanelErrores({ initialData }: { initialData: ErrorLog[] 
     <div className="panel">
       <div className="panel-header"><h2>Pendientes</h2><span className="badge badge-red">{pendientes.length}</span></div>
       {pendientes.length === 0
-        ? <div className="p-6 text-center text-sm text-slate-400">Sin errores pendientes.</div>
+        ? <div className="p-6 text-center text-sm text-brand-n500">Sin errores pendientes.</div>
         : pendientes.map(fila)}
 
       {resueltos.length > 0 && (

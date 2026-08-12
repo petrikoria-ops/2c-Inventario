@@ -13,6 +13,41 @@
   --c-muted:     #909090;
   --c-bg:        #F5F6F7;
 
+  /* Escala neutra 50→900 — ver DESIGN_SYSTEM.md.
+     --n-500 es el piso de contraste AA (4.83:1) para texto sobre blanco;
+     --n-400 y más claros son solo para decoración/bordes, nunca texto
+     (--c-muted #909090 de arriba da 3.19:1 y NO cumple AA — se conserva
+     solo por compatibilidad de código viejo, no usar en código nuevo). */
+  --n-50:  #F5F6F7;
+  --n-100: #ECEEF1;
+  --n-200: #E2E4E7;
+  --n-300: #D8D8D8;
+  --n-400: #AEB2B8;
+  --n-500: #6B7480;
+  --n-600: #4B5563;
+  --n-700: #374151;
+  --n-800: #2E333A;
+  --n-900: #181818;
+
+  /* Semánticos — formalizan los pares bg-50/text-800 de Tailwind que ya
+     se usaban sueltos en badges/alerts (ambos superan 7:1 de contraste). */
+  --sem-success-fg: #065F46;
+  --sem-success-bg: #ECFDF5;
+  --sem-error-fg:   #991B1B;
+  --sem-error-bg:   #FEF2F2;
+  --sem-warning-fg: #92400E;
+  --sem-warning-bg: #FFFBEB;
+  --sem-info-fg:    #1E40AF;
+  --sem-info-bg:    #EFF6FF;
+
+  /* Escala tipográfica modular — ver DESIGN_SYSTEM.md */
+  --fs-xs:   12px;
+  --fs-sm:   14px;
+  --fs-base: 16px;
+  --fs-lg:   20px;
+  --fs-xl:   24px;
+  --fs-2xl:  32px;
+
   /* Sombras de dos capas — sensación de profundidad sutil en vez de
      una sombra plana de un solo nivel. */
   --shadow-sm: 0 1px 2px rgba(16,24,40,.04), 0 1px 1px rgba(16,24,40,.03);
@@ -201,12 +236,14 @@
   /* ── Forms ───────────────────────────────────── */
   .label {
     @apply text-[11px] font-semibold uppercase tracking-wide block mb-1;
-    color: #909090;
+    color: var(--n-500); /* antes #909090 = 3.19:1, falla WCAG AA — ver AUDITORIA.md #1 */
   }
   .input {
-    @apply w-full px-2.5 py-1.5 rounded-md text-[13px] transition-colors duration-150 bg-white;
+    @apply w-full px-2.5 py-1.5 rounded-md text-base transition-colors duration-150 bg-white;
     border: 1px solid #D8D8D8;
     color: #181818;
+    /* text-base (16px), antes 13px — evita el auto-zoom de iOS Safari al
+       enfocar un campo con fuente menor a 16px. Ver AUDITORIA.md #6. */
   }
   .input::placeholder { color: #BBBBBB; }
   .input:focus {

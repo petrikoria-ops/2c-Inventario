@@ -43,7 +43,7 @@ export default async function ImprimirEntregaHerPage({ params }: { params: { id:
       {/* Barra acciones */}
       <div className="no-print flex items-center gap-3 p-4 bg-white border-b border-slate-200 shadow-sm">
         <a href="/herramientas" className="btn btn-ghost btn-sm">← Volver</a>
-        <span className="text-sm text-slate-500 flex-1">
+        <span className="text-sm text-brand-n500 flex-1">
           Entrega de herramientas <strong className="text-slate-800">{entrega.numero}</strong>
         </span>
         <PrintButton />
@@ -62,17 +62,17 @@ export default async function ImprimirEntregaHerPage({ params }: { params: { id:
               <p className="font-bold text-base" style={{ color: '#181818' }}>
                 2C MONTAJES Y PROYECTOS ELÉCTRICOS
               </p>
-              <p className="text-xs mt-0.5" style={{ color: '#909090' }}>Inventario General</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--n-500)' }}>Inventario General</p>
             </div>
           </div>
           <div className="text-right">
-            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: '#909090' }}>
+            <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--n-500)' }}>
               Entrega de Herramientas
             </p>
             <p className="text-3xl font-bold leading-tight" style={{ color: '#F0C000' }}>
               {entrega.numero}
             </p>
-            <p className="text-sm mt-1" style={{ color: '#909090' }}>{fechaCorta(entrega.fecha)}</p>
+            <p className="text-sm mt-1" style={{ color: 'var(--n-500)' }}>{fechaCorta(entrega.fecha)}</p>
           </div>
         </div>
 
@@ -81,15 +81,15 @@ export default async function ImprimirEntregaHerPage({ params }: { params: { id:
         {/* Datos trabajador */}
         <div className="grid grid-cols-2 gap-6 mb-7 text-sm">
           <div>
-            <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#909090' }}>
+            <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>
               Entregado a
             </p>
             <p className="font-semibold text-base" style={{ color: '#181818' }}>{entrega.trabajador_nombre}</p>
             {trab?.cargo && <p style={{ color: '#4A5260' }}>{trab.cargo}</p>}
-            {trab?.rut   && <p style={{ color: '#909090' }}>RUT: {trab.rut}</p>}
+            {trab?.rut   && <p style={{ color: 'var(--n-500)' }}>RUT: {trab.rut}</p>}
           </div>
           <div>
-            <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: '#909090' }}>
+            <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>
               Despachado por
             </p>
             <p className="font-semibold" style={{ color: '#181818' }}>{entrega.usuario || '—'}</p>
@@ -112,7 +112,7 @@ export default async function ImprimirEntregaHerPage({ params }: { params: { id:
                   {item.codigo}
                 </td>
                 <td className="doc-td" style={{ color: '#181818' }}>{item.descripcion}</td>
-                <td className="doc-td" style={{ color: '#909090', fontSize: 12 }}>{item.notas ?? ''}</td>
+                <td className="doc-td" style={{ color: 'var(--n-500)', fontSize: 12 }}>{item.notas ?? ''}</td>
               </tr>
             ))}
           </tbody>
