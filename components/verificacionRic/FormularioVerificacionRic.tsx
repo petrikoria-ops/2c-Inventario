@@ -113,14 +113,16 @@ export default function FormularioVerificacionRic({ verificacion, initialItems, 
 
           {b.id === 'A.0' && (
             <div className="px-4 pt-4 text-xs text-brand-n500 space-y-3 border-b pb-4" style={{ borderColor: '#EDEFF2' }}>
-              <table className="w-full">
-                <thead><tr><th className="text-left pb-1">Oficina Técnica prepara</th><th className="text-left pb-1">Obra / Terreno debe proporcionar</th></tr></thead>
-                <tbody>
-                  {A0_COORDINACION.map((row, i) => (
-                    <tr key={i} className="align-top"><td className="pr-3 py-1">{row.oficinaTecnica}</td><td className="py-1">{row.terreno}</td></tr>
-                  ))}
-                </tbody>
-              </table>
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[420px]">
+                  <thead><tr><th className="text-left pb-1">Oficina Técnica prepara</th><th className="text-left pb-1">Obra / Terreno debe proporcionar</th></tr></thead>
+                  <tbody>
+                    {A0_COORDINACION.map((row, i) => (
+                      <tr key={i} className="align-top"><td className="pr-3 py-1">{row.oficinaTecnica}</td><td className="py-1">{row.terreno}</td></tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
               <p>{A0_INFORMES_PROPIOS_TERRENO}</p>
             </div>
           )}

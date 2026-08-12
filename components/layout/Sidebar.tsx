@@ -7,7 +7,7 @@ import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck,
-  Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon,
+  Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { puedeVer, type Perfil, type Modulo, type Departamento } from '@/lib/auth/permisos'
@@ -65,6 +65,18 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
   const pathname = usePathname()
   const router    = useRouter()
 
+  // Secciones plegadas por defecto (menos "Principal", siempre a la vista) —
+  // así el menú entra en una pantalla sin scroll en vez de listar los ~20
+  // enlaces de una vez. Se abren al tocarlas, y la sección de la página en
+  // la que estás se fuerza abierta más abajo aunque no la hayas tocado.
+  const [openSections, setOpenSections] = useState<Set<string>>(new Set())
+  const toggleSection = (section: string) =>
+    setOpenSections(prev => {
+      const next = new Set(prev)
+      next.has(section) ? next.delete(section) : next.add(section)
+      return next
+    })
+
   // Navegación según el perfil EFECTIVO (real o simulado). El acceso de admin
   // se evalúa con el perfil REAL para no perder el panel de administración por
   // estar simulando, salvo que se quiera ver la barra tal cual la vería el área.
@@ -83,6 +95,12 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
         { href: '/admin/errors', Icon: AlertOctagon, label: 'Log de errores', badge: erroresPendientes || undefined },
       ],
     }] : [])
+
+  const esLinkActivo = (href: string) => pathname === href || (href !== '/' && pathname.startsWith(href))
+  // La sección de la página actual va siempre abierta, aunque el usuario
+  // no la haya tocado — si no, aterrizas en una página con su propio
+  // enlace escondido dentro de una sección plegada.
+  const seccionActiva = grupos.find(g => g.links.some(l => esLinkActivo(l.href)))?.section
 
   const cerrarSesion = async () => {
     await getSupabaseBrowser().auth.signOut()
@@ -141,25 +159,44 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
       {/* Nav — con degradado inferior que insinúa que hay más opciones al desplazar */}
       <div className="relative flex-1 min-h-0">
         <nav className="h-full overflow-y-auto py-3">
-          {grupos.map(group => (
-            <div key={group.section} className="mb-1">
-              <div className="text-[10px] uppercase tracking-widest font-semibold px-4 pt-3 pb-1"
-                style={{ color: '#4A5260' }}>
-                {group.section}
+          {grupos.map(group => {
+            // "Principal" siempre visible sin botón — es la entrada al resto.
+            // El resto se pliega para no listar los ~20 enlaces de una vez.
+            const plegable = group.section !== 'Principal'
+            const abierta   = !plegable || group.section === seccionActiva || openSections.has(group.section)
+            return (
+              <div key={group.section} className="mb-1">
+                {plegable ? (
+                  <button
+                    type="button"
+                    onClick={() => toggleSection(group.section)}
+                    aria-expanded={abierta}
+                    className="w-full flex items-center justify-between gap-1 px-4 pt-3 pb-1 text-[10px] uppercase tracking-widest font-semibold transition-colors hover:text-white"
+                    style={{ color: '#4A5260' }}
+                  >
+                    <span>{group.section}</span>
+                    <ChevronDown size={12} className={`flex-shrink-0 transition-transform duration-200 ${abierta ? 'rotate-180' : ''}`} />
+                  </button>
+                ) : (
+                  <div className="text-[10px] uppercase tracking-widest font-semibold px-4 pt-3 pb-1"
+                    style={{ color: '#4A5260' }}>
+                    {group.section}
+                  </div>
+                )}
+                {abierta && group.links.map(({ href, Icon, label, badge }) => {
+                  const active = esLinkActivo(href)
+                  return (
+                    <Link key={href} href={href} onClick={onNav}
+                      className={`nav-link ${active ? 'active' : ''}`}>
+                      <Icon size={15} strokeWidth={2} className="flex-shrink-0" />
+                      <span className="flex-1">{label}</span>
+                      {!!badge && <span className="badge badge-red text-[10px] px-1.5">{badge}</span>}
+                    </Link>
+                  )
+                })}
               </div>
-              {group.links.map(({ href, Icon, label, badge }) => {
-                const active = pathname === href || (href !== '/' && pathname.startsWith(href))
-                return (
-                  <Link key={href} href={href} onClick={onNav}
-                    className={`nav-link ${active ? 'active' : ''}`}>
-                    <Icon size={15} strokeWidth={2} className="flex-shrink-0" />
-                    <span className="flex-1">{label}</span>
-                    {!!badge && <span className="badge badge-red text-[10px] px-1.5">{badge}</span>}
-                  </Link>
-                )
-              })}
-            </div>
-          ))}
+            )
+          })}
         </nav>
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6"
           style={{ background: 'linear-gradient(to bottom, transparent, #2E333A)' }} />

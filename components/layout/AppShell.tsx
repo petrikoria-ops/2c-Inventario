@@ -33,9 +33,15 @@ export default function AppShell({
         erroresPendientes={erroresPendientes}
       />
       {/* pt-14 reserva el alto de la barra superior móvil (fixed) para que
-          el título de cada página nunca quede tapado por ella. */}
-      <main className="flex-1 md:ml-56 min-h-screen flex flex-col pt-14 md:pt-0">
-        <div className="flex-1 flex flex-col w-full max-w-[1440px] mx-auto">
+          el título de cada página nunca quede tapado por ella.
+          min-w-0: sin esto, un elemento flex no se achica más allá del
+          ancho mínimo de su contenido — una tabla ancha (ej. Materiales)
+          empuja todo el layout y aparece scroll horizontal de la página
+          entera en vez de quedar contenido en el overflow-x-auto de la
+          tabla. Con min-w-0 el que scrollea es solo el contenedor de la
+          tabla, como corresponde. */}
+      <main className="flex-1 md:ml-56 min-h-screen flex flex-col pt-14 md:pt-0 min-w-0">
+        <div className="flex-1 flex flex-col w-full max-w-[1440px] mx-auto min-w-0">
           {children}
         </div>
       </main>
