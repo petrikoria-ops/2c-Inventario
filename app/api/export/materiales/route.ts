@@ -1,9 +1,15 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { getPerfil, puedeVer } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET() {
+  const perfil = await getPerfil()
+  if (!perfil || !puedeVer(perfil, 'materiales')) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
+  }
+
   const sb = getSupabaseServer()
   const { data } = await sb
     .from('materiales')

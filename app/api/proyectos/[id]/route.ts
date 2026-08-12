@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { requireEditable } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -17,6 +18,9 @@ export async function GET(_: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
+  const denegado = await requireEditable('proyectos')
+  if (denegado) return denegado
+
   const sb = getSupabaseServer()
   const { error } = await sb.from('proyectos').update(await req.json()).eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })
@@ -24,6 +28,9 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {
+  const denegado = await requireEditable('proyectos')
+  if (denegado) return denegado
+
   const sb = getSupabaseServer()
   const { error } = await sb.from('proyectos').delete().eq('id', params.id)
   if (error) return NextResponse.json({ error: error.message }, { status: 400 })

@@ -18,6 +18,11 @@ export async function POST(req: NextRequest, { params }: Ctx) {
   if (!codigo || !nivel_acceso) {
     return NextResponse.json({ error: 'Falta el código o el nivel de acceso a asignar.' }, { status: 400 })
   }
+  // "master" es el nivel de mayor privilegio del sistema — solo alguien que
+  // ya es master puede otorgarlo al aprobar una solicitud de acceso.
+  if (nivel_acceso === 'master' && perfil.nivel_acceso !== 'master') {
+    return NextResponse.json({ error: 'Solo un usuario master puede asignar el nivel master.' }, { status: 403 })
+  }
 
   const sb = getSupabaseServer()
   const { data: solicitud, error: errSol } = await sb

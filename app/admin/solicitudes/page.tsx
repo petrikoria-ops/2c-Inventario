@@ -35,7 +35,7 @@ export default async function SolicitudesAdminPage() {
       <div className="mb-6">
         <PanelSolicitudes initialData={solicitudes ?? []} />
       </div>
-      <PanelUsuarios initialData={usuarios ?? []} miId={perfil.id} />
+      <PanelUsuarios initialData={usuarios ?? []} miId={perfil.id} miNivel={perfil.nivel_acceso} />
     </div>
   )
 }

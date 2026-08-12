@@ -8,7 +8,7 @@ import type { Trabajador } from '@/types'
 
 const BLANK: Partial<Trabajador> = { nombre: '', rut: '', cargo: '', telefono: '' }
 
-export default function TablaTrabjadores({ initialData }: { initialData: Trabajador[] }) {
+export default function TablaTrabjadores({ initialData, editable = true }: { initialData: Trabajador[]; editable?: boolean }) {
   const router = useRouter()
   const { showToast } = useToast()
 
@@ -64,11 +64,18 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
           <a href="/herramientas/entregar" className="btn btn-outline btn-sm ml-auto">
             Entregar herramientas →
           </a>
-          <button className="btn btn-primary btn-sm"
-            onClick={() => { setEditando(BLANK); setModalOpen(true) }}>
-            + Nuevo
-          </button>
+          {editable && (
+            <button className="btn btn-primary btn-sm"
+              onClick={() => { setEditando(BLANK); setModalOpen(true) }}>
+              + Nuevo
+            </button>
+          )}
         </div>
+        {!editable && (
+          <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+            Tu perfil tiene acceso de solo lectura a Trabajadores — no puedes crear, editar ni desactivar.
+          </div>
+        )}
         <div className="overflow-x-auto">
           <table className="w-full">
             <thead>
@@ -89,13 +96,17 @@ export default function TablaTrabjadores({ initialData }: { initialData: Trabaja
                   <td className="td text-xs text-brand-n500">{t.telefono ?? '—'}</td>
                   <td className="td">
                     <div className="flex gap-0.5">
-                      <button className="btn-icon" title="Editar" aria-label="Editar"
-                        onClick={() => { setEditando({ ...t }); setModalOpen(true) }}>
-                        <Pencil size={13} />
-                      </button>
-                      <button className="btn-icon" title="Desactivar" aria-label="Desactivar" onClick={() => eliminar(t)}>
-                        <Trash2 size={13} />
-                      </button>
+                      {editable && (
+                        <>
+                          <button className="btn-icon" title="Editar" aria-label="Editar"
+                            onClick={() => { setEditando({ ...t }); setModalOpen(true) }}>
+                            <Pencil size={13} />
+                          </button>
+                          <button className="btn-icon" title="Desactivar" aria-label="Desactivar" onClick={() => eliminar(t)}>
+                            <Trash2 size={13} />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>

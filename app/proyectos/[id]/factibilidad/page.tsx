@@ -1,9 +1,13 @@
+import { redirect, notFound }    from 'next/navigation'
 import { getSupabaseServer }    from '@/lib/supabase/server'
-import { notFound }              from 'next/navigation'
 import FactibilidadProyecto      from '@/components/proyectos/FactibilidadProyecto'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 export const dynamic = 'force-dynamic'
 
 export default async function FactibilidadPage({ params }: { params: { id: string } }) {
+  const perfil = await getPerfil()
+  if (!perfil || !puedeVer(perfil, 'proyectos')) redirect('/')
+
   const sb = getSupabaseServer()
 
   const [{ data: proyecto }, { data: bom }] = await Promise.all([
@@ -17,6 +21,8 @@ export default async function FactibilidadPage({ params }: { params: { id: strin
     <FactibilidadProyecto
       proyecto={proyecto}
       initialBom={bom ?? []}
+      editable={puedeEditar(perfil, 'proyectos')}
+      editableCompras={puedeEditar(perfil, 'compras')}
     />
   )
 }

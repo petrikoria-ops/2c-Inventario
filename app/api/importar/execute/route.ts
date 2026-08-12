@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { requireEditable } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -179,6 +180,9 @@ export async function POST(req: NextRequest) {
     actions: Action[]
     skipped: number
   }
+
+  const denegado = await requireEditable(type)
+  if (denegado) return denegado
 
   const sb = getSupabaseServer()
 

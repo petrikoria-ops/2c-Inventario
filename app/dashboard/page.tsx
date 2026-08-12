@@ -38,9 +38,9 @@ export default async function DashboardPage() {
   ] = await Promise.all([
     sb.from('materiales').select('*', { count: 'exact', head: true }).eq('activo', true),
     fetchAllMateriales<MaterialDashboard>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario'),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion'),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'extraviada'),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'operativa'),
+    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion').eq('activo', true),
+    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'extraviada').eq('activo', true),
+    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'operativa').eq('activo', true),
     sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
     sb.from('proyectos').select('estado'),
     sb.from('movimientos')

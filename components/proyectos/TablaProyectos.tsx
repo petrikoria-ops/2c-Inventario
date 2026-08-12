@@ -22,7 +22,7 @@ const calcCosto = (movs: unknown): number =>
       }, 0)
     : 0
 
-export default function TablaProyectos({ initialData }: { initialData: Proyecto[] }) {
+export default function TablaProyectos({ initialData, editable = true }: { initialData: Proyecto[]; editable?: boolean }) {
   const { showToast } = useToast()
   const [items, setItems]       = useState<Proyecto[]>(initialData)
   const [q, setQ]               = useState('')
@@ -78,7 +78,9 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
         <div className="panel-header">
           <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Obras activas — Tableros</h2>
-          <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva OT</button>
+          {editable && (
+            <button className="btn btn-primary btn-sm" onClick={() => { setEditando(BLANK); setModalOpen(true) }}>+ Nueva OT</button>
+          )}
         </div>
         <div className="filters">
           <div className="relative">
@@ -117,12 +119,16 @@ export default function TablaProyectos({ initialData }: { initialData: Proyecto[
                     <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad" aria-label="Factibilidad">
                       <ClipboardCheck size={13} />
                     </a>
-                    <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
-                      <Pencil size={13} />
-                    </button>
-                    <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
-                      <Trash2 size={13} />
-                    </button>
+                    {editable && (
+                      <>
+                        <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
+                          <Pencil size={13} />
+                        </button>
+                        <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
+                          <Trash2 size={13} />
+                        </button>
+                      </>
+                    )}
                   </div></td>
                 </tr>
               ))}

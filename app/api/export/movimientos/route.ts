@@ -1,9 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { getPerfil, puedeVer } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 export async function GET(req: NextRequest) {
+  const perfil = await getPerfil()
+  if (!perfil || !puedeVer(perfil, 'movimientos')) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
+  }
+
   const sb = getSupabaseServer()
   const { searchParams: p } = new URL(req.url)
   const desde = p.get('desde')

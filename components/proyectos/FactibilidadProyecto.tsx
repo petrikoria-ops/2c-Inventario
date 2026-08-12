@@ -38,9 +38,13 @@ const ESTADO_LABELS: Record<EstadoItem, { label: string; cls: string }> = {
 export default function FactibilidadProyecto({
   proyecto,
   initialBom,
+  editable = true,
+  editableCompras = true,
 }: {
   proyecto:   Pick<Proyecto, 'id' | 'ot' | 'nombre' | 'cliente'>
   initialBom: ProyectoMaterial[]
+  editable?:  boolean
+  editableCompras?: boolean
 }) {
   const [bom, setBom]               = useState<ProyectoMaterial[]>(initialBom)
   const [evalResult, setEvalResult] = useState<EvalResult | null>(null)
@@ -280,18 +284,27 @@ export default function FactibilidadProyecto({
             Lista de materiales (BOM)
             {bom.length > 0 && <span className="ml-2 badge badge-blue">{bom.length}</span>}
           </h2>
-          <div className="flex gap-2">
-            <button onClick={() => setShowManual(v => !v)} className="btn btn-outline btn-sm">
-              {showManual ? '× Cancelar' : '+ Agregar manual'}
-            </button>
-            <button onClick={() => fileInputRef.current?.click()} className="btn btn-outline btn-sm">
-              <Download size={13} /> Importar Excel
-            </button>
-            <input ref={fileInputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={handleFileChange} />
-          </div>
+          {editable && (
+            <div className="flex gap-2">
+              <button onClick={() => setShowManual(v => !v)} className="btn btn-outline btn-sm">
+                {showManual ? '× Cancelar' : '+ Agregar manual'}
+              </button>
+              <button onClick={() => fileInputRef.current?.click()} className="btn btn-outline btn-sm">
+                <Download size={13} /> Importar Excel
+              </button>
+              <input ref={fileInputRef} type="file" accept=".xlsx,.csv" className="hidden" onChange={handleFileChange} />
+            </div>
+          )}
         </div>
 
+        {!editable && (
+          <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
+            Tu perfil tiene acceso de solo lectura a Proyectos — puedes evaluar factibilidad pero no editar el BOM.
+          </div>
+        )}
+
         {/* Buscador */}
+        {editable && (
         <div className="px-4 pt-3 pb-2">
           <div ref={searchRef} className="relative">
             <div className="relative">
@@ -323,9 +336,10 @@ export default function FactibilidadProyecto({
             )}
           </div>
         </div>
+        )}
 
         {/* Formulario manual */}
-        {showManual && (
+        {editable && showManual && (
           <div className="mx-4 mb-3 p-3 bg-slate-50 border border-slate-200 rounded-lg">
             <p className="text-xs font-semibold text-brand-n500 uppercase tracking-wide mb-2">Agregar ítem manual</p>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
@@ -364,7 +378,7 @@ export default function FactibilidadProyecto({
         )}
 
         {/* Preview importación */}
-        {importPreview && (
+        {editable && importPreview && (
           <div className="mx-4 mb-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
             <p className="text-sm font-semibold text-blue-800 mb-2">
               Vista previa — {importPreview.length} ítem(s) a importar
@@ -408,7 +422,7 @@ export default function FactibilidadProyecto({
                 <th className="th">Descripción</th>
                 <th className="th">Un.</th>
                 <th className="th text-right" style={{ minWidth: 120 }}>Cant. requerida</th>
-                <th className="th"></th>
+                {editable && <th className="th"></th>}
               </tr></thead>
               <tbody>
                 {bom.map(item => (
@@ -417,17 +431,23 @@ export default function FactibilidadProyecto({
                     <td className="td">{item.descripcion}</td>
                     <td className="td text-brand-n500">{item.unidad}</td>
                     <td className="td text-right">
-                      <input type="number" min="0.01" step="1"
-                        value={item.cantidad_requerida}
-                        onChange={e => updateCantidad(item, parseFloat(e.target.value) || 1)}
-                        className="input text-right text-sm w-24" />
+                      {editable ? (
+                        <input type="number" min="0.01" step="1"
+                          value={item.cantidad_requerida}
+                          onChange={e => updateCantidad(item, parseFloat(e.target.value) || 1)}
+                          className="input text-right text-sm w-24" />
+                      ) : (
+                        <span className="font-medium">{num(item.cantidad_requerida, 2)}</span>
+                      )}
                     </td>
-                    <td className="td text-center">
-                      <button onClick={() => removeItem(item)}
-                        className="w-6 h-6 flex items-center justify-center rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors text-lg leading-none">
-                        ×
-                      </button>
-                    </td>
+                    {editable && (
+                      <td className="td text-center">
+                        <button onClick={() => removeItem(item)}
+                          className="w-6 h-6 flex items-center justify-center rounded text-slate-300 hover:text-red-500 hover:bg-red-50 transition-colors text-lg leading-none">
+                          ×
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>
@@ -469,7 +489,7 @@ export default function FactibilidadProyecto({
                   <AlertTriangle size={13} /> Faltan {evalResult.faltanCount} ítem{evalResult.faltanCount !== 1 ? 's' : ''}
                 </span>
               )}
-              {faltantes.length > 0 && (
+              {faltantes.length > 0 && editableCompras && (
                 <button onClick={generarSolicitud} disabled={generating} className="btn btn-primary btn-sm">
                   {generating ? <><Loader2 size={14} className="animate-spin" /> Generando…</> : <><ShoppingCart size={14} /> Generar solicitud de compra</>}
                 </button>

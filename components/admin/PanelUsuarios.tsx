@@ -13,7 +13,7 @@ const NOMBRE_DEPARTAMENTO: Record<Departamento, string> = {
 
 const DEPARTAMENTOS = Object.keys(PUESTOS_POR_DEPARTAMENTO) as Departamento[]
 
-export default function PanelUsuarios({ initialData, miId }: { initialData: Perfil[]; miId: string }) {
+export default function PanelUsuarios({ initialData, miId, miNivel }: { initialData: Perfil[]; miId: string; miNivel: NivelAcceso }) {
   const [usuarios, setUsuarios] = useState(initialData)
   const [editando, setEditando] = useState<string | null>(null)
   const [form, setForm] = useState<{ departamento: Departamento; puesto: string; nivel_acceso: NivelAcceso }>({
@@ -116,6 +116,8 @@ export default function PanelUsuarios({ initialData, miId }: { initialData: Perf
                 <div>
                   <label className="label" htmlFor={`nivel-${u.id}`}>Nivel de acceso</label>
                   <select id={`nivel-${u.id}`} className="select" value={form.nivel_acceso}
+                    disabled={u.id === miId}
+                    title={u.id === miId ? 'No puedes cambiar tu propio nivel de acceso.' : undefined}
                     onChange={e => setForm(f => ({ ...f, nivel_acceso: e.target.value as NivelAcceso }))}>
                     <option value="visualizacion">Visualización</option>
                     <option value="operador">Operador</option>
@@ -123,8 +125,9 @@ export default function PanelUsuarios({ initialData, miId }: { initialData: Perf
                     <option value="jefe_departamento">Jefe de departamento</option>
                     <option value="directiva">Directiva</option>
                     <option value="admin_software">Administrador de software</option>
-                    <option value="master">Master</option>
+                    {miNivel === 'master' && <option value="master">Master</option>}
                   </select>
+                  {u.id === miId && <p className="text-xs text-brand-n500 mt-1">No puedes cambiar tu propio nivel.</p>}
                 </div>
                 <div className="sm:col-span-3 flex gap-2">
                   <button disabled={guardando || !form.puesto} className="btn btn-success btn-sm" onClick={() => guardar(u.id)}>

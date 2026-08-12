@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VALID_CATEGORIES } from '@/lib/importar/categorias-map'
+import { getPerfil, requireEditable } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -146,7 +147,15 @@ async function callGroqBatch(
 
 // ── Diagnóstico: GET /api/importar/classify ────────────────────
 // Llama a Groq con 1 ítem real y devuelve config + respuesta cruda.
+// Solo admin_software/master: expone si la API key está configurada
+// (primeros caracteres) y gasta cupo real de la cuenta de Groq en cada
+// llamada — antes no exigía sesión (AUD-018).
 export async function GET() {
+  const perfil = await getPerfil()
+  if (!perfil || (perfil.nivel_acceso !== 'admin_software' && perfil.nivel_acceso !== 'master')) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
+  }
+
   const apiKey  = process.env.GROQ_API_KEY ?? null
   const enabled = process.env.AI_CLASSIFY_ENABLED
 
@@ -207,6 +216,9 @@ export async function GET() {
 
 // ── Endpoint principal — un lote por llamada (batching en el cliente) ──
 export async function POST(req: NextRequest) {
+  const denegado = await requireEditable('materiales')
+  if (denegado) return denegado
+
   if (!ENABLED) {
     return NextResponse.json(
       { error: 'Clasificación IA no activada. Agrega AI_CLASSIFY_ENABLED=true y GROQ_API_KEY en .env.local' },
