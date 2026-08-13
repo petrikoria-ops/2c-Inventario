@@ -45,6 +45,20 @@ export async function middleware(req: NextRequest) {
 
   const isPendingPage = path === '/pendiente-aprobacion'
 
+  // BUG CRÍTICO corregido: esta rama faltaba por completo. Sin ella, un
+  // request sin sesión a una página protegida no caía en ninguno de los
+  // `if (session && ...)` de abajo y seguía de largo con `return res` — es
+  // decir, cualquiera con un link directo a una página protegida entraba
+  // sin pasar por /login. RLS igual bloqueaba los datos, pero el shell de
+  // la app (sidebar, layout) se renderizaba igual. Sin sesión, a cualquier
+  // página no pública, siempre a /login.
+  if (!session && !isPublicPage) {
+    const url = req.nextUrl.clone()
+    url.pathname = '/login'
+    url.search = ''
+    return NextResponse.redirect(url)
+  }
+
    if (session && isPublicPage && path !== '/crear-password' && path !== '/auth/callback') {
      const url = req.nextUrl.clone()
      url.pathname = '/'
@@ -72,13 +86,6 @@ export async function middleware(req: NextRequest) {
       url.search = ''
       return NextResponse.redirect(url)
     }
-  }
-
-  if (session && isPublicPage) {
-    const url = req.nextUrl.clone()
-    url.pathname = '/'
-    url.search = ''
-    return NextResponse.redirect(url)
   }
 
   return res
