@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { CheckCircle2, Printer } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { BLOQUES_RIC, A0_COORDINACION, A0_INFORMES_PROPIOS_TERRENO } from '@/lib/verificacionRic/plantilla'
+import CampoFirma from '@/components/documentos/CampoFirma'
 import ResultadoPills from './ResultadoPills'
 import FotoUpload from './FotoUpload'
 import type { VerificacionRic, VerificacionRicItem } from '@/types'
@@ -218,6 +219,13 @@ export default function FormularioVerificacionRic({ verificacion, initialItems, 
                 value={cabecera.firma_cargo ?? ''} onChange={e => patchCabecera({ firma_cargo: e.target.value })} />
             </div>
           </div>
+          <CampoFirma
+            bucket="verificaciones-ric"
+            path={`${verificacion.id}/firma.png`}
+            firmaUrl={cabecera.firma_imagen_url}
+            disabled={!editable}
+            onFirmaGuardada={path => patchCabecera({ firma_imagen_url: path })}
+          />
         </div>
       </div>
     </div>

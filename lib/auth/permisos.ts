@@ -67,7 +67,7 @@ export type Modulo =
   | 'materiales' | 'herramientas' | 'movimientos' | 'proveedores' | 'compras'
   | 'proyectos' | 'trabajadores' | 'recursos_tecnicos' | 'checklist'
   | 'etiquetas' | 'agente' | 'metricas'
-  | 'avance_obra' | 'verificacion_ric' | 'prevencion_riesgos'
+  | 'avance_obra' | 'verificacion_ric' | 'prevencion_riesgos' | 'pruebas_alimentadores'
 
 type AccesoModulo = 'no' | 'lectura' | 'completo'
 
@@ -100,6 +100,7 @@ const MODULOS_POR_DEPARTAMENTO: Record<Departamento, Partial<Record<Modulo, Acce
     proveedores: 'lectura', compras: 'lectura', proyectos: 'lectura',
     trabajadores: 'lectura', agente: 'completo', metricas: 'completo',
     avance_obra: 'completo', verificacion_ric: 'completo', prevencion_riesgos: 'lectura',
+    pruebas_alimentadores: 'completo',
   },
   admin_software: {},
 }
@@ -117,7 +118,7 @@ const NIVELES_CON_METRICAS: NivelAcceso[] = ['jefe_departamento', 'directiva', '
 // rutas y componentes. Si esta tabla crece mucho más allá de 1-2 entradas,
 // reconsiderar un modelo de permisos por puesto en vez de por departamento.
 const EXCEPCIONES_EDICION_POR_PUESTO: Partial<Record<string, Modulo[]>> = {
-  'Ingeniero visitante': ['compras', 'avance_obra', 'verificacion_ric'],
+  'Ingeniero visitante': ['compras', 'avance_obra', 'verificacion_ric', 'pruebas_alimentadores'],
 }
 
 export function puedeVer(perfil: Perfil, modulo: Modulo): boolean {

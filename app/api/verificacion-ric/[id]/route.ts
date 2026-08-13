@@ -29,6 +29,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   for (const campo of [
     'cliente_mandante', 'ubicacion', 'fecha_visita', 'inspectores', 'num_tableros',
     'estado', 'declaracion_conformidad', 'firma_nombre', 'firma_rut', 'firma_cargo',
+    'firma_imagen_url',
   ]) {
     if (body[campo] !== undefined) patch[campo] = body[campo]
   }

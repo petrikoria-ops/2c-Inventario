@@ -1,7 +1,9 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { notFound } from 'next/navigation'
 import PrintButton from '@/components/solicitudes/PrintButton'
-import { getSignedUrls } from '@/lib/supabase/storage'
+import { getSignedUrls, getSignedUrlDeBucket } from '@/lib/supabase/storage'
+import { ESTILOS_IMPRESION_DOCUMENTO } from '@/components/documentos/estilosDocumento'
+import PortadaDocumento from '@/components/documentos/PortadaDocumento'
 import { BLOQUES_RIC, A0_COORDINACION, A0_INFORMES_PROPIOS_TERRENO } from '@/lib/verificacionRic/plantilla'
 import type { VerificacionRicItem } from '@/types'
 
@@ -23,31 +25,14 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
   const todosLosItems: VerificacionRicItem[] = items ?? []
   const paths = todosLosItems.filter(i => i.foto_url).map(i => i.foto_url as string)
   const urls = paths.length ? await getSignedUrls(sb, paths) : {}
+  const firmaUrl = verificacion.firma_imagen_url
+    ? await getSignedUrlDeBucket(sb, 'verificaciones-ric', verificacion.firma_imagen_url) : null
 
   const porBloque = (id: string) => todosLosItems.filter(i => i.bloque === id).sort((a, b) => a.orden - b.orden)
 
   return (
     <>
-      <style>{`
-        @media print {
-          aside, .no-print { display: none !important; }
-          main { margin: 0 !important; padding: 0 !important; background: white !important; }
-          .print-doc { box-shadow: none !important; margin: 0 !important; border: none !important; }
-          @page { margin: 1.6cm; size: A4; }
-
-          .ric-portada { break-after: page; page-break-after: always; }
-          .ric-cierre  { break-before: page; page-break-before: always; }
-          .ric-bloque  { break-inside: avoid; page-break-inside: avoid; }
-          .ric-bloque-titulo { break-after: avoid; page-break-after: avoid; }
-          table { break-inside: auto; }
-          tr    { break-inside: avoid; page-break-inside: avoid; }
-          thead { display: table-header-group; }
-        }
-        .doc-th   { background-color: #2E333A; color: #9AA3AE; padding: 6px 10px; text-align: left; font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; }
-        .doc-th-r { text-align: right; }
-        .doc-td   { padding: 6px 10px; font-size: 12px; border-bottom: 1px solid #ECEEF1; }
-        .doc-td-r { padding: 6px 10px; font-size: 12px; border-bottom: 1px solid #ECEEF1; text-align: right; }
-      `}</style>
+      <style>{ESTILOS_IMPRESION_DOCUMENTO}</style>
 
       <div className="no-print flex items-center gap-3 p-4 bg-white border-b border-slate-200 shadow-sm">
         <a href={`/verificacion-ric/${verificacion.id}`} className="btn btn-ghost btn-sm">← Volver</a>
@@ -60,44 +45,23 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
       <div className="print-doc bg-white max-w-3xl mx-auto my-8 p-10 shadow-lg rounded-xl" style={{ border: '1px solid #E2E4E7' }}>
 
         {/* Portada */}
-        <div className="ric-portada" style={{ minHeight: '80vh' }}>
-          <div className="flex justify-between items-start mb-8">
-            <div className="flex items-center gap-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src="/logo-2c.png" alt="2C Montajes" style={{ height: 48, width: 'auto' }} />
-              <div>
-                <p className="font-bold text-base" style={{ color: '#181818' }}>2C MONTAJES Y PROYECTOS ELÉCTRICOS</p>
-                <p className="text-xs mt-0.5" style={{ color: 'var(--n-500)' }}>Verificación Inicial y Puesta en Marcha</p>
-              </div>
-            </div>
-            <div className="text-right">
-              <p className="text-[10px] uppercase tracking-widest mb-1" style={{ color: 'var(--n-500)' }}>Verificación RIC N°18/19</p>
-              <p className="text-3xl font-bold leading-tight" style={{ color: '#F0C000' }}>{verificacion.numero}</p>
-              <p className="text-sm mt-1" style={{ color: 'var(--n-500)' }}>{new Date(verificacion.fecha_visita).toLocaleDateString('es-CL')}</p>
-            </div>
-          </div>
-
-          <div style={{ height: 2, backgroundColor: '#2E333A', marginBottom: 24 }} />
-
-          <div className="grid grid-cols-2 gap-6 mb-7 text-sm">
-            <div>
-              <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>Proyecto</p>
-              <p className="font-semibold" style={{ color: '#181818' }}>{verificacion.proyecto_nombre ?? '—'}</p>
-              {verificacion.cliente_mandante && <p style={{ color: 'var(--n-500)' }}>{verificacion.cliente_mandante}</p>}
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>Ubicación</p>
-              <p style={{ color: '#181818' }}>{verificacion.ubicacion ?? '—'}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>Inspector(es)</p>
-              <p style={{ color: '#181818' }}>{verificacion.inspectores ?? '—'}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-wide font-semibold mb-1" style={{ color: 'var(--n-500)' }}>N° de tableros</p>
-              <p style={{ color: '#181818' }}>{verificacion.num_tableros ?? '—'}</p>
-            </div>
-          </div>
+        <div className="doc-portada" style={{ minHeight: '80vh' }}>
+          <PortadaDocumento
+            kicker="CHECKLIST DE TERRENO — VERIFICACIÓN INICIAL Y PUESTA EN MARCHA (RIC N°18/19)"
+            numero={verificacion.numero}
+            fecha={new Date(verificacion.fecha_visita).toLocaleDateString('es-CL')}
+            titulo="CHECKLIST DE TERRENO"
+            subtitulo="Verificación Inicial y Puesta en Marcha — RIC N°18 y N°19"
+            descripcion="Documento generado a partir del checklist digital de terreno — incluye las verificaciones, mediciones y registro fotográfico de la visita."
+            campos={[
+              { label: 'Proyecto', value: verificacion.proyecto_nombre },
+              { label: 'Cliente / Mandante', value: verificacion.cliente_mandante },
+              { label: 'Ubicación', value: verificacion.ubicacion },
+              { label: 'Fecha de visita', value: new Date(verificacion.fecha_visita).toLocaleDateString('es-CL') },
+              { label: 'Inspector(es)', value: verificacion.inspectores },
+              { label: 'N° de tableros', value: verificacion.num_tableros },
+            ]}
+          />
         </div>
 
         {/* Bloques A.0 - A.11 */}
@@ -106,8 +70,8 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
           const fotos = porBloque(b.id).filter(i => i.tipo === 'foto')
           const nota  = porBloque(b.id).find(i => i.tipo === 'nota')
           return (
-            <div key={b.id} className="ric-bloque mb-7">
-              <p className="ric-bloque-titulo font-bold text-sm mb-2" style={{ color: '#2E333A' }}>
+            <div key={b.id} className="doc-bloque mb-7">
+              <p className="doc-bloque-titulo font-bold text-sm mb-2" style={{ color: '#2E333A' }}>
                 {b.id} {b.refNormativa && `— ${b.refNormativa}`}: {b.titulo}
               </p>
 
@@ -169,7 +133,7 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
         })}
 
         {/* Registro fotográfico general + Cierre */}
-        <div className="ric-cierre">
+        <div className="doc-cierre">
           <p className="font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Registro fotográfico general de la visita</p>
           <table className="w-full mb-6" style={{ borderCollapse: 'collapse' }}>
             <thead><tr><th className="doc-th">Foto</th><th className="doc-th" style={{ width: 60 }}>Hecho</th><th className="doc-th" style={{ width: 90 }}>Imagen</th></tr></thead>
@@ -194,11 +158,16 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
             {verificacion.declaracion_conformidad ? 'Completada y firmada' : 'Pendiente'}
           </div>
 
-          <div className="grid grid-cols-1 gap-1 text-sm mb-8">
+          <div className="grid grid-cols-1 gap-1 text-sm mb-4">
             <p><strong style={{ color: '#2E333A' }}>Nombre:</strong> {verificacion.firma_nombre ?? '—'}</p>
             <p><strong style={{ color: '#2E333A' }}>RUT:</strong> {verificacion.firma_rut ?? '—'}</p>
             <p><strong style={{ color: '#2E333A' }}>Cargo:</strong> {verificacion.firma_cargo ?? '—'}</p>
           </div>
+
+          {firmaUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={firmaUrl} alt="Firma" style={{ height: 70, marginBottom: 24 }} />
+          )}
 
           <div className="mt-8 pt-4 flex items-center justify-between text-[10px]" style={{ borderTop: '1px solid #E2E4E7', color: '#C0C4CC' }}>
             <span>2C Montajes y Proyectos Eléctricos</span>

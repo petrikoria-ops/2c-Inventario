@@ -6,7 +6,7 @@ import { useState } from 'react'
 import {
   Home, LayoutDashboard,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
-  ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert,
+  ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert, Zap,
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
@@ -17,6 +17,13 @@ import type { LucideIcon } from 'lucide-react'
 
 interface NavLink  { href: string; Icon: LucideIcon; label: string; modulo?: Modulo; badge?: number }
 interface NavGroup { section: string; links: NavLink[] }
+
+// Iniciales para el avatar del usuario con sesión iniciada (ej. "Ana Torres" → "AT").
+function inicialesDe(nombreCompleto: string): string {
+  const partes = nombreCompleto.trim().split(/\s+/).filter(Boolean)
+  if (!partes.length) return '?'
+  return (partes[0][0] + (partes[1]?.[0] ?? '')).toUpperCase()
+}
 
 // modulo: undefined = siempre visible para cualquier perfil (ej. Inicio).
 const NAV: NavGroup[] = [
@@ -46,6 +53,7 @@ const NAV: NavGroup[] = [
       { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros', modulo: 'proyectos' },
       { href: '/avance-obra', Icon: ListChecks,    label: 'Avance de obra',     modulo: 'avance_obra' },
       { href: '/verificacion-ric', Icon: ShieldCheck, label: 'Verificación RIC', modulo: 'verificacion_ric' },
+      { href: '/pruebas-alimentadores', Icon: Zap, label: 'Test de Alimentadores', modulo: 'pruebas_alimentadores' },
       { href: '/prevencion-riesgos', Icon: ShieldAlert, label: 'Inspección de riesgos', modulo: 'prevencion_riesgos' },
       { href: '/proveedores', Icon: Building2,     label: 'Proveedores', modulo: 'proveedores' },
       { href: '/solicitudes', Icon: ShoppingCart,  label: 'Compras',     modulo: 'compras' },
@@ -202,6 +210,20 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
         <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-6"
           style={{ background: 'linear-gradient(to bottom, transparent, #2E333A)' }} />
       </div>
+
+      {/* Usuario con sesión iniciada — quién está usando la app en este dispositivo */}
+      {perfil && (
+        <div className="flex items-center gap-2.5 px-4 py-2 mx-2 mb-1 rounded-md" title={perfil.email}>
+          <div className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-bold text-white flex-shrink-0"
+            style={{ background: `linear-gradient(120deg, ${cfg.grad[0]}, ${cfg.grad[1]})` }}>
+            {inicialesDe(perfil.nombre_completo)}
+          </div>
+          <div className="min-w-0 flex-1">
+            <div className="text-[12px] font-semibold text-white leading-tight truncate">{perfil.nombre_completo}</div>
+            <div className="text-[10px] leading-tight truncate" style={{ color: '#6B7480' }}>{perfil.email}</div>
+          </div>
+        </div>
+      )}
 
       {/* Cerrar sesión */}
       <button

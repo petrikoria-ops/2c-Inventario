@@ -9,8 +9,8 @@ type Ctx = { params: { id: string } }
 export async function GET(_: NextRequest, { params }: Ctx) {
   const sb = getSupabaseServer()
   const { data, error } = await sb
-    .from('inspecciones_prevencion')
-    .select('*,inspecciones_prevencion_items(*)')
+    .from('pruebas_alimentadores')
+    .select('*,pruebas_alimentadores_items(*)')
     .eq('id', params.id)
     .single()
 
@@ -19,7 +19,7 @@ export async function GET(_: NextRequest, { params }: Ctx) {
 }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('prevencion_riesgos')
+  const denegado = await requireEditable('pruebas_alimentadores')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()
@@ -27,16 +27,15 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
   const patch: Record<string, unknown> = {}
 
   for (const campo of [
-    'centro_trabajo', 'direccion', 'comuna', 'mandante', 'lugares_inspeccionados',
-    'fecha', 'prevencionista', 'dirigido_a', 'n_trabajadores', 'introduccion',
-    'observaciones_generales', 'firma_prevencionista', 'firma_encargado', 'estado',
-    'firma_prevencionista_imagen_url', 'firma_encargado_imagen_url',
+    'cliente_mandante', 'ubicacion', 'fecha_visita', 'inspectores',
+    'identificacion_alimentador', 'instrumento', 'observaciones',
+    'estado', 'firma_nombre', 'firma_rut', 'firma_cargo', 'firma_imagen_url',
   ]) {
     if (body[campo] !== undefined) patch[campo] = body[campo]
   }
 
   const { data, error } = await sb
-    .from('inspecciones_prevencion')
+    .from('pruebas_alimentadores')
     .update(patch)
     .eq('id', params.id)
     .select()

@@ -1,0 +1,28 @@
+import { notFound } from 'next/navigation'
+import { getSupabaseServer } from '@/lib/supabase/server'
+import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import FormularioPruebaAlimentadores from '@/components/pruebasAlimentadores/FormularioPruebaAlimentadores'
+
+export const dynamic = 'force-dynamic'
+
+export default async function PruebaAlimentadoresDetallePage({ params }: { params: { id: string } }) {
+  const sb = getSupabaseServer()
+
+  const [{ data: prueba }, { data: items }, perfil] = await Promise.all([
+    sb.from('pruebas_alimentadores').select('*').eq('id', params.id).single(),
+    sb.from('pruebas_alimentadores_items').select('*').eq('prueba_id', params.id).order('orden'),
+    getPerfil(),
+  ])
+
+  if (!prueba) notFound()
+
+  const editable = !perfil || puedeEditar(perfil, 'pruebas_alimentadores')
+
+  return (
+    <FormularioPruebaAlimentadores
+      prueba={prueba}
+      initialItems={items ?? []}
+      editable={editable}
+    />
+  )
+}

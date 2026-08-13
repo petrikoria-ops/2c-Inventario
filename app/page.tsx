@@ -68,10 +68,12 @@ export default async function HomePage() {
   const Widget = departamentoMostrado ? WIDGETS[departamentoMostrado] : null
 
   const fecha = new Date().toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long' })
+  const primerNombre = perfil?.nombre_completo?.trim().split(/\s+/)[0]
+  const saludo = primerNombre ? `${saludoSegunHora()}, ${primerNombre}` : saludoSegunHora()
   const rol = perfil
     ? verComo
       ? `Viendo como ${NOMBRE_DEPARTAMENTO[verComo]} · ${perfil.nombre_completo}`
-      : `${perfil.puesto}`
+      : `${perfil.nombre_completo} · ${perfil.puesto}`
     : null
 
   return (
@@ -82,7 +84,7 @@ export default async function HomePage() {
         lema={cfg.lema}
         Icon={cfg.Icon}
         grad={cfg.grad}
-        saludo={saludoSegunHora()}
+        saludo={saludo}
         rol={rol}
         fecha={fecha}
       />

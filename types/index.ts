@@ -276,6 +276,7 @@ export interface VerificacionRic {
   firma_nombre: string | null
   firma_rut: string | null
   firma_cargo: string | null
+  firma_imagen_url: string | null
   creado_por: string | null
   creado_en: string
   actualizado_en: string
@@ -335,11 +336,46 @@ export interface InspeccionPrevencion {
   observaciones_generales: string | null
   firma_prevencionista: string | null
   firma_encargado: string | null
+  firma_prevencionista_imagen_url: string | null
+  firma_encargado_imagen_url: string | null
   estado: 'en_progreso' | 'completa'
   creado_por: string | null
   creado_en: string
   actualizado_en: string
   inspecciones_prevencion_items?: InspeccionPrevencionItem[]
+}
+
+export interface PruebaAlimentadoresItem {
+  id: number
+  prueba_id: number
+  orden: number
+  texto: string
+  valor: string | null
+  foto_url: string | null
+  actualizado_en: string
+}
+
+export interface PruebaAlimentadores {
+  id: number
+  numero: string
+  proyecto_id: number | null
+  proyecto_nombre: string | null
+  cliente_mandante: string | null
+  ubicacion: string | null
+  fecha_visita: string
+  inspectores: string | null
+  identificacion_alimentador: string | null
+  instrumento: string | null
+  observaciones: string | null
+  estado: 'en_progreso' | 'completa'
+  firma_nombre: string | null
+  firma_rut: string | null
+  firma_cargo: string | null
+  firma_imagen_url: string | null
+  creado_por: string | null
+  creado_en: string
+  actualizado_en: string
+  pruebas_alimentadores_items?: PruebaAlimentadoresItem[]
 }
 
 export interface ErrorLog {

@@ -1,11 +1,13 @@
 'use client'
 import { useState, useCallback, useRef } from 'react'
 import { useRouter } from 'next/navigation'
-import { CheckCircle2, Plus, X } from 'lucide-react'
+import Link from 'next/link'
+import { CheckCircle2, Plus, X, Printer } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { CATEGORIAS_CHECKLIST_FAENA } from '@/lib/prevencion/checklistFaena'
 import { NIVELES_RIESGO, getNivelRiesgo, type NivelRiesgo } from '@/lib/prevencion/clasificacionRiesgo'
 import { MEDIDAS_MP } from '@/lib/prevencion/medidasMp'
+import CampoFirma from '@/components/documentos/CampoFirma'
 import ResultadoPillsPrevencion from './ResultadoPillsPrevencion'
 import BuscadorCatalogo from './BuscadorCatalogo'
 import BadgeNivel from './BadgeNivel'
@@ -118,11 +120,16 @@ export default function FormularioInspeccionPrevencion({ inspeccion, initialItem
           <h1 className="text-lg font-bold text-slate-800">Inspección de faena — Checklist DS 594</h1>
           <p className="text-sm text-brand-n500">{cabecera.centro_trabajo} · {hallazgos.length} hallazgo{hallazgos.length !== 1 ? 's' : ''}</p>
         </div>
-        {editable && cabecera.estado !== 'completa' && (
-          <button className="btn btn-primary btn-sm" onClick={marcarCompleta}>
-            <CheckCircle2 size={13} /> Marcar como completa
-          </button>
-        )}
+        <div className="flex gap-2">
+          <Link href={`/prevencion-riesgos/${inspeccion.id}/imprimir`} className="btn btn-outline btn-sm">
+            <Printer size={13} /> Ver / Imprimir
+          </Link>
+          {editable && cabecera.estado !== 'completa' && (
+            <button className="btn btn-primary btn-sm" onClick={marcarCompleta}>
+              <CheckCircle2 size={13} /> Marcar como completa
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Portada */}
@@ -297,6 +304,24 @@ export default function FormularioInspeccionPrevencion({ inspeccion, initialItem
                 defaultValue={cabecera.firma_encargado ?? ''}
                 onChange={e => patchCabecera({ firma_encargado: e.target.value })} />
             </div>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <CampoFirma
+              bucket="prevencion-riesgos"
+              path={`${inspeccion.id}/firma-prevencionista.png`}
+              firmaUrl={cabecera.firma_prevencionista_imagen_url}
+              label="Firma dibujada — prevencionista"
+              disabled={!editable}
+              onFirmaGuardada={path => patchCabecera({ firma_prevencionista_imagen_url: path })}
+            />
+            <CampoFirma
+              bucket="prevencion-riesgos"
+              path={`${inspeccion.id}/firma-encargado.png`}
+              firmaUrl={cabecera.firma_encargado_imagen_url}
+              label="Firma dibujada — encargado"
+              disabled={!editable}
+              onFirmaGuardada={path => patchCabecera({ firma_encargado_imagen_url: path })}
+            />
           </div>
         </div>
       </div>
