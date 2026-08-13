@@ -1,27 +1,96 @@
 import { NextResponse } from 'next/server'
+import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { puedeEditar, type Modulo, type Perfil } from './permisos'
+import { puedeCrear, puedeModificar, type Departamento, type Modulo, type Perfil, type MapaPermisos } from './permisos'
 
 export * from './permisos'
+
+// Resuelve el mapa ver/crear/modificar efectivo para un (departamento,
+// puesto): trae la fila base de permisos_puesto y, si se pasa usuarioId,
+// aplica encima las excepciones individuales de permisos_usuario_overrides
+// (solo pisan el campo que no sea NULL — NULL = hereda del puesto).
+export async function resolverPermisos(
+  sb: SupabaseClient, departamento: Departamento, puesto: string, usuarioId?: string
+): Promise<MapaPermisos> {
+  const mapa: MapaPermisos = {}
+
+  const { data: filas } = await sb
+    .from('permisos_puesto')
+    .select('modulo,ver,crear,modificar')
+    .eq('departamento', departamento)
+    .eq('puesto', puesto)
+
+  filas?.forEach(f => {
+    mapa[f.modulo as Modulo] = { ver: f.ver, crear: f.crear, modificar: f.modificar }
+  })
+
+  if (usuarioId) {
+    const { data: overrides } = await sb
+      .from('permisos_usuario_overrides')
+      .select('modulo,ver,crear,modificar')
+      .eq('usuario_id', usuarioId)
+
+    overrides?.forEach(o => {
+      const base = mapa[o.modulo as Modulo] ?? { ver: false, crear: false, modificar: false }
+      mapa[o.modulo as Modulo] = {
+        ver: o.ver ?? base.ver,
+        crear: o.crear ?? base.crear,
+        modificar: o.modificar ?? base.modificar,
+      }
+    })
+  }
+
+  return mapa
+}
 
 export async function getPerfil(): Promise<Perfil | null> {
   const sb = getSupabaseServer()
   const { data: auth } = await sb.auth.getUser()
   if (!auth.user) return null
   const { data } = await sb.from('perfiles').select('*').eq('id', auth.user.id).eq('activo', true).maybeSingle()
-  return (data as Perfil) ?? null
+  if (!data) return null
+
+  const permisos = await resolverPermisos(sb, data.departamento, data.puesto, data.id)
+  return { ...data, permisos } as Perfil
 }
 
-// Para usar al principio de un handler POST/PUT/DELETE de una API route:
-//   const denegado = await requireEditable('materiales')
+// Para usar al principio de un handler POST de una API route que crea un
+// registro nuevo (colección, ej. /api/verificacion-ric):
+//   const denegado = await requireCrear('verificacion_ric')
+//   if (denegado) return denegado
+export async function requireCrear(modulo: Modulo): Promise<NextResponse | null> {
+  const perfil = await getPerfil()
+  if (!perfil || !puedeCrear(perfil, modulo)) {
+    return NextResponse.json({ error: 'Tu perfil no tiene permiso para crear en este módulo.' }, { status: 403 })
+  }
+  return null
+}
+
+// Para usar al principio de un handler PATCH/PUT/DELETE de una API route
+// que modifica o elimina un registro existente (ej. /api/verificacion-ric/[id]):
+//   const denegado = await requireModificar('verificacion_ric')
 //   if (denegado) return denegado
 // Falla cerrado: sin perfil (sesión sin fila en `perfiles`, o usuario
-// desactivado) no hay permiso de edición. Las rutas /api/* no pasan por el
+// desactivado) no hay permiso de escritura. Las rutas /api/* no pasan por el
 // matcher del middleware, así que este es el único punto de control real.
-export async function requireEditable(modulo: Modulo): Promise<NextResponse | null> {
+export async function requireModificar(modulo: Modulo): Promise<NextResponse | null> {
   const perfil = await getPerfil()
-  if (!perfil || !puedeEditar(perfil, modulo)) {
+  if (!perfil || !puedeModificar(perfil, modulo)) {
     return NextResponse.json({ error: 'Tu perfil no tiene permiso para modificar este módulo.' }, { status: 403 })
+  }
+  return null
+}
+
+// Alias — mismo significado que antes (ver comentario en permisos.ts).
+export const requireEditable = requireModificar
+
+// Para las rutas de administración (gestión de usuarios, permisos): solo
+// admin_software / master. Centraliza el chequeo que antes se repetía
+// inline en cada route.ts de /api/admin/* y en cada page.tsx de /admin/*.
+export async function requireAdmin(): Promise<NextResponse | null> {
+  const perfil = await getPerfil()
+  if (!perfil || (perfil.nivel_acceso !== 'admin_software' && perfil.nivel_acceso !== 'master')) {
+    return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
   }
   return null
 }

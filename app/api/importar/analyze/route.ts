@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { classifyByRules } from '@/lib/importar/categorias-map'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireCrear } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -87,7 +87,7 @@ export async function POST(req: NextRequest) {
     rows: Record<string, any>[]
   }
 
-  const denegado = await requireEditable(type)
+  const denegado = await requireCrear(type)
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

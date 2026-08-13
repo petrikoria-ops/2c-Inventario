@@ -1,6 +1,6 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { notFound } from 'next/navigation'
-import { getPerfil, puedeEditar, puedeEstructurarAvance } from '@/lib/auth/permisos.server'
+import { notFound, redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar, puedeEstructurarAvance } from '@/lib/auth/permisos.server'
 import ProyectoHub from '@/components/proyectos/ProyectoHub'
 
 export const dynamic = 'force-dynamic'
@@ -17,6 +17,7 @@ export default async function ProyectoDetallePage({ params }: { params: { id: st
       getPerfil(),
     ])
 
+  if (perfil && !puedeVer(perfil, 'proyectos')) redirect('/')
   if (!proyecto) notFound()
 
   const editableProyecto = !perfil || puedeEditar(perfil, 'proyectos')

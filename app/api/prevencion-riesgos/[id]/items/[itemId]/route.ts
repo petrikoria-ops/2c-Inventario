@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireModificar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 type Ctx = { params: { id: string; itemId: string } }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('prevencion_riesgos')
+  const denegado = await requireModificar('prevencion_riesgos')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()
@@ -37,7 +37,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 // base del checklist DS 594 se limpian marcándolos "Cumple"/"No Aplica",
 // nunca se eliminan (son parte fija de la inspección).
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('prevencion_riesgos')
+  const denegado = await requireModificar('prevencion_riesgos')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

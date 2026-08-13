@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable, getPerfil } from '@/lib/auth/permisos.server'
+import { requireCrear, getPerfil } from '@/lib/auth/permisos.server'
 import { ITEMS_PLANTILLA_ALIMENTADORES } from '@/lib/pruebasAlimentadores/plantilla'
 
 export const dynamic = 'force-dynamic'
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const denegado = await requireEditable('pruebas_alimentadores')
+  const denegado = await requireCrear('pruebas_alimentadores')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

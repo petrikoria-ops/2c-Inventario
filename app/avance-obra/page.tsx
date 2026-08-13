@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { getPerfil, puedeVer } from '@/lib/auth/permisos.server'
 import TablaAvanceObra from '@/components/proyectos/TablaAvanceObra'
 import type { Metadata } from 'next'
 
@@ -6,6 +8,9 @@ export const metadata: Metadata = { title: 'Avance de obra — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
 export default async function AvanceObraPage() {
+  const perfil = await getPerfil()
+  if (perfil && !puedeVer(perfil, 'avance_obra')) redirect('/')
+
   const sb = getSupabaseServer()
 
   const [{ data: proyectos }, { data: avances }] = await Promise.all([

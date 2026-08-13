@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers'
-import { getPerfil, type Perfil, type Departamento, type NivelAcceso } from './permisos.server'
+import { getSupabaseServer } from '@/lib/supabase/server'
+import { getPerfil, resolverPermisos, PUESTOS_POR_DEPARTAMENTO, type Perfil, type Departamento, type NivelAcceso } from './permisos.server'
 import { DEPARTAMENTOS_OPERATIVOS } from './deptInfo'
 
 // Re-export para que el resto del código que ya importa estas constantes
@@ -14,8 +15,9 @@ export { DEPARTAMENTOS_OPERATIVOS, NOMBRE_DEPARTAMENTO } from './deptInfo'
 //
 // IMPORTANTE: esto solo cambia lo que se VE (navegación, inicio, visibilidad).
 // NO cambia los permisos de edición reales: cada API sigue validando con el
-// perfil real vía requireEditable(), así que un admin simulando "bodega"
-// sigue pudiendo editar — está evaluando la vista, no perdiendo su poder.
+// perfil real vía requireCrear()/requireModificar(), así que un admin
+// simulando "bodega" sigue pudiendo editar — está evaluando la vista, no
+// perdiendo su poder.
 
 export const VER_COMO_COOKIE = 'ver_como'
 
@@ -34,6 +36,23 @@ export interface ContextoUsuario {
   verComo: Departamento | null
 }
 
+// Se simula con el puesto de mayor jerarquía del departamento elegido (el
+// techo real de esa área — lo útil para evaluar la experiencia), sin llegar
+// a master/admin_software (esos bypasean todo y no muestran nada real).
+// La mayoría de los departamentos tiene un puesto 'jefe_departamento'; los
+// que no (bodega, taller, prevención) usan el de mayor nivel disponible.
+const ORDEN_NIVEL: Record<NivelAcceso, number> = {
+  visualizacion: 0, operador: 1, encargado: 2, jefe_departamento: 3, directiva: 4, master: 5, admin_software: 6,
+}
+
+function puestoRepresentativo(departamento: Departamento): { puesto: string; nivel: NivelAcceso } {
+  const puestos = PUESTOS_POR_DEPARTAMENTO[departamento]
+  const jefe = puestos.find(p => p.nivel === 'jefe_departamento')
+  if (jefe) return jefe
+  const candidatos = puestos.filter(p => p.nivel !== 'master' && p.nivel !== 'admin_software')
+  return candidatos.reduce((mejor, p) => ORDEN_NIVEL[p.nivel] > ORDEN_NIVEL[mejor.nivel] ? p : mejor, candidatos[0])
+}
+
 /**
  * Resuelve el perfil efectivo aplicando la cookie "ver como" si corresponde.
  * Úsalo en layout.tsx y en páginas que adapten su contenido al departamento.
@@ -48,12 +67,14 @@ export async function getContextoUsuario(): Promise<ContextoUsuario> {
     if (raw && DEPARTAMENTOS_OPERATIVOS.includes(raw)) verComo = raw
   }
 
-  // Se simula a nivel de jefe de departamento: muestra todo lo que esa área
-  // puede ver (el alcance máximo del departamento), que es lo útil para evaluar.
-  const NIVEL_SIMULADO: NivelAcceso = 'jefe_departamento'
-  const efectivo: Perfil | null = verComo && real
-    ? { ...real, departamento: verComo, nivel_acceso: NIVEL_SIMULADO }
-    : real
+  let efectivo: Perfil | null = real
+  if (verComo && real) {
+    const { puesto, nivel } = puestoRepresentativo(verComo)
+    // Sin usuarioId: la simulación no debe heredar las excepciones
+    // personales del admin real, solo lo que le tocaría al puesto.
+    const permisos = await resolverPermisos(getSupabaseServer(), verComo, puesto)
+    efectivo = { ...real, departamento: verComo, puesto, nivel_acceso: nivel, permisos }
+  }
 
   return { real, efectivo, puedeSimular, verComo }
 }

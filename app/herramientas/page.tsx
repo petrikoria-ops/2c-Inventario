@@ -1,6 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaHerramientas from '@/components/herramientas/TablaHerramientas'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Herramientas — 2C Inventario' }
@@ -12,6 +13,8 @@ export default async function HerramientasPage() {
     sb.from('herramientas').select('*').eq('activo', true).order('codigo'),
     getPerfil(),
   ])
+
+  if (perfil && !puedeVer(perfil, 'herramientas')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
   const editable = !perfil || puedeEditar(perfil, 'herramientas')

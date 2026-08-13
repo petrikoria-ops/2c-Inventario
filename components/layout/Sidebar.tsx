@@ -101,6 +101,7 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
       section: 'Administración',
       links: [
         { href: '/admin/solicitudes', Icon: UserCog, label: 'Gestión de usuarios' },
+        { href: '/admin/permisos', Icon: ShieldCheck, label: 'Permisos' },
         { href: '/admin/errors', Icon: AlertOctagon, label: 'Log de errores', badge: erroresPendientes || undefined },
       ],
     }] : [])

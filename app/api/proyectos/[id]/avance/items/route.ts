@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireCrear } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 // Agrega una etapa a un plan de avance ya existente para este proyecto.
 export async function POST(req: NextRequest, { params }: { params: { id: string } }) {
-  const denegado = await requireEditable('avance_obra')
+  const denegado = await requireCrear('avance_obra')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

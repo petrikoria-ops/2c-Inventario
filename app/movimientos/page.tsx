@@ -1,6 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaMovimientos from '@/components/movimientos/TablaMovimientos'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Movimientos — 2C Inventario' }
@@ -20,6 +21,8 @@ export default async function MovimientosPage() {
     sb.from('proyectos').select('id,ot,nombre').in('estado', ['en_proceso','presupuesto']).order('ot'),
     getPerfil(),
   ])
+
+  if (perfil && !puedeVer(perfil, 'movimientos')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
   const editable = !perfil || puedeEditar(perfil, 'movimientos')

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { VALID_CATEGORIES } from '@/lib/importar/categorias-map'
-import { getPerfil, requireEditable } from '@/lib/auth/permisos.server'
+import { getPerfil, requireCrear } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -216,7 +216,7 @@ export async function GET() {
 
 // ── Endpoint principal — un lote por llamada (batching en el cliente) ──
 export async function POST(req: NextRequest) {
-  const denegado = await requireEditable('materiales')
+  const denegado = await requireCrear('materiales')
   if (denegado) return denegado
 
   if (!ENABLED) {

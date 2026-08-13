@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireCrear } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +8,7 @@ type Ctx = { params: { id: string } }
 
 // Genera una solicitud de compra con los ítems faltantes del BOM de un proyecto
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('compras')
+  const denegado = await requireCrear('compras')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

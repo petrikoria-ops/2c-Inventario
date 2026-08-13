@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireCrear } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -10,7 +10,7 @@ type Ctx = { params: { id: string } }
 // (ej. algo detectado en una foto sin pregunta de checklist asociada —
 // mismo caso que HZ-035 del catálogo de la skill: checklist_item: null).
 export async function POST(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('prevencion_riesgos')
+  const denegado = await requireCrear('prevencion_riesgos')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

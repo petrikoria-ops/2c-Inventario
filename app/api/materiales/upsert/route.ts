@@ -1,6 +1,6 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { NextResponse } from 'next/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireModificar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -21,7 +21,7 @@ interface MappedRow {
 }
 
 export async function POST(req: Request) {
-  const denegado = await requireEditable('materiales')
+  const denegado = await requireModificar('materiales')
   if (denegado) return denegado
 
   const { rows, updateStock } = (await req.json()) as {

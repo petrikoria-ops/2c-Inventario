@@ -1,6 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaSalidas from '@/components/salidas/TablaSalidas'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Salidas — 2C Inventario' }
@@ -16,6 +17,8 @@ export default async function SalidasPage() {
       .limit(100),
     getPerfil(),
   ])
+
+  if (perfil && !puedeVer(perfil, 'movimientos')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
   const editable = !perfil || puedeEditar(perfil, 'movimientos')

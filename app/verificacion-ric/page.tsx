@@ -1,5 +1,6 @@
+import { redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import TablaVerificacionesRic from '@/components/verificacionRic/TablaVerificacionesRic'
 import type { Metadata } from 'next'
 
@@ -12,6 +13,7 @@ export default async function VerificacionRicPage() {
     sb.from('verificaciones_ric').select('*').order('fecha_visita', { ascending: false }),
     getPerfil(),
   ])
+  if (perfil && !puedeVer(perfil, 'verificacion_ric')) redirect('/')
   const editable = !perfil || puedeEditar(perfil, 'verificacion_ric')
 
   return (

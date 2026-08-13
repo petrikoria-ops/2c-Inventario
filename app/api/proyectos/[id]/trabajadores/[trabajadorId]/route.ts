@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireModificar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 type Ctx = { params: { id: string; trabajadorId: string } }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('proyectos')
+  const denegado = await requireModificar('proyectos')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

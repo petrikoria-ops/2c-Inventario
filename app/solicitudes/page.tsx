@@ -1,7 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaSolicitudes from '@/components/solicitudes/TablaSolicitudes'
 import Link from 'next/link'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { SolicitudCompra } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -16,6 +17,8 @@ export default async function SolicitudesPage() {
       .order('creado_en', { ascending: false }),
     getPerfil(),
   ])
+
+  if (perfil && !puedeVer(perfil, 'compras')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
   const editable = !perfil || puedeEditar(perfil, 'compras')

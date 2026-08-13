@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import FormularioVerificacionRic from '@/components/verificacionRic/FormularioVerificacionRic'
 
 export const dynamic = 'force-dynamic'
@@ -14,6 +14,7 @@ export default async function VerificacionRicDetallePage({ params }: { params: {
     getPerfil(),
   ])
 
+  if (perfil && !puedeVer(perfil, 'verificacion_ric')) redirect('/')
   if (!verificacion) notFound()
 
   const editable = !perfil || puedeEditar(perfil, 'verificacion_ric')

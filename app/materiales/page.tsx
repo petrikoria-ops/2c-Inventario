@@ -1,7 +1,8 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaMateriales from '@/components/materiales/TablaMateriales'
 import { AlertTriangle } from 'lucide-react'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Material } from '@/types'
 import type { Metadata } from 'next'
 
@@ -53,6 +54,8 @@ export default async function MaterialesPage() {
     sb.from('proyectos').select('id,ot,nombre,estado').in('estado', ['en_proceso','presupuesto']).order('ot'),
     getPerfil(),
   ])
+
+  if (perfil && !puedeVer(perfil, 'materiales')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
   const editable = !perfil || puedeEditar(perfil, 'materiales')

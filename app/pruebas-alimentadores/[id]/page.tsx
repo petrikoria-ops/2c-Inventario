@@ -1,6 +1,6 @@
-import { notFound } from 'next/navigation'
+import { notFound, redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import FormularioPruebaAlimentadores from '@/components/pruebasAlimentadores/FormularioPruebaAlimentadores'
 
 export const dynamic = 'force-dynamic'
@@ -14,6 +14,7 @@ export default async function PruebaAlimentadoresDetallePage({ params }: { param
     getPerfil(),
   ])
 
+  if (perfil && !puedeVer(perfil, 'pruebas_alimentadores')) redirect('/')
   if (!prueba) notFound()
 
   const editable = !perfil || puedeEditar(perfil, 'pruebas_alimentadores')

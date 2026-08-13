@@ -1,4 +1,6 @@
+import { redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { getPerfil, puedeVer } from '@/lib/auth/permisos.server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import AlertasStockRealtime from '@/components/dashboard/AlertasStockRealtime'
 import { clp, fechaHora, num, estaBajoMinimo } from '@/lib/utils'
@@ -20,6 +22,9 @@ export const revalidate = 0
 const ESTADOS_PROY = ['presupuesto', 'en_proceso', 'terminado', 'entregado', 'cancelado'] as const
 
 export default async function DashboardPage() {
+  const perfil = await getPerfil()
+  if (perfil && !puedeVer(perfil, 'metricas')) redirect('/')
+
   const sb = getSupabaseServer()
 
   const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable, getPerfil } from '@/lib/auth/permisos.server'
+import { requireCrear, getPerfil } from '@/lib/auth/permisos.server'
 import { CHECKLIST_FAENA_DS594 } from '@/lib/prevencion/checklistFaena'
 
 export const dynamic = 'force-dynamic'
@@ -34,7 +34,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const denegado = await requireEditable('prevencion_riesgos')
+  const denegado = await requireCrear('prevencion_riesgos')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

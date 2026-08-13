@@ -1,5 +1,6 @@
+import { redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import TablaInspeccionesPrevencion from '@/components/prevencion/TablaInspeccionesPrevencion'
 import type { Metadata } from 'next'
 
@@ -13,6 +14,7 @@ export default async function PrevencionRiesgosPage() {
     sb.from('inspecciones_prevencion_items').select('inspeccion_id, resultado').eq('resultado', 'no_cumple'),
     getPerfil(),
   ])
+  if (perfil && !puedeVer(perfil, 'prevencion_riesgos')) redirect('/')
   const editable = !perfil || puedeEditar(perfil, 'prevencion_riesgos')
 
   const conteos: Record<number, number> = {}

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireModificar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -18,7 +18,7 @@ export async function GET(_: NextRequest, { params }: Ctx) {
 }
 
 export async function PUT(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('materiales')
+  const denegado = await requireModificar('materiales')
   if (denegado) return denegado
   const sb = getSupabaseServer()
   const body = await req.json()
@@ -33,7 +33,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('materiales')
+  const denegado = await requireModificar('materiales')
   if (denegado) return denegado
   const sb = getSupabaseServer()
   const { error } = await sb.from('materiales').update({ activo: false }).eq('id', params.id)

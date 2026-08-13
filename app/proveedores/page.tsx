@@ -1,6 +1,7 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaProveedores from '@/components/proveedores/TablaProveedores'
-import { getPerfil, puedeEditar } from '@/lib/auth/permisos.server'
+import { redirect } from 'next/navigation'
+import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = { title: 'Proveedores — 2C Inventario' }
@@ -12,6 +13,8 @@ export default async function ProveedoresPage() {
     sb.from('proveedores').select('*').eq('activo', true).order('nombre'),
     getPerfil(),
   ])
+
+  if (perfil && !puedeVer(perfil, 'proveedores')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
   const editable = !perfil || puedeEditar(perfil, 'proveedores')

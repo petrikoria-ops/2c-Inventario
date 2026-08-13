@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireEditable, getPerfil } from '@/lib/auth/permisos.server'
+import { requireModificar, getPerfil } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 type Ctx = { params: { itemId: string } }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('avance_obra')
+  const denegado = await requireModificar('avance_obra')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()
@@ -43,7 +43,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const denegado = await requireEditable('avance_obra')
+  const denegado = await requireModificar('avance_obra')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

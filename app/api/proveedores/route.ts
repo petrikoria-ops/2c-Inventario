@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { escapeOrFilterValue } from '@/lib/utils'
-import { requireEditable } from '@/lib/auth/permisos.server'
+import { requireCrear } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
-  const denegado = await requireEditable('proveedores')
+  const denegado = await requireCrear('proveedores')
   if (denegado) return denegado
   const sb = getSupabaseServer()
   const { data, error } = await sb.from('proveedores').insert(await req.json()).select().single()
