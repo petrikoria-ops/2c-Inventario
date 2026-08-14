@@ -18,6 +18,7 @@ import {
   Calculator, CheckSquare, Bot,
   ShieldCheck, ShieldAlert, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
+  Truck, RotateCcw,
 } from 'lucide-react'
 
 export interface AccionRapida {
@@ -90,6 +91,8 @@ const BODEGA: DeptConfig = {
     { titulo: 'Operación diaria', items: [
       { href: '/salidas',      Icon: PackageOpen, titulo: 'Despachos',   desc: 'Vales de despacho VD-AAAA', modulo: 'movimientos' },
       { href: '/movimientos',  Icon: ArrowUpDown, titulo: 'Movimientos', desc: 'Historial de entradas y salidas', modulo: 'movimientos' },
+      { href: '/pedidos-bodega', Icon: Truck,     titulo: 'Pedidos a bodega', desc: 'Pedidos internos de Supervisores/Visitadores', modulo: 'pedidos_bodega' },
+      { href: '/solicitudes-ajuste', Icon: RotateCcw, titulo: 'Ajustes de inventario', desc: 'Correcciones de stock con aprobación', modulo: 'solicitudes_ajuste' },
     ]},
     { titulo: 'Compras', items: [
       { href: '/solicitudes', Icon: ShoppingCart, titulo: 'Compras',     desc: 'Solicitudes SC-AAAA', modulo: 'compras' },
@@ -224,6 +227,7 @@ const DIRECTIVA: DeptConfig = {
     { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric', acento: A.verde },
     { href: '/agente',     Icon: Bot,          titulo: 'Agente IA',      desc: 'Pregunta por el negocio', modulo: 'agente', acento: A.violeta },
     { href: '/materiales', Icon: Package,      titulo: 'Inventario',     desc: 'Valor y existencias', modulo: 'materiales', acento: A.pizarra },
+    { href: '/pedidos-bodega/nueva', Icon: Truck, titulo: 'Pedido a bodega', desc: 'Material contra stock para tu obra', modulo: 'pedidos_bodega', acento: A.azul },
   ],
   herramientas: [
     { titulo: 'Control', items: [
@@ -234,6 +238,7 @@ const DIRECTIVA: DeptConfig = {
     { titulo: 'Terreno', items: [
       { href: '/avance-obra',      Icon: ListChecks,  titulo: 'Avance de obra',    desc: 'Plan de etapas por obra', modulo: 'avance_obra' },
       { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC',  desc: 'Verificación inicial y puesta en marcha', modulo: 'verificacion_ric' },
+      { href: '/pedidos-bodega',   Icon: Truck,       titulo: 'Pedidos a bodega',  desc: 'Material contra stock existente', modulo: 'pedidos_bodega' },
     ]},
     { titulo: 'Inventario y compras', items: [
       { href: '/materiales',  Icon: Package,      titulo: 'Materiales',   desc: 'Existencias y valor', modulo: 'materiales' },
@@ -282,6 +287,8 @@ const GENERAL: DeptConfig = {
     { titulo: 'Terreno', items: [
       { href: '/avance-obra',      Icon: ListChecks,  titulo: 'Avance de obra',   desc: 'Plan de etapas', modulo: 'avance_obra' },
       { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric' },
+      { href: '/pedidos-bodega',   Icon: Truck,       titulo: 'Pedidos a bodega', desc: 'Material contra stock', modulo: 'pedidos_bodega' },
+      { href: '/solicitudes-ajuste', Icon: RotateCcw, titulo: 'Ajustes de inventario', desc: 'Correcciones con aprobación', modulo: 'solicitudes_ajuste' },
     ]},
     { titulo: 'Recursos', items: [
       { href: '/recursos',  Icon: Calculator,  titulo: 'Recursos técnicos', desc: 'Calculadoras', modulo: 'recursos_tecnicos' },

@@ -144,6 +144,60 @@ export interface ValeDespacho {
   proyectos?: (Pick<Proyecto, 'id' | 'ot' | 'nombre'> & { cliente?: string | null }) | null
 }
 
+export type EstadoPedidoBodega = 'pendiente' | 'aprobado' | 'rechazado' | 'despachado' | 'cancelado'
+
+export interface PedidoBodegaItem {
+  id: number
+  pedido_id: number
+  material_id: number | null
+  codigo: string
+  descripcion: string
+  unidad: string | null
+  cantidad_pedida: number
+}
+
+export interface PedidoBodega {
+  id: number
+  numero: string
+  proyecto_id: number | null
+  solicitante_id: string | null
+  solicitante_nombre: string
+  estado: EstadoPedidoBodega
+  observaciones: string | null
+  aprobado_por: string | null
+  aprobado_por_nombre: string | null
+  aprobado_en: string | null
+  vale_despacho_id: number | null
+  creado_en: string
+  actualizado_en: string
+  pedidos_bodega_items?: PedidoBodegaItem[]
+  proyectos?: Pick<Proyecto, 'id' | 'ot' | 'nombre'> | null
+}
+
+export type MotivoAjusteInventario = 'conteo_fisico' | 'perdida' | 'dano' | 'error_registro' | 'otro'
+export type EstadoAjusteInventario = 'pendiente' | 'aprobado' | 'rechazado'
+
+export interface SolicitudAjusteInventario {
+  id: number
+  numero: string
+  material_id: number
+  codigo: string
+  descripcion: string
+  stock_actual_sistema: number
+  cantidad_reportada: number
+  motivo: MotivoAjusteInventario
+  observaciones: string | null
+  solicitante_id: string | null
+  solicitante_nombre: string
+  estado: EstadoAjusteInventario
+  aprobado_por: string | null
+  aprobado_por_nombre: string | null
+  aprobado_en: string | null
+  movimiento_id: number | null
+  creado_en: string
+  actualizado_en: string
+}
+
 export interface ProyectoMaterial {
   id: number
   proyecto_id: number

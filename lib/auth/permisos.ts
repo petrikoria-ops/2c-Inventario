@@ -20,14 +20,14 @@ export type Modulo =
   | 'proyectos' | 'trabajadores' | 'recursos_tecnicos' | 'checklist'
   | 'etiquetas' | 'agente' | 'metricas'
   | 'avance_obra' | 'verificacion_ric' | 'prevencion_riesgos' | 'pruebas_alimentadores'
-  | 'tableros'
+  | 'tableros' | 'pedidos_bodega' | 'solicitudes_ajuste'
 
 export const MODULOS: Modulo[] = [
   'materiales', 'herramientas', 'movimientos', 'proveedores', 'compras',
   'proyectos', 'trabajadores', 'recursos_tecnicos', 'checklist',
   'etiquetas', 'agente', 'metricas',
   'avance_obra', 'verificacion_ric', 'prevencion_riesgos', 'pruebas_alimentadores',
-  'tableros',
+  'tableros', 'pedidos_bodega', 'solicitudes_ajuste',
 ]
 
 // Etiquetas legibles — usadas en /admin/permisos (matriz por puesto y
@@ -50,6 +50,8 @@ export const NOMBRE_MODULO: Record<Modulo, string> = {
   prevencion_riesgos: 'Inspección de riesgos',
   pruebas_alimentadores: 'Test de Alimentadores',
   tableros: 'Tableros',
+  pedidos_bodega: 'Pedidos de bodega',
+  solicitudes_ajuste: 'Ajustes de inventario',
 }
 
 // Las 3 acciones independientes que puede tener un usuario sobre un módulo.
@@ -201,6 +203,19 @@ export function puedeMarcarAvance(perfil: Perfil | null): boolean {
   if (!perfil) return false
   if (puedeModificar(perfil, 'avance_obra')) return true
   return PUESTOS_MARCAN_AVANCE.includes(perfil.puesto)
+}
+
+// Quién puede aprobar/rechazar un pedido interno de bodega
+// (pedidos_bodega) o una solicitud de ajuste de inventario
+// (solicitudes_ajuste_inventario) — acotado a "Encargado de bodega o
+// Gerencia" según lo confirmado con el dueño del negocio, no al permiso
+// genérico `modificar` de esos módulos (un Bodeguero puede tener
+// `modificar` para armar/despachar un pedido ya aprobado, pero no para
+// aprobarlo él mismo).
+export function esJefeDeBodegaOGerencia(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  if (NIVELES_TOTALES.includes(perfil.nivel_acceso)) return true
+  return perfil.departamento === 'bodega' && perfil.puesto === 'Encargado de bodega'
 }
 
 // Quién puede VER el estado de conexión de otras personas (desplegable

@@ -76,6 +76,8 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const verPrevencion    = puedeVerModulo(perfil, 'prevencion_riesgos')
   const verAlimentadores = puedeVerModulo(perfil, 'pruebas_alimentadores')
   const verTableros      = puedeVerModulo(perfil, 'tableros')
+  const verPedidosBodega = puedeVerModulo(perfil, 'pedidos_bodega')
+  const verAjusteInv     = puedeVerModulo(perfil, 'solicitudes_ajuste')
   // Jefe de departamento o superior: ve tareas de su equipo (RLS ampliada
   // en migration_tareas_visibilidad_jefatura.sql), no solo las propias.
   const esJefe = !perfil || perfil.nivel_acceso === 'administrador' || perfil.nivel_acceso === 'master' || perfil.nivel_acceso === 'admin_software'
@@ -96,7 +98,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
     solNuevasHoy, solRecibidasHoy, solPend,
     avanceItemsHoy, proyectosNuevosHoy,
     ricHoy, prevHoy, prevAbiertas, alimHoy,
-    tableros,
+    tableros, pedidosBodegaPend, ajusteInvPend,
     tareas,
   ] = await Promise.all([
     verMateriales
@@ -156,6 +158,11 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
       ? sb.from('tableros').select('id,estado').neq('estado', 'terminado').limit(500)
       : vacioLista,
 
+    // Igual que tableros: si las migraciones de Etapa 3 todavía no
+    // corrieron, estas tablas no existen y el resultado vuelve con error.
+    verPedidosBodega ? sb.from('pedidos_bodega').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente') : vacioConteo,
+    verAjusteInv      ? sb.from('solicitudes_ajuste_inventario').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente') : vacioConteo,
+
     // tareas_asignadas tiene RLS propia: por defecto solo asignado_por/
     // asignado_a = auth.uid(), y además — desde
     // migration_tareas_visibilidad_jefatura.sql — las de todo el equipo
@@ -208,6 +215,10 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const tablerosData = (tableros?.data ?? []) as { id: number; estado: string }[]
   const tablerosPorCubicar = tablerosData.filter(t => t.estado === 'por_cubicar').length
   const tablerosPorArmar   = tablerosData.filter(t => t.estado === 'por_armar').length
+
+  // ── Pedidos de bodega / ajustes de inventario (Etapa 3) ──────────
+  const pedidosBodegaPendCount = pedidosBodegaPend?.count ?? 0
+  const ajusteInvPendCount     = ajusteInvPend?.count ?? 0
 
   // ── Tareas asignadas (propias, vía RLS) ──────────────────────────
   const tareasData = (tareas?.data ?? []) as { id: number; titulo: string; estado: string; fecha_limite: string | null; creado_en: string; completado_en: string | null }[]
@@ -332,6 +343,12 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (tablerosPorArmar > 0) {
     alertas.push({ id: 'tab-arm', texto: `${tablerosPorArmar} tablero${tablerosPorArmar !== 1 ? 's' : ''} por armar`, nivel: 'atencion', href: '/proyectos', Icon: LayoutGrid })
   }
+  if (pedidosBodegaPendCount > 0) {
+    alertas.push({ id: 'ped-bod', texto: `${pedidosBodegaPendCount} pedido${pedidosBodegaPendCount !== 1 ? 's' : ''} a bodega por aprobar`, nivel: 'atencion', href: '/pedidos-bodega', Icon: PackageOpen })
+  }
+  if (ajusteInvPendCount > 0) {
+    alertas.push({ id: 'ajuste-inv', texto: `${ajusteInvPendCount} ajuste${ajusteInvPendCount !== 1 ? 's' : ''} de inventario por aprobar`, nivel: 'atencion', href: '/solicitudes-ajuste', Icon: PackageX })
+  }
   if (solPendCount > 0) {
     alertas.push({ id: 'sol-pend', texto: `${solPendCount} solicitud${solPendCount !== 1 ? 'es' : ''} de compra pendiente${solPendCount !== 1 ? 's' : ''}`, nivel: 'atencion', href: '/solicitudes', Icon: ShoppingCart })
   }
@@ -363,6 +380,8 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (herRepCount > 0) agregarRecomendacion('r-her-rep', `Dar seguimiento a ${herRepCount} herramienta${herRepCount !== 1 ? 's' : ''} en reparación.`)
   if (tablerosPorCubicar > 0) agregarRecomendacion('r-tab-cub', `Cubicar ${tablerosPorCubicar} tablero${tablerosPorCubicar !== 1 ? 's' : ''} para que Taller pueda empezar a armarlo${tablerosPorCubicar !== 1 ? 's' : ''}.`)
   if (tablerosPorArmar > 0) agregarRecomendacion('r-tab-arm', `Avanzar el armado de ${tablerosPorArmar} tablero${tablerosPorArmar !== 1 ? 's' : ''} en cola.`)
+  if (pedidosBodegaPendCount > 0) agregarRecomendacion('r-ped-bod', `Aprobar o rechazar ${pedidosBodegaPendCount} pedido${pedidosBodegaPendCount !== 1 ? 's' : ''} a bodega antes de que frene a la obra que lo pidió.`)
+  if (ajusteInvPendCount > 0) agregarRecomendacion('r-ajuste-inv', `Revisar ${ajusteInvPendCount} ajuste${ajusteInvPendCount !== 1 ? 's' : ''} de inventario pendiente${ajusteInvPendCount !== 1 ? 's' : ''} de aprobar.`)
 
   // ── Síntesis ejecutiva (3–5 líneas, solo con datos reales) ────────
   const huboActividad = avancesTop.length > 0
