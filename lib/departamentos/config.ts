@@ -18,7 +18,7 @@ import {
   Calculator, CheckSquare, Bot,
   ShieldCheck, ShieldAlert, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
-  Truck, RotateCcw, FileText,
+  Truck, RotateCcw, FileText, MapPin,
 } from 'lucide-react'
 
 export interface AccionRapida {
@@ -230,7 +230,6 @@ const DIRECTIVA: DeptConfig = {
     { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric', acento: A.verde },
     { href: '/agente',     Icon: Bot,          titulo: 'Agente IA',      desc: 'Pregunta por el negocio', modulo: 'agente', acento: A.violeta },
     { href: '/materiales', Icon: Package,      titulo: 'Inventario',     desc: 'Valor y existencias', modulo: 'materiales', acento: A.pizarra },
-    { href: '/pedidos-bodega/nueva', Icon: Truck, titulo: 'Pedido a bodega', desc: 'Material contra stock para tu obra', modulo: 'pedidos_bodega', acento: A.azul },
   ],
   herramientas: [
     { titulo: 'Control', items: [
@@ -250,6 +249,51 @@ const DIRECTIVA: DeptConfig = {
     ]},
     { titulo: 'Personas', items: [
       { href: '/trabajadores', Icon: Users, titulo: 'Trabajadores', desc: 'Personal de la empresa', modulo: 'trabajadores' },
+    ]},
+  ],
+}
+
+// ── Supervisión de terreno (Supervisor eléctrico / Visitador de obra) ──
+// Mismo departamento (directiva) que Gerencia, pero una cara distinta a
+// propósito: estos dos puestos viven en la obra, no en el tablero de
+// control de toda la empresa — heredar la identidad de "Directiva"
+// (corona, "visión global") no representaba su día a día. Acciones y
+// herramientas acotadas a lo que estos dos puestos realmente pueden
+// crear/editar (avance_obra, verificacion_ric, pruebas_alimentadores,
+// compras, pedidos_bodega — ver migration_permisos_granulares.sql y
+// migration_pedidos_bodega.sql), el resto queda como lectura de apoyo.
+const PUESTOS_TERRENO_DIRECTIVA = ['Supervisor eléctrico', 'Visitador de obra']
+
+const SUPERVISION_TERRENO: DeptConfig = {
+  slug: 'directiva',
+  nombre: 'Supervisión de obra',
+  lema: 'Tu obra a cargo — avance, verificaciones y pedidos, desde terreno.',
+  Icon: MapPin,
+  grad: ['#0F172A', '#0D9488'],
+  acento: A.teal,
+  acciones: [
+    { href: '/avance-obra',              Icon: ListChecks,  titulo: 'Avance de obra',      desc: 'Marcar etapas completadas',        modulo: 'avance_obra',          acento: A.teal },
+    { href: '/verificacion-ric/nueva',   Icon: ShieldCheck, titulo: 'Verificación RIC',    desc: 'Puesta en marcha N°18/19',         modulo: 'verificacion_ric',     acento: A.verde },
+    { href: '/pruebas-alimentadores/nueva', Icon: ShieldAlert, titulo: 'Test de alimentadores', desc: 'Pruebas SAT',                 modulo: 'pruebas_alimentadores', acento: A.indigo },
+    { href: '/pedidos-bodega/nueva',     Icon: Truck,       titulo: 'Pedido a bodega',     desc: 'Material contra stock existente',  modulo: 'pedidos_bodega',       acento: A.azul },
+    { href: '/solicitudes/nueva',        Icon: ShoppingCart,titulo: 'Solicitud de compra', desc: 'Pedir material a un proveedor',    modulo: 'compras',              acento: A.ambar },
+  ],
+  herramientas: [
+    { titulo: 'Tu obra', items: [
+      { href: '/proyectos',              Icon: ClipboardList, titulo: 'Obras activas',       desc: 'Buscar tu obra asignada',            modulo: 'proyectos' },
+      { href: '/avance-obra',            Icon: ListChecks,    titulo: 'Avance de obra',       desc: 'Plan de etapas por obra',            modulo: 'avance_obra' },
+      { href: '/verificacion-ric',       Icon: ShieldCheck,   titulo: 'Verificación RIC',     desc: 'Historial de verificaciones',        modulo: 'verificacion_ric' },
+      { href: '/pruebas-alimentadores',  Icon: ShieldAlert,   titulo: 'Test de alimentadores', desc: 'Pruebas SAT registradas',           modulo: 'pruebas_alimentadores' },
+    ]},
+    { titulo: 'Abastecimiento', items: [
+      { href: '/pedidos-bodega', Icon: Truck,        titulo: 'Pedidos a bodega', desc: 'Material contra stock existente', modulo: 'pedidos_bodega' },
+      { href: '/solicitudes',    Icon: ShoppingCart, titulo: 'Compras',          desc: 'Solicitudes a proveedores',       modulo: 'compras' },
+      { href: '/materiales',     Icon: Package,       titulo: 'Materiales',      desc: 'Consulta de stock (lectura)',     modulo: 'materiales' },
+    ]},
+    { titulo: 'Apoyo', items: [
+      { href: '/trabajadores', Icon: Users,  titulo: 'Trabajadores', desc: 'Personal de la empresa (lectura)', modulo: 'trabajadores' },
+      { href: '/herramientas', Icon: Wrench, titulo: 'Herramientas', desc: 'Estado de equipos (lectura)',      modulo: 'herramientas' },
+      { href: '/agente',       Icon: Bot,    titulo: 'Agente IA',    desc: 'Consultas del negocio',            modulo: 'agente' },
     ]},
   ],
 }
@@ -314,7 +358,8 @@ export const DEPT_CONFIG: Record<Departamento, DeptConfig> = {
 
 export const CONFIG_GENERAL = GENERAL
 
-export function getDeptConfig(depto: Departamento | undefined | null): DeptConfig {
+export function getDeptConfig(depto: Departamento | undefined | null, puesto?: string | null): DeptConfig {
   if (!depto) return GENERAL
+  if (depto === 'directiva' && puesto && PUESTOS_TERRENO_DIRECTIVA.includes(puesto)) return SUPERVISION_TERRENO
   return DEPT_CONFIG[depto] ?? GENERAL
 }

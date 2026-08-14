@@ -50,7 +50,7 @@ export default async function HomePage() {
   const { real: perfil, efectivo: perfilEfectivo, puedeSimular, verComo, verComoPuesto } = await getContextoUsuario()
 
   const departamentoMostrado = perfilEfectivo?.departamento as Departamento | undefined
-  const cfg = getDeptConfig(departamentoMostrado)
+  const cfg = getDeptConfig(departamentoMostrado, perfilEfectivo?.puesto)
 
   const [materiales, { count: proyActivos }, solicRes] = await Promise.all([
     fetchAllMateriales<{ stock_actual: number; stock_minimo: number }>(sb, 'stock_actual,stock_minimo'),

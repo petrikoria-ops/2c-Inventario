@@ -95,7 +95,7 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, v
   // se evalúa con el perfil REAL para no perder el panel de administración por
   // estar simulando, salvo que se quiera ver la barra tal cual la vería el área.
   const esAdmin = perfil?.nivel_acceso === 'admin_software' || perfil?.nivel_acceso === 'master'
-  const cfg = getDeptConfig(perfil?.departamento)
+  const cfg = getDeptConfig(perfil?.departamento, perfil?.puesto)
   const DeptIcon = cfg.Icon
   const simulando = !!verComo
   const { noLeidos, tareasPendientes } = usePresence()
