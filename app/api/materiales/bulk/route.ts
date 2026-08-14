@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireModificar, requireEliminar } from '@/lib/auth/permisos.server'
+import { getPerfil, requireModificar, requireEliminar, puedeVerPrecios } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -34,6 +34,8 @@ export async function PATCH(req: NextRequest) {
   // stock_actual solo se toca vía movimientos
   const safeFields = { ...fields }
   delete safeFields.stock_actual
+  const verPrecios = puedeVerPrecios(await getPerfil())
+  if (!verPrecios) delete safeFields.precio_unitario
 
   const sb = getSupabaseServer()
   const { error, data } = await sb
@@ -43,5 +45,10 @@ export async function PATCH(req: NextRequest) {
     .select('*,categorias(id,nombre,color),proveedores(id,nombre)')
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json({ ok: true, updated: ids.length, data: data ?? [] })
+  // La fila completa (con el precio real, sin tocar) vuelve igual en el
+  // SELECT del UPDATE aunque el campo editado haya sido otro — se redacta
+  // acá para no filtrar precio en la respuesta de un bulk edit de, por
+  // ejemplo, solo la ubicación.
+  const rows = verPrecios ? (data ?? []) : (data ?? []).map(m => ({ ...m, precio_unitario: 0 }))
+  return NextResponse.json({ ok: true, updated: ids.length, data: rows })
 }

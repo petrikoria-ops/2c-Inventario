@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil, puedeVer } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeVerPrecios } from '@/lib/auth/permisos.server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import AlertasStockRealtime from '@/components/dashboard/AlertasStockRealtime'
 import { clp, fechaHora, num, estaBajoMinimo } from '@/lib/utils'
@@ -56,6 +56,7 @@ export default async function DashboardPage() {
     sb.from('vales_despacho').select('*', { count: 'exact', head: true }).gte('fecha', startOfMonth),
   ])
 
+  const verPrecios      = puedeVerPrecios(perfil)
   const alertas         = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo))
   const valorInventario = materiales.reduce((s, m) => s + m.stock_actual * (m.precio_unitario ?? 0), 0)
   const solicPend       = solicRes.error   ? 0 : (solicRes.count   ?? 0)
@@ -69,7 +70,9 @@ export default async function DashboardPage() {
   const stats: { Icon: LucideIcon; label: string; value: string; bg: string; iconColor: string }[] = [
     { Icon: Package,       label: 'Ítems en inventario', value: num(totalItems    ?? 0, 0), bg: 'bg-blue-100',   iconColor: '#1D4ED8' },
     { Icon: AlertTriangle, label: 'Bajo stock mínimo',   value: num(alertas.length,    0), bg: 'bg-red-100',    iconColor: '#DC2626' },
-    { Icon: DollarSign,    label: 'Valor inventario',    value: clp(valorInventario),      bg: 'bg-green-100',  iconColor: '#059669' },
+    // "Valor inventario" es precio × stock — jefatura solamente, ver
+    // puedeVerPrecios() en lib/auth/permisos.ts.
+    ...(verPrecios ? [{ Icon: DollarSign, label: 'Valor inventario', value: clp(valorInventario), bg: 'bg-green-100', iconColor: '#059669' }] : []),
     { Icon: ClipboardList, label: 'Proy. en proceso',    value: num(proyActivos   ?? 0, 0), bg: 'bg-yellow-100', iconColor: '#D97706' },
     { Icon: CheckCircle,   label: 'Her. operativas',     value: num(herOperativas ?? 0, 0), bg: 'bg-green-100',  iconColor: '#059669' },
     { Icon: Wrench,        label: 'Her. en reparación',  value: num(herEnRep      ?? 0, 0), bg: 'bg-orange-100', iconColor: '#EA580C' },
@@ -124,8 +127,11 @@ export default async function DashboardPage() {
         </div>
       )}
 
-      {/* Alertas con Realtime */}
-      <AlertasStockRealtime initialAlertas={alertas} />
+      {/* Alertas con Realtime — solo los campos que la tabla realmente
+          pinta, para no viajar precio_unitario al cliente igual (Material[]
+          lo trae de más aunque Alerta no lo declare). */}
+      <AlertasStockRealtime initialAlertas={alertas.map(({ id, codigo, descripcion, stock_actual, stock_minimo, ubicacion }) =>
+        ({ id, codigo, descripcion, stock_actual, stock_minimo, ubicacion }))} />
 
       {/* Últimos movimientos */}
       <div className="panel">

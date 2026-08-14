@@ -2,7 +2,7 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import TablaMateriales from '@/components/materiales/TablaMateriales'
 import { AlertTriangle } from 'lucide-react'
 import { redirect } from 'next/navigation'
-import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeEditar, puedeVerPrecios } from '@/lib/auth/permisos.server'
 import type { Material } from '@/types'
 import type { Metadata } from 'next'
 
@@ -58,7 +58,15 @@ export default async function MaterialesPage() {
   if (perfil && !puedeVer(perfil, 'materiales')) redirect('/')
 
   // Sin perfil (no debería pasar, ver middleware) se deja editar como antes.
-  const editable = !perfil || puedeEditar(perfil, 'materiales')
+  const editable   = !perfil || puedeEditar(perfil, 'materiales')
+  const verPrecios = puedeVerPrecios(perfil)
+
+  // No solo se oculta en la tabla: si el perfil no ve precios, ni siquiera
+  // viaja en el payload inicial de la página (evita que aparezca igual
+  // mirando el HTML/RSC payload aunque la UI lo esconda).
+  const materiales = verPrecios
+    ? (materialesRes.rows ?? [])
+    : (materialesRes.rows ?? []).map(m => ({ ...m, precio_unitario: 0 }))
 
   return (
     <div className="p-5">
@@ -69,11 +77,12 @@ export default async function MaterialesPage() {
         </div>
       )}
       <TablaMateriales
-        initialData={materialesRes.rows ?? []}
+        initialData={materiales}
         categorias={categorias ?? []}
         proveedores={proveedores ?? []}
         proyectos={proyectos ?? []}
         editable={editable}
+        verPrecios={verPrecios}
       />
     </div>
   )

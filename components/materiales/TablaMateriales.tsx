@@ -19,6 +19,10 @@ interface Props {
   proveedores: Pick<Proveedor, 'id' | 'nombre'>[]
   proyectos:   Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]
   editable?: boolean
+  /** Jefatura ve precio y stock; Supervisor/Maestro/Ayudante solo stock —
+   * ver puedeVerPrecios() en lib/auth/permisos.ts. El servidor ya manda
+   * precio_unitario en 0 si es false, esto solo controla qué se pinta. */
+  verPrecios?: boolean
 }
 
 type SortField = 'codigo' | 'descripcion' | 'categoria' | 'stock' | 'precio'
@@ -26,7 +30,7 @@ type SortDir   = 'asc' | 'desc'
 
 const UNIDADES = ['UN', 'MT', 'ML', 'KG', 'JGO', 'RLL', 'PAR']
 
-export default function TablaMateriales({ initialData, categorias, proveedores, proyectos, editable = true }: Props) {
+export default function TablaMateriales({ initialData, categorias, proveedores, proyectos, editable = true, verPrecios = true }: Props) {
   const router      = useRouter()
   const { showToast } = useToast()
 
@@ -421,14 +425,16 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 value={stockHasta} onChange={e => setStockHasta(e.target.value)} />
             </div>
 
-            <div className="flex items-center gap-1 text-xs text-brand-n500 whitespace-nowrap">
-              <span>Precio (CLP)</span>
-              <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="desde"
-                value={precioDesde} onChange={e => setPrecioDesde(e.target.value)} />
-              <span>—</span>
-              <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="hasta"
-                value={precioHasta} onChange={e => setPrecioHasta(e.target.value)} />
-            </div>
+            {verPrecios && (
+              <div className="flex items-center gap-1 text-xs text-brand-n500 whitespace-nowrap">
+                <span>Precio (CLP)</span>
+                <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="desde"
+                  value={precioDesde} onChange={e => setPrecioDesde(e.target.value)} />
+                <span>—</span>
+                <input className="input w-24 text-xs text-right" type="number" min="0" placeholder="hasta"
+                  value={precioHasta} onChange={e => setPrecioHasta(e.target.value)} />
+              </div>
+            )}
           </div>
         </div>
 
@@ -465,9 +471,11 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                 </th>
                 <th className="th text-right">Mínimo</th>
                 <th className="th">Estado</th>
-                <th className="th text-right cursor-pointer select-none" onClick={() => handleSort('precio')}>
-                  <span className="inline-flex items-center justify-end">Precio CLP{sortIcon('precio')}</span>
-                </th>
+                {verPrecios && (
+                  <th className="th text-right cursor-pointer select-none" onClick={() => handleSort('precio')}>
+                    <span className="inline-flex items-center justify-end">Precio CLP{sortIcon('precio')}</span>
+                  </th>
+                )}
                 <th className="th">Acciones</th>
               </tr>
             </thead>
@@ -502,7 +510,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                     </td>
                     <td className="td-r text-brand-n500">{num(m.stock_minimo)}</td>
                     <td className="td"><BadgeStock actual={m.stock_actual} minimo={m.stock_minimo} /></td>
-                    <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>
+                    {verPrecios && <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>}
                     <td className="td">
                       <div className="flex gap-0.5">
                         {editable && (
@@ -531,7 +539,7 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               })}
               {!filtered.length && (
                 <tr>
-                  <td colSpan={10} className="text-center py-10 text-brand-n500">
+                  <td colSpan={verPrecios ? 10 : 9} className="text-center py-10 text-brand-n500">
                     {hasFilters
                       ? 'Sin resultados con estos filtros. Prueba cambiando la búsqueda o limpiando los filtros.'
                       : 'Sin materiales registrados'}
@@ -604,11 +612,13 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               <input id="material-stock-minimo" className="input" type="number" min="0" value={editando.stock_minimo ?? 0}
                 onChange={e => setEditando(p => ({ ...p!, stock_minimo: parseFloat(e.target.value) || 0 }))} />
             </div>
-            <div>
-              <label className="label" htmlFor="material-precio-unitario">Precio unitario (CLP)</label>
-              <input id="material-precio-unitario" className="input" type="number" min="0" value={editando.precio_unitario ?? 0}
-                onChange={e => setEditando(p => ({ ...p!, precio_unitario: parseFloat(e.target.value) || 0 }))} />
-            </div>
+            {verPrecios && (
+              <div>
+                <label className="label" htmlFor="material-precio-unitario">Precio unitario (CLP)</label>
+                <input id="material-precio-unitario" className="input" type="number" min="0" value={editando.precio_unitario ?? 0}
+                  onChange={e => setEditando(p => ({ ...p!, precio_unitario: parseFloat(e.target.value) || 0 }))} />
+              </div>
+            )}
             <div>
               <label className="label" htmlFor="material-ubicacion">Ubicación física</label>
               <input id="material-ubicacion" className="input" value={editando.ubicacion ?? ''} onChange={e => setEditando(p => ({ ...p!, ubicacion: e.target.value }))} placeholder="Est.A / Cajón 1" />
@@ -663,12 +673,14 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
               value={bulkFields.stock_minimo ?? ''}
               onChange={e => setBulkFields(p => ({ ...p, stock_minimo: e.target.value }))} />
           </div>
-          <div>
-            <label className="label" htmlFor="material-bulk-precio-unitario">Precio unitario (CLP)</label>
-            <input id="material-bulk-precio-unitario" className="input" type="number" min="0" placeholder="— no cambiar —"
-              value={bulkFields.precio_unitario ?? ''}
-              onChange={e => setBulkFields(p => ({ ...p, precio_unitario: e.target.value }))} />
-          </div>
+          {verPrecios && (
+            <div>
+              <label className="label" htmlFor="material-bulk-precio-unitario">Precio unitario (CLP)</label>
+              <input id="material-bulk-precio-unitario" className="input" type="number" min="0" placeholder="— no cambiar —"
+                value={bulkFields.precio_unitario ?? ''}
+                onChange={e => setBulkFields(p => ({ ...p, precio_unitario: e.target.value }))} />
+            </div>
+          )}
         </div>
       </Modal>
 

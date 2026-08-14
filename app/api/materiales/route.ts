@@ -1,14 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { estaBajoMinimo, escapeOrFilterValue } from '@/lib/utils'
-import { requireCrear } from '@/lib/auth/permisos.server'
+import { getPerfil, requireCrear, puedeVerPrecios } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 const PAGE_SIZE = 1000
 
+// Supervisor/Maestro/Ayudante no ven precio en ningún lugar que use este
+// endpoint (tabla de materiales, y los buscadores de materiales de
+// Solicitudes/Salidas/Pedidos a bodega, que también pegan acá) —
+// ver puedeVerPrecios() en lib/auth/permisos.ts.
+function ocultarPrecios<T extends { precio_unitario?: unknown }>(rows: T[]): T[] {
+  return rows.map(r => ({ ...r, precio_unitario: 0 }))
+}
+
 export async function GET(req: NextRequest) {
   const sb = getSupabaseServer()
+  const perfil = await getPerfil()
+  const verPrecios = puedeVerPrecios(perfil)
   const { searchParams: p } = new URL(req.url)
   const q           = p.get('q') ?? ''
   const categoriaId = p.get('categoria') ?? ''
@@ -42,7 +52,7 @@ export async function GET(req: NextRequest) {
       from += PAGE_SIZE
     }
     const filtered = all.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo))
-    return NextResponse.json({ data: filtered, total: filtered.length, page: 1, limit: filtered.length })
+    return NextResponse.json({ data: verPrecios ? filtered : ocultarPrecios(filtered), total: filtered.length, page: 1, limit: filtered.length })
   }
 
   let query = sb
@@ -59,7 +69,7 @@ export async function GET(req: NextRequest) {
   const { data, count, error } = await query.order('codigo').range(offset, offset + limit - 1)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  return NextResponse.json({ data: data ?? [], total: count ?? 0, page, limit })
+  return NextResponse.json({ data: verPrecios ? (data ?? []) : ocultarPrecios(data ?? []), total: count ?? 0, page, limit })
 }
 
 export async function POST(req: NextRequest) {
@@ -67,6 +77,7 @@ export async function POST(req: NextRequest) {
   if (denegado) return denegado
   const sb = getSupabaseServer()
   const body = await req.json()
+  if (!puedeVerPrecios(await getPerfil())) delete body.precio_unitario
 
   // El código tiene UNIQUE en la base sin importar "activo": si el código
   // ya lo usó un material eliminado, el insert falla con un error crudo de

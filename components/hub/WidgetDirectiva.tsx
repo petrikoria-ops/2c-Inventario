@@ -2,13 +2,21 @@ import Link from 'next/link'
 import { Package, DollarSign, Wrench, ClipboardList } from 'lucide-react'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
+import { getPerfil, puedeVerPrecios } from '@/lib/auth/permisos.server'
 import { clp, num } from '@/lib/utils'
 
 export default async function WidgetDirectiva() {
   const sb = getSupabaseServer()
+  // Este widget se muestra a todo el departamento Directiva sin importar
+  // nivel_acceso (Supervisor eléctrico incluido) — "Valor de inventario"
+  // es precio × stock, así que se oculta igual que en /materiales para
+  // quien no ve precios.
+  const verPrecios = puedeVerPrecios(await getPerfil())
 
   const [materiales, { count: matActivos }, { count: herOperativas }, { count: proyEnProceso }] = await Promise.all([
-    fetchAllMateriales<{ stock_actual: number; precio_unitario: number | null }>(sb, 'stock_actual,precio_unitario'),
+    verPrecios
+      ? fetchAllMateriales<{ stock_actual: number; precio_unitario: number | null }>(sb, 'stock_actual,precio_unitario')
+      : Promise.resolve([]),
     sb.from('materiales').select('*', { count: 'exact', head: true }).eq('activo', true),
     sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'operativa'),
     sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
@@ -29,15 +37,17 @@ export default async function WidgetDirectiva() {
           </div>
         </div>
 
-        <div className="stat-card">
-          <div className="stat-icon flex items-center justify-center bg-green-100">
-            <DollarSign size={18} style={{ color: '#059669' }} />
+        {verPrecios && (
+          <div className="stat-card">
+            <div className="stat-icon flex items-center justify-center bg-green-100">
+              <DollarSign size={18} style={{ color: '#059669' }} />
+            </div>
+            <div>
+              <div className="text-xl font-bold text-slate-800 leading-tight">{clp(valorInventario)}</div>
+              <div className="text-xs text-brand-n500 font-medium">Valor de inventario</div>
+            </div>
           </div>
-          <div>
-            <div className="text-xl font-bold text-slate-800 leading-tight">{clp(valorInventario)}</div>
-            <div className="text-xs text-brand-n500 font-medium">Valor de inventario</div>
-          </div>
-        </div>
+        )}
 
         <div className="stat-card">
           <div className="stat-icon flex items-center justify-center bg-blue-100">

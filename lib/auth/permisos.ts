@@ -218,6 +218,18 @@ export function esJefeDeBodegaOGerencia(perfil: Perfil | null): boolean {
   return perfil.departamento === 'bodega' && perfil.puesto === 'Encargado de bodega'
 }
 
+// Quién ve el precio de los materiales — transversal a todos los
+// departamentos, por nivel_acceso (no por módulo): jefatura
+// (administrador/master/admin_software) ve precio y stock; Supervisor/
+// Maestro/Ayudante (modificador/maestro) solo ve stock, en la lista, el
+// formulario de alta/edición, la edición masiva y el CSV exportado —
+// confirmado con el dueño del negocio. Server-side real en cada ruta de
+// /api/materiales, no solo ocultar la columna en la UI.
+export function puedeVerPrecios(perfil: Perfil | null): boolean {
+  if (!perfil) return true
+  return perfil.nivel_acceso === 'administrador' || NIVELES_TOTALES.includes(perfil.nivel_acceso)
+}
+
 // Quién puede VER el estado de conexión de otras personas (desplegable
 // "Conectados" de la barra lateral + punto verde/gris en mensajería) —
 // acotado a Gerente y Administrador de software únicamente.

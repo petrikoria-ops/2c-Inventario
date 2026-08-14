@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil, puedeVer } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeVer, puedeVerPrecios } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,6 +9,7 @@ export async function GET() {
   if (!perfil || !puedeVer(perfil, 'materiales')) {
     return NextResponse.json({ error: 'No autorizado.' }, { status: 403 })
   }
+  const verPrecios = puedeVerPrecios(perfil)
 
   const sb = getSupabaseServer()
   const { data } = await sb
@@ -17,11 +18,13 @@ export async function GET() {
     .eq('activo', true)
     .order('codigo')
 
-  const cols = ['codigo','descripcion','categoria','unidad','stock_actual','stock_minimo','ubicacion','precio_unitario','valor_total','proveedor','notas']
+  const cols = ['codigo','descripcion','categoria','unidad','stock_actual','stock_minimo','ubicacion',
+    ...(verPrecios ? ['precio_unitario', 'valor_total'] : []),
+    'proveedor','notas']
   const rows = (data ?? []).map(m => [
     m.codigo, m.descripcion, (m.categorias as any)?.nombre ?? '',
     m.unidad, m.stock_actual, m.stock_minimo, m.ubicacion ?? '',
-    m.precio_unitario, (m.stock_actual * m.precio_unitario).toFixed(0),
+    ...(verPrecios ? [m.precio_unitario, (m.stock_actual * m.precio_unitario).toFixed(0)] : []),
     (m.proveedores as any)?.nombre ?? '', m.notas ?? '',
   ])
 
