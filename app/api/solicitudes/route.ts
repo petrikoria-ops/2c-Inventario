@@ -6,10 +6,22 @@ export const dynamic = 'force-dynamic'
 
 export async function GET() {
   const sb = getSupabaseServer()
-  const { data, error } = await sb
+  // Intenta traer la obra vinculada (proyecto_id, migration_solicitudes_proyecto_fk.sql).
+  // Si esa migración todavía no corrió en esta base, el embed de `proyectos`
+  // falla porque PostgREST no encuentra la relación — se reintenta sin él
+  // para que la lista de solicitudes nunca se rompa por una migración
+  // pendiente, igual que el resto de columnas opcionales de esta tabla.
+  let { data, error } = await sb
     .from('solicitudes_compra')
-    .select('*, solicitudes_compra_items(id)')
+    .select('*, solicitudes_compra_items(id), proyectos(id,ot,nombre)')
     .order('creado_en', { ascending: false })
+
+  if (error) {
+    ({ data, error } = await sb
+      .from('solicitudes_compra')
+      .select('*, solicitudes_compra_items(id)')
+      .order('creado_en', { ascending: false }))
+  }
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
@@ -26,7 +38,7 @@ export async function POST(req: NextRequest) {
   const denegado = await requireCrear('compras')
   if (denegado) return denegado
   const sb = getSupabaseServer()
-  const { items, observaciones, obra, supervisor, visitador, fecha_entrega } = await req.json()
+  const { items, observaciones, obra, supervisor, visitador, fecha_entrega, proyecto_id } = await req.json()
 
   if (!Array.isArray(items) || items.length === 0) {
     return NextResponse.json({ error: 'Se requiere al menos un ítem' }, { status: 400 })
@@ -55,6 +67,7 @@ export async function POST(req: NextRequest) {
   if (supervisor)    insertPayload.supervisor = supervisor
   if (visitador)     insertPayload.visitador = visitador
   if (fecha_entrega) insertPayload.fecha_entrega = fecha_entrega
+  if (proyecto_id)   insertPayload.proyecto_id = proyecto_id
 
   const { data: sol, error: errSol } = await sb
     .from('solicitudes_compra')

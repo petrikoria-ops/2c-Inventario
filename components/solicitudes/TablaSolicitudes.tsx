@@ -70,6 +70,7 @@ export default function TablaSolicitudes({ initialData, editable = true }: Props
             <tr>
               <th className="th">N° Solicitud</th>
               <th className="th">Fecha</th>
+              <th className="th">Obra</th>
               <th className="th td-r">Ítems</th>
               <th className="th">Estado</th>
               <th className="th">Observaciones</th>
@@ -83,6 +84,9 @@ export default function TablaSolicitudes({ initialData, editable = true }: Props
                   <span className="code font-bold" style={{ color: '#2E333A' }}>{sol.numero}</span>
                 </td>
                 <td className="td text-sm text-slate-600">{fechaCorta(sol.fecha)}</td>
+                <td className="td text-sm text-brand-n500">
+                  {sol.proyectos ? <span className="code">{sol.proyectos.ot}</span> : '—'}
+                </td>
                 <td className="td-r">
                   <span className="badge badge-blue">{sol.items_count}</span>
                 </td>

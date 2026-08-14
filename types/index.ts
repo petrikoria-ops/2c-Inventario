@@ -113,9 +113,11 @@ export interface SolicitudCompra {
   supervisor: string | null
   visitador: string | null
   fecha_entrega: string | null
+  proyecto_id: number | null
   creado_en: string
   actualizado_en: string
   solicitudes_compra_items?: SolicitudCompraItem[]
+  proyectos?: Pick<Proyecto, 'id' | 'ot' | 'nombre'> | null
 }
 
 export interface ValeDespachoItem {

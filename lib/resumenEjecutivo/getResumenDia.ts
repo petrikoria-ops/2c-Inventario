@@ -75,13 +75,22 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const verRic           = puedeVerModulo(perfil, 'verificacion_ric')
   const verPrevencion    = puedeVerModulo(perfil, 'prevencion_riesgos')
   const verAlimentadores = puedeVerModulo(perfil, 'pruebas_alimentadores')
+  // Jefe de departamento o superior: ve tareas de su equipo (RLS ampliada
+  // en migration_tareas_visibilidad_jefatura.sql), no solo las propias.
+  const esJefe = !perfil || perfil.nivel_acceso === 'administrador' || perfil.nivel_acceso === 'master' || perfil.nivel_acceso === 'admin_software'
 
   const vacioLista  = Promise.resolve({ data: [] as any[], count: 0 })
   const vacioConteo = Promise.resolve({ count: 0 })
 
+  // Herramientas "a mi nombre": responsable es un campo de texto libre (no
+  // FK a perfiles), así que el cruce es por nombre_completo — mejor
+  // esfuerzo, no una identidad garantizada. Solo se pide para operativos
+  // (para jefatura ya se ve el total del departamento).
+  const misHerramientasQuery = verHerramientas && !esJefe && perfil?.nombre_completo
+
   const [
     materiales,
-    herRep, herExt, entregasHoy,
+    herRep, herExt, entregasHoy, misHerramientas,
     movHoy, valesHoy,
     solNuevasHoy, solRecibidasHoy, solPend,
     avanceItemsHoy, proyectosNuevosHoy,
@@ -99,6 +108,9 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
     verHerramientas
       ? sb.from('entregas_herramientas').select('id,numero,trabajador_nombre,fecha').gte('fecha', inicioHoy).order('fecha', { ascending: false }).limit(15)
       : vacioLista,
+    misHerramientasQuery
+      ? sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('responsable', perfil!.nombre_completo).eq('activo', true).neq('estado', 'dada_de_baja')
+      : vacioConteo,
 
     verMovimientos
       ? sb.from('movimientos').select('id,tipo,fecha').gte('fecha', inicioHoy).order('fecha', { ascending: false }).limit(300)
@@ -135,9 +147,11 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
       ? sb.from('pruebas_alimentadores').select('id,numero,estado,proyecto_nombre,actualizado_en').gte('actualizado_en', inicioHoy).order('actualizado_en', { ascending: false }).limit(10)
       : vacioLista,
 
-    // tareas_asignadas tiene RLS propia (solo asignado_por/asignado_a = auth.uid()),
-    // así que esta consulta ya viene acotada a las tareas del usuario real —
-    // no hace falta filtrar por módulo.
+    // tareas_asignadas tiene RLS propia: por defecto solo asignado_por/
+    // asignado_a = auth.uid(), y además — desde
+    // migration_tareas_visibilidad_jefatura.sql — las de todo el equipo
+    // si quien mira es Jefe de departamento o Gerencia. No hace falta
+    // filtrar acá: ya viene acotada por rol desde la base de datos.
     sb.from('tareas_asignadas').select('id,titulo,estado,fecha_limite,creado_en,completado_en').order('creado_en', { ascending: false }).limit(100),
   ])
 
@@ -149,6 +163,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   // ── Herramientas ─────────────────────────────────────────────────
   const herRepCount = herRep?.count ?? 0
   const herExtCount = herExt?.count ?? 0
+  const misHerramientasCount = misHerramientas?.count ?? 0
   const entregas     = (entregasHoy?.data ?? []) as { id: number; numero: string; trabajador_nombre: string; fecha: string }[]
 
   // ── Movimientos / despachos ──────────────────────────────────────
@@ -190,6 +205,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const indicadores: IndicadorDia[] = []
   if (verMovimientos)   indicadores.push({ key: 'mov',   label: 'Movimientos de inventario', value: movTotal,                              Icon: ArrowUpDown })
   if (verHerramientas)  indicadores.push({ key: 'her',   label: 'Herramientas entregadas',    value: entregas.length,                       Icon: HardHat })
+  if (misHerramientasQuery) indicadores.push({ key: 'mis-her', label: 'Herramientas a tu nombre', value: misHerramientasCount,             Icon: Wrench })
   if (verCompras)       indicadores.push({ key: 'com',   label: 'Movimientos de compra',      value: solNuevas.length + solRecibidas.length, Icon: ShoppingCart })
   if (verAvanceObra)    indicadores.push({ key: 'ava',   label: 'Etapas de avance completadas', value: avanceItems.length,                  Icon: ListChecks })
   if (verRic || verPrevencion || verAlimentadores) {
@@ -301,11 +317,15 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (prevAbiertasCount > 0) {
     alertas.push({ id: 'prev-abiertas', texto: `${prevAbiertasCount} inspección${prevAbiertasCount !== 1 ? 'es' : ''} de prevención en progreso`, nivel: 'atencion', href: '/prevencion-riesgos', Icon: ShieldAlert })
   }
+  // "del equipo" vs. "tuyas": mismo texto, alcance distinto — lo resuelve
+  // solo la RLS de tareas_asignadas (migration_tareas_visibilidad_jefatura.sql),
+  // acá nomás se nombra bien lo que ya llegó filtrado.
+  const alcanceTareas = esJefe ? 'del equipo' : 'tuyas'
   if (tareasVencidas.length > 0) {
-    alertas.push({ id: 'tar-venc', texto: `${tareasVencidas.length} tarea${tareasVencidas.length !== 1 ? 's' : ''} vencida${tareasVencidas.length !== 1 ? 's' : ''}`, nivel: 'critico', href: '/itinerario', Icon: CheckSquare })
+    alertas.push({ id: 'tar-venc', texto: `${tareasVencidas.length} tarea${tareasVencidas.length !== 1 ? 's' : ''} vencida${tareasVencidas.length !== 1 ? 's' : ''} ${alcanceTareas}`, nivel: 'critico', href: '/itinerario', Icon: CheckSquare })
   }
   if (tareasAbiertas.length > tareasVencidas.length) {
-    alertas.push({ id: 'tar-abiertas', texto: `${tareasAbiertas.length} tarea${tareasAbiertas.length !== 1 ? 's' : ''} abierta${tareasAbiertas.length !== 1 ? 's' : ''} en el itinerario`, nivel: 'atencion', href: '/itinerario', Icon: ClipboardList })
+    alertas.push({ id: 'tar-abiertas', texto: `${tareasAbiertas.length} tarea${tareasAbiertas.length !== 1 ? 's' : ''} abierta${tareasAbiertas.length !== 1 ? 's' : ''} ${alcanceTareas} en el itinerario`, nivel: 'atencion', href: '/itinerario', Icon: ClipboardList })
   }
 
   // ── Recomendaciones (reglas determinísticas, más severas primero) ─
@@ -316,7 +336,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (sinStock.length > 0) agregarRecomendacion('r-sin-stock', `Reponer ${sinStock.length} material${sinStock.length !== 1 ? 'es' : ''} sin stock antes de que frene un despacho u obra.`)
   if (bajoMinimo.length > 0) agregarRecomendacion('r-bajo-min', `Revisar compras para ${bajoMinimo.length} material${bajoMinimo.length !== 1 ? 'es' : ''} bajo su stock mínimo.`)
   if (herExtCount > 0) agregarRecomendacion('r-her-ext', `Investigar el paradero de ${herExtCount} herramienta${herExtCount !== 1 ? 's' : ''} extraviada${herExtCount !== 1 ? 's' : ''}.`)
-  if (tareasVencidas.length > 0) agregarRecomendacion('r-tar-venc', `Resolver ${tareasVencidas.length} tarea${tareasVencidas.length !== 1 ? 's' : ''} vencida${tareasVencidas.length !== 1 ? 's' : ''} en el itinerario.`)
+  if (tareasVencidas.length > 0) agregarRecomendacion('r-tar-venc', `Resolver ${tareasVencidas.length} tarea${tareasVencidas.length !== 1 ? 's' : ''} vencida${tareasVencidas.length !== 1 ? 's' : ''} ${alcanceTareas} en el itinerario.`)
   if (solPendCount > 0) agregarRecomendacion('r-sol-pend', `Dar seguimiento a ${solPendCount} solicitud${solPendCount !== 1 ? 'es' : ''} de compra pendiente${solPendCount !== 1 ? 's' : ''} con los proveedores.`)
   if (prevAbiertasCount > 0) agregarRecomendacion('r-prev', `Cerrar ${prevAbiertasCount} inspección${prevAbiertasCount !== 1 ? 'es' : ''} de prevención que sigue${prevAbiertasCount !== 1 ? 'n' : ''} en progreso.`)
   if (herRepCount > 0) agregarRecomendacion('r-her-rep', `Dar seguimiento a ${herRepCount} herramienta${herRepCount !== 1 ? 's' : ''} en reparación.`)

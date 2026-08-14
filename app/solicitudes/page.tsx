@@ -10,13 +10,24 @@ export const metadata = { title: 'Solicitudes de compra — 2C Inventario' }
 
 export default async function SolicitudesPage() {
   const sb = getSupabaseServer()
-  const [{ data }, perfil] = await Promise.all([
+  const [solicitudesRes, perfil] = await Promise.all([
     sb
       .from('solicitudes_compra')
-      .select('*, solicitudes_compra_items(id)')
+      .select('*, solicitudes_compra_items(id), proyectos(id,ot,nombre)')
       .order('creado_en', { ascending: false }),
     getPerfil(),
   ])
+
+  // Igual que /api/solicitudes: si migration_solicitudes_proyecto_fk.sql
+  // todavía no corrió en esta base, el embed de `proyectos` falla — se
+  // reintenta sin él para no romper la lista por una migración pendiente.
+  let { data } = solicitudesRes
+  if (solicitudesRes.error) {
+    ({ data } = await sb
+      .from('solicitudes_compra')
+      .select('*, solicitudes_compra_items(id)')
+      .order('creado_en', { ascending: false }))
+  }
 
   if (perfil && !puedeVer(perfil, 'compras')) redirect('/')
 

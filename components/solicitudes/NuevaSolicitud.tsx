@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Loader2, Search, Zap, ClipboardList } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { num, clp, estaBajoMinimo } from '@/lib/utils'
-import type { Material } from '@/types'
+import type { Material, Proyecto } from '@/types'
 
 interface SolicitudItem {
   material_id:       number
@@ -18,8 +18,10 @@ interface SolicitudItem {
   precio_unitario:   number
 }
 
-export default function NuevaSolicitud() {
+export default function NuevaSolicitud({ proyectos: initialProyectos = [] }: { proyectos?: Pick<Proyecto, 'id' | 'ot' | 'nombre'>[] }) {
   const [items, setItems]             = useState<SolicitudItem[]>([])
+  const [proyectos, setProyectos]     = useState<Pick<Proyecto, 'id' | 'ot' | 'nombre'>[]>(initialProyectos)
+  const [proyectoId, setProyectoId]   = useState('')
   const [observaciones, setObs]       = useState('')
   const [query, setQuery]             = useState('')
   const [suggestions, setSuggestions] = useState<Material[]>([])
@@ -31,6 +33,18 @@ export default function NuevaSolicitud() {
   const inputRef  = useRef<HTMLInputElement>(null)
   const { showToast } = useToast()
   const router = useRouter()
+
+  // Fetch proyectos frescos en cada montaje (mismo patrón que NuevaSalida)
+  useEffect(() => {
+    fetch('/api/proyectos')
+      .then(r => r.json())
+      .then((data: any[]) => {
+        if (Array.isArray(data)) {
+          setProyectos(data.filter((p: any) => p.estado === 'en_proceso' || p.estado === 'presupuesto'))
+        }
+      })
+      .catch(() => {/* mantener initialProyectos si falla */})
+  }, [])
 
   // Búsqueda con debounce 300 ms
   useEffect(() => {
@@ -124,7 +138,7 @@ export default function NuevaSolicitud() {
       const res = await fetch('/api/solicitudes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items, observaciones }),
+        body: JSON.stringify({ items, observaciones, proyecto_id: proyectoId ? parseInt(proyectoId) : null }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
@@ -294,17 +308,30 @@ export default function NuevaSolicitud() {
         </div>
       )}
 
-      {/* Observaciones */}
+      {/* Obra + Observaciones */}
       <div className="panel mb-5">
-        <div className="panel-header"><h2>Observaciones</h2></div>
-        <div className="p-4">
-          <textarea
-            value={observaciones}
-            onChange={e => setObs(e.target.value)}
-            rows={3}
-            placeholder="Urgencia, instrucciones de entrega, referencia de cotización, contacto de proveedor…"
-            className="textarea w-full"
-          />
+        <div className="panel-header"><h2>Obra y observaciones</h2></div>
+        <div className="p-4 space-y-3">
+          <div>
+            <label className="label" htmlFor="solicitud-proyecto">Obra / OT</label>
+            <select id="solicitud-proyecto" className="select w-full" value={proyectoId} onChange={e => setProyectoId(e.target.value)}>
+              <option value="">Sin obra (compra general)</option>
+              {proyectos.map(p => (
+                <option key={p.id} value={p.id}>{p.ot} — {p.nombre}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="label" htmlFor="solicitud-obs">Observaciones</label>
+            <textarea
+              id="solicitud-obs"
+              value={observaciones}
+              onChange={e => setObs(e.target.value)}
+              rows={3}
+              placeholder="Urgencia, instrucciones de entrega, referencia de cotización, contacto de proveedor…"
+              className="textarea w-full"
+            />
+          </div>
         </div>
       </div>
 
