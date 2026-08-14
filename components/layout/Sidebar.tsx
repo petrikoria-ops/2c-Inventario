@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
-  Home, LayoutDashboard,
+  Home, LayoutDashboard, MessageCircle,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert, Zap,
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
@@ -12,6 +12,7 @@ import {
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { puedeVer, type Perfil, type Modulo, type Departamento } from '@/lib/auth/permisos'
 import { getDeptConfig } from '@/lib/departamentos/config'
+import { usePresence } from '@/contexts/PresenceContext'
 import VerComoSelector from './VerComoSelector'
 import type { LucideIcon } from 'lucide-react'
 
@@ -31,6 +32,7 @@ const NAV: NavGroup[] = [
     section: 'Principal',
     links: [
       { href: '/',          Icon: Home,             label: 'Inicio' },
+      { href: '/mensajes',  Icon: MessageCircle,    label: 'Mensajes' },
       { href: '/dashboard', Icon: LayoutDashboard,  label: 'Métricas', modulo: 'metricas' },
     ],
   },
@@ -93,9 +95,15 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
   const cfg = getDeptConfig(perfil?.departamento)
   const DeptIcon = cfg.Icon
   const simulando = !!verComo
+  const { noLeidos } = usePresence()
 
   const grupos = NAV
-    .map(g => ({ ...g, links: g.links.filter(l => !l.modulo || !perfil || puedeVer(perfil, l.modulo)) }))
+    .map(g => ({
+      ...g,
+      links: g.links
+        .filter(l => !l.modulo || !perfil || puedeVer(perfil, l.modulo))
+        .map(l => l.href === '/mensajes' ? { ...l, badge: noLeidos || undefined } : l),
+    }))
     .filter(g => g.links.length > 0)
     .concat(esAdmin ? [{
       section: 'Administración',

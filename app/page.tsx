@@ -7,6 +7,7 @@ import { getContextoUsuario, NOMBRE_DEPARTAMENTO } from '@/lib/auth/verComo'
 import { getDeptConfig } from '@/lib/departamentos/config'
 import VerComoSelector from '@/components/layout/VerComoSelector'
 import CockpitHeader from '@/components/hub/CockpitHeader'
+import PanelConectados from '@/components/hub/PanelConectados'
 import CountUp from '@/components/ui/CountUp'
 import Reveal from '@/components/ui/Reveal'
 import WidgetBodega from '@/components/hub/WidgetBodega'
@@ -88,6 +89,10 @@ export default async function HomePage() {
         rol={rol}
         fecha={fecha}
       />
+
+      {/* Quién está conectado ahora + mensajería — disponible para cualquier
+          perfil con sesión, sin importar nivel_acceso (ver docs del plan). */}
+      {perfil && <PanelConectados />}
 
       {/* Selector "Ver como" — solo admin_software/master. Persiste vía cookie,
           así la barra lateral y todas las páginas se adaptan al área elegida. */}

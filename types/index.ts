@@ -404,3 +404,22 @@ export interface ErrorLog {
   resuelto_en: string | null
   resuelto_por: string | null
 }
+
+export interface Mensaje {
+  id: number
+  remitente_id: string
+  destinatario_id: string
+  contenido: string
+  leido_en: string | null
+  creado_en: string
+}
+
+// Fila que devuelve la función SECURITY DEFINER perfiles_directorio() —
+// solo lo mínimo para mostrar a un colega en el directorio de mensajería,
+// nunca email/nivel_acceso/licencia SEC (ver migration_mensajeria.sql).
+export interface PerfilDirectorio {
+  id: string
+  nombre_completo: string
+  departamento: string
+  puesto: string
+}

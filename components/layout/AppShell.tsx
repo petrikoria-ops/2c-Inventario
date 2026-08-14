@@ -1,6 +1,7 @@
 'use client'
 import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
+import PanelChatDeslizante from '@/components/mensajeria/PanelChatDeslizante'
 import type { Perfil, Departamento } from '@/lib/auth/permisos'
 
 // Páginas sin sidebar — se detecta por ruta para no tener que mover
@@ -10,12 +11,14 @@ const SIN_SIDEBAR = ['/login', '/solicitar-acceso', '/pendiente-aprobacion']
 export default function AppShell({
   children,
   perfil,
+  perfilReal = null,
   puedeSimular = false,
   verComo = null,
   erroresPendientes = 0,
 }: {
   children: React.ReactNode
   perfil: Perfil | null
+  perfilReal?: Perfil | null
   puedeSimular?: boolean
   verComo?: Departamento | null
   erroresPendientes?: number
@@ -45,6 +48,7 @@ export default function AppShell({
           {children}
         </div>
       </main>
+      <PanelChatDeslizante miId={perfilReal?.id ?? null} />
     </div>
   )
 }
