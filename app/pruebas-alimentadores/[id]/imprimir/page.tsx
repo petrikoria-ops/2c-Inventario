@@ -4,7 +4,7 @@ import PrintButton from '@/components/solicitudes/PrintButton'
 import { getSignedUrlsAlimentador, getSignedUrlDeBucket } from '@/lib/supabase/storage'
 import { ESTILOS_IMPRESION_DOCUMENTO } from '@/components/documentos/estilosDocumento'
 import PortadaDocumento from '@/components/documentos/PortadaDocumento'
-import type { PruebaAlimentadoresItem } from '@/types'
+import type { PruebaAlimentadoresAlimentador, PruebaAlimentadoresItem } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -13,12 +13,12 @@ export default async function ImprimirPruebaAlimentadoresPage({ params }: { para
   const { data: prueba, error } = await sb.from('pruebas_alimentadores').select('*').eq('id', params.id).single()
   if (error || !prueba) notFound()
 
-  const { data: items } = await sb
-    .from('pruebas_alimentadores_items')
-    .select('*')
-    .eq('prueba_id', params.id)
-    .order('orden')
+  const [{ data: alimentadores }, { data: items }] = await Promise.all([
+    sb.from('pruebas_alimentadores_alimentadores').select('*').eq('prueba_id', params.id).order('orden'),
+    sb.from('pruebas_alimentadores_items').select('*').eq('prueba_id', params.id).order('orden'),
+  ])
 
+  const todosLosAlimentadores: PruebaAlimentadoresAlimentador[] = alimentadores ?? []
   const todosLosItems: PruebaAlimentadoresItem[] = items ?? []
   const paths = todosLosItems.filter(i => i.foto_url).map(i => i.foto_url as string)
   const urls = paths.length ? await getSignedUrlsAlimentador(sb, paths) : {}
@@ -45,12 +45,12 @@ export default async function ImprimirPruebaAlimentadoresPage({ params }: { para
             fecha={new Date(prueba.fecha_visita).toLocaleDateString('es-CL')}
             titulo="TEST DE ALIMENTADORES"
             subtitulo="Mediciones entre fases, neutro y tierra"
-            descripcion="Registro de las mediciones tomadas entre cada par de conductores del alimentador indicado, con su respaldo fotográfico correspondiente."
+            descripcion="Registro de las mediciones tomadas entre cada par de conductores de cada alimentador de la obra, con su respaldo fotográfico correspondiente."
             campos={[
               { label: 'Proyecto', value: prueba.proyecto_nombre },
               { label: 'Cliente / Mandante', value: prueba.cliente_mandante },
               { label: 'Ubicación', value: prueba.ubicacion },
-              { label: 'Alimentador / tablero', value: prueba.identificacion_alimentador },
+              { label: 'Cantidad de alimentadores', value: todosLosAlimentadores.length },
               { label: 'Inspector(es)', value: prueba.inspectores },
               { label: 'Instrumento', value: prueba.instrumento },
             ]}
@@ -58,30 +58,47 @@ export default async function ImprimirPruebaAlimentadoresPage({ params }: { para
         </div>
 
         <div className="doc-cierre">
-          <p className="font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Mediciones</p>
-          <table className="w-full mb-6" style={{ borderCollapse: 'collapse' }}>
-            <thead>
-              <tr>
-                <th className="doc-th">Medición</th>
-                <th className="doc-th doc-th-r" style={{ width: 110 }}>Valor</th>
-                <th className="doc-th" style={{ width: 90 }}>Foto</th>
-              </tr>
-            </thead>
-            <tbody>
-              {todosLosItems.map((item, i) => (
-                <tr key={item.id} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
-                  <td className="doc-td">{item.texto}</td>
-                  <td className="doc-td-r" style={{ fontWeight: 600 }}>{item.valor || '—'}</td>
-                  <td className="doc-td">
-                    {item.foto_url && urls[item.foto_url] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={urls[item.foto_url]} alt="" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
-                    ) : '—'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {todosLosAlimentadores.map((alimentador, ai) => {
+            const itemsAlimentador = todosLosItems.filter(i => i.alimentador_id === alimentador.id)
+            return (
+              <div key={alimentador.id} style={{ marginBottom: 28, pageBreakInside: 'avoid' }}>
+                <p className="font-bold text-sm mb-1" style={{ color: '#2E333A' }}>
+                  {ai + 1}. {alimentador.nombre}
+                </p>
+                <div className="flex flex-wrap gap-x-6 gap-y-1 text-xs mb-2" style={{ color: '#4A5260' }}>
+                  <span><strong style={{ color: '#2E333A' }}>Protección aguas arriba:</strong> {alimentador.proteccion_aguas_arriba || '—'}</span>
+                  <span><strong style={{ color: '#2E333A' }}>Largo:</strong> {alimentador.largo || '—'}</span>
+                </div>
+                <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th className="doc-th">Medición</th>
+                      <th className="doc-th doc-th-r" style={{ width: 110 }}>Valor</th>
+                      <th className="doc-th" style={{ width: 90 }}>Foto</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {itemsAlimentador.map((item, i) => (
+                      <tr key={item.id} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
+                        <td className="doc-td">{item.texto}</td>
+                        <td className="doc-td-r" style={{ fontWeight: 600 }}>{item.valor || '—'}</td>
+                        <td className="doc-td">
+                          {item.foto_url && urls[item.foto_url] ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={urls[item.foto_url]} alt="" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
+                          ) : '—'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )
+          })}
+
+          {!todosLosAlimentadores.length && (
+            <p className="text-xs mb-6" style={{ color: '#4A5260' }}>Este informe todavía no tiene alimentadores registrados.</p>
+          )}
 
           {prueba.observaciones && (
             <div className="text-xs p-2 rounded mb-8" style={{ background: '#F5F6F7', color: '#4A5260', border: '1px solid #E2E4E7' }}>

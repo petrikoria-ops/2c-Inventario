@@ -10,7 +10,7 @@ export async function GET(_: NextRequest, { params }: Ctx) {
   const sb = getSupabaseServer()
   const { data, error } = await sb
     .from('pruebas_alimentadores')
-    .select('*,pruebas_alimentadores_items(*)')
+    .select('*,pruebas_alimentadores_alimentadores(*,pruebas_alimentadores_items(*))')
     .eq('id', params.id)
     .single()
 
@@ -28,7 +28,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 
   for (const campo of [
     'cliente_mandante', 'ubicacion', 'fecha_visita', 'inspectores',
-    'identificacion_alimentador', 'instrumento', 'observaciones',
+    'instrumento', 'observaciones',
     'estado', 'firma_nombre', 'firma_rut', 'firma_cargo', 'firma_imagen_url',
   ]) {
     if (body[campo] !== undefined) patch[campo] = body[campo]

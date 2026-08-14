@@ -3,7 +3,9 @@ import Link from 'next/link'
 import { Zap, Plus } from 'lucide-react'
 import type { PruebaAlimentadores } from '@/types'
 
-export default function TablaPruebasAlimentadores({ initialData, editable }: { initialData: PruebaAlimentadores[]; editable: boolean }) {
+type PruebaConConteo = PruebaAlimentadores & { pruebas_alimentadores_alimentadores?: { count: number }[] }
+
+export default function TablaPruebasAlimentadores({ initialData, editable }: { initialData: PruebaConConteo[]; editable: boolean }) {
   return (
     <div className="panel">
       <div className="panel-header">
@@ -21,7 +23,7 @@ export default function TablaPruebasAlimentadores({ initialData, editable }: { i
             <tr>
               <th className="th">N°</th>
               <th className="th">Obra</th>
-              <th className="th">Alimentador</th>
+              <th className="th">Alimentadores</th>
               <th className="th">Fecha visita</th>
               <th className="th">Inspectores</th>
               <th className="th">Estado</th>
@@ -32,7 +34,7 @@ export default function TablaPruebasAlimentadores({ initialData, editable }: { i
               <tr key={p.id} className="tr-hover">
                 <td className="td"><Link href={`/pruebas-alimentadores/${p.id}`} className="code hover:underline">{p.numero}</Link></td>
                 <td className="td">{p.proyecto_nombre ?? '—'}</td>
-                <td className="td text-xs text-brand-n500">{p.identificacion_alimentador ?? '—'}</td>
+                <td className="td text-xs text-brand-n500">{p.pruebas_alimentadores_alimentadores?.[0]?.count ?? 0}</td>
                 <td className="td text-xs text-brand-n500">{new Date(p.fecha_visita).toLocaleDateString('es-CL')}</td>
                 <td className="td text-xs text-brand-n500">{p.inspectores ?? '—'}</td>
                 <td className="td">

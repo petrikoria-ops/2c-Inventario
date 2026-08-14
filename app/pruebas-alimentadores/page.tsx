@@ -10,7 +10,9 @@ export const dynamic = 'force-dynamic'
 export default async function PruebasAlimentadoresPage() {
   const sb = getSupabaseServer()
   const [{ data }, perfil] = await Promise.all([
-    sb.from('pruebas_alimentadores').select('*').order('fecha_visita', { ascending: false }),
+    sb.from('pruebas_alimentadores')
+      .select('*,pruebas_alimentadores_alimentadores(count)')
+      .order('fecha_visita', { ascending: false }),
     getPerfil(),
   ])
   if (perfil && !puedeVer(perfil, 'pruebas_alimentadores')) redirect('/')

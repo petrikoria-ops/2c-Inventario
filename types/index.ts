@@ -348,11 +348,24 @@ export interface InspeccionPrevencion {
 export interface PruebaAlimentadoresItem {
   id: number
   prueba_id: number
+  alimentador_id: number
   orden: number
   texto: string
   valor: string | null
   foto_url: string | null
   actualizado_en: string
+}
+
+export interface PruebaAlimentadoresAlimentador {
+  id: number
+  prueba_id: number
+  orden: number
+  nombre: string
+  proteccion_aguas_arriba: string | null
+  largo: string | null
+  creado_en: string
+  actualizado_en: string
+  pruebas_alimentadores_items?: PruebaAlimentadoresItem[]
 }
 
 export interface PruebaAlimentadores {
@@ -375,7 +388,7 @@ export interface PruebaAlimentadores {
   creado_por: string | null
   creado_en: string
   actualizado_en: string
-  pruebas_alimentadores_items?: PruebaAlimentadoresItem[]
+  pruebas_alimentadores_alimentadores?: PruebaAlimentadoresAlimentador[]
 }
 
 export interface ErrorLog {
