@@ -1,4 +1,5 @@
 // Tipos que reflejan el esquema de Supabase (PostgreSQL)
+import type { CategoriaDocumentoTrabajador } from '@/lib/departamentos/documentosTrabajador'
 
 export interface Categoria {
   id: number
@@ -217,6 +218,23 @@ export interface Trabajador {
   telefono: string | null
   activo: boolean
   creado_en: string
+}
+
+export interface DocumentoTrabajador {
+  id: number
+  trabajador_id: number
+  proyecto_id: number | null
+  categoria: CategoriaDocumentoTrabajador
+  titulo: string
+  archivo_url: string
+  archivo_nombre: string | null
+  fecha_documento: string | null
+  fecha_vencimiento: string | null
+  notas: string | null
+  subido_por: string | null
+  subido_por_nombre: string | null
+  creado_en: string
+  proyectos?: Pick<Proyecto, 'id' | 'ot' | 'nombre'> | null
 }
 
 export interface EntregaHerramientaItem {

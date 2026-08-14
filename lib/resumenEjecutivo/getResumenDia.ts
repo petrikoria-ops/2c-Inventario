@@ -9,11 +9,15 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { LucideIcon } from 'lucide-react'
 import {
   ArrowUpDown, PackageOpen, HardHat, ShoppingCart, ListChecks, ShieldCheck,
-  ClipboardList, CheckSquare, PackageX, Wrench, Search, ShieldAlert, LayoutGrid,
+  ClipboardList, CheckSquare, PackageX, Wrench, Search, ShieldAlert, LayoutGrid, FileText,
 } from 'lucide-react'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
 import { puedeVer, type Perfil, type Modulo } from '@/lib/auth/permisos'
+import { GRUPOS_DOCUMENTOS } from '@/lib/departamentos/documentosTrabajador'
+
+const CATEGORIAS_RRHH = GRUPOS_DOCUMENTOS.find(g => g.modulo === 'trabajadores')!.categorias.map(c => c.value)
+const CATEGORIAS_PREVENCION_DOCS = GRUPOS_DOCUMENTOS.find(g => g.modulo === 'prevencion_riesgos')!.categorias.map(c => c.value)
 
 export interface IndicadorDia {
   key: string
@@ -64,6 +68,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   // comportamiento nuevo que el resto de la app no tiene.
   const inicioHoy = new Date(ahora.getFullYear(), ahora.getMonth(), ahora.getDate()).toISOString()
   const hoyISO = ahora.toISOString().slice(0, 10)
+  const en30ISO = new Date(ahora.getTime() + 30 * 86400000).toISOString().slice(0, 10)
   const fecha = ahora.toLocaleDateString('es-CL', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
 
   const verMateriales    = puedeVerModulo(perfil, 'materiales')
@@ -78,6 +83,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const verTableros      = puedeVerModulo(perfil, 'tableros')
   const verPedidosBodega = puedeVerModulo(perfil, 'pedidos_bodega')
   const verAjusteInv     = puedeVerModulo(perfil, 'solicitudes_ajuste')
+  const verTrabajadores  = puedeVerModulo(perfil, 'trabajadores')
   // Jefe de departamento o superior: ve tareas de su equipo (RLS ampliada
   // en migration_tareas_visibilidad_jefatura.sql), no solo las propias.
   const esJefe = !perfil || perfil.nivel_acceso === 'administrador' || perfil.nivel_acceso === 'master' || perfil.nivel_acceso === 'admin_software'
@@ -99,6 +105,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
     avanceItemsHoy, proyectosNuevosHoy,
     ricHoy, prevHoy, prevAbiertas, alimHoy,
     tableros, pedidosBodegaPend, ajusteInvPend,
+    docsVencenRrhh, docsVencenPrev,
     tareas,
   ] = await Promise.all([
     verMateriales
@@ -163,6 +170,17 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
     verPedidosBodega ? sb.from('pedidos_bodega').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente') : vacioConteo,
     verAjusteInv      ? sb.from('solicitudes_ajuste_inventario').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente') : vacioConteo,
 
+    // Documentos de trabajador vencidos o por vencer en 30 días — misma
+    // tabla para RRHH y Prevención, separados por categoría (ver
+    // lib/departamentos/documentosTrabajador.ts). Si
+    // migration_documentos_trabajador.sql no corrió, la tabla no existe.
+    verTrabajadores
+      ? sb.from('documentos_trabajador').select('id,titulo').in('categoria', CATEGORIAS_RRHH).not('fecha_vencimiento', 'is', null).lte('fecha_vencimiento', en30ISO).limit(200)
+      : vacioLista,
+    verPrevencion
+      ? sb.from('documentos_trabajador').select('id,titulo').in('categoria', CATEGORIAS_PREVENCION_DOCS).not('fecha_vencimiento', 'is', null).lte('fecha_vencimiento', en30ISO).limit(200)
+      : vacioLista,
+
     // tareas_asignadas tiene RLS propia: por defecto solo asignado_por/
     // asignado_a = auth.uid(), y además — desde
     // migration_tareas_visibilidad_jefatura.sql — las de todo el equipo
@@ -219,6 +237,10 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   // ── Pedidos de bodega / ajustes de inventario (Etapa 3) ──────────
   const pedidosBodegaPendCount = pedidosBodegaPend?.count ?? 0
   const ajusteInvPendCount     = ajusteInvPend?.count ?? 0
+
+  // ── Documentos de trabajador por vencer (RRHH / Prevención) ──────
+  const docsVencenRrhhCount = (docsVencenRrhh?.data ?? []).length
+  const docsVencenPrevCount = (docsVencenPrev?.data ?? []).length
 
   // ── Tareas asignadas (propias, vía RLS) ──────────────────────────
   const tareasData = (tareas?.data ?? []) as { id: number; titulo: string; estado: string; fecha_limite: string | null; creado_en: string; completado_en: string | null }[]
@@ -355,6 +377,12 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (prevAbiertasCount > 0) {
     alertas.push({ id: 'prev-abiertas', texto: `${prevAbiertasCount} inspección${prevAbiertasCount !== 1 ? 'es' : ''} de prevención en progreso`, nivel: 'atencion', href: '/prevencion-riesgos', Icon: ShieldAlert })
   }
+  if (docsVencenRrhhCount > 0) {
+    alertas.push({ id: 'docs-rrhh', texto: `${docsVencenRrhhCount} documento${docsVencenRrhhCount !== 1 ? 's' : ''} de RRHH vencido${docsVencenRrhhCount !== 1 ? 's' : ''} o por vencer`, nivel: 'atencion', href: '/trabajadores', Icon: FileText })
+  }
+  if (docsVencenPrevCount > 0) {
+    alertas.push({ id: 'docs-prev', texto: `${docsVencenPrevCount} documento${docsVencenPrevCount !== 1 ? 's' : ''} de prevención vencido${docsVencenPrevCount !== 1 ? 's' : ''} o por vencer`, nivel: 'atencion', href: '/trabajadores', Icon: FileText })
+  }
   // "del equipo" vs. "tuyas": mismo texto, alcance distinto — lo resuelve
   // solo la RLS de tareas_asignadas (migration_tareas_visibilidad_jefatura.sql),
   // acá nomás se nombra bien lo que ya llegó filtrado.
@@ -382,6 +410,8 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (tablerosPorArmar > 0) agregarRecomendacion('r-tab-arm', `Avanzar el armado de ${tablerosPorArmar} tablero${tablerosPorArmar !== 1 ? 's' : ''} en cola.`)
   if (pedidosBodegaPendCount > 0) agregarRecomendacion('r-ped-bod', `Aprobar o rechazar ${pedidosBodegaPendCount} pedido${pedidosBodegaPendCount !== 1 ? 's' : ''} a bodega antes de que frene a la obra que lo pidió.`)
   if (ajusteInvPendCount > 0) agregarRecomendacion('r-ajuste-inv', `Revisar ${ajusteInvPendCount} ajuste${ajusteInvPendCount !== 1 ? 's' : ''} de inventario pendiente${ajusteInvPendCount !== 1 ? 's' : ''} de aprobar.`)
+  if (docsVencenRrhhCount > 0) agregarRecomendacion('r-docs-rrhh', `Renovar o archivar ${docsVencenRrhhCount} documento${docsVencenRrhhCount !== 1 ? 's' : ''} de RRHH vencido${docsVencenRrhhCount !== 1 ? 's' : ''} o por vencer.`)
+  if (docsVencenPrevCount > 0) agregarRecomendacion('r-docs-prev', `Renovar ${docsVencenPrevCount} documento${docsVencenPrevCount !== 1 ? 's' : ''} de prevención vencido${docsVencenPrevCount !== 1 ? 's' : ''} o por vencer antes de que alguien quede sin certificación vigente en obra.`)
 
   // ── Síntesis ejecutiva (3–5 líneas, solo con datos reales) ────────
   const huboActividad = avancesTop.length > 0

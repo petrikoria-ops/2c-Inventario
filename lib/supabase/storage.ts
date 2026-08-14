@@ -8,6 +8,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 const BUCKET_RIC = 'verificaciones-ric'
 const BUCKET_PREVENCION = 'prevencion-riesgos'
 const BUCKET_ALIMENTADORES = 'pruebas-alimentadores'
+const BUCKET_DOCUMENTOS_TRABAJADOR = 'documentos-trabajador'
 
 export async function subirFotoVerificacion(
   sb: SupabaseClient, verificacionId: number, itemId: number, file: File
@@ -46,6 +47,28 @@ async function subirFoto(sb: SupabaseClient, bucket: string, pathSinExtension: s
   })
   if (error) throw error
   return path
+}
+
+// Documentos de trabajador (RRHH/Prevención, ver migration_documentos_trabajador.sql)
+// — a diferencia de las fotos, cualquier tipo de archivo (PDF, imagen…),
+// así que se preserva el nombre original en el path para que la
+// descarga muestre algo legible.
+export async function subirDocumentoTrabajador(
+  sb: SupabaseClient, trabajadorId: number, file: File
+): Promise<string> {
+  const safeName = file.name.replace(/[^a-zA-Z0-9.\-_]/g, '_')
+  const path = `${trabajadorId}/${Date.now()}-${safeName}`
+  const { error } = await sb.storage.from(BUCKET_DOCUMENTOS_TRABAJADOR).upload(path, file, {
+    upsert: false,
+    contentType: file.type,
+  })
+  if (error) throw error
+  return path
+}
+
+export async function getSignedUrlDocumentoTrabajador(sb: SupabaseClient, path: string, expiresIn = 3600): Promise<string | null> {
+  const { data } = await sb.storage.from(BUCKET_DOCUMENTOS_TRABAJADOR).createSignedUrl(path, expiresIn)
+  return data?.signedUrl ?? null
 }
 
 export async function getSignedUrl(sb: SupabaseClient, path: string, expiresIn = 3600): Promise<string | null> {

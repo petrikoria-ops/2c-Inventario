@@ -1,7 +1,8 @@
 'use client'
 import { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
-import { Users, Pencil, Trash2 } from 'lucide-react'
+import Link from 'next/link'
+import { Users, Pencil, Trash2, FileText } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import { useToast } from '@/contexts/ToastContext'
 import type { Trabajador } from '@/types'
@@ -96,6 +97,9 @@ export default function TablaTrabjadores({ initialData, editable = true }: { ini
                   <td className="td text-xs text-brand-n500">{t.telefono ?? '—'}</td>
                   <td className="td">
                     <div className="flex gap-0.5">
+                      <Link href={`/trabajadores/${t.id}`} className="btn-icon" title="Documentos" aria-label="Ver documentos">
+                        <FileText size={13} />
+                      </Link>
                       {editable && (
                         <>
                           <button className="btn-icon" title="Editar" aria-label="Editar"

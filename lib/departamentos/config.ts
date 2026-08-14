@@ -18,7 +18,7 @@ import {
   Calculator, CheckSquare, Bot,
   ShieldCheck, ShieldAlert, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
-  Truck, RotateCcw,
+  Truck, RotateCcw, FileText,
 } from 'lucide-react'
 
 export interface AccionRapida {
@@ -190,6 +190,9 @@ const PREVENCION: DeptConfig = {
     ]},
     { titulo: 'Control', items: [
       { href: '/herramientas', Icon: Wrench, titulo: 'Herramientas', desc: 'Estado y mantención (lectura)', modulo: 'herramientas' },
+    ]},
+    { titulo: 'Personas', items: [
+      { href: '/trabajadores', Icon: FileText, titulo: 'Documentos de trabajadores', desc: 'Charla diaria, EPP, exámenes, inducción', modulo: 'trabajadores' },
     ]},
   ],
 }
