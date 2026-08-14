@@ -75,7 +75,7 @@ const NAV: NavGroup[] = [
   },
 ]
 
-export function SidebarContent({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0, directorioConectados = [], onNav }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number; directorioConectados?: PerfilDirectorio[]; onNav?: () => void }) {
+export function SidebarContent({ perfil, puedeSimular = false, verComo = null, verComoPuesto = null, erroresPendientes = 0, directorioConectados = [], onNav }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; verComoPuesto?: string | null; erroresPendientes?: number; directorioConectados?: PerfilDirectorio[]; onNav?: () => void }) {
   const pathname = usePathname()
   const router    = useRouter()
 
@@ -175,7 +175,7 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
 
       {/* Control "Ver como" — solo master / admin_software */}
       {puedeSimular && (
-        <VerComoSelector verComo={verComo} variant="sidebar" onNavigate={onNav} />
+        <VerComoSelector verComo={verComo} verComoPuesto={verComoPuesto} variant="sidebar" onNavigate={onNav} />
       )}
 
       {/* Quién está conectado — colapsado por defecto, gateado por
@@ -260,7 +260,7 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
   )
 }
 
-export default function Sidebar({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0, directorioConectados = [] }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number; directorioConectados?: PerfilDirectorio[] }) {
+export default function Sidebar({ perfil, puedeSimular = false, verComo = null, verComoPuesto = null, erroresPendientes = 0, directorioConectados = [] }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; verComoPuesto?: string | null; erroresPendientes?: number; directorioConectados?: PerfilDirectorio[] }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -296,7 +296,7 @@ export default function Sidebar({ perfil, puedeSimular = false, verComo = null, 
       {/* Sidebar escritorio */}
       <aside className="hidden md:flex flex-col w-56 fixed top-0 left-0 h-screen z-[200]"
         style={{ backgroundColor: '#2E333A' }}>
-        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} directorioConectados={directorioConectados} />
+        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} verComoPuesto={verComoPuesto} erroresPendientes={erroresPendientes} directorioConectados={directorioConectados} />
       </aside>
 
       {/* Sidebar móvil (drawer) */}
@@ -311,7 +311,7 @@ export default function Sidebar({ perfil, puedeSimular = false, verComo = null, 
             <X size={16} />
           </button>
         </div>
-        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} directorioConectados={directorioConectados} onNav={() => setOpen(false)} />
+        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} verComoPuesto={verComoPuesto} erroresPendientes={erroresPendientes} directorioConectados={directorioConectados} onNav={() => setOpen(false)} />
       </aside>
     </>
   )

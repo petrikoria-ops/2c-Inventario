@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 }
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const { real, efectivo, puedeSimular, verComo } = await getContextoUsuario()
+  const { real, efectivo, puedeSimular, verComo, verComoPuesto } = await getContextoUsuario()
 
   // El conteo de errores pendientes depende del rol REAL (no del simulado).
   let erroresPendientes = 0
@@ -81,6 +81,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               perfilReal={real}
               puedeSimular={puedeSimular}
               verComo={verComo}
+              verComoPuesto={verComoPuesto}
               erroresPendientes={erroresPendientes}
               directorioConectados={directorioConectados}
             >{children}</AppShell>

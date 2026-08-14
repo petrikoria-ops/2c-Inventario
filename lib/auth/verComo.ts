@@ -20,6 +20,10 @@ export { DEPARTAMENTOS_OPERATIVOS, NOMBRE_DEPARTAMENTO } from './deptInfo'
 // perdiendo su poder.
 
 export const VER_COMO_COOKIE = 'ver_como'
+// Puesto específico dentro del departamento simulado — opcional. Sin esta
+// cookie (o con un puesto que ya no exista en ese departamento), se cae al
+// comportamiento original: el puesto de mayor jerarquía (puestoRepresentativo).
+export const VER_COMO_PUESTO_COOKIE = 'ver_como_puesto'
 
 export function esAdminTotal(perfil: Perfil | null): boolean {
   return perfil?.nivel_acceso === 'master' || perfil?.nivel_acceso === 'admin_software'
@@ -34,6 +38,8 @@ export interface ContextoUsuario {
   puedeSimular: boolean
   /** departamento simulado activo, o null si está en su propia vista */
   verComo: Departamento | null
+  /** puesto específico simulado dentro de `verComo` — null = el representativo (jefe) del área */
+  verComoPuesto: string | null
 }
 
 // Se simula con el puesto de mayor jerarquía del departamento elegido (el
@@ -63,19 +69,28 @@ export async function getContextoUsuario(): Promise<ContextoUsuario> {
   const puedeSimular = esAdminTotal(real)
 
   let verComo: Departamento | null = null
+  let verComoPuesto: string | null = null
   if (puedeSimular) {
     const raw = cookies().get(VER_COMO_COOKIE)?.value as Departamento | undefined
-    if (raw && DEPARTAMENTOS_OPERATIVOS.includes(raw)) verComo = raw
+    if (raw && DEPARTAMENTOS_OPERATIVOS.includes(raw)) {
+      verComo = raw
+      const rawPuesto = cookies().get(VER_COMO_PUESTO_COOKIE)?.value
+      if (rawPuesto && PUESTOS_POR_DEPARTAMENTO[raw].some(p => p.puesto === rawPuesto)) {
+        verComoPuesto = rawPuesto
+      }
+    }
   }
 
   let efectivo: Perfil | null = real
   if (verComo && real) {
-    const { puesto, nivel } = puestoRepresentativo(verComo)
+    const { puesto, nivel } = verComoPuesto
+      ? PUESTOS_POR_DEPARTAMENTO[verComo].find(p => p.puesto === verComoPuesto)!
+      : puestoRepresentativo(verComo)
     // Sin usuarioId: la simulación no debe heredar las excepciones
     // personales del admin real, solo lo que le tocaría al puesto.
     const permisos = await resolverPermisos(getSupabaseServer(), verComo, puesto)
     efectivo = { ...real, departamento: verComo, puesto, nivel_acceso: nivel, permisos }
   }
 
-  return { real, efectivo, puedeSimular, verComo }
+  return { real, efectivo, puedeSimular, verComo, verComoPuesto }
 }

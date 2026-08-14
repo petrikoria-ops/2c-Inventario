@@ -47,7 +47,7 @@ export default async function HomePage() {
   const sb = getSupabaseServer()
 
   // Contexto: perfil real + perfil efectivo (aplica "ver como" si está activo).
-  const { real: perfil, efectivo: perfilEfectivo, puedeSimular, verComo } = await getContextoUsuario()
+  const { real: perfil, efectivo: perfilEfectivo, puedeSimular, verComo, verComoPuesto } = await getContextoUsuario()
 
   const departamentoMostrado = perfilEfectivo?.departamento as Departamento | undefined
   const cfg = getDeptConfig(departamentoMostrado)
@@ -75,7 +75,7 @@ export default async function HomePage() {
   const saludo = primerNombre ? `${saludoSegunHora()}, ${primerNombre}` : saludoSegunHora()
   const rol = perfil
     ? verComo
-      ? `Viendo como ${NOMBRE_DEPARTAMENTO[verComo]} · ${perfil.nombre_completo}`
+      ? `Viendo como ${perfilEfectivo?.puesto ?? NOMBRE_DEPARTAMENTO[verComo]} (${NOMBRE_DEPARTAMENTO[verComo]}) · ${perfil.nombre_completo}`
       : `${perfil.nombre_completo} · ${perfil.puesto}`
     : null
 
@@ -96,7 +96,7 @@ export default async function HomePage() {
           así la barra lateral y todas las páginas se adaptan al área elegida. */}
       {puedeSimular && (
         <div className="mb-6 anim-fade-in">
-          <VerComoSelector verComo={verComo} variant="pills" />
+          <VerComoSelector verComo={verComo} verComoPuesto={verComoPuesto} variant="pills" />
         </div>
       )}
 

@@ -15,6 +15,7 @@ export default function AppShell({
   perfilReal = null,
   puedeSimular = false,
   verComo = null,
+  verComoPuesto = null,
   erroresPendientes = 0,
   directorioConectados = [],
 }: {
@@ -23,6 +24,7 @@ export default function AppShell({
   perfilReal?: Perfil | null
   puedeSimular?: boolean
   verComo?: Departamento | null
+  verComoPuesto?: string | null
   erroresPendientes?: number
   directorioConectados?: PerfilDirectorio[]
 }) {
@@ -36,6 +38,7 @@ export default function AppShell({
         perfil={perfil}
         puedeSimular={puedeSimular}
         verComo={verComo}
+        verComoPuesto={verComoPuesto}
         erroresPendientes={erroresPendientes}
         directorioConectados={directorioConectados}
       />

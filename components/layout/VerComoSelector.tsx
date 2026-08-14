@@ -3,36 +3,45 @@ import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { Eye, Check, Loader2 } from 'lucide-react'
 import { DEPARTAMENTOS_OPERATIVOS, NOMBRE_DEPARTAMENTO } from '@/lib/auth/deptInfo'
-import type { Departamento } from '@/lib/auth/permisos'
+import { PUESTOS_POR_DEPARTAMENTO, type Departamento } from '@/lib/auth/permisos'
 
 /**
  * Control "Ver como" — solo lo renderiza el layout/sidebar para master y
- * admin_software. Cambia el departamento simulado vía /api/ver-como (cookie)
- * y refresca para que la barra lateral, el inicio y la visibilidad se adapten.
+ * admin_software. Cambia el departamento (y opcionalmente el puesto
+ * específico dentro de él) simulado vía /api/ver-como (cookies) y refresca
+ * para que la barra lateral, el inicio y la visibilidad se adapten.
  *
- * - variant="pills"    → fila de botones (usado en el inicio)
+ * Sin elegir puesto, se simula el de mayor jerarquía del área (el jefe) —
+ * igual que el comportamiento original. Elegir un puesto puntual (ej.
+ * "Bodeguero" en vez de "Encargado de bodega") es lo que permite comparar
+ * cómo ve la app un operario contra cómo la ve su jefe, no solo departamento
+ * contra departamento.
+ *
+ * - variant="pills"    → fila de botones + selector de puesto (usado en el inicio)
  * - variant="sidebar"  → bloque compacto vertical (usado en la barra lateral)
  */
 export default function VerComoSelector({
   verComo,
+  verComoPuesto = null,
   variant = 'pills',
   onNavigate,
 }: {
   verComo: Departamento | null
+  verComoPuesto?: string | null
   variant?: 'pills' | 'sidebar'
   onNavigate?: () => void
 }) {
   const router = useRouter()
   const [pending, setPending] = useState<string | null>(null)
 
-  async function cambiar(depto: Departamento | 'real') {
+  async function cambiar(depto: Departamento | 'real', puesto: string | null = null) {
     if (pending) return
     setPending(depto)
     try {
       await fetch('/api/ver-como', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ depto: depto === 'real' ? null : depto }),
+        body: JSON.stringify({ depto: depto === 'real' ? null : depto, puesto }),
       })
       onNavigate?.()
       router.refresh()
@@ -41,6 +50,28 @@ export default function VerComoSelector({
       setTimeout(() => setPending(null), 400)
     }
   }
+
+  const puestoDefaultLabel = (d: Departamento) => {
+    const jefe = PUESTOS_POR_DEPARTAMENTO[d].find(p => p.nivel === 'administrador')
+    return jefe ? `— ${jefe.puesto} (jefatura, por defecto) —` : '— Jefatura del área (por defecto) —'
+  }
+
+  const SelectorPuesto = ({ className, style }: { className?: string; style?: React.CSSProperties }) => (
+    !verComo ? null : (
+      <select
+        value={verComoPuesto ?? ''}
+        disabled={!!pending}
+        onChange={e => cambiar(verComo, e.target.value || null)}
+        className={className}
+        style={style}
+      >
+        <option value="">{puestoDefaultLabel(verComo)}</option>
+        {PUESTOS_POR_DEPARTAMENTO[verComo].map(p => (
+          <option key={p.puesto} value={p.puesto}>{p.puesto}</option>
+        ))}
+      </select>
+    )
+  )
 
   if (variant === 'sidebar') {
     return (
@@ -62,6 +93,12 @@ export default function VerComoSelector({
           ))}
         </select>
         {verComo && (
+          <SelectorPuesto
+            className="w-full text-[12px] rounded-lg px-2.5 py-2 mt-1.5 cursor-pointer transition-colors"
+            style={{ background: '#262B31', color: '#E5E7EB', border: '1px solid #3A3F47' }}
+          />
+        )}
+        {verComo && (
           <button
             onClick={() => cambiar('real')}
             disabled={!!pending}
@@ -78,26 +115,34 @@ export default function VerComoSelector({
 
   // variant pills (inicio)
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <span className="text-xs font-semibold text-brand-n500 uppercase tracking-widest flex items-center gap-1.5">
-        <Eye size={13} /> Ver como:
-      </span>
-      <button
-        onClick={() => cambiar('real')}
-        className={`btn btn-sm ${!verComo ? 'btn-secondary' : 'btn-outline'}`}
-      >
-        {!verComo && <Check size={12} />} Mi vista
-      </button>
-      {DEPARTAMENTOS_OPERATIVOS.map(d => (
+    <div className="flex flex-col gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs font-semibold text-brand-n500 uppercase tracking-widest flex items-center gap-1.5">
+          <Eye size={13} /> Ver como:
+        </span>
         <button
-          key={d}
-          onClick={() => cambiar(d)}
-          className={`btn btn-sm ${verComo === d ? 'btn-secondary' : 'btn-outline'}`}
+          onClick={() => cambiar('real')}
+          className={`btn btn-sm ${!verComo ? 'btn-secondary' : 'btn-outline'}`}
         >
-          {pending === d ? <Loader2 size={12} className="animate-spin" /> : verComo === d ? <Check size={12} /> : null}
-          {NOMBRE_DEPARTAMENTO[d]}
+          {!verComo && <Check size={12} />} Mi vista
         </button>
-      ))}
+        {DEPARTAMENTOS_OPERATIVOS.map(d => (
+          <button
+            key={d}
+            onClick={() => cambiar(d)}
+            className={`btn btn-sm ${verComo === d ? 'btn-secondary' : 'btn-outline'}`}
+          >
+            {pending === d ? <Loader2 size={12} className="animate-spin" /> : verComo === d ? <Check size={12} /> : null}
+            {NOMBRE_DEPARTAMENTO[d]}
+          </button>
+        ))}
+      </div>
+      {verComo && (
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-brand-n500 pl-[1px]">Puesto dentro de {NOMBRE_DEPARTAMENTO[verComo]}:</span>
+          <SelectorPuesto className="select w-auto text-sm py-1.5" />
+        </div>
+      )}
     </div>
   )
 }
