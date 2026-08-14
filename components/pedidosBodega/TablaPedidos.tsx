@@ -1,6 +1,7 @@
 'use client'
 import { useState, useCallback } from 'react'
-import { PackageOpen, Check, X, Truck } from 'lucide-react'
+import Link from 'next/link'
+import { PackageOpen, Check, X, Truck, Printer } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { fechaHora, cn } from '@/lib/utils'
 import type { PedidoBodega, EstadoPedidoBodega } from '@/types'
@@ -36,6 +37,24 @@ export default function TablaPedidos({ initialData, puedeAprobar = false, puedeD
       if (!res.ok) throw new Error(data.error ?? 'Error al actualizar')
       setRows(prev => prev.map(r => r.id === id ? data : r))
       showToast(`Pedido ${data.numero}: ${ESTADO_BADGE[estado as EstadoPedidoBodega][1].toLowerCase()}`, 'success')
+    } catch (e: any) {
+      showToast(e.message, 'error')
+    } finally {
+      setBusyId(null)
+    }
+  }, [showToast])
+
+  // Arma el vale de despacho real (descuenta stock) — no un simple cambio
+  // de estado, ver app/api/pedidos-bodega/[id]/despachar/route.ts.
+  const despachar = useCallback(async (id: number) => {
+    if (!confirm('¿Ya cargaste los materiales al camión? Esto genera el vale de despacho y descuenta el stock.')) return
+    setBusyId(id)
+    try {
+      const res = await fetch(`/api/pedidos-bodega/${id}/despachar`, { method: 'POST' })
+      const data = await res.json()
+      if (!res.ok) throw new Error([data.error, ...(data.stockErrors ?? [])].filter(Boolean).join(' — '))
+      setRows(prev => prev.map(r => r.id === id ? data : r))
+      showToast(`Despachado — vale ${data.vale_numero} generado`, 'success')
     } catch (e: any) {
       showToast(e.message, 'error')
     } finally {
@@ -91,12 +110,17 @@ export default function TablaPedidos({ initialData, puedeAprobar = false, puedeD
                       </>
                     )}
                     {puedeDespachar && p.estado === 'aprobado' && (
-                      <button onClick={() => cambiarEstado(p.id, 'despachado')} disabled={busyId === p.id}
-                        className="btn btn-outline btn-sm" title="Marcar como despachado una vez armado y entregado">
-                        <Truck size={13} /> Marcar despachado
+                      <button onClick={() => despachar(p.id)} disabled={busyId === p.id}
+                        className="btn btn-outline btn-sm" title="Genera el vale de despacho y descuenta el stock">
+                        <Truck size={13} /> Despachar
                       </button>
                     )}
-                    {!((puedeAprobar && p.estado === 'pendiente') || (puedeDespachar && p.estado === 'aprobado')) && (
+                    {p.estado === 'despachado' && p.vale_despacho_id && (
+                      <Link href={`/salidas/${p.vale_despacho_id}/imprimir`} className="btn btn-ghost btn-sm">
+                        <Printer size={13} /> Ver vale
+                      </Link>
+                    )}
+                    {!((puedeAprobar && p.estado === 'pendiente') || (puedeDespachar && p.estado === 'aprobado') || (p.estado === 'despachado' && p.vale_despacho_id)) && (
                       <span className="text-xs text-brand-n500">—</span>
                     )}
                   </div>
