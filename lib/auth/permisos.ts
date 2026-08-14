@@ -20,12 +20,14 @@ export type Modulo =
   | 'proyectos' | 'trabajadores' | 'recursos_tecnicos' | 'checklist'
   | 'etiquetas' | 'agente' | 'metricas'
   | 'avance_obra' | 'verificacion_ric' | 'prevencion_riesgos' | 'pruebas_alimentadores'
+  | 'tableros'
 
 export const MODULOS: Modulo[] = [
   'materiales', 'herramientas', 'movimientos', 'proveedores', 'compras',
   'proyectos', 'trabajadores', 'recursos_tecnicos', 'checklist',
   'etiquetas', 'agente', 'metricas',
   'avance_obra', 'verificacion_ric', 'prevencion_riesgos', 'pruebas_alimentadores',
+  'tableros',
 ]
 
 // Etiquetas legibles — usadas en /admin/permisos (matriz por puesto y
@@ -47,6 +49,7 @@ export const NOMBRE_MODULO: Record<Modulo, string> = {
   verificacion_ric: 'Verificación RIC',
   prevencion_riesgos: 'Inspección de riesgos',
   pruebas_alimentadores: 'Test de Alimentadores',
+  tableros: 'Tableros',
 }
 
 // Las 3 acciones independientes que puede tener un usuario sobre un módulo.

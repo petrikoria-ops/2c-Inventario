@@ -9,7 +9,7 @@ import type { SupabaseClient } from '@supabase/supabase-js'
 import type { LucideIcon } from 'lucide-react'
 import {
   ArrowUpDown, PackageOpen, HardHat, ShoppingCart, ListChecks, ShieldCheck,
-  ClipboardList, CheckSquare, PackageX, Wrench, Search, ShieldAlert,
+  ClipboardList, CheckSquare, PackageX, Wrench, Search, ShieldAlert, LayoutGrid,
 } from 'lucide-react'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
@@ -75,6 +75,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const verRic           = puedeVerModulo(perfil, 'verificacion_ric')
   const verPrevencion    = puedeVerModulo(perfil, 'prevencion_riesgos')
   const verAlimentadores = puedeVerModulo(perfil, 'pruebas_alimentadores')
+  const verTableros      = puedeVerModulo(perfil, 'tableros')
   // Jefe de departamento o superior: ve tareas de su equipo (RLS ampliada
   // en migration_tareas_visibilidad_jefatura.sql), no solo las propias.
   const esJefe = !perfil || perfil.nivel_acceso === 'administrador' || perfil.nivel_acceso === 'master' || perfil.nivel_acceso === 'admin_software'
@@ -95,6 +96,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
     solNuevasHoy, solRecibidasHoy, solPend,
     avanceItemsHoy, proyectosNuevosHoy,
     ricHoy, prevHoy, prevAbiertas, alimHoy,
+    tableros,
     tareas,
   ] = await Promise.all([
     verMateriales
@@ -147,6 +149,13 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
       ? sb.from('pruebas_alimentadores').select('id,numero,estado,proyecto_nombre,actualizado_en').gte('actualizado_en', inicioHoy).order('actualizado_en', { ascending: false }).limit(10)
       : vacioLista,
 
+    // Si migration_tableros.sql todavía no corrió, esta tabla no existe —
+    // el resultado vuelve con error y se trata igual que "sin tableros"
+    // más abajo (mismo criterio que el resto de este archivo).
+    verTableros
+      ? sb.from('tableros').select('id,estado').neq('estado', 'terminado').limit(500)
+      : vacioLista,
+
     // tareas_asignadas tiene RLS propia: por defecto solo asignado_por/
     // asignado_a = auth.uid(), y además — desde
     // migration_tareas_visibilidad_jefatura.sql — las de todo el equipo
@@ -195,6 +204,11 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const prevAbiertasCount = prevAbiertas?.count ?? 0
   const alim = (alimHoy?.data ?? [])  as { id: number; numero: string; estado: string; proyecto_nombre: string | null; actualizado_en: string }[]
 
+  // ── Tableros (Taller / Oficina Técnica) ──────────────────────────
+  const tablerosData = (tableros?.data ?? []) as { id: number; estado: string }[]
+  const tablerosPorCubicar = tablerosData.filter(t => t.estado === 'por_cubicar').length
+  const tablerosPorArmar   = tablerosData.filter(t => t.estado === 'por_armar').length
+
   // ── Tareas asignadas (propias, vía RLS) ──────────────────────────
   const tareasData = (tareas?.data ?? []) as { id: number; titulo: string; estado: string; fecha_limite: string | null; creado_en: string; completado_en: string | null }[]
   const tareasCompletadasHoy = tareasData.filter(t => t.estado === 'completada' && t.completado_en && t.completado_en >= inicioHoy)
@@ -211,6 +225,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (verRic || verPrevencion || verAlimentadores) {
     indicadores.push({ key: 'ver', label: 'Verificaciones e inspecciones', value: ric.length + prev.length + alim.length, Icon: ShieldCheck })
   }
+  if (verTableros) indicadores.push({ key: 'tab', label: 'Tableros por cubicar/armar', value: tablerosPorCubicar + tablerosPorArmar, Icon: LayoutGrid })
 
   // ── Hechos del día ("Avances") ────────────────────────────────────
   const avances: HechoDia[] = []
@@ -311,6 +326,12 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (herRepCount > 0) {
     alertas.push({ id: 'her-rep', texto: `${herRepCount} herramienta${herRepCount !== 1 ? 's' : ''} en reparación`, nivel: 'atencion', href: '/herramientas', Icon: Wrench })
   }
+  if (tablerosPorCubicar > 0) {
+    alertas.push({ id: 'tab-cub', texto: `${tablerosPorCubicar} tablero${tablerosPorCubicar !== 1 ? 's' : ''} por cubicar`, nivel: 'atencion', href: '/proyectos', Icon: LayoutGrid })
+  }
+  if (tablerosPorArmar > 0) {
+    alertas.push({ id: 'tab-arm', texto: `${tablerosPorArmar} tablero${tablerosPorArmar !== 1 ? 's' : ''} por armar`, nivel: 'atencion', href: '/proyectos', Icon: LayoutGrid })
+  }
   if (solPendCount > 0) {
     alertas.push({ id: 'sol-pend', texto: `${solPendCount} solicitud${solPendCount !== 1 ? 'es' : ''} de compra pendiente${solPendCount !== 1 ? 's' : ''}`, nivel: 'atencion', href: '/solicitudes', Icon: ShoppingCart })
   }
@@ -340,6 +361,8 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   if (solPendCount > 0) agregarRecomendacion('r-sol-pend', `Dar seguimiento a ${solPendCount} solicitud${solPendCount !== 1 ? 'es' : ''} de compra pendiente${solPendCount !== 1 ? 's' : ''} con los proveedores.`)
   if (prevAbiertasCount > 0) agregarRecomendacion('r-prev', `Cerrar ${prevAbiertasCount} inspección${prevAbiertasCount !== 1 ? 'es' : ''} de prevención que sigue${prevAbiertasCount !== 1 ? 'n' : ''} en progreso.`)
   if (herRepCount > 0) agregarRecomendacion('r-her-rep', `Dar seguimiento a ${herRepCount} herramienta${herRepCount !== 1 ? 's' : ''} en reparación.`)
+  if (tablerosPorCubicar > 0) agregarRecomendacion('r-tab-cub', `Cubicar ${tablerosPorCubicar} tablero${tablerosPorCubicar !== 1 ? 's' : ''} para que Taller pueda empezar a armarlo${tablerosPorCubicar !== 1 ? 's' : ''}.`)
+  if (tablerosPorArmar > 0) agregarRecomendacion('r-tab-arm', `Avanzar el armado de ${tablerosPorArmar} tablero${tablerosPorArmar !== 1 ? 's' : ''} en cola.`)
 
   // ── Síntesis ejecutiva (3–5 líneas, solo con datos reales) ────────
   const huboActividad = avancesTop.length > 0

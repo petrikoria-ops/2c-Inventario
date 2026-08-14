@@ -4,22 +4,25 @@ import { ClipboardCheck, ShieldCheck, ArrowRight, Plus } from 'lucide-react'
 import { BadgeEstadoProy } from '@/components/ui/Badge'
 import TrabajadoresObra from './TrabajadoresObra'
 import AvanceObra from './AvanceObra'
-import type { Proyecto, ProyectoTrabajador, AvanceObra as AvanceObraType, AvanceObraItem, VerificacionRic } from '@/types'
+import TablerosObra from './TablerosObra'
+import type { Proyecto, ProyectoTrabajador, AvanceObra as AvanceObraType, AvanceObraItem, VerificacionRic, Tablero } from '@/types'
 
 interface Props {
   proyecto: Proyecto
   initialTrabajadores: ProyectoTrabajador[]
   initialAvance: (AvanceObraType & { avances_obra_items: AvanceObraItem[] }) | null
   verificaciones: Pick<VerificacionRic, 'id' | 'numero' | 'fecha_visita' | 'estado'>[]
+  initialTableros: Tablero[] | null
   editableProyecto: boolean
   editableAvance: boolean
   editableRic: boolean
+  editableTableros: boolean
   puedeEstructurarAvance: boolean
 }
 
 export default function ProyectoHub({
-  proyecto, initialTrabajadores, initialAvance, verificaciones,
-  editableProyecto, editableAvance, editableRic, puedeEstructurarAvance,
+  proyecto, initialTrabajadores, initialAvance, verificaciones, initialTableros,
+  editableProyecto, editableAvance, editableRic, editableTableros, puedeEstructurarAvance,
 }: Props) {
   return (
     <div className="p-5 w-full max-w-5xl mx-auto">
@@ -42,6 +45,10 @@ export default function ProyectoHub({
         <TrabajadoresObra proyectoId={proyecto.id} initialData={initialTrabajadores} editable={editableProyecto} />
 
         <AvanceObra proyectoId={proyecto.id} initialAvance={initialAvance} puedeEstructurar={puedeEstructurarAvance} editable={editableAvance} />
+
+        {initialTableros !== null && (
+          <TablerosObra proyectoId={proyecto.id} initialData={initialTableros} editable={editableTableros} />
+        )}
 
         {/* Verificaciones RIC */}
         <div className="panel">

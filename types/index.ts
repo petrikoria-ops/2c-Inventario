@@ -249,6 +249,39 @@ export interface AvanceObra {
   avances_obra_items?: AvanceObraItem[]
 }
 
+export type EstadoTablero = 'por_cubicar' | 'por_armar' | 'armado' | 'en_pruebas' | 'terminado'
+
+// Checklist RIC N°2 de armado de tablero — mismas 3 secciones/26 ítems fijos
+// que ya vivían solo en sesión en app/checklist/page.tsx (SECTIONS), ahora
+// persistidos por tablero. `checks` guarda el mismo shape que el estado de
+// React de esa página: clave `${seccion}_${índice}` → boolean.
+export interface TableroChecklist {
+  id: number
+  tablero_id: number
+  checks: Record<string, boolean>
+  tecnico: string | null
+  fecha_inspeccion: string | null
+  observaciones: string | null
+  completado_en: string | null
+  actualizado_en: string
+}
+
+export interface Tablero {
+  id: number
+  proyecto_id: number
+  nombre: string
+  amperaje: number | null
+  requiere_fat_sat: boolean
+  estado: EstadoTablero
+  creado_por: string | null
+  creado_por_nombre: string | null
+  creado_en: string
+  actualizado_en: string
+  // Joins
+  proyectos?: Pick<Proyecto, 'id' | 'ot' | 'nombre'> | null
+  tableros_checklist?: TableroChecklist | TableroChecklist[] | null
+}
+
 export interface VerificacionRicItem {
   id: number
   verificacion_id: number

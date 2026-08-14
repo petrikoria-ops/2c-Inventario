@@ -34,6 +34,18 @@ export function BadgeEstadoProy({ estado }: { estado: string }) {
   return <span className={cn('badge', cls)}>{label}</span>
 }
 
+export function BadgeEstadoTablero({ estado }: { estado: string }) {
+  const map: Record<string, [string, string]> = {
+    por_cubicar: ['badge-gray',   'Por cubicar'],
+    por_armar:   ['badge-yellow', 'Por armar'],
+    armado:      ['badge-blue',   'Armado'],
+    en_pruebas:  ['badge-orange', 'En pruebas'],
+    terminado:   ['badge-green',  'Terminado'],
+  }
+  const [cls, label] = map[estado] ?? ['badge-gray', estado]
+  return <span className={cn('badge', cls)}>{label}</span>
+}
+
 export function BadgeStock({ actual, minimo }: { actual: number; minimo: number }) {
   if (actual <= 0) return <span className="badge badge-red">Sin stock</span>
   if (estaBajoMinimo(actual, minimo)) return <span className="badge badge-yellow">Bajo mínimo</span>
