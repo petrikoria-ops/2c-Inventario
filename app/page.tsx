@@ -2,7 +2,7 @@ import Link from 'next/link'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
-import { puedeVer, type Departamento } from '@/lib/auth/permisos.server'
+import { puedeVer, puedeVerConectados, type Departamento } from '@/lib/auth/permisos.server'
 import { getContextoUsuario, NOMBRE_DEPARTAMENTO } from '@/lib/auth/verComo'
 import { getDeptConfig } from '@/lib/departamentos/config'
 import VerComoSelector from '@/components/layout/VerComoSelector'
@@ -90,9 +90,10 @@ export default async function HomePage() {
         fecha={fecha}
       />
 
-      {/* Quién está conectado ahora + mensajería — disponible para cualquier
-          perfil con sesión, sin importar nivel_acceso (ver docs del plan). */}
-      {perfil && <PanelConectados />}
+      {/* Quién está conectado ahora — solo jefatura desde Visitador de obra
+          hacia arriba (administrador/master/admin_software). El resto de la
+          empresa sigue pudiendo mandar y recibir mensajes con normalidad. */}
+      {perfil && puedeVerConectados(perfil) && <PanelConectados />}
 
       {/* Selector "Ver como" — solo admin_software/master. Persiste vía cookie,
           así la barra lateral y todas las páginas se adaptan al área elegida. */}

@@ -36,7 +36,7 @@ export default function PanelPermisosPuesto({ initialData }: { initialData: Fila
   const [guardando, setGuardando] = useState<string | null>(null)
   const { showToast } = useToast()
 
-  // 'Dueño', 'Jefe directivo' y 'Administrador de software' bypasean todo
+  // 'Gerente', 'Jefe directivo' y 'Administrador de software' bypasean todo
   // vía nivel_acceso (master/admin_software) — no tienen filas y mostrar
   // sus casillas vacías confundiría más de lo que ayuda.
   const departamentos = (Object.keys(PUESTOS_POR_DEPARTAMENTO) as Departamento[])

@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
-  const { conectados } = usePresence()
+  const { conectados, puedeVerConectados } = usePresence()
   const searchParams = useSearchParams()
   const [seleccionado, setSeleccionado] = useState<string | null>(searchParams.get('con'))
   const [busqueda, setBusqueda] = useState('')
@@ -64,7 +64,9 @@ export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
                   style={{ borderColor: '#EDEFF2' }}
                   onClick={() => setSeleccionado(c.persona.id)}
                 >
-                  <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: conectados.has(c.persona.id) ? '#059669' : '#C0C4CC' }} />
+                  {puedeVerConectados && (
+                    <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: conectados.has(c.persona.id) ? '#059669' : '#C0C4CC' }} />
+                  )}
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center justify-between gap-2">
                       <span className="text-sm font-medium text-slate-800 truncate">{c.persona.nombre_completo}</span>
@@ -81,7 +83,9 @@ export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
                     <button key={p.id} className="w-full text-left flex items-center gap-2.5 px-3 py-2.5 hover:bg-slate-50 transition-colors"
                       onClick={() => { setSeleccionado(p.id); setBusqueda('') }}
                     >
-                      <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: conectados.has(p.id) ? '#059669' : '#C0C4CC' }} />
+                      {puedeVerConectados && (
+                        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: conectados.has(p.id) ? '#059669' : '#C0C4CC' }} />
+                      )}
                       <div className="min-w-0 flex-1">
                         <div className="text-sm font-medium text-slate-800 truncate">{p.nombre_completo}</div>
                         <div className="text-[11px] text-brand-n500 truncate">{p.puesto}</div>

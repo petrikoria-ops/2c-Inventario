@@ -21,7 +21,7 @@ export default function HiloConversacion({ contacto, miId }: Props) {
   const [texto, setTexto] = useState('')
   const [enviando, setEnviando] = useState(false)
   const finRef = useRef<HTMLDivElement>(null)
-  const { marcarLeidosLocal, conectados } = usePresence()
+  const { marcarLeidosLocal, conectados, puedeVerConectados } = usePresence()
   const { showToast } = useToast()
 
   const marcarLeidos = () => {
@@ -97,11 +97,14 @@ export default function HiloConversacion({ contacto, miId }: Props) {
   return (
     <div className="flex flex-col h-full min-h-0">
       <div className="flex items-center gap-2.5 px-4 py-3 border-b flex-shrink-0" style={{ borderColor: '#EDEFF2' }}>
-        <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: enLinea ? '#059669' : '#C0C4CC' }} />
+        {puedeVerConectados && (
+          <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: enLinea ? '#059669' : '#C0C4CC' }} />
+        )}
         <div className="min-w-0">
           <div className="text-sm font-semibold text-slate-800 truncate">{contacto.nombre_completo}</div>
           <div className="text-[11px] text-brand-n500 truncate">
-            {contacto.puesto} · {NOMBRE_DEPARTAMENTO[contacto.departamento] ?? contacto.departamento} · {enLinea ? 'En línea' : 'Desconectado'}
+            {contacto.puesto} · {NOMBRE_DEPARTAMENTO[contacto.departamento] ?? contacto.departamento}
+            {puedeVerConectados && ` · ${enLinea ? 'En línea' : 'Desconectado'}`}
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ Lee también el `CLAUDE.md` raíz antes de trabajar aquí.
 
 | Puesto | nivel_acceso |
 |---|---|
-| Dueño | `master` (acceso total) — Gerencia |
+| Gerente *(antes "Dueño")* | `master` (acceso total) — Gerencia |
 | Jefe directivo | `master` (acceso total) — Gerencia |
 | Jefe ejecutivo | `administrador` |
 | Supervisor eléctrico | `modificador` — **Supervisor de obra** |

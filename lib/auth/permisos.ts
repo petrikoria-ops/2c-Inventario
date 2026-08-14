@@ -114,7 +114,7 @@ export const PUESTOS_POR_DEPARTAMENTO: Record<Departamento, { puesto: string; ni
     { puesto: 'Practicante',                  nivel: 'maestro' },
   ],
   directiva: [
-    { puesto: 'Dueño',               nivel: 'master' },
+    { puesto: 'Gerente',             nivel: 'master' },
     { puesto: 'Jefe directivo',      nivel: 'master' },
     { puesto: 'Jefe ejecutivo',      nivel: 'administrador' },
     { puesto: 'Supervisor eléctrico', nivel: 'modificador' },
@@ -188,4 +188,15 @@ export function puedeMarcarAvance(perfil: Perfil | null): boolean {
   if (!perfil) return false
   if (puedeModificar(perfil, 'avance_obra')) return true
   return PUESTOS_MARCAN_AVANCE.includes(perfil.puesto)
+}
+
+// Quién puede VER el estado de conexión de otras personas (panel "Quién
+// está conectado" del Inicio + punto verde/gris en mensajería) — jefatura
+// desde Visitador de obra hacia arriba (administrador/master/admin_software).
+// El resto de la empresa sigue pudiendo mandar y recibir mensajes con
+// normalidad — solo no ve el directorio de conexión, que se sintió invasivo
+// dejarlo abierto a todo nivel.
+export function puedeVerConectados(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  return perfil.nivel_acceso === 'administrador' || NIVELES_TOTALES.includes(perfil.nivel_acceso)
 }

@@ -1,7 +1,7 @@
 'use client'
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
-import type { Perfil } from '@/lib/auth/permisos'
+import { puedeVerConectados as calculaPuedeVerConectados, type Perfil } from '@/lib/auth/permisos'
 
 export interface ContactoChat {
   id: string
@@ -10,6 +10,8 @@ export interface ContactoChat {
   departamento: string
 }
 
+const EMPTY_SET: Set<string> = new Set()
+
 interface PresenceCtx {
   conectados: Set<string>
   noLeidos: number
@@ -17,6 +19,10 @@ interface PresenceCtx {
   abrirChatCon: (persona: ContactoChat) => void
   cerrarChat: () => void
   marcarLeidosLocal: (cantidad: number) => void
+  // Jefatura desde Visitador de obra hacia arriba — el resto de la empresa
+  // sigue mandando/recibiendo mensajes, pero no ve el estado de conexión de
+  // nadie (ni el panel del Inicio, ni el punto verde/gris en el chat).
+  puedeVerConectados: boolean
 }
 
 const Ctx = createContext<PresenceCtx>({
@@ -26,6 +32,7 @@ const Ctx = createContext<PresenceCtx>({
   abrirChatCon: () => {},
   cerrarChat: () => {},
   marcarLeidosLocal: () => {},
+  puedeVerConectados: false,
 })
 
 // Un solo canal de Presence + una sola suscripción a postgres_changes para
@@ -81,8 +88,18 @@ export function PresenceProvider({ perfil, noLeidosInicial, children }: {
   const cerrarChat = useCallback(() => setChatAbiertoCon(null), [])
   const marcarLeidosLocal = useCallback((cantidad: number) => setNoLeidos(n => Math.max(0, n - cantidad)), [])
 
+  // Se sigue rastreando/transmitiendo la presencia de todo el mundo (para
+  // que la jefatura vea conectado a un Maestro), pero solo se EXPONE el
+  // set de conectados a quien puede verlo — así un componente que se
+  // olvide de chequear puedeVerConectados nunca termina mostrando a nadie
+  // como "en línea" igual.
+  const puedeVerConectados = calculaPuedeVerConectados(perfil)
+  const conectadosVisibles = puedeVerConectados ? conectados : EMPTY_SET
+
   return (
-    <Ctx.Provider value={{ conectados, noLeidos, chatAbiertoCon, abrirChatCon, cerrarChat, marcarLeidosLocal }}>
+    <Ctx.Provider value={{
+      conectados: conectadosVisibles, noLeidos, chatAbiertoCon, abrirChatCon, cerrarChat, marcarLeidosLocal, puedeVerConectados,
+    }}>
       {children}
     </Ctx.Provider>
   )

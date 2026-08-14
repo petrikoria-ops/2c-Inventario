@@ -46,7 +46,7 @@ Antes cualquier usuario autenticado tenía acceso total. Desde la migración `su
 | Oficina Técnica | `docs/departamentos/oficina-tecnica.md` | Jefe, Proyectista/ingeniero, Ayudante de jefe, Técnico junior |
 | Prevención | `docs/departamentos/prevencion.md` | Prevencionista |
 | Recursos Humanos | `docs/departamentos/rrhh.md` | Jefe, Asistente, Practicante |
-| Directiva | `docs/departamentos/directiva.md` | Dueño, Jefe directivo, Jefe ejecutivo, Supervisor eléctrico, Visitador de obra |
+| Directiva | `docs/departamentos/directiva.md` | Gerente, Jefe directivo, Jefe ejecutivo, Supervisor eléctrico, Visitador de obra |
 | Administración de software | `docs/departamentos/admin-software.md` | Administrador de software (gestiona usuarios/roles, no es un departamento operativo) |
 
 **Enrolamiento**: `/solicitar-acceso` (público) → genera código y avisa por correo al `ADMIN_SOFTWARE_EMAIL` → el Administrador de software lo aprueba en `/admin/solicitudes` (logueado + código correcto) → se crea el `perfil` y se invita al usuario por correo (Supabase Admin API, `lib/supabase/admin.ts`). Usuarios sin perfil quedan confinados a `/pendiente-aprobacion` por el middleware.

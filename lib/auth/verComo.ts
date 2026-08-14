@@ -8,7 +8,7 @@ import { DEPARTAMENTOS_OPERATIVOS } from './deptInfo'
 // directamente desde './deptInfo', que no arrastra next/headers).
 export { DEPARTAMENTOS_OPERATIVOS, NOMBRE_DEPARTAMENTO } from './deptInfo'
 
-// "Ver como": el Dueño (master) y el Administrador de software pueden navegar
+// "Ver como": el Gerente (master) y el Administrador de software pueden navegar
 // TODA la app como la vería un usuario de otro departamento, para evaluar la
 // experiencia real de cada área. La elección se guarda en una cookie para que
 // persista al cambiar de página (la barra lateral y el inicio se adaptan).

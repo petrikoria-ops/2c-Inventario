@@ -10,7 +10,7 @@ empresa y vive acá.
 
 | Escalón | nivel_acceso | Quién |
 |---|---|---|
-| Gerencia | `master` | Dueño, Jefe directivo — acceso total, bypasea todo (`NIVELES_TOTALES`) |
+| Gerencia | `master` | Gerente *(antes "Dueño")*, Jefe directivo — acceso total, bypasea todo (`NIVELES_TOTALES`) |
 | Jefe de departamento / Visitador de obra | `administrador` | Encargado de bodega, Encargado de taller, Jefe de oficina técnica, Prevencionista, Jefe de Recursos Humanos, Jefe ejecutivo, Visitador de obra |
 | Supervisor | `modificador` | Supervisor eléctrico, Maestro Mayor, Ayudante de encargado (bodega/taller), Proyectista / ingeniero, Ayudante de jefe de oficina técnica, Asistente de Recursos Humanos, Chofer-bodeguero |
 | Maestro / Ayudante | `maestro` | Maestro 1, Maestro 2, Ayudante de maestro, Ayudante de bodega, Bodeguero, Técnico junior / ingeniero junior, Practicante |
@@ -70,3 +70,14 @@ Esta misma noción de orden es la que reutilizará una futura función
 tareas/inspecciones) para decidir "quién puede asignarle una tarea a
 quién" — generalmente, alguien solo puede asignar a otra persona en su
 mismo escalón o por debajo.
+
+## Quién ve "quién está conectado"
+
+`puedeVerConectados(perfil)` (`lib/auth/permisos.ts`) — jefatura desde
+Visitador de obra hacia arriba (`administrador`/`master`/`admin_software`).
+Gatea el panel "Quién está conectado" del Inicio y el punto verde/gris de
+la mensajería (`contexts/PresenceContext.tsx`, `components/mensajeria/`).
+El resto de la empresa (Supervisor, Maestro, Ayudante) sigue pudiendo
+mandar y recibir mensajes con total normalidad — solo no ve el estado de
+conexión de nadie, porque tenerlo abierto a todo nivel se sintió invasivo
+para quien hace el trabajo de terreno.
