@@ -6,10 +6,13 @@ Lee también el `CLAUDE.md` raíz (stack, arquitectura, patrones generales) ante
 
 | Puesto | nivel_acceso |
 |---|---|
-| Ayudante de bodega | `visualizacion` |
-| Chofer-bodeguero | `operador` |
-| Encargado de bodega | `encargado` |
-| Ayudante de encargado | `operador` |
+| Ayudante de bodega | `maestro` |
+| Bodeguero | `maestro` |
+| Chofer-bodeguero | `modificador` |
+| Encargado de bodega | `administrador` — Jefe de departamento |
+| Ayudante de encargado | `modificador` |
+
+Ver `docs/departamentos/piramide.md` para la pirámide de roles cross-departamento (qué significa cada `nivel_acceso`).
 
 ## Módulos visibles
 

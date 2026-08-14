@@ -16,8 +16,12 @@ const DEPARTAMENTOS = Object.keys(PUESTOS_POR_DEPARTAMENTO) as Departamento[]
 export default function PanelUsuarios({ initialData, miId, miNivel }: { initialData: Perfil[]; miId: string; miNivel: NivelAcceso }) {
   const [usuarios, setUsuarios] = useState(initialData)
   const [editando, setEditando] = useState<string | null>(null)
-  const [form, setForm] = useState<{ departamento: Departamento; puesto: string; nivel_acceso: NivelAcceso }>({
-    departamento: 'bodega', puesto: '', nivel_acceso: 'visualizacion',
+  const [form, setForm] = useState<{
+    departamento: Departamento; puesto: string; nivel_acceso: NivelAcceso
+    sec_licencia_numero: string; sec_licencia_clase: string; sec_licencia_vencimiento: string
+  }>({
+    departamento: 'bodega', puesto: '', nivel_acceso: 'maestro',
+    sec_licencia_numero: '', sec_licencia_clase: '', sec_licencia_vencimiento: '',
   })
   const [guardando, setGuardando] = useState(false)
   const { showToast } = useToast()
@@ -25,19 +29,32 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
 
   const abrir = (u: Perfil) => {
     setEditando(u.id)
-    setForm({ departamento: u.departamento, puesto: u.puesto, nivel_acceso: u.nivel_acceso })
+    setForm({
+      departamento: u.departamento, puesto: u.puesto, nivel_acceso: u.nivel_acceso,
+      sec_licencia_numero: u.sec_licencia_numero ?? '',
+      sec_licencia_clase: u.sec_licencia_clase ?? '',
+      sec_licencia_vencimiento: u.sec_licencia_vencimiento ?? '',
+    })
   }
+
+  const requiereLicenciaSec = form.nivel_acceso === 'administrador' || form.nivel_acceso === 'modificador'
 
   const guardar = async (id: string) => {
     setGuardando(true)
     try {
+      const payload = {
+        departamento: form.departamento, puesto: form.puesto, nivel_acceso: form.nivel_acceso,
+        sec_licencia_numero: requiereLicenciaSec ? (form.sec_licencia_numero.trim() || null) : null,
+        sec_licencia_clase: requiereLicenciaSec ? (form.sec_licencia_clase.trim() || null) : null,
+        sec_licencia_vencimiento: requiereLicenciaSec ? (form.sec_licencia_vencimiento || null) : null,
+      }
       const res = await fetch(`/api/admin/usuarios/${id}`, {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify(payload),
       })
       if (!res.ok) throw new Error((await res.json()).error ?? 'No se pudo actualizar')
-      setUsuarios(prev => prev.map(u => u.id === id ? { ...u, ...form } : u))
+      setUsuarios(prev => prev.map(u => u.id === id ? { ...u, ...payload } : u))
       setEditando(null)
       showToast('Usuario actualizado', 'success')
       router.refresh()
@@ -119,16 +136,36 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
                     disabled={u.id === miId}
                     title={u.id === miId ? 'No puedes cambiar tu propio nivel de acceso.' : undefined}
                     onChange={e => setForm(f => ({ ...f, nivel_acceso: e.target.value as NivelAcceso }))}>
-                    <option value="visualizacion">Visualización</option>
-                    <option value="operador">Operador</option>
-                    <option value="encargado">Encargado</option>
-                    <option value="jefe_departamento">Jefe de departamento</option>
-                    <option value="directiva">Directiva</option>
+                    <option value="maestro">Maestro</option>
+                    <option value="modificador">Modificador (Supervisor)</option>
+                    <option value="administrador">Administrador (Jefe de departamento / Visitador)</option>
                     <option value="admin_software">Administrador de software</option>
                     {miNivel === 'master' && <option value="master">Master</option>}
                   </select>
                   {u.id === miId && <p className="text-xs text-brand-n500 mt-1">No puedes cambiar tu propio nivel.</p>}
                 </div>
+                {requiereLicenciaSec && (
+                  <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t" style={{ borderColor: '#E8EAED' }}>
+                    <div className="sm:col-span-3 text-xs font-medium text-brand-n500">Licencia SEC</div>
+                    <div>
+                      <label className="label" htmlFor={`sec-numero-${u.id}`}>N° de licencia</label>
+                      <input id={`sec-numero-${u.id}`} className="input" value={form.sec_licencia_numero}
+                        onChange={e => setForm(f => ({ ...f, sec_licencia_numero: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor={`sec-clase-${u.id}`}>Clase</label>
+                      <input id={`sec-clase-${u.id}`} className="input" placeholder="Ej: A, B, C, D"
+                        value={form.sec_licencia_clase}
+                        onChange={e => setForm(f => ({ ...f, sec_licencia_clase: e.target.value }))} />
+                    </div>
+                    <div>
+                      <label className="label" htmlFor={`sec-vencimiento-${u.id}`}>Vencimiento</label>
+                      <input id={`sec-vencimiento-${u.id}`} type="date" className="input"
+                        value={form.sec_licencia_vencimiento}
+                        onChange={e => setForm(f => ({ ...f, sec_licencia_vencimiento: e.target.value }))} />
+                    </div>
+                  </div>
+                )}
                 <div className="sm:col-span-3 flex gap-2">
                   <button disabled={guardando || !form.puesto} className="btn btn-success btn-sm" onClick={() => guardar(u.id)}>
                     <Check size={12} /> Guardar

@@ -6,7 +6,9 @@ Lee también el `CLAUDE.md` raíz antes de trabajar aquí.
 
 | Puesto | nivel_acceso |
 |---|---|
-| Prevencionista | `operador` |
+| Prevencionista | `administrador` — es el único puesto de Prevención, así que hace de Jefe de departamento |
+
+Ver `docs/departamentos/piramide.md` para la pirámide de roles cross-departamento (qué significa cada `nivel_acceso`).
 
 ## Módulos visibles
 

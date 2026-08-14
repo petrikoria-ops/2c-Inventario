@@ -9,14 +9,14 @@ import type { SolicitudEnrolamiento } from '@/types'
 
 function nivelSugerido(departamento: string, puesto: string): NivelAcceso {
   const lista = PUESTOS_POR_DEPARTAMENTO[departamento as Departamento] ?? []
-  return lista.find(p => p.puesto === puesto)?.nivel ?? 'visualizacion'
+  return lista.find(p => p.puesto === puesto)?.nivel ?? 'maestro'
 }
 
 export default function PanelSolicitudes({ initialData }: { initialData: SolicitudEnrolamiento[] }) {
   const [solicitudes, setSolicitudes] = useState(initialData)
   const [abierta, setAbierta] = useState<number | null>(null)
   const [codigo, setCodigo] = useState('')
-  const [nivel, setNivel] = useState<NivelAcceso>('visualizacion')
+  const [nivel, setNivel] = useState<NivelAcceso>('maestro')
   const [procesando, setProcesando] = useState(false)
   const { showToast } = useToast()
   const router = useRouter()
@@ -88,11 +88,9 @@ export default function PanelSolicitudes({ initialData }: { initialData: Solicit
                     <div>
                       <label className="label" htmlFor={`nivel-${s.id}`}>Nivel de acceso a asignar</label>
                       <select id={`nivel-${s.id}`} className="select" value={nivel} onChange={e => setNivel(e.target.value as NivelAcceso)}>
-                        <option value="visualizacion">Visualización (solo lectura)</option>
-                        <option value="operador">Operador</option>
-                        <option value="encargado">Encargado</option>
-                        <option value="jefe_departamento">Jefe de departamento</option>
-                        <option value="directiva">Directiva</option>
+                        <option value="maestro">Maestro</option>
+                        <option value="modificador">Modificador (Supervisor)</option>
+                        <option value="administrador">Administrador (Jefe de departamento / Visitador)</option>
                         <option value="admin_software">Administrador de software</option>
                         <option value="master">Master (acceso total)</option>
                       </select>

@@ -4,7 +4,7 @@ import { requireAdmin } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
-const CAMPOS = ['ver', 'crear', 'modificar'] as const
+const CAMPOS = ['ver', 'crear', 'modificar', 'eliminar'] as const
 
 // Upsert de una sola celda de la matriz — el resto de columnas del row
 // (si ya existe) no se tocan; PostgREST solo actualiza las columnas

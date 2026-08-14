@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireModificar } from '@/lib/auth/permisos.server'
+import { requireModificar, requireEliminar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,7 +16,7 @@ export async function PUT(req: NextRequest, { params }: Ctx) {
 }
 
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const denegado = await requireModificar('herramientas')
+  const denegado = await requireEliminar('herramientas')
   if (denegado) return denegado
   const sb = getSupabaseServer()
   const { error } = await sb.from('herramientas').update({ activo: false }).eq('id', params.id)

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { puedeCrear, puedeModificar, type Departamento, type Modulo, type Perfil, type MapaPermisos } from './permisos'
+import { puedeCrear, puedeModificar, puedeEliminar, type Departamento, type Modulo, type Perfil, type MapaPermisos } from './permisos'
 
 export * from './permisos'
 
@@ -16,26 +16,27 @@ export async function resolverPermisos(
 
   const { data: filas } = await sb
     .from('permisos_puesto')
-    .select('modulo,ver,crear,modificar')
+    .select('modulo,ver,crear,modificar,eliminar')
     .eq('departamento', departamento)
     .eq('puesto', puesto)
 
   filas?.forEach(f => {
-    mapa[f.modulo as Modulo] = { ver: f.ver, crear: f.crear, modificar: f.modificar }
+    mapa[f.modulo as Modulo] = { ver: f.ver, crear: f.crear, modificar: f.modificar, eliminar: f.eliminar }
   })
 
   if (usuarioId) {
     const { data: overrides } = await sb
       .from('permisos_usuario_overrides')
-      .select('modulo,ver,crear,modificar')
+      .select('modulo,ver,crear,modificar,eliminar')
       .eq('usuario_id', usuarioId)
 
     overrides?.forEach(o => {
-      const base = mapa[o.modulo as Modulo] ?? { ver: false, crear: false, modificar: false }
+      const base = mapa[o.modulo as Modulo] ?? { ver: false, crear: false, modificar: false, eliminar: false }
       mapa[o.modulo as Modulo] = {
         ver: o.ver ?? base.ver,
         crear: o.crear ?? base.crear,
         modificar: o.modificar ?? base.modificar,
+        eliminar: o.eliminar ?? base.eliminar,
       }
     })
   }
@@ -77,6 +78,19 @@ export async function requireModificar(modulo: Modulo): Promise<NextResponse | n
   const perfil = await getPerfil()
   if (!perfil || !puedeModificar(perfil, modulo)) {
     return NextResponse.json({ error: 'Tu perfil no tiene permiso para modificar este módulo.' }, { status: 403 })
+  }
+  return null
+}
+
+// Para las rutas DELETE que deben exigir el permiso "eliminar" separado de
+// "modificar" (Supervisor puede modificar/agregar sin poder borrar, salvo
+// en los módulos donde el dueño le habilite `eliminar` desde /admin/permisos):
+//   const denegado = await requireEliminar('materiales')
+//   if (denegado) return denegado
+export async function requireEliminar(modulo: Modulo): Promise<NextResponse | null> {
+  const perfil = await getPerfil()
+  if (!perfil || !puedeEliminar(perfil, modulo)) {
+    return NextResponse.json({ error: 'Tu perfil no tiene permiso para eliminar en este módulo.' }, { status: 403 })
   }
   return null
 }

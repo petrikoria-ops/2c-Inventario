@@ -35,18 +35,18 @@ GROQ_API_KEY=                 # opcional — el agente IA funciona sin él
 
 Antes cualquier usuario autenticado tenía acceso total. Desde la migración `supabase/migration_roles_y_perfiles.sql` existe la tabla `perfiles` (departamento + puesto + nivel_acceso por usuario) y `lib/auth/permisos.ts` (tipos, `getPerfil()`, `puedeVer()`/`puedeEditar()`, mapa de módulos por departamento).
 
-**Niveles de acceso** (de menor a mayor): `visualizacion` (solo lectura) → `operador` → `encargado` → `jefe_departamento` → `directiva` (lectura total cross-depto) → `admin_software` / `master` (acceso total + el segundo además gestiona usuarios).
+**Niveles de acceso** (pirámide de roles cross-departamento, de menor a mayor): `maestro` (Maestro/Ayudante) → `modificador` (Supervisor) → `administrador` (Jefe de departamento / Visitador de obra) → `master` (Gerencia, acceso total) — más `admin_software`, aparte de la pirámide (gestiona usuarios). `administrador`/`modificador`/`maestro` NO son bypass de código, a diferencia de `master`/`admin_software` — su acceso real sigue viniendo de `permisos_puesto`/`permisos_usuario_overrides`. Ver `docs/departamentos/piramide.md`.
 
 **Docs por departamento** (léelos solo si vas a trabajar ahí):
 
 | Departamento | Doc | Roles |
 |---|---|---|
-| Bodega | `docs/departamentos/bodega.md` | Ayudante, Chofer-bodeguero, Encargado, Ayudante de encargado |
-| Taller | `docs/departamentos/taller.md` | Ayudante de maestro, Maestro tablerista, Encargado, Ayudante de encargado |
+| Bodega | `docs/departamentos/bodega.md` | Ayudante, Bodeguero, Chofer-bodeguero, Encargado, Ayudante de encargado |
+| Taller | `docs/departamentos/taller.md` | Ayudante de maestro, Maestro 1/2, Maestro Mayor, Encargado, Ayudante de encargado |
 | Oficina Técnica | `docs/departamentos/oficina-tecnica.md` | Jefe, Proyectista/ingeniero, Ayudante de jefe, Técnico junior |
 | Prevención | `docs/departamentos/prevencion.md` | Prevencionista |
 | Recursos Humanos | `docs/departamentos/rrhh.md` | Jefe, Asistente, Practicante |
-| Directiva | `docs/departamentos/directiva.md` | Dueño, Jefe directivo, Jefe ejecutivo, Supervisor eléctrico, Ingeniero visitante |
+| Directiva | `docs/departamentos/directiva.md` | Dueño, Jefe directivo, Jefe ejecutivo, Supervisor eléctrico, Visitador de obra |
 | Administración de software | `docs/departamentos/admin-software.md` | Administrador de software (gestiona usuarios/roles, no es un departamento operativo) |
 
 **Enrolamiento**: `/solicitar-acceso` (público) → genera código y avisa por correo al `ADMIN_SOFTWARE_EMAIL` → el Administrador de software lo aprueba en `/admin/solicitudes` (logueado + código correcto) → se crea el `perfil` y se invita al usuario por correo (Supabase Admin API, `lib/supabase/admin.ts`). Usuarios sin perfil quedan confinados a `/pendiente-aprobacion` por el middleware.
@@ -114,7 +114,7 @@ La home (`app/page.tsx`) ya **no** es una grilla genérica igual para todos: arm
 `master` y `admin_software` pueden navegar TODA la app como la vería cada departamento, para evaluar la experiencia real de cada área. Se eligen desde el selector "Ver como" (barra lateral en cualquier página + pills en el inicio).
 
 - **Persistencia**: cookie `ver_como` (no `?depto=`). La fija/borra `POST /api/ver-como` (solo admin). Así la barra lateral, el inicio y la visibilidad se adaptan en TODA la navegación, no solo en el inicio.
-- **Resolución**: `lib/auth/verComo.ts` → `getContextoUsuario()` devuelve `{ real, efectivo, puedeSimular, verComo }`. El `efectivo` simula `departamento = verComo` y `nivel_acceso = 'jefe_departamento'` (el alcance máximo del área). `layout.tsx` pasa `efectivo` a `AppShell`/`Sidebar`; las páginas que se adaptan usan `getContextoUsuario()`.
+- **Resolución**: `lib/auth/verComo.ts` → `getContextoUsuario()` devuelve `{ real, efectivo, puedeSimular, verComo }`. El `efectivo` simula el puesto `nivel_acceso = 'administrador'` de ese departamento (el alcance máximo del área — Jefe de departamento / Visitador de obra). `layout.tsx` pasa `efectivo` a `AppShell`/`Sidebar`; las páginas que se adaptan usan `getContextoUsuario()`.
 - **Seguridad**: la simulación SOLO cambia lo que se ve. Las APIs siguen validando con el perfil REAL vía `requireEditable()` — un admin simulando "bodega" no pierde su poder de edición.
 - **Constantes client-safe**: `DEPARTAMENTOS_OPERATIVOS` y `NOMBRE_DEPARTAMENTO` viven en `lib/auth/deptInfo.ts` (sin `next/headers`), para poder importarlas desde el Client Component `VerComoSelector`. `verComo.ts` (servidor) las re-exporta.
 

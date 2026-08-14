@@ -1,18 +1,25 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireModificar, getPerfil } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeModificar, puedeMarcarAvance, requireModificar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
 type Ctx = { params: { itemId: string } }
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
-  const denegado = await requireModificar('avance_obra')
-  if (denegado) return denegado
-
-  const sb = getSupabaseServer()
   const perfil = await getPerfil()
   const body = await req.json()
+
+  // Tildar `completado` es "marcar" (Maestro de terreno incluido); tocar
+  // cualquier otro campo es "estructurar" el plan (etapa/descripcion/fecha),
+  // reservado a quien puede modificar avance_obra de verdad.
+  const soloCompletado = Object.keys(body).length > 0 && Object.keys(body).every(k => k === 'completado')
+  const autorizado = soloCompletado ? puedeMarcarAvance(perfil) : (!!perfil && puedeModificar(perfil, 'avance_obra'))
+  if (!autorizado) {
+    return NextResponse.json({ error: 'Tu perfil no tiene permiso para modificar el avance de esta obra.' }, { status: 403 })
+  }
+
+  const sb = getSupabaseServer()
   const patch: Record<string, unknown> = {}
 
   if (typeof body.completado === 'boolean') {

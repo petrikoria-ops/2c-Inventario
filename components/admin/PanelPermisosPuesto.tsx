@@ -16,13 +16,15 @@ interface FilaPermiso {
   ver: boolean
   crear: boolean
   modificar: boolean
+  eliminar: boolean
 }
 
-type Campo = 'ver' | 'crear' | 'modificar'
+type Campo = 'ver' | 'crear' | 'modificar' | 'eliminar'
 const CAMPOS: { key: Campo; label: string }[] = [
   { key: 'ver', label: 'Ver' },
   { key: 'crear', label: 'Crear' },
   { key: 'modificar', label: 'Mod.' },
+  { key: 'eliminar', label: 'Elim.' },
 ]
 
 export default function PanelPermisosPuesto({ initialData }: { initialData: FilaPermiso[] }) {
@@ -42,7 +44,7 @@ export default function PanelPermisosPuesto({ initialData }: { initialData: Fila
 
   const toggle = async (departamento: string, puesto: string, modulo: string, campo: Campo) => {
     const key = `${departamento}|${puesto}|${modulo}`
-    const actual = mapa.get(key) ?? { departamento, puesto, modulo, ver: false, crear: false, modificar: false }
+    const actual = mapa.get(key) ?? { departamento, puesto, modulo, ver: false, crear: false, modificar: false, eliminar: false }
     const valor = !actual[campo]
     setMapa(prev => new Map(prev).set(key, { ...actual, [campo]: valor }))
     setGuardando(key)
@@ -75,7 +77,7 @@ export default function PanelPermisosPuesto({ initialData }: { initialData: Fila
                   <tr>
                     <th className="th" rowSpan={2} style={{ verticalAlign: 'bottom' }}>Módulo</th>
                     {puestos.map(p => (
-                      <th key={p.puesto} className="th text-center" colSpan={3}>{p.puesto}</th>
+                      <th key={p.puesto} className="th text-center" colSpan={4}>{p.puesto}</th>
                     ))}
                   </tr>
                   <tr>

@@ -7,7 +7,10 @@ export const dynamic = 'force-dynamic'
 
 type Ctx = { params: { id: string } }
 
-const CAMPOS_PERMITIDOS = ['departamento', 'puesto', 'nivel_acceso', 'activo'] as const
+const CAMPOS_PERMITIDOS = [
+  'departamento', 'puesto', 'nivel_acceso', 'activo',
+  'sec_licencia_numero', 'sec_licencia_clase', 'sec_licencia_vencimiento',
+] as const
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {
   const perfil = await getPerfil()

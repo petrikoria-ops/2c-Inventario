@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireModificar } from '@/lib/auth/permisos.server'
+import { requireModificar, requireEliminar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -33,7 +33,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 // Elimina un alimentador y sus mediciones (ON DELETE CASCADE) — para
 // sacar uno agregado por error del informe.
 export async function DELETE(_: NextRequest, { params }: Ctx) {
-  const denegado = await requireModificar('pruebas_alimentadores')
+  const denegado = await requireEliminar('pruebas_alimentadores')
   if (denegado) return denegado
 
   const sb = getSupabaseServer()

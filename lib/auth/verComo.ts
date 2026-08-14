@@ -38,16 +38,17 @@ export interface ContextoUsuario {
 
 // Se simula con el puesto de mayor jerarquía del departamento elegido (el
 // techo real de esa área — lo útil para evaluar la experiencia), sin llegar
-// a master/admin_software (esos bypasean todo y no muestran nada real).
-// La mayoría de los departamentos tiene un puesto 'jefe_departamento'; los
-// que no (bodega, taller, prevención) usan el de mayor nivel disponible.
+// a master/admin_software (esos bypasean todo y no muestran nada real). Todo
+// departamento operativo tiene un puesto 'administrador' (Jefe de
+// departamento / Visitador de obra) tras la pirámide de roles — ver
+// docs/departamentos/piramide.md.
 const ORDEN_NIVEL: Record<NivelAcceso, number> = {
-  visualizacion: 0, operador: 1, encargado: 2, jefe_departamento: 3, directiva: 4, master: 5, admin_software: 6,
+  maestro: 0, modificador: 1, administrador: 2, master: 3, admin_software: 4,
 }
 
 function puestoRepresentativo(departamento: Departamento): { puesto: string; nivel: NivelAcceso } {
   const puestos = PUESTOS_POR_DEPARTAMENTO[departamento]
-  const jefe = puestos.find(p => p.nivel === 'jefe_departamento')
+  const jefe = puestos.find(p => p.nivel === 'administrador')
   if (jefe) return jefe
   const candidatos = puestos.filter(p => p.nivel !== 'master' && p.nivel !== 'admin_software')
   return candidatos.reduce((mejor, p) => ORDEN_NIVEL[p.nivel] > ORDEN_NIVEL[mejor.nivel] ? p : mejor, candidatos[0])

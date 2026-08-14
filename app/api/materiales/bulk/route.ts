@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { requireModificar } from '@/lib/auth/permisos.server'
+import { requireModificar, requireEliminar } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -8,7 +8,7 @@ export const dynamic = 'force-dynamic'
 // PATCH  /api/materiales/bulk  — actualizar campos en múltiples ids
 
 export async function DELETE(req: NextRequest) {
-  const denegado = await requireModificar('materiales')
+  const denegado = await requireEliminar('materiales')
   if (denegado) return denegado
   const { ids }: { ids: number[] } = await req.json()
   if (!ids?.length) return NextResponse.json({ error: 'ids requeridos' }, { status: 400 })

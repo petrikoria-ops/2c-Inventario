@@ -6,10 +6,12 @@ Lee también el `CLAUDE.md` raíz antes de trabajar aquí.
 
 | Puesto | nivel_acceso |
 |---|---|
-| Jefe de oficina técnica | `jefe_departamento` |
-| Proyectista / ingeniero | `operador` |
-| Ayudante de jefe de oficina técnica | `operador` |
-| Técnico junior / ingeniero junior | `visualizacion` |
+| Jefe de oficina técnica | `administrador` — Jefe de departamento |
+| Proyectista / ingeniero | `modificador` |
+| Ayudante de jefe de oficina técnica | `modificador` |
+| Técnico junior / ingeniero junior | `maestro` |
+
+Ver `docs/departamentos/piramide.md` para la pirámide de roles cross-departamento (qué significa cada `nivel_acceso`).
 
 ## Módulos visibles
 
@@ -21,7 +23,7 @@ Lee también el `CLAUDE.md` raíz antes de trabajar aquí.
 | Agente IA | completo |
 | Materiales | lectura (para factibilidad) |
 | Proveedores | lectura |
-| Métricas | solo `jefe_departamento` |
+| Métricas | solo `administrador` (Jefe de oficina técnica) |
 
 ## Pendiente / reglas específicas
 

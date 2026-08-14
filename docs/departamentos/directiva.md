@@ -6,42 +6,32 @@ Lee también el `CLAUDE.md` raíz antes de trabajar aquí.
 
 | Puesto | nivel_acceso |
 |---|---|
-| Dueño | `master` (acceso total) |
-| Jefe directivo | `master` (acceso total) |
-| Jefe ejecutivo | `directiva` (lectura total, sin edición operativa) |
-| Supervisor eléctrico | `jefe_departamento` (cross-depto: Bodega + Taller + Oficina Técnica) — **Supervisor de obra** |
-| Ingeniero visitante | `visualizacion` (acceso temporal) — **Visitador de obra** |
+| Dueño | `master` (acceso total) — Gerencia |
+| Jefe directivo | `master` (acceso total) — Gerencia |
+| Jefe ejecutivo | `administrador` |
+| Supervisor eléctrico | `modificador` — **Supervisor de obra** |
+| Visitador de obra *(antes "Ingeniero visitante")* | `administrador` — **Visitador de obra** |
+
+Ver `docs/departamentos/piramide.md` para la pirámide de roles cross-departamento completa (qué significa cada `nivel_acceso`, y por qué `administrador`/`modificador`/`maestro` no son bypass de código).
 
 ## Módulos visibles
 
 `master` ve y edita todo, en todos los departamentos — no hay restricción de módulo para ese nivel (ver `lib/auth/permisos.ts`, `NIVELES_TOTALES`).
 
-Para `directiva` (lectura total, salvo lo que se detalla abajo):
+`administrador`/`modificador` no bypasean nada — su acceso real sigue viniendo 100% de `permisos_puesto` / `permisos_usuario_overrides` (editable desde `/admin/permisos`), igual que cualquier otro puesto de la empresa.
 
-| Módulo | Acceso |
-|---|---|
-| Materiales, Herramientas, Movimientos, Proveedores, Compras, Trabajadores, Proyectos | lectura |
-| Métricas | completo |
-| Agente IA | completo |
-| Avance de obra, Verificación RIC | completo |
+### Visitador de obra — cómo llegó a `administrador`
 
-`Supervisor eléctrico` todavía usa el mapa genérico de `directiva` para el resto de módulos — falta implementar el acceso cross-departamento real (Bodega + Taller + Oficina Técnica con nivel `jefe_departamento`), ya que el modelo actual asume un usuario = un departamento. Esto **no** bloquea su uso de Avance de obra / Verificación RIC, que ya funcionan con el mapa de `directiva` tal cual.
-
-### Visitador de obra ("Ingeniero visitante") — excepción de edición
-
-El puesto "Ingeniero visitante" tiene `nivel_acceso: 'visualizacion'`, que por regla general del sistema **nunca** edita nada (ver `puedeEditar()` en `lib/auth/permisos.ts`). Para que el Visitador de obra pueda generar solicitudes de compra y crear/editar el avance y la verificación RIC de sus obras, se agregó una excepción puntual centralizada en `EXCEPCIONES_EDICION_POR_PUESTO` (mismo archivo) — el único lugar del sistema que mira `perfil.puesto` en vez de `departamento`/`nivel_acceso`:
-
-```ts
-const EXCEPCIONES_EDICION_POR_PUESTO: Partial<Record<string, Modulo[]>> = {
-  'Ingeniero visitante': ['compras', 'avance_obra', 'verificacion_ric'],
-}
-```
-
-El resto de sus permisos (materiales, herramientas, proyectos, trabajadores) sigue siendo de solo lectura, como corresponde a "acceso temporal".
+El puesto se llamaba "Ingeniero visitante" y tenía `nivel_acceso: 'visualizacion'` (el más restringido del sistema), con una excepción puntual hardcodeada (`EXCEPCIONES_EDICION_POR_PUESTO`, ya no existe en código) para poder generar solicitudes de compra y crear/editar avance de obra y verificación RIC. Esa excepción quedó reemplazada por la pirámide de roles: el Visitador de obra ahora es tier `administrador` de pleno derecho, con sus permisos reales definidos como cualquier otro puesto en `permisos_puesto` (ver seed en `migration_permisos_granulares.sql` + el remapeo de `migration_piramide_roles.sql`).
 
 ### Avance de obra — quién estructura vs. quién marca
 
-Ambos puestos (`avance_obra: 'completo'` para todo `directiva`) pueden técnicamente crear/editar/borrar etapas a nivel de API — la separación real ("el Visitador crea el plan, el Supervisor solo marca") es de interfaz, no de permisos duros: helpers `esVisitadorDeObra(perfil)` / `esSupervisorDeObra(perfil)` en `lib/auth/permisos.ts` (comparan `perfil.puesto`) condicionan qué controles muestra `components/proyectos/AvanceObra.tsx`. Si en algún momento se necesita que la API también lo bloquee a nivel de servidor (no solo la UI), la extensión natural es una tabla de excepciones por *acción* (`'avance_obra:estructura'` vs `'avance_obra:marcar'`), replicando el mismo patrón — no antes de que haga falta de verdad.
+La separación ("el Visitador/administrador estructura el plan, el Supervisor y el Maestro de terreno solo marcan etapas como completadas") sí está reforzada a nivel de servidor, no solo de interfaz:
+
+- **Estructurar** (crear el plan, agregar/editar/borrar etapas): exige `puedeModificar(perfil, 'avance_obra')` — quien tenga ese permiso real en `permisos_puesto` (típicamente el Visitador de obra o un `administrador`/`master`).
+- **Marcar una etapa como completada**: exige `puedeMarcarAvance(perfil)` (`lib/auth/permisos.ts`) — es `true` si ya puede modificar `avance_obra`, **o** si el puesto es `'Maestro 1' | 'Maestro 2' | 'Maestro Mayor'` (los puestos de terreno de Taller). Así un Maestro puede tildar su propio avance sin poder tocar el texto de una etapa ni borrarla.
+
+`app/api/avance-obra/items/[itemId]/route.ts` decide cuál de las dos exigir mirando qué campos trae el body del PATCH (solo `completado` → marcar; cualquier otro campo → estructurar). Los helpers de UI `esVisitadorDeObra(perfil)` / `esSupervisorDeObra(perfil)` / `puedeEstructurarAvance(perfil)` siguen condicionando qué controles muestra `components/proyectos/AvanceObra.tsx`, ahora en sintonía con el candado real de la API.
 
 ## Módulos nuevos: Avance de obra y Verificación RIC N°18/19
 
@@ -52,7 +42,7 @@ Ambos puestos (`avance_obra: 'completo'` para todo `directiva`) pueden técnicam
 
 ## Pendiente / reglas específicas
 
-- [ ] Implementar acceso multi-departamento para "Supervisor eléctrico" (hoy el modelo de `perfiles` solo permite un departamento por usuario) — no bloquea Avance de obra ni Verificación RIC.
-- [ ] Confirmar si "Ingeniero visitante" necesita expiración automática de su cuenta (acceso temporal real, no solo nominal).
+- [ ] El modelo de `perfiles` sigue permitiendo solo un departamento por usuario — la pirámide de roles (`docs/departamentos/piramide.md`) resuelve la jerarquía cross-departamento vía `nivel_acceso`, pero no un acceso multi-departamento real (ej. alguien con permisos simultáneos en Bodega y Taller). No bloquea nada hoy.
+- [ ] "Visitador de obra" ya no es "acceso temporal" nominal (subió de `visualizacion` a `administrador`) — confirmar si sigue teniendo sentido alguna forma de expiración de cuenta para ese puesto.
 - [ ] Verificación RIC: agregar el Anexo SAT por tablero (repetible), la librería de tipos de tablero, y las 5 tablas de mediciones (alimentadores, bucle/diferencial, iluminación, puesta a tierra, otras verificaciones) — quedaron fuera de la v1 a propósito.
 - [ ] Verificación RIC: sin compresión de imagen antes de subir — fotos de celular pueden pesar varios MB en conexiones de obra lentas.

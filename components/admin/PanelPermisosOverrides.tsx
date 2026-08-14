@@ -11,6 +11,7 @@ interface Override {
   ver: boolean | null
   crear: boolean | null
   modificar: boolean | null
+  eliminar: boolean | null
   notas: string | null
   perfiles?: { nombre_completo: string; email: string } | null
 }
@@ -36,13 +37,14 @@ function resumen(o: Override): string {
   if (o.ver !== null) partes.push(`Ver: ${o.ver ? 'Sí' : 'No'}`)
   if (o.crear !== null) partes.push(`Crear: ${o.crear ? 'Sí' : 'No'}`)
   if (o.modificar !== null) partes.push(`Modificar: ${o.modificar ? 'Sí' : 'No'}`)
+  if (o.eliminar !== null) partes.push(`Eliminar: ${o.eliminar ? 'Sí' : 'No'}`)
   return partes.join(' · ') || 'Sin cambios'
 }
 
 export default function PanelPermisosOverrides({ initialOverrides, usuarios }: { initialOverrides: Override[]; usuarios: UsuarioOpcion[] }) {
   const [overrides, setOverrides] = useState(initialOverrides)
   const [mostrarNuevo, setMostrarNuevo] = useState(false)
-  const [form, setForm] = useState({ usuario_id: '', modulo: 'materiales' as Modulo, ver: '', crear: '', modificar: '', notas: '' })
+  const [form, setForm] = useState({ usuario_id: '', modulo: 'materiales' as Modulo, ver: '', crear: '', modificar: '', eliminar: '', notas: '' })
   const [guardando, setGuardando] = useState(false)
   const { showToast } = useToast()
 
@@ -59,13 +61,14 @@ export default function PanelPermisosOverrides({ initialOverrides, usuarios }: {
           ver: parseTri(form.ver),
           crear: parseTri(form.crear),
           modificar: parseTri(form.modificar),
+          eliminar: parseTri(form.eliminar),
           notas: form.notas || null,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'No se pudo guardar la excepción')
       setOverrides(prev => [data, ...prev.filter(o => !(o.usuario_id === form.usuario_id && o.modulo === form.modulo))])
-      setForm({ usuario_id: '', modulo: 'materiales', ver: '', crear: '', modificar: '', notas: '' })
+      setForm({ usuario_id: '', modulo: 'materiales', ver: '', crear: '', modificar: '', eliminar: '', notas: '' })
       setMostrarNuevo(false)
       showToast('Excepción guardada', 'success')
     } catch (e: any) {
@@ -111,7 +114,7 @@ export default function PanelPermisosOverrides({ initialOverrides, usuarios }: {
               </select>
             </div>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div>
               <label className="label" htmlFor="ov-ver">Ver</label>
               <select id="ov-ver" className="select w-full" value={form.ver} onChange={e => setForm(f => ({ ...f, ver: e.target.value }))}>
@@ -127,6 +130,12 @@ export default function PanelPermisosOverrides({ initialOverrides, usuarios }: {
             <div>
               <label className="label" htmlFor="ov-modificar">Modificar</label>
               <select id="ov-modificar" className="select w-full" value={form.modificar} onChange={e => setForm(f => ({ ...f, modificar: e.target.value }))}>
+                {TRI.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="label" htmlFor="ov-eliminar">Eliminar</label>
+              <select id="ov-eliminar" className="select w-full" value={form.eliminar} onChange={e => setForm(f => ({ ...f, eliminar: e.target.value }))}>
                 {TRI.map(t => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </div>

@@ -12,7 +12,7 @@ export async function PATCH(req: NextRequest, { params }: Ctx) {
 
   const body = await req.json()
   const patch: Record<string, unknown> = {}
-  for (const campo of ['ver', 'crear', 'modificar', 'notas']) {
+  for (const campo of ['ver', 'crear', 'modificar', 'eliminar', 'notas']) {
     if (campo in body) patch[campo] = body[campo]
   }
 

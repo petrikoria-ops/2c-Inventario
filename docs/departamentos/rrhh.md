@@ -6,9 +6,11 @@ Lee también el `CLAUDE.md` raíz antes de trabajar aquí.
 
 | Puesto | nivel_acceso |
 |---|---|
-| Jefe de Recursos Humanos | `jefe_departamento` |
-| Asistente de Recursos Humanos | `operador` |
-| Practicante | `visualizacion` |
+| Jefe de Recursos Humanos | `administrador` — Jefe de departamento |
+| Asistente de Recursos Humanos | `modificador` |
+| Practicante | `maestro` |
+
+Ver `docs/departamentos/piramide.md` para la pirámide de roles cross-departamento (qué significa cada `nivel_acceso`).
 
 ## Módulos visibles
 

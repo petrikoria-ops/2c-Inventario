@@ -3,9 +3,13 @@
 // /solicitar-acceso, panel de admin). Lo que necesita sesión/DB vive en
 // permisos.server.ts.
 
+// Pirámide de roles cross-departamento (reemplaza la escala vieja, inconsistente
+// entre departamentos). 'administrador'/'modificador'/'maestro' NO son bypass de
+// código — a diferencia de 'master'/'admin_software' (ver NIVELES_TOTALES más
+// abajo), el acceso real de esos 3 sigue viniendo 100% de permisos_puesto /
+// permisos_usuario_overrides. Ver docs/departamentos/piramide.md.
 export type NivelAcceso =
-  | 'visualizacion' | 'operador' | 'encargado'
-  | 'jefe_departamento' | 'directiva' | 'admin_software' | 'master'
+  | 'maestro' | 'modificador' | 'administrador' | 'admin_software' | 'master'
 
 export type Departamento =
   | 'bodega' | 'taller' | 'oficina_tecnica' | 'prevencion'
@@ -53,6 +57,7 @@ export interface AccionesModulo {
   ver: boolean
   crear: boolean
   modificar: boolean
+  eliminar: boolean
 }
 
 export type MapaPermisos = Partial<Record<Modulo, AccionesModulo>>
@@ -66,6 +71,12 @@ export interface Perfil {
   nivel_acceso: NivelAcceso
   activo: boolean
   permisos: MapaPermisos
+  // Licencia SEC (Superintendencia de Electricidad y Combustibles) — solo se
+  // edita/muestra en el panel admin para nivel_acceso 'administrador' o
+  // 'modificador' (Jefe de departamento, Visitador de obra, Supervisor).
+  sec_licencia_numero: string | null
+  sec_licencia_clase: string | null
+  sec_licencia_vencimiento: string | null
 }
 
 // Roles válidos por departamento — el dropdown de /solicitar-acceso
@@ -74,37 +85,40 @@ export interface Perfil {
 // la fuente de filas/columnas de la matriz en /admin/permisos.
 export const PUESTOS_POR_DEPARTAMENTO: Record<Departamento, { puesto: string; nivel: NivelAcceso }[]> = {
   bodega: [
-    { puesto: 'Ayudante de bodega',    nivel: 'visualizacion' },
-    { puesto: 'Chofer-bodeguero',      nivel: 'operador' },
-    { puesto: 'Encargado de bodega',   nivel: 'encargado' },
-    { puesto: 'Ayudante de encargado', nivel: 'operador' },
+    { puesto: 'Ayudante de bodega',    nivel: 'maestro' },
+    { puesto: 'Bodeguero',             nivel: 'maestro' },
+    { puesto: 'Chofer-bodeguero',      nivel: 'modificador' },
+    { puesto: 'Encargado de bodega',   nivel: 'administrador' },
+    { puesto: 'Ayudante de encargado', nivel: 'modificador' },
   ],
   taller: [
-    { puesto: 'Ayudante de maestro',    nivel: 'visualizacion' },
-    { puesto: 'Maestro tablerista',     nivel: 'operador' },
-    { puesto: 'Encargado de taller',    nivel: 'encargado' },
-    { puesto: 'Ayudante de encargado',  nivel: 'operador' },
+    { puesto: 'Ayudante de maestro',    nivel: 'maestro' },
+    { puesto: 'Maestro 1',              nivel: 'maestro' },
+    { puesto: 'Maestro 2',              nivel: 'maestro' },
+    { puesto: 'Maestro Mayor',          nivel: 'modificador' },
+    { puesto: 'Encargado de taller',    nivel: 'administrador' },
+    { puesto: 'Ayudante de encargado',  nivel: 'modificador' },
   ],
   oficina_tecnica: [
-    { puesto: 'Jefe de oficina técnica',            nivel: 'jefe_departamento' },
-    { puesto: 'Proyectista / ingeniero',            nivel: 'operador' },
-    { puesto: 'Ayudante de jefe de oficina técnica', nivel: 'operador' },
-    { puesto: 'Técnico junior / ingeniero junior',  nivel: 'visualizacion' },
+    { puesto: 'Jefe de oficina técnica',            nivel: 'administrador' },
+    { puesto: 'Proyectista / ingeniero',            nivel: 'modificador' },
+    { puesto: 'Ayudante de jefe de oficina técnica', nivel: 'modificador' },
+    { puesto: 'Técnico junior / ingeniero junior',  nivel: 'maestro' },
   ],
   prevencion: [
-    { puesto: 'Prevencionista', nivel: 'operador' },
+    { puesto: 'Prevencionista', nivel: 'administrador' },
   ],
   rrhh: [
-    { puesto: 'Jefe de Recursos Humanos',     nivel: 'jefe_departamento' },
-    { puesto: 'Asistente de Recursos Humanos', nivel: 'operador' },
-    { puesto: 'Practicante',                  nivel: 'visualizacion' },
+    { puesto: 'Jefe de Recursos Humanos',     nivel: 'administrador' },
+    { puesto: 'Asistente de Recursos Humanos', nivel: 'modificador' },
+    { puesto: 'Practicante',                  nivel: 'maestro' },
   ],
   directiva: [
     { puesto: 'Dueño',               nivel: 'master' },
     { puesto: 'Jefe directivo',      nivel: 'master' },
-    { puesto: 'Jefe ejecutivo',      nivel: 'directiva' },
-    { puesto: 'Supervisor eléctrico', nivel: 'jefe_departamento' },
-    { puesto: 'Ingeniero visitante', nivel: 'visualizacion' },
+    { puesto: 'Jefe ejecutivo',      nivel: 'administrador' },
+    { puesto: 'Supervisor eléctrico', nivel: 'modificador' },
+    { puesto: 'Visitador de obra',   nivel: 'administrador' },
   ],
   admin_software: [
     { puesto: 'Administrador de software', nivel: 'admin_software' },
@@ -128,6 +142,11 @@ export function puedeModificar(perfil: Perfil, modulo: Modulo): boolean {
   return !!perfil.permisos[modulo]?.modificar
 }
 
+export function puedeEliminar(perfil: Perfil, modulo: Modulo): boolean {
+  if (NIVELES_TOTALES.includes(perfil.nivel_acceso)) return true
+  return !!perfil.permisos[modulo]?.eliminar
+}
+
 // Alias — así no hay que renombrar de golpe cada import existente de
 // puedeEditar. Significa exactamente lo mismo que antes: "puede escribir".
 export const puedeEditar = puedeModificar
@@ -140,7 +159,7 @@ export const puedeEditar = puedeModificar
 // interfaz, no un candado de seguridad duro. Ver plan en
 // docs/departamentos/directiva.md si hace falta endurecerlo a futuro.
 export function esVisitadorDeObra(perfil: Perfil | null): boolean {
-  return perfil?.puesto === 'Ingeniero visitante'
+  return perfil?.puesto === 'Visitador de obra'
 }
 
 export function esSupervisorDeObra(perfil: Perfil | null): boolean {
@@ -154,4 +173,19 @@ export function esSupervisorDeObra(perfil: Perfil | null): boolean {
 export function puedeEstructurarAvance(perfil: Perfil | null): boolean {
   if (!perfil) return false
   return esVisitadorDeObra(perfil) || NIVELES_TOTALES.includes(perfil.nivel_acceso)
+}
+
+// Maestro de terreno (Taller): puede tildar una etapa de avance como
+// completada aunque no tenga permiso de "modificar" avance_obra (que
+// también permitiría editar/estructurar el plan). Server-side gate real —
+// ver app/api/avance-obra/items/[itemId]/route.ts, que exige esto cuando el
+// body del PATCH trae solo `completado`. Acotado a los puestos de campo de
+// Taller (no a todo nivel_acceso='maestro' de la empresa: un Practicante de
+// RRHH o un Ayudante de bodega no marcan avance de una obra eléctrica).
+const PUESTOS_MARCAN_AVANCE = ['Maestro 1', 'Maestro 2', 'Maestro Mayor']
+
+export function puedeMarcarAvance(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  if (puedeModificar(perfil, 'avance_obra')) return true
+  return PUESTOS_MARCAN_AVANCE.includes(perfil.puesto)
 }

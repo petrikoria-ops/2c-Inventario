@@ -26,7 +26,7 @@ export async function POST(req: NextRequest) {
 
   const perfil = await getPerfil()
   const body = await req.json()
-  const { usuario_id, modulo, ver, crear, modificar, notas } = body
+  const { usuario_id, modulo, ver, crear, modificar, eliminar, notas } = body
 
   if (!usuario_id || !modulo) {
     return NextResponse.json({ error: 'Persona y módulo son obligatorios' }, { status: 400 })
@@ -38,7 +38,7 @@ export async function POST(req: NextRequest) {
     .upsert(
       {
         usuario_id, modulo,
-        ver: ver ?? null, crear: crear ?? null, modificar: modificar ?? null,
+        ver: ver ?? null, crear: crear ?? null, modificar: modificar ?? null, eliminar: eliminar ?? null,
         notas: notas ?? null, creado_por: perfil?.id ?? null,
       },
       { onConflict: 'usuario_id,modulo' },
