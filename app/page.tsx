@@ -1,4 +1,5 @@
 import Link from 'next/link'
+import { Suspense } from 'react'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
@@ -9,6 +10,8 @@ import VerComoSelector from '@/components/layout/VerComoSelector'
 import CockpitHeader from '@/components/hub/CockpitHeader'
 import CountUp from '@/components/ui/CountUp'
 import Reveal from '@/components/ui/Reveal'
+import ResumenEjecutivoDia from '@/components/hub/ResumenEjecutivoDia'
+import ResumenEjecutivoDiaSkeleton from '@/components/hub/ResumenEjecutivoDiaSkeleton'
 import WidgetBodega from '@/components/hub/WidgetBodega'
 import WidgetTaller from '@/components/hub/WidgetTaller'
 import WidgetOficinaTecnica from '@/components/hub/WidgetOficinaTecnica'
@@ -105,6 +108,13 @@ export default async function HomePage() {
           <a href="/materiales?bajo_minimo=1" className="underline font-semibold">Ver ahora →</a>
         </div>
       )}
+
+      {/* Resumen ejecutivo del día — capa de lectura sobre los módulos ya
+          existentes, streameada aparte con Suspense para no bloquear el
+          resto del cockpit. */}
+      <Suspense fallback={<ResumenEjecutivoDiaSkeleton />}>
+        <ResumenEjecutivoDia perfil={perfilEfectivo} acento={cfg.acento} />
+      </Suspense>
 
       {/* Pulso general — 3 KPIs con contador animado */}
       <h2 className="seccion-label" style={{ '--seccion-acento': cfg.acento } as React.CSSProperties}>
