@@ -10,6 +10,7 @@ type Ctx = { params: { id: string } }
 const CAMPOS_PERMITIDOS = [
   'departamento', 'puesto', 'nivel_acceso', 'activo',
   'sec_licencia_numero', 'sec_licencia_clase', 'sec_licencia_vencimiento',
+  'puede_enviar_mensajes',
 ] as const
 
 export async function PATCH(req: NextRequest, { params }: Ctx) {

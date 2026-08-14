@@ -77,6 +77,11 @@ export interface Perfil {
   sec_licencia_numero: string | null
   sec_licencia_clase: string | null
   sec_licencia_vencimiento: string | null
+  // Permiso individual, independiente del nivel_acceso — el dueño puede
+  // otorgárselo a cualquier persona puntualmente desde el panel de
+  // Usuarios, además de Gerente/Admin de software que ya lo tienen por
+  // defecto. Ver puedeEnviarMensajes() más abajo.
+  puede_enviar_mensajes: boolean
 }
 
 // Roles válidos por departamento — el dropdown de /solicitar-acceso
@@ -199,12 +204,15 @@ export function puedeVerConectados(perfil: Perfil | null): boolean {
 }
 
 // Quién puede ENVIAR mensajes — la mensajería no es un chat entre pares,
-// es una notificación/asignación que baja desde Gerencia o Administración
-// de software hacia cualquier persona. El resto de la empresa solo recibe:
-// puede leer lo que le llega, pero no responde ni le escribe a nadie más
-// (ver HiloConversacion.tsx, que oculta el campo de texto cuando esto da
-// false, y POST /api/mensajes, que es el candado real del lado servidor).
+// es una notificación/asignación. Por defecto solo Gerencia y Administración
+// de software (NIVELES_TOTALES), pero el dueño puede otorgarle el permiso a
+// cualquier otra persona puntualmente (perfil.puede_enviar_mensajes, editable
+// desde el panel de Usuarios) sin tener que subirla de nivel. El resto sigue
+// solo recibiendo: lee lo que le llega, pero no responde ni le escribe a
+// nadie (ver HiloConversacion.tsx, que oculta el campo de texto cuando esto
+// da false, y POST /api/mensajes + la política RLS de INSERT en `mensajes`,
+// que son el candado real del lado servidor).
 export function puedeEnviarMensajes(perfil: Perfil | null): boolean {
   if (!perfil) return false
-  return NIVELES_TOTALES.includes(perfil.nivel_acceso)
+  return NIVELES_TOTALES.includes(perfil.nivel_acceso) || perfil.puede_enviar_mensajes
 }

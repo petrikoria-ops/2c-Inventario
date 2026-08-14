@@ -19,9 +19,11 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
   const [form, setForm] = useState<{
     departamento: Departamento; puesto: string; nivel_acceso: NivelAcceso
     sec_licencia_numero: string; sec_licencia_clase: string; sec_licencia_vencimiento: string
+    puede_enviar_mensajes: boolean
   }>({
     departamento: 'bodega', puesto: '', nivel_acceso: 'maestro',
     sec_licencia_numero: '', sec_licencia_clase: '', sec_licencia_vencimiento: '',
+    puede_enviar_mensajes: false,
   })
   const [guardando, setGuardando] = useState(false)
   const { showToast } = useToast()
@@ -34,6 +36,7 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
       sec_licencia_numero: u.sec_licencia_numero ?? '',
       sec_licencia_clase: u.sec_licencia_clase ?? '',
       sec_licencia_vencimiento: u.sec_licencia_vencimiento ?? '',
+      puede_enviar_mensajes: u.puede_enviar_mensajes ?? false,
     })
   }
 
@@ -47,6 +50,7 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
         sec_licencia_numero: requiereLicenciaSec ? (form.sec_licencia_numero.trim() || null) : null,
         sec_licencia_clase: requiereLicenciaSec ? (form.sec_licencia_clase.trim() || null) : null,
         sec_licencia_vencimiento: requiereLicenciaSec ? (form.sec_licencia_vencimiento || null) : null,
+        puede_enviar_mensajes: form.puede_enviar_mensajes,
       }
       const res = await fetch(`/api/admin/usuarios/${id}`, {
         method: 'PATCH',
@@ -99,6 +103,9 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
                 </div>
                 <div className="text-xs text-brand-n500">
                   {NOMBRE_DEPARTAMENTO[u.departamento] ?? u.departamento} · {u.puesto} · <span className="font-medium">{u.nivel_acceso}</span>
+                  {u.puede_enviar_mensajes && !(u.nivel_acceso === 'master' || u.nivel_acceso === 'admin_software') && (
+                    <span className="badge badge-green ml-2">Puede enviar mensajes</span>
+                  )}
                 </div>
               </div>
               {editando !== u.id && (
@@ -143,6 +150,16 @@ export default function PanelUsuarios({ initialData, miId, miNivel }: { initialD
                     {miNivel === 'master' && <option value="master">Master</option>}
                   </select>
                   {u.id === miId && <p className="text-xs text-brand-n500 mt-1">No puedes cambiar tu propio nivel.</p>}
+                </div>
+                <div className="sm:col-span-3 pt-2 border-t" style={{ borderColor: '#E8EAED' }}>
+                  <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
+                    <input type="checkbox" checked={form.puede_enviar_mensajes}
+                      onChange={e => setForm(f => ({ ...f, puede_enviar_mensajes: e.target.checked }))} />
+                    Puede enviar mensajes
+                  </label>
+                  <p className="text-xs text-brand-n500 mt-1">
+                    Gerente y Administrador de software ya pueden enviar por su nivel — esto le da el permiso puntualmente a cualquier otra persona, sin cambiarle el nivel de acceso.
+                  </p>
                 </div>
                 {requiereLicenciaSec && (
                   <div className="sm:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2 border-t" style={{ borderColor: '#E8EAED' }}>
