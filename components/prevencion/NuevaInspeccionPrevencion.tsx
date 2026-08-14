@@ -7,10 +7,11 @@ import type { Proyecto } from '@/types'
 interface Props {
   proyectos: Pick<Proyecto, 'id' | 'ot' | 'nombre' | 'cliente'>[]
   prevencionistaInicial: string
+  proyectoIdInicial?: string
 }
 
-export default function NuevaInspeccionPrevencion({ proyectos, prevencionistaInicial }: Props) {
-  const [proyectoId, setProyectoId] = useState('')
+export default function NuevaInspeccionPrevencion({ proyectos, prevencionistaInicial, proyectoIdInicial = '' }: Props) {
+  const [proyectoId, setProyectoId] = useState(proyectoIdInicial)
   const [centroTrabajo, setCentroTrabajo] = useState('')
   const [mandante, setMandante] = useState('')
   const [direccion, setDireccion] = useState('')

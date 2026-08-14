@@ -59,11 +59,23 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     directorioConectados = data ?? []
   }
 
+  // Badge de "Itinerario" — tareas asignadas a mí que sigo sin aceptar/rechazar.
+  let tareasPendientes = 0
+  if (real) {
+    const sb = getSupabaseServer()
+    const { count } = await sb
+      .from('tareas_asignadas')
+      .select('*', { count: 'exact', head: true })
+      .eq('asignado_a', real.id)
+      .eq('estado', 'pendiente')
+    tareasPendientes = count ?? 0
+  }
+
   return (
     <html lang="es" className={inter.variable}>
       <body>
         <ToastProvider>
-          <PresenceProvider perfil={real} noLeidosInicial={mensajesNoLeidos}>
+          <PresenceProvider perfil={real} noLeidosInicial={mensajesNoLeidos} tareasPendientesInicial={tareasPendientes}>
             <AppShell
               perfil={efectivo}
               perfilReal={real}

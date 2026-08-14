@@ -1,10 +1,11 @@
 'use client'
 import { useEffect, useRef, useState } from 'react'
-import { Send } from 'lucide-react'
+import { Send, ClipboardPlus } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { usePresence, type ContactoChat } from '@/contexts/PresenceContext'
 import { useToast } from '@/contexts/ToastContext'
 import { NOMBRE_DEPARTAMENTO } from '@/lib/auth/deptInfo'
+import NuevaTareaModal from '@/components/tareas/NuevaTareaModal'
 import type { Mensaje } from '@/types'
 
 interface Props {
@@ -20,8 +21,9 @@ export default function HiloConversacion({ contacto, miId }: Props) {
   const [cargando, setCargando] = useState(true)
   const [texto, setTexto] = useState('')
   const [enviando, setEnviando] = useState(false)
+  const [tareaModalAbierta, setTareaModalAbierta] = useState(false)
   const finRef = useRef<HTMLDivElement>(null)
-  const { marcarLeidosLocal, conectados, puedeVerConectados, puedeEnviarMensajes } = usePresence()
+  const { marcarLeidosLocal, conectados, puedeVerConectados, puedeEnviarMensajes, puedeAsignarTareas } = usePresence()
   const { showToast } = useToast()
 
   const marcarLeidos = () => {
@@ -100,13 +102,23 @@ export default function HiloConversacion({ contacto, miId }: Props) {
         {puedeVerConectados && (
           <span className="w-2 h-2 rounded-full flex-shrink-0" style={{ background: enLinea ? '#059669' : '#C0C4CC' }} />
         )}
-        <div className="min-w-0">
+        <div className="min-w-0 flex-1">
           <div className="text-sm font-semibold text-slate-800 truncate">{contacto.nombre_completo}</div>
           <div className="text-[11px] text-brand-n500 truncate">
             {contacto.puesto} · {NOMBRE_DEPARTAMENTO[contacto.departamento] ?? contacto.departamento}
             {puedeVerConectados && ` · ${enLinea ? 'En línea' : 'Desconectado'}`}
           </div>
         </div>
+        {puedeAsignarTareas && (
+          <button
+            type="button"
+            className="btn btn-outline btn-sm flex-shrink-0"
+            onClick={() => setTareaModalAbierta(true)}
+            title={`Asignar una tarea a ${contacto.nombre_completo}`}
+          >
+            <ClipboardPlus size={13} /> Asignar tarea
+          </button>
+        )}
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto px-4 py-3 space-y-2">
@@ -151,6 +163,14 @@ export default function HiloConversacion({ contacto, miId }: Props) {
         <div className="px-4 py-2.5 border-t flex-shrink-0 text-center text-[11px]" style={{ borderColor: '#EDEFF2', color: 'var(--n-500)' }}>
           Esto es una notificación — no se puede responder.
         </div>
+      )}
+
+      {puedeAsignarTareas && (
+        <NuevaTareaModal
+          abierto={tareaModalAbierta}
+          onClose={() => setTareaModalAbierta(false)}
+          destinatarioInicial={contacto}
+        />
       )}
     </div>
   )

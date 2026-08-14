@@ -82,6 +82,11 @@ export interface Perfil {
   // Usuarios, además de Gerente/Admin de software que ya lo tienen por
   // defecto. Ver puedeEnviarMensajes() más abajo.
   puede_enviar_mensajes: boolean
+  // Idem, pero para asignar tareas/inspecciones — por defecto ya lo tienen
+  // Gerente/Admin de software y el tier administrador (Jefe de
+  // departamento/Visitador de obra); esto se lo otorga puntualmente a
+  // cualquier otra persona. Ver puedeAsignarTareas() más abajo.
+  puede_asignar_tareas: boolean
 }
 
 // Roles válidos por departamento — el dropdown de /solicitar-acceso
@@ -215,4 +220,15 @@ export function puedeVerConectados(perfil: Perfil | null): boolean {
 export function puedeEnviarMensajes(perfil: Perfil | null): boolean {
   if (!perfil) return false
   return NIVELES_TOTALES.includes(perfil.nivel_acceso) || perfil.puede_enviar_mensajes
+}
+
+// Quién puede ASIGNAR una tarea/inspección a otra persona — más amplio que
+// puedeEnviarMensajes a propósito (confirmado con el usuario): Gerencia,
+// Administración de software, y también el tier administrador (Jefe de
+// departamento/Visitador de obra), más quien reciba el permiso puntual
+// (perfil.puede_asignar_tareas). El candado real es la política RLS de
+// INSERT en `tareas_asignadas` (mi_puede_asignar_tareas()), no solo esto.
+export function puedeAsignarTareas(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  return NIVELES_TOTALES.includes(perfil.nivel_acceso) || perfil.nivel_acceso === 'administrador' || perfil.puede_asignar_tareas
 }

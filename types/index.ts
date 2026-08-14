@@ -423,3 +423,22 @@ export interface PerfilDirectorio {
   departamento: string
   puesto: string
 }
+
+export type ModuloTarea = 'pruebas_alimentadores' | 'verificacion_ric' | 'prevencion_riesgos' | 'avance_obra'
+export type EstadoTarea = 'pendiente' | 'aceptada' | 'rechazada' | 'completada'
+
+export interface TareaAsignada {
+  id: number
+  asignado_por: string
+  asignado_a: string
+  titulo: string
+  descripcion: string | null
+  proyecto_id: number | null
+  proyecto_nombre: string | null
+  modulo: ModuloTarea | null
+  fecha_limite: string | null
+  estado: EstadoTarea
+  creado_en: string
+  respondido_en: string | null
+  completado_en: string | null
+}

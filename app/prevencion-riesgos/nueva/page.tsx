@@ -6,7 +6,7 @@ import NuevaInspeccionPrevencion from '@/components/prevencion/NuevaInspeccionPr
 export const metadata = { title: 'Nueva inspección — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
-export default async function NuevaInspeccionPrevencionPage() {
+export default async function NuevaInspeccionPrevencionPage({ searchParams }: { searchParams: { proyecto?: string } }) {
   const perfil = await getPerfil()
   if (perfil && !puedeCrear(perfil, 'prevencion_riesgos')) redirect('/prevencion-riesgos')
 
@@ -17,5 +17,11 @@ export default async function NuevaInspeccionPrevencionPage() {
     .in('estado', ['en_proceso', 'presupuesto'])
     .order('ot')
 
-  return <NuevaInspeccionPrevencion proyectos={proyectos ?? []} prevencionistaInicial={perfil?.nombre_completo ?? ''} />
+  return (
+    <NuevaInspeccionPrevencion
+      proyectos={proyectos ?? []}
+      prevencionistaInicial={perfil?.nombre_completo ?? ''}
+      proyectoIdInicial={searchParams.proyecto ?? ''}
+    />
+  )
 }

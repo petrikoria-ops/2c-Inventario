@@ -4,7 +4,7 @@ import Image from 'next/image'
 import { usePathname, useRouter } from 'next/navigation'
 import { useState } from 'react'
 import {
-  Home, LayoutDashboard, MessageCircle,
+  Home, LayoutDashboard, MessageCircle, CalendarCheck2,
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert, Zap,
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
@@ -33,9 +33,10 @@ const NAV: NavGroup[] = [
   {
     section: 'Principal',
     links: [
-      { href: '/',          Icon: Home,             label: 'Inicio' },
-      { href: '/mensajes',  Icon: MessageCircle,    label: 'Mensajes' },
-      { href: '/dashboard', Icon: LayoutDashboard,  label: 'Métricas', modulo: 'metricas' },
+      { href: '/',           Icon: Home,             label: 'Inicio' },
+      { href: '/mensajes',   Icon: MessageCircle,    label: 'Mensajes' },
+      { href: '/itinerario', Icon: CalendarCheck2,   label: 'Itinerario' },
+      { href: '/dashboard',  Icon: LayoutDashboard,  label: 'Métricas', modulo: 'metricas' },
     ],
   },
   {
@@ -97,14 +98,15 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
   const cfg = getDeptConfig(perfil?.departamento)
   const DeptIcon = cfg.Icon
   const simulando = !!verComo
-  const { noLeidos } = usePresence()
+  const { noLeidos, tareasPendientes } = usePresence()
+  const BADGES: Record<string, number> = { '/mensajes': noLeidos, '/itinerario': tareasPendientes }
 
   const grupos = NAV
     .map(g => ({
       ...g,
       links: g.links
         .filter(l => !l.modulo || !perfil || puedeVer(perfil, l.modulo))
-        .map(l => l.href === '/mensajes' ? { ...l, badge: noLeidos || undefined } : l),
+        .map(l => l.href in BADGES ? { ...l, badge: BADGES[l.href] || undefined } : l),
     }))
     .filter(g => g.links.length > 0)
     .concat(esAdmin ? [{
