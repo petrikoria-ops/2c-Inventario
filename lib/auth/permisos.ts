@@ -190,13 +190,21 @@ export function puedeMarcarAvance(perfil: Perfil | null): boolean {
   return PUESTOS_MARCAN_AVANCE.includes(perfil.puesto)
 }
 
-// Quién puede VER el estado de conexión de otras personas (panel "Quién
-// está conectado" del Inicio + punto verde/gris en mensajería) — jefatura
-// desde Visitador de obra hacia arriba (administrador/master/admin_software).
-// El resto de la empresa sigue pudiendo mandar y recibir mensajes con
-// normalidad — solo no ve el directorio de conexión, que se sintió invasivo
-// dejarlo abierto a todo nivel.
+// Quién puede VER el estado de conexión de otras personas (desplegable
+// "Conectados" de la barra lateral + punto verde/gris en mensajería) —
+// acotado a Gerente y Administrador de software únicamente.
 export function puedeVerConectados(perfil: Perfil | null): boolean {
   if (!perfil) return false
-  return perfil.nivel_acceso === 'administrador' || NIVELES_TOTALES.includes(perfil.nivel_acceso)
+  return NIVELES_TOTALES.includes(perfil.nivel_acceso)
+}
+
+// Quién puede ENVIAR mensajes — la mensajería no es un chat entre pares,
+// es una notificación/asignación que baja desde Gerencia o Administración
+// de software hacia cualquier persona. El resto de la empresa solo recibe:
+// puede leer lo que le llega, pero no responde ni le escribe a nadie más
+// (ver HiloConversacion.tsx, que oculta el campo de texto cuando esto da
+// false, y POST /api/mensajes, que es el candado real del lado servidor).
+export function puedeEnviarMensajes(perfil: Perfil | null): boolean {
+  if (!perfil) return false
+  return NIVELES_TOTALES.includes(perfil.nivel_acceso)
 }

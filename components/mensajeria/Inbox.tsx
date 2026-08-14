@@ -13,7 +13,7 @@ interface Props {
 }
 
 export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
-  const { conectados, puedeVerConectados } = usePresence()
+  const { conectados, puedeVerConectados, puedeEnviarMensajes } = usePresence()
   const searchParams = useSearchParams()
   const [seleccionado, setSeleccionado] = useState<string | null>(searchParams.get('con'))
   const [busqueda, setBusqueda] = useState('')
@@ -35,11 +35,16 @@ export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
       .sort((a, b) => new Date(b.ultimo.creado_en).getTime() - new Date(a.ultimo.creado_en).getTime())
   }, [mensajesIniciales, directorio, miId])
 
-  const sinConversacion = directorio.filter(p =>
-    busqueda.trim() &&
-    !conversaciones.some(c => c.persona.id === p.id) &&
-    p.nombre_completo.toLowerCase().includes(busqueda.trim().toLowerCase()),
-  )
+  // Solo quien puede enviar mensajes ve gente nueva para "iniciar
+  // conversación" — el resto solo tiene las conversaciones que ya le
+  // llegaron (no puede escribirle a nadie, ver puedeEnviarMensajes).
+  const sinConversacion = puedeEnviarMensajes
+    ? directorio.filter(p =>
+        busqueda.trim() &&
+        !conversaciones.some(c => c.persona.id === p.id) &&
+        p.nombre_completo.toLowerCase().includes(busqueda.trim().toLowerCase()),
+      )
+    : []
 
   const contactoActivo = directorio.find(p => p.id === seleccionado) ?? null
 
@@ -53,7 +58,7 @@ export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
             <div className="p-3 border-b flex-shrink-0" style={{ borderColor: '#EDEFF2' }}>
               <div className="relative">
                 <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-brand-n500" />
-                <input className="input pl-7 text-xs" placeholder="Buscar persona…" value={busqueda}
+                <input className="input pl-7 text-xs" placeholder={puedeEnviarMensajes ? 'Buscar persona…' : 'Buscar en tus mensajes…'} value={busqueda}
                   onChange={e => setBusqueda(e.target.value)} />
               </div>
             </div>
@@ -95,7 +100,9 @@ export default function Inbox({ miId, directorio, mensajesIniciales }: Props) {
                 </>
               )}
               {!conversaciones.length && !busqueda.trim() && (
-                <p className="text-center text-xs text-brand-n500 p-6">Todavía no tienes conversaciones. Busca a alguien para empezar.</p>
+                <p className="text-center text-xs text-brand-n500 p-6">
+                  {puedeEnviarMensajes ? 'Todavía no tienes conversaciones. Busca a alguien para empezar.' : 'Todavía no te ha llegado ningún mensaje.'}
+                </p>
               )}
             </div>
           </div>

@@ -1,7 +1,7 @@
 'use client'
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
-import { puedeVerConectados as calculaPuedeVerConectados, type Perfil } from '@/lib/auth/permisos'
+import { puedeVerConectados as calculaPuedeVerConectados, puedeEnviarMensajes as calculaPuedeEnviarMensajes, type Perfil } from '@/lib/auth/permisos'
 
 export interface ContactoChat {
   id: string
@@ -19,10 +19,11 @@ interface PresenceCtx {
   abrirChatCon: (persona: ContactoChat) => void
   cerrarChat: () => void
   marcarLeidosLocal: (cantidad: number) => void
-  // Jefatura desde Visitador de obra hacia arriba — el resto de la empresa
-  // sigue mandando/recibiendo mensajes, pero no ve el estado de conexión de
-  // nadie (ni el panel del Inicio, ni el punto verde/gris en el chat).
+  // Gerente y Administración de software únicamente — ver contexts/PresenceContext.tsx.
   puedeVerConectados: boolean
+  // Idem: solo Gerencia/Admin de software mandan mensajes. El resto de la
+  // empresa recibe (notificación), no responde — no es un chat entre pares.
+  puedeEnviarMensajes: boolean
 }
 
 const Ctx = createContext<PresenceCtx>({
@@ -33,6 +34,7 @@ const Ctx = createContext<PresenceCtx>({
   cerrarChat: () => {},
   marcarLeidosLocal: () => {},
   puedeVerConectados: false,
+  puedeEnviarMensajes: false,
 })
 
 // Un solo canal de Presence + una sola suscripción a postgres_changes para
@@ -95,10 +97,12 @@ export function PresenceProvider({ perfil, noLeidosInicial, children }: {
   // como "en línea" igual.
   const puedeVerConectados = calculaPuedeVerConectados(perfil)
   const conectadosVisibles = puedeVerConectados ? conectados : EMPTY_SET
+  const puedeEnviarMensajes = calculaPuedeEnviarMensajes(perfil)
 
   return (
     <Ctx.Provider value={{
-      conectados: conectadosVisibles, noLeidos, chatAbiertoCon, abrirChatCon, cerrarChat, marcarLeidosLocal, puedeVerConectados,
+      conectados: conectadosVisibles, noLeidos, chatAbiertoCon, abrirChatCon, cerrarChat, marcarLeidosLocal,
+      puedeVerConectados, puedeEnviarMensajes,
     }}>
       {children}
     </Ctx.Provider>

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { getPerfil } from '@/lib/auth/permisos.server'
+import { getPerfil, puedeEnviarMensajes } from '@/lib/auth/permisos.server'
 
 export const dynamic = 'force-dynamic'
 
@@ -25,12 +25,18 @@ export async function GET(req: NextRequest) {
   return NextResponse.json(data ?? [])
 }
 
-// POST /api/mensajes — envía un mensaje. No hay permiso de módulo que
-// exigir acá (mensajería es transversal, ver docs del plan) — la única
-// condición es tener sesión.
+// POST /api/mensajes — envía un mensaje. No es un chat entre pares: solo
+// Gerencia y Administración de software pueden enviar (puedeEnviarMensajes) —
+// el resto de la empresa recibe, no escribe. El candado real es la política
+// RLS de INSERT en `mensajes` (ver migration_mensajes_notificacion.sql); este
+// chequeo es para devolver un error entendible en vez de que PostgREST tire
+// una violación de RLS cruda.
 export async function POST(req: NextRequest) {
   const perfil = await getPerfil()
   if (!perfil) return NextResponse.json({ error: 'No autorizado.' }, { status: 401 })
+  if (!puedeEnviarMensajes(perfil)) {
+    return NextResponse.json({ error: 'Solo Gerencia y Administración de software pueden enviar mensajes.' }, { status: 403 })
+  }
 
   const body = await req.json()
   const destinatario_id = body.destinatario_id as string | undefined

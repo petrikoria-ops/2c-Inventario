@@ -21,7 +21,7 @@ export default function HiloConversacion({ contacto, miId }: Props) {
   const [texto, setTexto] = useState('')
   const [enviando, setEnviando] = useState(false)
   const finRef = useRef<HTMLDivElement>(null)
-  const { marcarLeidosLocal, conectados, puedeVerConectados } = usePresence()
+  const { marcarLeidosLocal, conectados, puedeVerConectados, puedeEnviarMensajes } = usePresence()
   const { showToast } = useToast()
 
   const marcarLeidos = () => {
@@ -113,7 +113,9 @@ export default function HiloConversacion({ contacto, miId }: Props) {
         {cargando ? (
           <p className="text-center text-xs text-brand-n500 py-6">Cargando…</p>
         ) : mensajes.length === 0 ? (
-          <p className="text-center text-xs text-brand-n500 py-6">Todavía no hay mensajes — escribe el primero.</p>
+          <p className="text-center text-xs text-brand-n500 py-6">
+            {puedeEnviarMensajes ? 'Todavía no hay mensajes — escribe el primero.' : 'Todavía no has recibido ningún mensaje de esta persona.'}
+          </p>
         ) : (
           mensajes.map(m => {
             const esMio = m.remitente_id === miId
@@ -132,18 +134,24 @@ export default function HiloConversacion({ contacto, miId }: Props) {
         <div ref={finRef} />
       </div>
 
-      <div className="flex gap-2 p-3 border-t flex-shrink-0" style={{ borderColor: '#EDEFF2' }}>
-        <input
-          className="input flex-1"
-          placeholder="Escribe un mensaje…"
-          value={texto}
-          onChange={e => setTexto(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') enviar() }}
-        />
-        <button className="btn btn-primary btn-sm" onClick={enviar} disabled={enviando || !texto.trim()} aria-label="Enviar mensaje">
-          <Send size={13} />
-        </button>
-      </div>
+      {puedeEnviarMensajes ? (
+        <div className="flex gap-2 p-3 border-t flex-shrink-0" style={{ borderColor: '#EDEFF2' }}>
+          <input
+            className="input flex-1"
+            placeholder="Escribe un mensaje…"
+            value={texto}
+            onChange={e => setTexto(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') enviar() }}
+          />
+          <button className="btn btn-primary btn-sm" onClick={enviar} disabled={enviando || !texto.trim()} aria-label="Enviar mensaje">
+            <Send size={13} />
+          </button>
+        </div>
+      ) : (
+        <div className="px-4 py-2.5 border-t flex-shrink-0 text-center text-[11px]" style={{ borderColor: '#EDEFF2', color: 'var(--n-500)' }}>
+          Esto es una notificación — no se puede responder.
+        </div>
+      )}
     </div>
   )
 }

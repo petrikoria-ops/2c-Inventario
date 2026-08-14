@@ -71,13 +71,22 @@ tareas/inspecciones) para decidir "quién puede asignarle una tarea a
 quién" — generalmente, alguien solo puede asignar a otra persona en su
 mismo escalón o por debajo.
 
-## Quién ve "quién está conectado"
+## Quién ve "quién está conectado" y quién puede enviar mensajes
 
-`puedeVerConectados(perfil)` (`lib/auth/permisos.ts`) — jefatura desde
-Visitador de obra hacia arriba (`administrador`/`master`/`admin_software`).
-Gatea el panel "Quién está conectado" del Inicio y el punto verde/gris de
-la mensajería (`contexts/PresenceContext.tsx`, `components/mensajeria/`).
-El resto de la empresa (Supervisor, Maestro, Ayudante) sigue pudiendo
-mandar y recibir mensajes con total normalidad — solo no ve el estado de
-conexión de nadie, porque tenerlo abierto a todo nivel se sintió invasivo
-para quien hace el trabajo de terreno.
+`puedeVerConectados(perfil)` y `puedeEnviarMensajes(perfil)`
+(`lib/auth/permisos.ts`) — ambas acotadas a `master`/`admin_software`
+únicamente (Gerente y Administrador de software), es decir
+`NIVELES_TOTALES`. Ni Jefe de departamento/Visitador de obra
+(`administrador`) ni Supervisor/Maestro/Ayudante ven el desplegable
+"Conectados" de la barra lateral (`components/mensajeria/ConectadosDropdown.tsx`),
+ni pueden enviar un mensaje.
+
+La mensajería (`components/mensajeria/`) **no es un chat entre pares** —
+es una notificación/asignación que baja desde Gerencia o Administración de
+software hacia cualquier persona de la empresa. Quien no puede enviar
+solo recibe: ve el historial de lo que le llegó (`HiloConversacion.tsx`
+oculta el campo de texto), pero no responde ni le escribe a nadie. El
+candado real es la política RLS de `INSERT` en `mensajes`
+(`migration_mensajes_notificacion.sql`, usa `mi_nivel_acceso()`) — la
+ruta `POST /api/mensajes` solo repite el chequeo para devolver un error
+entendible, RLS es la que de verdad lo impide.
