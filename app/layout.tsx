@@ -6,6 +6,8 @@ import { ToastProvider } from '@/contexts/ToastContext'
 import { PresenceProvider } from '@/contexts/PresenceContext'
 import { getContextoUsuario } from '@/lib/auth/verComo'
 import { getSupabaseServer } from '@/lib/supabase/server'
+import { puedeVerConectados } from '@/lib/auth/permisos'
+import type { PerfilDirectorio } from '@/types'
 
 const inter = Inter({
   subsets: ['latin'],
@@ -47,6 +49,16 @@ export default async function RootLayout({ children }: { children: React.ReactNo
     mensajesNoLeidos = count ?? 0
   }
 
+  // Directorio para el desplegable "Conectados" de la barra lateral — solo
+  // se pide si el perfil REAL puede verlo (jefatura desde Visitador de obra
+  // hacia arriba), para no traer datos que ni se van a mostrar.
+  let directorioConectados: PerfilDirectorio[] = []
+  if (real && puedeVerConectados(real)) {
+    const sb = getSupabaseServer()
+    const { data } = await sb.rpc('perfiles_directorio')
+    directorioConectados = data ?? []
+  }
+
   return (
     <html lang="es" className={inter.variable}>
       <body>
@@ -58,6 +70,7 @@ export default async function RootLayout({ children }: { children: React.ReactNo
               puedeSimular={puedeSimular}
               verComo={verComo}
               erroresPendientes={erroresPendientes}
+              directorioConectados={directorioConectados}
             >{children}</AppShell>
           </PresenceProvider>
         </ToastProvider>

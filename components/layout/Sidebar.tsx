@@ -14,7 +14,9 @@ import { puedeVer, type Perfil, type Modulo, type Departamento } from '@/lib/aut
 import { getDeptConfig } from '@/lib/departamentos/config'
 import { usePresence } from '@/contexts/PresenceContext'
 import VerComoSelector from './VerComoSelector'
+import ConectadosDropdown from '@/components/mensajeria/ConectadosDropdown'
 import type { LucideIcon } from 'lucide-react'
+import type { PerfilDirectorio } from '@/types'
 
 interface NavLink  { href: string; Icon: LucideIcon; label: string; modulo?: Modulo; badge?: number }
 interface NavGroup { section: string; links: NavLink[] }
@@ -72,7 +74,7 @@ const NAV: NavGroup[] = [
   },
 ]
 
-export function SidebarContent({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0, onNav }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number; onNav?: () => void }) {
+export function SidebarContent({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0, directorioConectados = [], onNav }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number; directorioConectados?: PerfilDirectorio[]; onNav?: () => void }) {
   const pathname = usePathname()
   const router    = useRouter()
 
@@ -174,6 +176,11 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
         <VerComoSelector verComo={verComo} variant="sidebar" onNavigate={onNav} />
       )}
 
+      {/* Quién está conectado — colapsado por defecto, gateado por
+          puedeVerConectados dentro del propio componente (jefatura desde
+          Visitador de obra hacia arriba). */}
+      <ConectadosDropdown directorio={directorioConectados} onNav={onNav} />
+
       {/* Nav — con degradado inferior que insinúa que hay más opciones al desplazar */}
       <div className="relative flex-1 min-h-0">
         <nav className="h-full overflow-y-auto py-3">
@@ -251,7 +258,7 @@ export function SidebarContent({ perfil, puedeSimular = false, verComo = null, e
   )
 }
 
-export default function Sidebar({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0 }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number }) {
+export default function Sidebar({ perfil, puedeSimular = false, verComo = null, erroresPendientes = 0, directorioConectados = [] }: { perfil: Perfil | null; puedeSimular?: boolean; verComo?: Departamento | null; erroresPendientes?: number; directorioConectados?: PerfilDirectorio[] }) {
   const [open, setOpen] = useState(false)
 
   return (
@@ -287,7 +294,7 @@ export default function Sidebar({ perfil, puedeSimular = false, verComo = null, 
       {/* Sidebar escritorio */}
       <aside className="hidden md:flex flex-col w-56 fixed top-0 left-0 h-screen z-[200]"
         style={{ backgroundColor: '#2E333A' }}>
-        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} />
+        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} directorioConectados={directorioConectados} />
       </aside>
 
       {/* Sidebar móvil (drawer) */}
@@ -302,7 +309,7 @@ export default function Sidebar({ perfil, puedeSimular = false, verComo = null, 
             <X size={16} />
           </button>
         </div>
-        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} onNav={() => setOpen(false)} />
+        <SidebarContent perfil={perfil} puedeSimular={puedeSimular} verComo={verComo} erroresPendientes={erroresPendientes} directorioConectados={directorioConectados} onNav={() => setOpen(false)} />
       </aside>
     </>
   )

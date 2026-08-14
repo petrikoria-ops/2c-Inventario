@@ -3,6 +3,7 @@ import { usePathname } from 'next/navigation'
 import Sidebar from './Sidebar'
 import PanelChatDeslizante from '@/components/mensajeria/PanelChatDeslizante'
 import type { Perfil, Departamento } from '@/lib/auth/permisos'
+import type { PerfilDirectorio } from '@/types'
 
 // Páginas sin sidebar — se detecta por ruta para no tener que mover
 // todas las carpetas de app/ a un route group separado.
@@ -15,6 +16,7 @@ export default function AppShell({
   puedeSimular = false,
   verComo = null,
   erroresPendientes = 0,
+  directorioConectados = [],
 }: {
   children: React.ReactNode
   perfil: Perfil | null
@@ -22,6 +24,7 @@ export default function AppShell({
   puedeSimular?: boolean
   verComo?: Departamento | null
   erroresPendientes?: number
+  directorioConectados?: PerfilDirectorio[]
 }) {
   const pathname = usePathname()
 
@@ -34,6 +37,7 @@ export default function AppShell({
         puedeSimular={puedeSimular}
         verComo={verComo}
         erroresPendientes={erroresPendientes}
+        directorioConectados={directorioConectados}
       />
       {/* pt-14 reserva el alto de la barra superior móvil (fixed) para que
           el título de cada página nunca quede tapado por ella.

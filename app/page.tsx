@@ -2,12 +2,11 @@ import Link from 'next/link'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
-import { puedeVer, puedeVerConectados, type Departamento } from '@/lib/auth/permisos.server'
+import { puedeVer, type Departamento } from '@/lib/auth/permisos.server'
 import { getContextoUsuario, NOMBRE_DEPARTAMENTO } from '@/lib/auth/verComo'
 import { getDeptConfig } from '@/lib/departamentos/config'
 import VerComoSelector from '@/components/layout/VerComoSelector'
 import CockpitHeader from '@/components/hub/CockpitHeader'
-import PanelConectados from '@/components/hub/PanelConectados'
 import CountUp from '@/components/ui/CountUp'
 import Reveal from '@/components/ui/Reveal'
 import WidgetBodega from '@/components/hub/WidgetBodega'
@@ -89,11 +88,6 @@ export default async function HomePage() {
         rol={rol}
         fecha={fecha}
       />
-
-      {/* Quién está conectado ahora — solo jefatura desde Visitador de obra
-          hacia arriba (administrador/master/admin_software). El resto de la
-          empresa sigue pudiendo mandar y recibir mensajes con normalidad. */}
-      {perfil && puedeVerConectados(perfil) && <PanelConectados />}
 
       {/* Selector "Ver como" — solo admin_software/master. Persiste vía cookie,
           así la barra lateral y todas las páginas se adaptan al área elegida. */}
