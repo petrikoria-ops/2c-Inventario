@@ -77,10 +77,33 @@ export default function FormularioPublico(props: Props) {
     })
   }
 
-  const patchTablero = (tableroId: number, patch: Registro) => {
+  const patchTablero = async (tableroId: number, patch: Registro) => {
     setTableros(prev => prev.map(t => (t.id === tableroId ? { ...t, ...patch } : t)))
-    fetch(`/api/publico/${token}/tableros/${tableroId}`, {
+    const res = await fetch(`/api/publico/${token}/tableros/${tableroId}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+    })
+    if (!res.ok) return
+    // Si el patch tocó tipo_tablero_id, el servidor regeneró los ítems de
+    // "puntos específicos" — hay que refrescar esa categoría en el estado.
+    const data = await res.json()
+    if (data.itemsPuntosEspecificosNuevos !== undefined) {
+      setTableros(prev => prev.map(t => t.id !== tableroId ? t : {
+        ...t,
+        verificaciones_ric_tableros_items: [
+          ...(t.verificaciones_ric_tableros_items ?? []).filter((i: Registro) => i.categoria !== 'puntos_especificos'),
+          ...data.itemsPuntosEspecificosNuevos,
+        ],
+      }))
+    }
+  }
+
+  const patchTableroItem = (tableroId: number, itemId: number, resultado: 'pasa' | 'no_pasa' | 'na') => {
+    setTableros(prev => prev.map(t => t.id !== tableroId ? t : {
+      ...t,
+      verificaciones_ric_tableros_items: (t.verificaciones_ric_tableros_items ?? []).map((i: Registro) => i.id === itemId ? { ...i, resultado } : i),
+    }))
+    fetch(`/api/publico/${token}/tableros/${tableroId}/items/${itemId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ resultado }),
     })
   }
 
@@ -223,7 +246,9 @@ export default function FormularioPublico(props: Props) {
           {tableros.map(t => (
             <AnexoSatTableroPublico key={t.id} token={token} entry={t}
               previewUrlInicial={t.foto_url ? fotosFirmadas[t.foto_url] : undefined}
-              onPatch={patch => patchTablero(t.id, patch)} onDelete={() => quitarTablero(t.id)} />
+              onPatch={patch => patchTablero(t.id, patch)}
+              onPatchItem={(itemId, resultado) => patchTableroItem(t.id, itemId, resultado)}
+              onDelete={() => quitarTablero(t.id)} />
           ))}
           <div className="panel">
             <div className="p-4">

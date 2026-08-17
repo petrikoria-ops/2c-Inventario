@@ -368,9 +368,24 @@ export interface VerificacionRicItem {
   actualizado_en: string
 }
 
-// Anexo Opcional SAT por tablero — repetible (0..N por verificación),
-// resumen de 1 página con checklist consolidado de 5 ítems. Ver
-// lib/verificacionRic/anexoSat.ts para el detalle de cada ítem y la
+// Un punto de verificación itemizado del Anexo SAT (1 fila = 1 medición/
+// inspección concreta, igual de guiado que PruebaAlimentadoresItem) — ver
+// lib/verificacionRic/anexoSat.ts para las 4 categorías y sus textos.
+export interface VerificacionRicTableroItem {
+  id: number
+  tablero_entry_id: number
+  categoria: 'ensayos_instrumento' | 'inspeccion' | 'requisitos_terreno' | 'puntos_especificos'
+  orden: number
+  texto: string
+  resultado: 'pasa' | 'no_pasa' | 'na' | null
+  actualizado_en: string
+}
+
+// Anexo Opcional SAT por tablero — repetible (0..N por verificación). El
+// checklist en sí vive itemizado en verificaciones_ric_tableros_items
+// (VerificacionRicTableroItem); las 4 columnas resultado_* de abajo
+// quedan como dato histórico pre-itemización, sin usarse desde la UI.
+// Ver lib/verificacionRic/anexoSat.ts para el detalle de cada ítem y la
 // librería de tipos de tablero.
 export interface VerificacionRicTablero {
   id: number
@@ -384,9 +399,13 @@ export interface VerificacionRicTablero {
   fabricante: string | null
   ui: string | null
   in_nominal: string | null
+  /** @deprecated reemplazado por VerificacionRicTableroItem[] (categoria='ensayos_instrumento') */
   resultado_ensayos_instrumento: 'pasa' | 'no_pasa' | 'na' | null
+  /** @deprecated reemplazado por VerificacionRicTableroItem[] (categoria='inspeccion') */
   resultado_inspeccion: 'pasa' | 'no_pasa' | 'na' | null
+  /** @deprecated reemplazado por VerificacionRicTableroItem[] (categoria='requisitos_terreno') */
   resultado_requisitos_terreno: 'pasa' | 'no_pasa' | 'na' | null
+  /** @deprecated reemplazado por VerificacionRicTableroItem[] (categoria='puntos_especificos') */
   resultado_puntos_especificos: 'pasa' | 'no_pasa' | 'na' | null
   resultado_registro_fotografico: 'pasa' | 'no_pasa' | 'na' | null
   notas: string | null
@@ -394,6 +413,7 @@ export interface VerificacionRicTablero {
   foto_url: string | null
   creado_en: string
   actualizado_en: string
+  verificaciones_ric_tableros_items?: VerificacionRicTableroItem[]
 }
 
 export interface VerificacionRic {

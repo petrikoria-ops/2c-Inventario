@@ -35,7 +35,14 @@ export default async function CompletarPage({ params }: { params: { token: strin
 
   if (modulo === 'verificacion_ric') {
     const { data } = await sb.from('verificaciones_ric_tableros').select('*').eq('verificacion_id', enlace.registro_id).order('orden')
-    tableros = data ?? []
+    const tableroIds = (data ?? []).map(t => t.id)
+    const { data: tablerosItems } = tableroIds.length
+      ? await sb.from('verificaciones_ric_tableros_items').select('*').in('tablero_entry_id', tableroIds).order('categoria').order('orden')
+      : { data: [] }
+    tableros = (data ?? []).map(t => ({
+      ...t,
+      verificaciones_ric_tableros_items: (tablerosItems ?? []).filter(i => i.tablero_entry_id === t.id),
+    }))
   }
 
   if (modulo === 'pruebas_alimentadores') {

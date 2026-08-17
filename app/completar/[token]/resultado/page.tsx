@@ -1,12 +1,12 @@
 import { notFound } from 'next/navigation'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
-import { getSignedUrlDeBucket } from '@/lib/supabase/storage'
+import { getSignedUrlDeBucket, getSignedUrlsAlimentador } from '@/lib/supabase/storage'
 import { CONFIG_MODULOS_PUBLICOS, esModuloPublico } from '@/lib/enlacesPublicos/modulos'
 import { ESTILOS_IMPRESION_DOCUMENTO } from '@/components/documentos/estilosDocumento'
 import PortadaDocumento from '@/components/documentos/PortadaDocumento'
 import PrintButton from '@/components/solicitudes/PrintButton'
 import { BLOQUES_RIC } from '@/lib/verificacionRic/plantilla'
-import { ITEMS_CHECKLIST_SAT, getTipoTablero } from '@/lib/verificacionRic/anexoSat'
+import { CATEGORIAS_CHECKLIST_SAT, ITEM_REGISTRO_FOTOGRAFICO_SAT, getTipoTablero } from '@/lib/verificacionRic/anexoSat'
 import { SECCIONES_DRS, SECCION_IMAGENES } from '@/lib/checklistDrs/plantilla'
 import { CATEGORIAS_CHECKLIST_FAENA } from '@/lib/prevencion/checklistFaena'
 import type { ModuloPublico } from '@/types'
@@ -14,7 +14,7 @@ import type { ModuloPublico } from '@/types'
 export const dynamic = 'force-dynamic'
 
 const TITULOS: Record<string, { kicker: string; titulo: string; subtitulo: string }> = {
-  verificacion_ric: { kicker: 'CHECKLIST DE TERRENO — VERIFICACIÓN RIC N°18/19', titulo: 'CHECKLIST DE TERRENO', subtitulo: 'Verificación Inicial y Puesta en Marcha — RIC N°18 y N°19' },
+  verificacion_ric: { kicker: 'CHECKLIST DE TERRENO', titulo: 'VERIFICACIONES PLIEGO RIC N°18 Y 19', subtitulo: 'Verificación Inicial y Puesta en Marcha de Instalaciones Eléctricas' },
   checklist_drs: { kicker: 'PROTOCOLO DE PRUEBAS DE VERIFICACIÓN — DRS', titulo: 'CHECKLIST DRS', subtitulo: 'Protocolo de pruebas de verificación inicial e informe de imágenes' },
   prevencion_riesgos: { kicker: 'INSPECCIÓN DE FAENA — CHECKLIST DS 594', titulo: 'INSPECCIÓN DE FAENA', subtitulo: 'Checklist de prevención de riesgos — DS 594' },
   pruebas_alimentadores: { kicker: 'TEST DE ALIMENTADORES', titulo: 'TEST DE ALIMENTADORES', subtitulo: 'Mediciones de continuidad y aislamiento por alimentador' },
@@ -35,9 +35,34 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
   let items: Record<string, any>[] = []
   let alimentadores: (Record<string, any> & { items: Record<string, any>[] })[] = []
   let tableros: Record<string, any>[] = []
+  let tablerosItems: Record<string, any>[] = []
+  // Alimentadores vinculados a esta Verificación RIC (Informe de Medición
+  // N°1) — solo aplica al módulo verificacion_ric, no al módulo
+  // pruebas_alimentadores (que ya se maneja aparte más abajo).
+  let alimentadoresVinculados: (Record<string, any> & { alimentadores: Record<string, any>[] })[] = []
+
   if (modulo === 'verificacion_ric') {
     const { data } = await sb.from('verificaciones_ric_tableros').select('*').eq('verificacion_id', enlace.registro_id).order('orden')
     tableros = data ?? []
+    const tableroIds = tableros.map(t => t.id)
+    if (tableroIds.length) {
+      const { data: ti } = await sb.from('verificaciones_ric_tableros_items').select('*').in('tablero_entry_id', tableroIds).order('categoria').order('orden')
+      tablerosItems = ti ?? []
+    }
+
+    const { data: pruebas } = await sb.from('pruebas_alimentadores').select('*').eq('verificacion_ric_id', enlace.registro_id)
+    if (pruebas?.length) {
+      const pruebaIds = pruebas.map(p => p.id)
+      const [{ data: alims }, { data: alimItems }] = await Promise.all([
+        sb.from('pruebas_alimentadores_alimentadores').select('*').in('prueba_id', pruebaIds).order('orden'),
+        sb.from('pruebas_alimentadores_items').select('*').in('prueba_id', pruebaIds).order('orden'),
+      ])
+      alimentadoresVinculados = pruebas.map(p => ({
+        ...p,
+        alimentadores: (alims ?? []).filter(a => a.prueba_id === p.id)
+          .map(a => ({ ...a, items: (alimItems ?? []).filter(i => i.alimentador_id === a.id) })),
+      }))
+    }
   }
   if (modulo === 'pruebas_alimentadores') {
     const [{ data: alims }, { data: todosLosItems }] = await Promise.all([
@@ -63,10 +88,20 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
     if (url) urls[path] = url
   }))
 
+  const pathsAlimentador = new Set<string>()
+  alimentadoresVinculados.forEach(p => p.alimentadores.forEach((a: Record<string, any>) => a.items.forEach((i: Record<string, any>) => { if (i.foto_url) pathsAlimentador.add(i.foto_url) })))
+  const urlsAlimentador: Record<string, string> = {}
+  if (pathsAlimentador.size) {
+    const mapa = await getSignedUrlsAlimentador(sb, Array.from(pathsAlimentador))
+    Object.assign(urlsAlimentador, mapa)
+  }
+
   const info = TITULOS[modulo]
   const fecha = cabecera.fecha_visita ?? cabecera.fecha
   const porBloque = (id: string) => items.filter(i => i.bloque === id).sort((a, b) => a.orden - b.orden)
   const porSeccion = (id: string) => items.filter(i => i.seccion === id).sort((a, b) => a.orden - b.orden)
+  const itemsDelTablero = (tableroId: number, categoria: string) =>
+    tablerosItems.filter(i => i.tablero_entry_id === tableroId && i.categoria === categoria)
 
   return (
     <>
@@ -230,6 +265,45 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
           )
         })()}
 
+        {modulo === 'verificacion_ric' && alimentadoresVinculados.length > 0 && (
+          <div className="doc-bloque mb-7">
+            <p className="doc-bloque-titulo font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Informe de Medición N°1 — Alimentadores</p>
+            {alimentadoresVinculados.map(prueba => (
+              <div key={prueba.id} className="mb-4">
+                {alimentadoresVinculados.length > 1 && (
+                  <p className="text-xs font-semibold mb-2" style={{ color: 'var(--n-500)' }}>{prueba.numero}</p>
+                )}
+                {prueba.alimentadores.map((alimentador: Record<string, any>, ai: number) => (
+                  <div key={alimentador.id} style={{ marginBottom: 16 }}>
+                    <p className="text-xs font-semibold mb-1" style={{ color: '#2E333A' }}>
+                      {ai + 1}. {alimentador.nombre}
+                      {alimentador.proteccion_aguas_arriba && ` · ${alimentador.proteccion_aguas_arriba}`}
+                      {alimentador.largo && ` · ${alimentador.largo}`}
+                    </p>
+                    <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                      <thead><tr><th className="doc-th">Medición</th><th className="doc-th doc-th-r" style={{ width: 100 }}>Valor</th><th className="doc-th" style={{ width: 70 }}>Foto</th></tr></thead>
+                      <tbody>
+                        {alimentador.items.map((item: Record<string, any>, i: number) => (
+                          <tr key={item.id} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
+                            <td className="doc-td">{item.texto}</td>
+                            <td className="doc-td-r" style={{ fontWeight: 600 }}>{item.valor || '—'}</td>
+                            <td className="doc-td">
+                              {item.foto_url && urlsAlimentador[item.foto_url] ? (
+                                // eslint-disable-next-line @next/next/no-img-element
+                                <img src={urlsAlimentador[item.foto_url]} alt="" style={{ width: 50, height: 50, objectFit: 'cover', borderRadius: 4 }} />
+                              ) : '—'}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+
         {modulo === 'verificacion_ric' && tableros.length > 0 && (
           <div className="doc-bloque mb-7">
             <p className="doc-bloque-titulo font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Anexo Opcional — Checklist SAT por tablero</p>
@@ -253,15 +327,31 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
                     </tr>
                   </tbody>
                 </table>
+                {CATEGORIAS_CHECKLIST_SAT.map(cat => {
+                  const itemsCategoria = itemsDelTablero(t.id, cat.categoria)
+                  if (!itemsCategoria.length) return null
+                  return (
+                    <table key={cat.categoria} className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                      <thead><tr><th className="doc-th">{cat.titulo}</th><th className="doc-th doc-th-r" style={{ width: 90 }}>Resultado</th></tr></thead>
+                      <tbody>
+                        {itemsCategoria.map((item, i) => (
+                          <tr key={item.id} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
+                            <td className="doc-td">{item.texto}</td>
+                            <td className="doc-td-r" style={{ fontWeight: 600 }}>{item.resultado ? LABEL_RESULTADO[item.resultado] : '—'}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  )
+                })}
                 <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
-                  <thead><tr><th className="doc-th">Checklist</th><th className="doc-th doc-th-r" style={{ width: 90 }}>Resultado</th></tr></thead>
                   <tbody>
-                    {ITEMS_CHECKLIST_SAT.map((item, i) => (
-                      <tr key={item.campo} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
-                        <td className="doc-td">{item.texto}</td>
-                        <td className="doc-td-r" style={{ fontWeight: 600 }}>{t[item.campo] ? LABEL_RESULTADO[t[item.campo] as string] : '—'}</td>
-                      </tr>
-                    ))}
+                    <tr>
+                      <td className="doc-td">{ITEM_REGISTRO_FOTOGRAFICO_SAT}</td>
+                      <td className="doc-td-r" style={{ fontWeight: 600, width: 90 }}>
+                        {t.resultado_registro_fotografico ? LABEL_RESULTADO[t.resultado_registro_fotografico] : '—'}
+                      </td>
+                    </tr>
                   </tbody>
                 </table>
                 {t.foto_url && urls[t.foto_url] && (

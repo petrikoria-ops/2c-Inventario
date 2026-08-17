@@ -20,11 +20,21 @@ export default async function VerificacionRicDetallePage({ params }: { params: {
 
   const editable = !perfil || puedeEditar(perfil, 'verificacion_ric')
 
+  const tableroIds = (tableros ?? []).map(t => t.id)
+  const { data: tablerosItems } = tableroIds.length
+    ? await sb.from('verificaciones_ric_tableros_items').select('*').in('tablero_entry_id', tableroIds).order('categoria').order('orden')
+    : { data: [] }
+
+  const tablerosConItems = (tableros ?? []).map(t => ({
+    ...t,
+    verificaciones_ric_tableros_items: (tablerosItems ?? []).filter(i => i.tablero_entry_id === t.id),
+  }))
+
   return (
     <FormularioVerificacionRic
       verificacion={verificacion}
       initialItems={items ?? []}
-      initialTableros={tableros ?? []}
+      initialTableros={tablerosConItems}
       editable={editable}
     />
   )

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { validarToken, tocarEnlace } from '@/lib/enlacesPublicos/token.server'
+import { filasItemsTablero } from '@/lib/verificacionRic/anexoSat'
 
 export const dynamic = 'force-dynamic'
 
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     .select('*', { count: 'exact', head: true })
     .eq('verificacion_id', enlace.registro_id)
 
-  const { data, error } = await sb
+  const { data: tablero, error } = await sb
     .from('verificaciones_ric_tableros')
     .insert({
       verificacion_id: enlace.registro_id,
@@ -46,8 +47,12 @@ export async function POST(req: NextRequest, { params }: Ctx) {
     .select()
     .single()
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+  if (error || !tablero) return NextResponse.json({ error: error?.message ?? 'Error al crear el tablero' }, { status: 500 })
+
+  const itemsRows = filasItemsTablero(tablero.id, body.tipo_tablero_id || null)
+  const { data: items, error: itemsErr } = await sb.from('verificaciones_ric_tableros_items').insert(itemsRows).select()
+  if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 })
 
   tocarEnlace(enlace.id)
-  return NextResponse.json(data, { status: 201 })
+  return NextResponse.json({ ...tablero, verificaciones_ric_tableros_items: items ?? [] }, { status: 201 })
 }

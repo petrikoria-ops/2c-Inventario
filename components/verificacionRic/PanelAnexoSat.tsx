@@ -17,10 +17,33 @@ export default function PanelAnexoSat({ verificacionId, proyectoId, initialTable
   const [agregando, setAgregando] = useState(false)
   const { showToast } = useToast()
 
-  const patchTablero = (id: number, patch: Partial<VerificacionRicTablero>) => {
+  const patchTablero = async (id: number, patch: Partial<VerificacionRicTablero>) => {
     setTableros(prev => prev.map(t => t.id === id ? { ...t, ...patch } : t))
-    fetch(`/api/verificacion-ric/${verificacionId}/tableros/${id}`, {
+    const res = await fetch(`/api/verificacion-ric/${verificacionId}/tableros/${id}`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+    })
+    if (!res.ok) { showToast('No se pudo guardar el cambio', 'error'); return }
+    // Si el patch tocó tipo_tablero_id, el servidor regeneró los ítems de
+    // "puntos específicos" — hay que refrescar esa categoría en el estado.
+    const data = await res.json()
+    if (data.itemsPuntosEspecificosNuevos !== undefined) {
+      setTableros(prev => prev.map(t => t.id !== id ? t : {
+        ...t,
+        verificaciones_ric_tableros_items: [
+          ...(t.verificaciones_ric_tableros_items ?? []).filter(i => i.categoria !== 'puntos_especificos'),
+          ...data.itemsPuntosEspecificosNuevos,
+        ],
+      }))
+    }
+  }
+
+  const patchItem = (tableroId: number, itemId: number, resultado: 'pasa' | 'no_pasa' | 'na') => {
+    setTableros(prev => prev.map(t => t.id !== tableroId ? t : {
+      ...t,
+      verificaciones_ric_tableros_items: (t.verificaciones_ric_tableros_items ?? []).map(i => i.id === itemId ? { ...i, resultado } : i),
+    }))
+    fetch(`/api/verificacion-ric/${verificacionId}/tableros/${tableroId}/items/${itemId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ resultado }),
     }).then(res => { if (!res.ok) showToast('No se pudo guardar el cambio', 'error') })
   }
 
@@ -57,13 +80,14 @@ export default function PanelAnexoSat({ verificacionId, proyectoId, initialTable
         <span className="text-xs text-brand-n500">{tableros.length} tablero{tableros.length !== 1 ? 's' : ''}</span>
       </div>
       <p className="text-xs mb-3" style={{ color: 'var(--n-500)' }}>
-        Resumen de control por tablero (no reemplaza el Informe SAT detallado que se genera aparte cuando corresponde).
+        Checklist punto por punto por tablero (no reemplaza el Informe SAT detallado que se genera aparte cuando corresponde).
         Se hace solo cuando lo exigen las Especificaciones Técnicas o la inspección técnica.
       </p>
 
       {tableros.map(t => (
         <AnexoSatTablero key={t.id} verificacionId={verificacionId} proyectoId={proyectoId} entry={t} editable={editable}
-          onPatch={patch => patchTablero(t.id, patch)} onDelete={() => quitarTablero(t.id)} />
+          onPatch={patch => patchTablero(t.id, patch)} onPatchItem={(itemId, resultado) => patchItem(t.id, itemId, resultado)}
+          onDelete={() => quitarTablero(t.id)} />
       ))}
 
       {editable && (

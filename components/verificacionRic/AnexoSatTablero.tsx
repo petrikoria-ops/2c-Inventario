@@ -1,16 +1,13 @@
 'use client'
-// Una tarjeta = un tablero dentro del Anexo Opcional SAT (repetible). Es un
-// resumen de control de 1 página (identificación de 6 columnas + checklist
-// consolidado de 5 ítems), no el protocolo técnico completo — ver
-// lib/verificacionRic/anexoSat.ts para el porqué de cada ítem.
+// Una tarjeta = un tablero dentro del Anexo Opcional SAT (repetible).
+// Checklist itemizado — 1 fila por punto de verificación, igual de guiado
+// que un alimentador del Test de Alimentadores (cada medición con su
+// propio Pasa/No pasa/N/A) — ver lib/verificacionRic/anexoSat.ts.
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { Trash2, Info, Link2 } from 'lucide-react'
+import { Trash2, Link2 } from 'lucide-react'
 import ResultadoPills from './ResultadoPills'
 import FotoUploadAnexoSat from './FotoUploadAnexoSat'
-import {
-  TIPOS_TABLERO, ITEMS_CHECKLIST_SAT, REQUISITOS_TERRENO_SAT,
-  NUCLEO_IEC_ENSAYOS, NUCLEO_IEC_INSPECCION, getTipoTablero, type CampoChecklistSat,
-} from '@/lib/verificacionRic/anexoSat'
+import { TIPOS_TABLERO, CATEGORIAS_CHECKLIST_SAT, ITEM_REGISTRO_FOTOGRAFICO_SAT, getTipoTablero } from '@/lib/verificacionRic/anexoSat'
 import type { VerificacionRicTablero } from '@/types'
 
 interface TableroDisponible { id: number; nombre: string; amperaje: number | null }
@@ -21,24 +18,16 @@ interface Props {
   entry: VerificacionRicTablero
   editable: boolean
   onPatch: (patch: Partial<VerificacionRicTablero>) => void
+  onPatchItem: (itemId: number, resultado: 'pasa' | 'no_pasa' | 'na') => void
   onDelete: () => void
 }
 
-function ayudaItem(campo: CampoChecklistSat, tipoTableroId: string | null): string[] | null {
-  if (campo === 'resultado_ensayos_instrumento') return NUCLEO_IEC_ENSAYOS.map(e => `${e.prueba} (${e.criterio})`)
-  if (campo === 'resultado_inspeccion') return NUCLEO_IEC_INSPECCION.map(i => i.verificacion)
-  if (campo === 'resultado_requisitos_terreno') return REQUISITOS_TERRENO_SAT
-  if (campo === 'resultado_puntos_especificos') return getTipoTablero(tipoTableroId)?.puntosEspecificos ?? null
-  return null
-}
-
-export default function AnexoSatTablero({ verificacionId, proyectoId, entry, editable, onPatch, onDelete }: Props) {
+export default function AnexoSatTablero({ verificacionId, proyectoId, entry, editable, onPatch, onPatchItem, onDelete }: Props) {
   const [campo, setCampo] = useState({
     numero_tablero: entry.numero_tablero ?? '', nombre: entry.nombre,
     fabricante: entry.fabricante ?? '', ui: entry.ui ?? '', in_nominal: entry.in_nominal ?? '',
     notas: entry.notas ?? '',
   })
-  const [ayudaAbierta, setAyudaAbierta] = useState<CampoChecklistSat | null>(null)
   const [tablerosDisponibles, setTablerosDisponibles] = useState<TableroDisponible[]>([])
   const timers = useRef<Record<string, ReturnType<typeof setTimeout>>>({})
 
@@ -126,30 +115,43 @@ export default function AnexoSatTablero({ verificacionId, proyectoId, entry, edi
         )}
       </div>
 
-      {/* Checklist consolidado de 5 ítems */}
-      <div className="divide-y" style={{ borderColor: '#EDEFF2' }}>
-        {ITEMS_CHECKLIST_SAT.map(item => {
-          const ayuda = ayudaItem(item.campo, entry.tipo_tablero_id)
-          const abierta = ayudaAbierta === item.campo
+      {/* Checklist itemizado — 1 fila por punto, agrupado en 4 categorías */}
+      {CATEGORIAS_CHECKLIST_SAT.map(cat => {
+        const itemsCategoria = (entry.verificaciones_ric_tableros_items ?? [])
+          .filter(i => i.categoria === cat.categoria)
+
+        if (cat.categoria === 'puntos_especificos' && !itemsCategoria.length) {
           return (
-            <div key={item.campo} className="px-4 py-2.5">
-              <div className="flex items-center gap-3">
-                <button type="button" className="flex-1 text-left text-sm text-slate-700 flex items-center gap-1.5"
-                  onClick={() => setAyudaAbierta(abierta ? null : item.campo)}>
-                  {item.texto}
-                  {ayuda && <Info size={12} style={{ color: 'var(--n-500)' }} />}
-                </button>
-                <ResultadoPills value={entry[item.campo]} disabled={!editable}
-                  onChange={r => onPatch({ [item.campo]: r } as Partial<VerificacionRicTablero>)} />
-              </div>
-              {abierta && ayuda && (
-                <ul className="mt-2 pl-4 text-xs list-disc space-y-0.5" style={{ color: 'var(--n-500)' }}>
-                  {ayuda.map((a, i) => <li key={i}>{a}</li>)}
-                </ul>
-              )}
+            <div key={cat.categoria} className="border-t px-4 py-3" style={{ borderColor: '#EDEFF2' }}>
+              <p className="text-xs font-semibold uppercase tracking-wide mb-1" style={{ color: 'var(--n-500)' }}>{cat.titulo}</p>
+              <p className="text-xs" style={{ color: 'var(--n-500)' }}>Elige un tipo de tablero arriba para ver sus puntos específicos.</p>
             </div>
           )
-        })}
+        }
+
+        return (
+          <div key={cat.categoria} className="border-t" style={{ borderColor: '#EDEFF2' }}>
+            <p className="px-4 pt-3 pb-1 text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--n-500)' }}>
+              {cat.titulo}
+            </p>
+            <div className="divide-y" style={{ borderColor: '#EDEFF2' }}>
+              {itemsCategoria.map(item => (
+                <div key={item.id} className="flex items-center gap-3 px-4 py-2.5">
+                  <span className="flex-1 text-sm text-slate-700">{item.texto}</span>
+                  <ResultadoPills value={item.resultado} disabled={!editable}
+                    onChange={r => onPatchItem(item.id, r)} />
+                </div>
+              ))}
+            </div>
+          </div>
+        )
+      })}
+
+      {/* Registro fotográfico — el único ítem que sigue consolidado */}
+      <div className="border-t px-4 py-2.5 flex items-center gap-3" style={{ borderColor: '#EDEFF2' }}>
+        <span className="flex-1 text-sm text-slate-700">{ITEM_REGISTRO_FOTOGRAFICO_SAT}</span>
+        <ResultadoPills value={entry.resultado_registro_fotografico} disabled={!editable}
+          onChange={r => onPatch({ resultado_registro_fotografico: r })} />
       </div>
 
       {/* Notas + foto */}

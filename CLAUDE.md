@@ -270,13 +270,15 @@ CREATE TABLE entregas_herramientas_items (
 
 ### Verificación RIC N°18/19 `/verificacion-ric`
 - Ficha técnica de terreno para verificación inicial y puesta en marcha de instalaciones eléctricas (RIC N°18/19) — algunas obras la requieren (ampliaciones/remodelaciones)
-- **v1 = solo Sección A** (12 bloques A.0–A.11: ítems Pasa/No pasa/N/A + registro fotográfico + notas por bloque, más portada y cierre/firma). Contenido real transcrito en `lib/verificacionRic/plantilla.ts`. El Anexo SAT por tablero, la librería de tipos de tablero y las 5 tablas de mediciones detalladas del documento original quedan para una entrega futura
+- Sección A (12 bloques A.0–A.11: ítems Pasa/No pasa/N/A + registro fotográfico + notas por bloque, más portada y cierre/firma). Contenido real transcrito en `lib/verificacionRic/plantilla.ts`
+- Anexo Opcional SAT por tablero (repetible, `incluye_anexo_sat`): identificación de 6 columnas + checklist **itemizado** (1 fila por punto de verificación en 4 categorías — ensayos con instrumento, inspección, requisitos de terreno, puntos específicos según tipo de tablero — igual de guiado que Test de Alimentadores) + 1 ítem consolidado de registro fotográfico + notas + foto general. Librería de 9 tipos de tablero y textos en `lib/verificacionRic/anexoSat.ts`
+- **Informe de Medición N°1 — Alimentadores**: no duplica una tabla propia — se vincula a informes ya existentes del módulo Test de Alimentadores (`pruebas_alimentadores.verificacion_ric_id`). El detalle completo (por alimentador, por medición) se embebe en el informe impreso de la Verificación RIC, no solo una referencia
 - Guardado por fila (sin botón "Guardar" global) — cada cambio dispara un `PATCH` inmediato, igual que el patrón de tablas editables inline
 - Evidencia fotográfica real: Supabase Storage, bucket privado `verificaciones-ric`, helper en `lib/supabase/storage.ts`. `capture="environment"` en el input de foto abre la cámara trasera en celular
-- Impresión multi-página con control de paginación (`break-inside`/`break-before`/`break-after`) — primer documento del repo que necesita esto, el resto de `/imprimir` son de 1 página
-- **API**: `/api/verificacion-ric`, `/api/verificacion-ric/[id]`, `/api/verificacion-ric/[id]/items/[itemId]`
-- **Tablas**: `verificaciones_ric` (correlativo `RIC-YYYY-NNN`), `verificaciones_ric_items`
-- **SQL pendiente** (ejecutar manualmente): `supabase/migration_avance_obra_y_verificacion_ric.sql` — crea las 5 tablas de arriba + el bucket de Storage + políticas RLS
+- Impresión multi-página con control de paginación (`break-inside`/`break-before`/`break-after`) — primer documento del repo que necesita esto, el resto de `/imprimir` son de 1 página. Título del informe: "VERIFICACIONES PLIEGO RIC N°18 Y 19"
+- **API**: `/api/verificacion-ric`, `/api/verificacion-ric/[id]`, `/api/verificacion-ric/[id]/items/[itemId]`, `/api/verificacion-ric/[id]/tableros`, `/api/verificacion-ric/[id]/tableros/[tableroEntryId]`, `/api/verificacion-ric/[id]/tableros/[tableroEntryId]/items/[itemId]`
+- **Tablas**: `verificaciones_ric` (correlativo `RIC-YYYY-NNN`), `verificaciones_ric_items`, `verificaciones_ric_tableros`, `verificaciones_ric_tableros_items`
+- **SQL pendiente** (ejecutar manualmente): `supabase/migration_avance_obra_y_verificacion_ric.sql` (tablas base), `supabase/migration_verificacion_ric_sat.sql` (Anexo SAT + vínculo a alimentadores), `supabase/migration_verificacion_ric_sat_items.sql` (checklist SAT itemizado)
 
 ---
 
@@ -370,7 +372,7 @@ Colores de marca:
 - [ ] **SQL Supabase** (ejecutar manualmente): crear tablas `trabajadores`, `entregas_herramientas`, `entregas_herramientas_items` — scripts arriba en la sección de cada módulo
 - [ ] **SQL Supabase** (ejecutar manualmente): `supabase/migration_roles_y_perfiles.sql` — roles/perfiles, ver sección "Roles y Departamentos"
 - [ ] **SQL Supabase** (ejecutar manualmente): `supabase/migration_avance_obra_y_verificacion_ric.sql` — Trabajadores por obra, Avance de obra, Verificación RIC N°18/19 + bucket de Storage. Sin esto, `/avance-obra`, `/verificacion-ric` y la sección de trabajadores del hub de proyecto (`/proyectos/[id]`) fallan al consultar tablas que todavía no existen — el resto de la app no se ve afectado
-- [ ] Verificación RIC: agregar Anexo SAT por tablero, librería de tipos de tablero, y las 5 tablas de mediciones detalladas (quedaron fuera de la v1 a propósito)
+- [ ] **SQL Supabase** (ejecutar manualmente): `supabase/migration_verificacion_ric_sat.sql` y `supabase/migration_verificacion_ric_sat_items.sql` — Anexo SAT por tablero (checklist itemizado) + vínculo a Test de Alimentadores
 - [ ] Configurar `SUPABASE_SERVICE_ROLE_KEY` y `SMTP_*`/`ADMIN_SOFTWARE_EMAIL` en Vercel — sin esto el enrolamiento no invita usuarios ni avisa por correo
 - [ ] Aplicar permisos por departamento al resto de los módulos (hoy solo Materiales tiene el patrón completo) — uno por sesión, ver docs/departamentos/
 - [ ] Notificaciones push cuando stock cae bajo mínimo

@@ -92,21 +92,62 @@ export const NUCLEO_IEC_INSPECCION: { verificacion: string; clausula: string; me
   { verificacion: 'Funcionamiento operacional (mando/señalización)', clausula: '11.10', metodo: 'Funcional' },
 ]
 
-// Campo de resultado en verificaciones_ric_tableros ↔ los 5 ítems del
-// checklist consolidado — single source of truth para el formulario y la
-// impresión.
-export type CampoChecklistSat =
-  | 'resultado_ensayos_instrumento' | 'resultado_inspeccion' | 'resultado_requisitos_terreno'
-  | 'resultado_puntos_especificos' | 'resultado_registro_fotografico'
-
-export const ITEMS_CHECKLIST_SAT: { campo: CampoChecklistSat; texto: string }[] = [
-  { campo: 'resultado_ensayos_instrumento',  texto: '1. Ensayos con instrumento (continuidad, aislación, rigidez dieléctrica)' },
-  { campo: 'resultado_inspeccion',           texto: '2. Inspección visual, manual y funcional' },
-  { campo: 'resultado_requisitos_terreno',   texto: '3. Requisitos de terreno propios de SAT' },
-  { campo: 'resultado_puntos_especificos',   texto: '4. Puntos específicos según tipo de tablero' },
-  { campo: 'resultado_registro_fotografico', texto: '5. Registro fotográfico completo' },
-]
+// Único ítem del checklist que sigue consolidado (no se itemiza) — el
+// registro fotográfico general del tablero, que ya tiene su propio
+// foto_tomada/foto_url en verificaciones_ric_tableros.
+export const ITEM_REGISTRO_FOTOGRAFICO_SAT = '5. Registro fotográfico completo'
 
 export function getTipoTablero(id: string | null | undefined): TipoTablero | undefined {
   return TIPOS_TABLERO.find(t => t.id === id)
+}
+
+// ─────────────────────────────────────────────────────────────────────
+//  Checklist itemizado — 1 fila por punto de verificación (ver
+//  verificaciones_ric_tableros_items), igual de guiado que
+//  pruebas_alimentadores_items: cada punto tiene su propio Pasa/No
+//  pasa/N/A en vez de un único resultado por categoría completa.
+// ─────────────────────────────────────────────────────────────────────
+
+export type CategoriaChecklistSat = 'ensayos_instrumento' | 'inspeccion' | 'requisitos_terreno' | 'puntos_especificos'
+
+export const CATEGORIAS_CHECKLIST_SAT: { categoria: CategoriaChecklistSat; titulo: string }[] = [
+  { categoria: 'ensayos_instrumento', titulo: '1. Ensayos con instrumento' },
+  { categoria: 'inspeccion',          titulo: '2. Inspección visual, manual y funcional' },
+  { categoria: 'requisitos_terreno',  titulo: '3. Requisitos de terreno propios de SAT' },
+  { categoria: 'puntos_especificos',  titulo: '4. Puntos específicos según tipo de tablero' },
+]
+
+export interface ItemPlantillaSat { categoria: CategoriaChecklistSat; texto: string; orden: number }
+
+// Los 20 ítems fijos (siempre iguales, no dependen del tipo de tablero) —
+// textos idénticos a los usados en el backfill de
+// migration_verificacion_ric_sat_items.sql.
+const ITEMS_SAT_FIJOS: ItemPlantillaSat[] = [
+  ...NUCLEO_IEC_ENSAYOS.map((e, i): ItemPlantillaSat => ({
+    categoria: 'ensayos_instrumento', orden: i, texto: `${e.prueba} (cláusula ${e.clausula}, criterio ${e.criterio})`,
+  })),
+  ...NUCLEO_IEC_INSPECCION.map((e, i): ItemPlantillaSat => ({
+    categoria: 'inspeccion', orden: i, texto: `${e.verificacion} (cláusula ${e.clausula})`,
+  })),
+  ...REQUISITOS_TERRENO_SAT.map((texto, i): ItemPlantillaSat => ({ categoria: 'requisitos_terreno', orden: i, texto })),
+]
+
+// Ítems de "puntos específicos" — dependen del tipo de tablero elegido;
+// vacío si todavía no se eligió tipo (o no hay tipo listado).
+export function itemsPuntosEspecificos(tipoTableroId: string | null | undefined): ItemPlantillaSat[] {
+  const tipo = getTipoTablero(tipoTableroId)
+  if (!tipo) return []
+  return tipo.puntosEspecificos.map((texto, i): ItemPlantillaSat => ({ categoria: 'puntos_especificos', orden: i, texto }))
+}
+
+// Filas listas para insertar en verificaciones_ric_tableros_items al
+// crear un tablero nuevo (o al cambiar su tipo, solo para la categoría
+// puntos_especificos — ver ruta PATCH de tableros).
+export function filasItemsTablero(tableroEntryId: number, tipoTableroId?: string | null) {
+  return [...ITEMS_SAT_FIJOS, ...itemsPuntosEspecificos(tipoTableroId)].map(it => ({
+    tablero_entry_id: tableroEntryId,
+    categoria: it.categoria,
+    orden: it.orden,
+    texto: it.texto,
+  }))
 }
