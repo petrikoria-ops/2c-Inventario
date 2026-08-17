@@ -167,6 +167,7 @@ export default async function HomePage() {
                 href={a.href}
                 className="accion-card group"
                 style={{ '--accion-acento': a.acento } as React.CSSProperties}
+                {...(a.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
               >
                 <div className="flex items-center justify-between">
                   <div
@@ -215,7 +216,8 @@ export default async function HomePage() {
                 <div className="text-[11px] font-bold uppercase tracking-wider text-brand-n500 mb-2.5">{s.titulo}</div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
                   {s.items.map(i => (
-                    <Link key={i.href + i.titulo} href={i.href} className="tool-card group">
+                    <Link key={i.href + i.titulo} href={i.href} className="tool-card group"
+                      {...(i.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
                       <div
                         className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0
                                    transition-colors duration-200"

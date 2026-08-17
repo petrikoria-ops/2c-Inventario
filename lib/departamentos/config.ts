@@ -18,7 +18,7 @@ import {
   Calculator, CheckSquare, Bot,
   ShieldCheck, ShieldAlert, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
-  Truck, RotateCcw, FileText, MapPin,
+  Truck, RotateCcw, FileText, MapPin, UserPlus,
 } from 'lucide-react'
 
 export interface AccionRapida {
@@ -207,10 +207,12 @@ const RRHH: DeptConfig = {
   acento: A.rosa,
   acciones: [
     { href: '/trabajadores', Icon: Users, titulo: 'Trabajadores', desc: 'Ficha del personal activo', modulo: 'trabajadores', acento: A.rosa },
+    { href: 'https://docs.google.com/forms/d/e/1FAIpQLSfa4Z0rNP33EqJE8Mk1sJdX9DE_25ZuSjAmFB08cTNuHXsAzQ/viewform?usp=header', Icon: UserPlus, titulo: 'Ficha de ingreso', desc: 'Formulario para trabajadores nuevos', modulo: 'trabajadores', acento: A.violeta },
   ],
   herramientas: [
     { titulo: 'Personas', items: [
       { href: '/trabajadores', Icon: Users, titulo: 'Trabajadores', desc: 'Alta, edición y herramientas asignadas', modulo: 'trabajadores' },
+      { href: 'https://docs.google.com/forms/d/e/1FAIpQLSfa4Z0rNP33EqJE8Mk1sJdX9DE_25ZuSjAmFB08cTNuHXsAzQ/viewform?usp=header', Icon: UserPlus, titulo: 'Ficha de ingreso', desc: 'Formulario de ingreso para trabajadores nuevos', modulo: 'trabajadores' },
     ]},
   ],
 }
