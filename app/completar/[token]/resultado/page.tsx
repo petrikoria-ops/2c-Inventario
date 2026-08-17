@@ -6,6 +6,7 @@ import { ESTILOS_IMPRESION_DOCUMENTO } from '@/components/documentos/estilosDocu
 import PortadaDocumento from '@/components/documentos/PortadaDocumento'
 import PrintButton from '@/components/solicitudes/PrintButton'
 import { BLOQUES_RIC } from '@/lib/verificacionRic/plantilla'
+import { ITEMS_CHECKLIST_SAT, getTipoTablero } from '@/lib/verificacionRic/anexoSat'
 import { SECCIONES_DRS, SECCION_IMAGENES } from '@/lib/checklistDrs/plantilla'
 import { CATEGORIAS_CHECKLIST_FAENA } from '@/lib/prevencion/checklistFaena'
 import type { ModuloPublico } from '@/types'
@@ -33,6 +34,11 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
 
   let items: Record<string, any>[] = []
   let alimentadores: (Record<string, any> & { items: Record<string, any>[] })[] = []
+  let tableros: Record<string, any>[] = []
+  if (modulo === 'verificacion_ric') {
+    const { data } = await sb.from('verificaciones_ric_tableros').select('*').eq('verificacion_id', enlace.registro_id).order('orden')
+    tableros = data ?? []
+  }
   if (modulo === 'pruebas_alimentadores') {
     const [{ data: alims }, { data: todosLosItems }] = await Promise.all([
       sb.from('pruebas_alimentadores_alimentadores').select('*').eq('prueba_id', enlace.registro_id).order('orden'),
@@ -47,6 +53,7 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
   const paths = new Set<string>()
   items.forEach(i => { if (i.foto_url) paths.add(i.foto_url) })
   alimentadores.forEach(a => a.items.forEach(i => { if (i.foto_url) paths.add(i.foto_url) }))
+  tableros.forEach(t => { if (t.foto_url) paths.add(t.foto_url) })
   for (const campo of config.camposCabeceraEditables) {
     if (campo.endsWith('_imagen_url') && cabecera[campo]) paths.add(cabecera[campo])
   }
@@ -222,6 +229,54 @@ export default async function ResultadoPublicoPage({ params }: { params: { token
             </div>
           )
         })()}
+
+        {modulo === 'verificacion_ric' && tableros.length > 0 && (
+          <div className="doc-bloque mb-7">
+            <p className="doc-bloque-titulo font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Anexo Opcional — Checklist SAT por tablero</p>
+            {tableros.map(t => (
+              <div key={t.id} className="mb-4">
+                <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr>
+                      <th className="doc-th">Tablero N°</th><th className="doc-th">Nombre</th><th className="doc-th">Tipo</th>
+                      <th className="doc-th">Fabricante</th><th className="doc-th">Ui</th><th className="doc-th">In</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td className="doc-td">{t.numero_tablero ?? '—'}</td>
+                      <td className="doc-td">{t.nombre}</td>
+                      <td className="doc-td">{t.tipo ?? getTipoTablero(t.tipo_tablero_id)?.nombre ?? '—'}</td>
+                      <td className="doc-td">{t.fabricante ?? '—'}</td>
+                      <td className="doc-td">{t.ui ?? '—'}</td>
+                      <td className="doc-td">{t.in_nominal ?? '—'}</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                  <thead><tr><th className="doc-th">Checklist</th><th className="doc-th doc-th-r" style={{ width: 90 }}>Resultado</th></tr></thead>
+                  <tbody>
+                    {ITEMS_CHECKLIST_SAT.map((item, i) => (
+                      <tr key={item.campo} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
+                        <td className="doc-td">{item.texto}</td>
+                        <td className="doc-td-r" style={{ fontWeight: 600 }}>{t[item.campo] ? LABEL_RESULTADO[t[item.campo] as string] : '—'}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {t.foto_url && urls[t.foto_url] && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={urls[t.foto_url]} alt={`Foto de ${t.nombre}`} style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 4, marginBottom: 6 }} />
+                )}
+                {t.notas && (
+                  <div className="text-xs p-2 rounded" style={{ background: '#F5F6F7', color: '#4A5260', border: '1px solid #E2E4E7' }}>
+                    <strong style={{ color: '#2E333A' }}>Notas: </strong>{t.notas}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Cierre + firma(s) */}
         <div className="doc-cierre">

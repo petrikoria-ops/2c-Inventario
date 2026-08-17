@@ -28,6 +28,15 @@ export async function POST(req: NextRequest) {
 
   if (!body.proyecto_id) return NextResponse.json({ error: 'Selecciona una obra' }, { status: 400 })
 
+  // Alcance: al menos una de las dos partes tiene que aplicar. incluye_seccion_a
+  // define si se siembra la plantilla A.0-A.11 (~90 ítems) — queda fijo tras
+  // crear; incluye_anexo_sat se puede activar después porque no siembra nada.
+  const incluyeSeccionA = body.incluye_seccion_a !== false
+  const incluyeAnexoSat = body.incluye_anexo_sat === true
+  if (!incluyeSeccionA && !incluyeAnexoSat) {
+    return NextResponse.json({ error: 'Selecciona al menos un alcance: Sección A o Anexo SAT.' }, { status: 400 })
+  }
+
   let proyectoNombre: string | null = null
   const { data: proyecto } = await sb.from('proyectos').select('nombre').eq('id', body.proyecto_id).maybeSingle()
   proyectoNombre = proyecto?.nombre ?? null
@@ -59,6 +68,8 @@ export async function POST(req: NextRequest) {
         fecha_visita: body.fecha_visita || new Date().toISOString().slice(0, 10),
         inspectores: body.inspectores || null,
         num_tableros: body.num_tableros ? parseInt(body.num_tableros, 10) : null,
+        incluye_seccion_a: incluyeSeccionA,
+        incluye_anexo_sat: incluyeAnexoSat,
         creado_por: perfil?.id ?? null,
       })
       .select()
@@ -72,15 +83,19 @@ export async function POST(req: NextRequest) {
 
   // Sembrar ítems desde la plantilla — se copia el texto, no se referencia,
   // para que una verificación ya creada no cambie si la plantilla se edita.
-  const itemsRows = ITEMS_PLANTILLA_RIC.map(it => ({
-    verificacion_id: verificacion.id,
-    bloque: it.bloque,
-    tipo: it.tipo,
-    orden: it.orden,
-    texto: it.texto,
-  }))
-  const { error: itemsErr } = await sb.from('verificaciones_ric_items').insert(itemsRows)
-  if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 })
+  // Solo si incluye Sección A: una verificación "solo SAT" no lleva estos
+  // ~90 ítems (y no se pueden sembrar después — ver comentario de arriba).
+  if (incluyeSeccionA) {
+    const itemsRows = ITEMS_PLANTILLA_RIC.map(it => ({
+      verificacion_id: verificacion.id,
+      bloque: it.bloque,
+      tipo: it.tipo,
+      orden: it.orden,
+      texto: it.texto,
+    }))
+    const { error: itemsErr } = await sb.from('verificaciones_ric_items').insert(itemsRows)
+    if (itemsErr) return NextResponse.json({ error: itemsErr.message }, { status: 500 })
+  }
 
   return NextResponse.json({ id: verificacion.id, numero }, { status: 201 })
 }

@@ -1,20 +1,28 @@
 'use client'
+import { useState } from 'react'
 import Link from 'next/link'
 import { ShieldAlert, Plus } from 'lucide-react'
+import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
+import BotonEliminarFila from '@/components/ui/BotonEliminarFila'
 import type { InspeccionPrevencion } from '@/types'
 
 type InspeccionConConteo = InspeccionPrevencion & { hallazgos_count?: number }
 
 export default function TablaInspeccionesPrevencion({ initialData, editable }: { initialData: InspeccionConConteo[]; editable: boolean }) {
+  const [data, setData] = useState(initialData)
+
   return (
     <div className="panel">
       <div className="panel-header">
         <ShieldAlert size={14} style={{ color: 'var(--n-500)' }} />
         <h2>Inspecciones de faena (DS 594)</h2>
         {editable && (
-          <Link href="/prevencion-riesgos/nueva" className="btn btn-primary btn-sm ml-auto">
-            <Plus size={13} /> Nueva inspección
-          </Link>
+          <div className="flex gap-2 ml-auto">
+            <CompartirEnlaceModal modulo="prevencion_riesgos" registroId={null} label="Enlace en blanco" />
+            <Link href="/prevencion-riesgos/nueva" className="btn btn-primary btn-sm">
+              <Plus size={13} /> Nueva inspección
+            </Link>
+          </div>
         )}
       </div>
       <div className="overflow-x-auto">
@@ -27,10 +35,11 @@ export default function TablaInspeccionesPrevencion({ initialData, editable }: {
               <th className="th">Prevencionista</th>
               <th className="th">Estado</th>
               <th className="th text-right">Hallazgos abiertos</th>
+              {editable && <th className="th w-8" />}
             </tr>
           </thead>
           <tbody>
-            {initialData.map(i => (
+            {data.map(i => (
               <tr key={i.id} className="tr-hover">
                 <td className="td"><Link href={`/prevencion-riesgos/${i.id}`} className="code hover:underline">{i.numero}</Link></td>
                 <td className="td">{i.centro_trabajo}</td>
@@ -47,10 +56,17 @@ export default function TablaInspeccionesPrevencion({ initialData, editable }: {
                   )}
                   {!i.hallazgos_count && <span className="text-brand-n500 text-xs">0</span>}
                 </td>
+                {editable && (
+                  <td className="td">
+                    <BotonEliminarFila url={`/api/prevencion-riesgos/${i.id}`}
+                      confirmMessage={`¿Eliminar la inspección ${i.numero}? Esta acción no se puede deshacer.`}
+                      onDeleted={() => setData(prev => prev.filter(x => x.id !== i.id))} />
+                  </td>
+                )}
               </tr>
             ))}
-            {!initialData.length && (
-              <tr><td colSpan={6} className="text-center py-10 text-brand-n500">Sin inspecciones registradas</td></tr>
+            {!data.length && (
+              <tr><td colSpan={7} className="text-center py-10 text-brand-n500">Sin inspecciones registradas</td></tr>
             )}
           </tbody>
         </table>

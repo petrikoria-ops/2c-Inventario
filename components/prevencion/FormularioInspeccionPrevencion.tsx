@@ -9,6 +9,7 @@ import { NIVELES_RIESGO, getNivelRiesgo, type NivelRiesgo } from '@/lib/prevenci
 import { MEDIDAS_MP } from '@/lib/prevencion/medidasMp'
 import CampoFirma from '@/components/documentos/CampoFirma'
 import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
+import VincularObra from '@/components/shared/VincularObra'
 import ResultadoPillsPrevencion from './ResultadoPillsPrevencion'
 import BuscadorCatalogo from './BuscadorCatalogo'
 import BadgeNivel from './BadgeNivel'
@@ -145,6 +146,12 @@ export default function FormularioInspeccionPrevencion({ inspeccion, initialItem
           <div><span className="label block">N° trabajadores</span>{cabecera.n_trabajadores ?? '—'}</div>
           <div><span className="label block">Lugares inspeccionados</span>{cabecera.lugares_inspeccionados ?? '—'}</div>
         </div>
+        {editable && (
+          <div className="px-4 pb-3">
+            <VincularObra proyectoId={cabecera.proyecto_id} patchUrl={`/api/prevencion-riesgos/${inspeccion.id}`}
+              onVinculado={id => setCabecera(prev => ({ ...prev, proyecto_id: id }))} />
+          </div>
+        )}
       </div>
 
       {/* Resumen de hallazgos por nivel */}

@@ -368,6 +368,34 @@ export interface VerificacionRicItem {
   actualizado_en: string
 }
 
+// Anexo Opcional SAT por tablero — repetible (0..N por verificación),
+// resumen de 1 página con checklist consolidado de 5 ítems. Ver
+// lib/verificacionRic/anexoSat.ts para el detalle de cada ítem y la
+// librería de tipos de tablero.
+export interface VerificacionRicTablero {
+  id: number
+  verificacion_id: number
+  tablero_id: number | null
+  orden: number
+  numero_tablero: string | null
+  nombre: string
+  tipo: string | null
+  tipo_tablero_id: string | null
+  fabricante: string | null
+  ui: string | null
+  in_nominal: string | null
+  resultado_ensayos_instrumento: 'pasa' | 'no_pasa' | 'na' | null
+  resultado_inspeccion: 'pasa' | 'no_pasa' | 'na' | null
+  resultado_requisitos_terreno: 'pasa' | 'no_pasa' | 'na' | null
+  resultado_puntos_especificos: 'pasa' | 'no_pasa' | 'na' | null
+  resultado_registro_fotografico: 'pasa' | 'no_pasa' | 'na' | null
+  notas: string | null
+  foto_tomada: boolean
+  foto_url: string | null
+  creado_en: string
+  actualizado_en: string
+}
+
 export interface VerificacionRic {
   id: number
   numero: string
@@ -384,10 +412,16 @@ export interface VerificacionRic {
   firma_rut: string | null
   firma_cargo: string | null
   firma_imagen_url: string | null
+  // Alcance elegido al crear — incluye_seccion_a queda fijo (define si se
+  // sembró la plantilla A.0-A.11); incluye_anexo_sat se puede activar
+  // después porque no siembra nada.
+  incluye_seccion_a: boolean
+  incluye_anexo_sat: boolean
   creado_por: string | null
   creado_en: string
   actualizado_en: string
   verificaciones_ric_items?: VerificacionRicItem[]
+  verificaciones_ric_tableros?: VerificacionRicTablero[]
 }
 
 export interface ChecklistDrsItem {
@@ -530,6 +564,9 @@ export interface PruebaAlimentadores {
   firma_rut: string | null
   firma_cargo: string | null
   firma_imagen_url: string | null
+  // Vínculo opcional — permite reusar este informe como "Informe de
+  // Medición N°1" de una Verificación RIC en vez de duplicar datos.
+  verificacion_ric_id: number | null
   creado_por: string | null
   creado_en: string
   actualizado_en: string
@@ -577,7 +614,9 @@ export interface EnlacePublico {
   id: number
   token: string
   modulo: ModuloPublico
-  registro_id: number
+  // null = enlace "en blanco": todavía no existe el registro, lo crea la
+  // persona externa la primera vez que abre el link (ver /api/publico/[token]/crear).
+  registro_id: number | null
   descripcion: string | null
   activo: boolean
   expira_en: string

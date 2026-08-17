@@ -8,6 +8,8 @@ import type { Proyecto } from '@/types'
 interface Props {
   proyectos: Pick<Proyecto, 'id' | 'ot' | 'nombre' | 'cliente'>[]
   proyectoIdInicial: string
+  verificacionRicIdInicial?: string | null
+  verificacionRicNumero?: string | null
 }
 
 interface AlimentadorBorrador {
@@ -18,7 +20,7 @@ interface AlimentadorBorrador {
 
 const ALIMENTADOR_VACIO: AlimentadorBorrador = { nombre: '', proteccion_aguas_arriba: '', largo: '' }
 
-export default function NuevaPruebaAlimentadores({ proyectos, proyectoIdInicial }: Props) {
+export default function NuevaPruebaAlimentadores({ proyectos, proyectoIdInicial, verificacionRicIdInicial, verificacionRicNumero }: Props) {
   const [proyectoId, setProyectoId] = useState(proyectoIdInicial)
   const [clienteMandante, setCliente] = useState('')
   const [ubicacion, setUbicacion] = useState('')
@@ -74,6 +76,7 @@ export default function NuevaPruebaAlimentadores({ proyectos, proyectoIdInicial 
           inspectores,
           instrumento,
           alimentadores: alimentadoresValidos,
+          verificacion_ric_id: verificacionRicIdInicial ? parseInt(verificacionRicIdInicial, 10) : undefined,
         }),
       })
       const data = await res.json()
@@ -96,12 +99,19 @@ export default function NuevaPruebaAlimentadores({ proyectos, proyectoIdInicial 
         <a href="/pruebas-alimentadores" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
       </div>
 
+      {verificacionRicIdInicial && (
+        <div className="alert alert-blue mb-4 text-sm">
+          Se vinculará como Informe de Medición N°1 de la Verificación RIC {verificacionRicNumero ?? `#${verificacionRicIdInicial}`}.
+        </div>
+      )}
+
       <div className="panel">
         <div className="panel-header"><h2>Portada</h2></div>
         <div className="p-4 grid grid-cols-1 md:grid-cols-2 gap-3">
           <div className="col-span-2">
             <label className="label" htmlFor="alim-proyecto">Proyecto / Obra *</label>
-            <select id="alim-proyecto" className="select w-full" value={proyectoId} onChange={e => setProyectoId(e.target.value)}>
+            <select id="alim-proyecto" className="select w-full" value={proyectoId} disabled={!!verificacionRicIdInicial}
+              onChange={e => setProyectoId(e.target.value)}>
               <option value="">— Selecciona —</option>
               {proyectos.map(p => <option key={p.id} value={p.id}>{p.ot} — {p.nombre}</option>)}
             </select>

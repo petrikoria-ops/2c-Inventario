@@ -9,13 +9,14 @@
 // como para que forzar un tipo único no aporte, y esto ya es una capa
 // simplificada sobre los tipos reales (ver types/index.ts para el detalle).
 import { useState } from 'react'
-import { CheckCircle2, Printer } from 'lucide-react'
+import { CheckCircle2, Printer, Plus } from 'lucide-react'
 import { BLOQUES_RIC } from '@/lib/verificacionRic/plantilla'
 import { SECCIONES_DRS, SECCION_IMAGENES } from '@/lib/checklistDrs/plantilla'
 import { CATEGORIAS_CHECKLIST_FAENA } from '@/lib/prevencion/checklistFaena'
 import PillsPublico from './PillsPublico'
 import FotoCampoPublico from './FotoCampoPublico'
 import FirmaCampoPublico from './FirmaCampoPublico'
+import AnexoSatTableroPublico from './AnexoSatTableroPublico'
 import type { ModuloPublico } from '@/types'
 
 type Registro = Record<string, any>
@@ -26,6 +27,7 @@ interface Props {
   cabeceraInicial: Registro
   itemsIniciales: Registro[]
   alimentadoresIniciales: (Registro & { items: Registro[] })[]
+  tablerosIniciales: Registro[]
   fotosFirmadas: Record<string, string>
   yaCompletado: boolean
   completadoPorNombre: string | null
@@ -44,6 +46,8 @@ export default function FormularioPublico(props: Props) {
   const [cabecera, setCabecera] = useState<Registro>(props.cabeceraInicial)
   const [items, setItems] = useState<Registro[]>(props.itemsIniciales)
   const [alimentadores, setAlimentadores] = useState(props.alimentadoresIniciales)
+  const [tableros, setTableros] = useState<Registro[]>(props.tablerosIniciales)
+  const [agregandoTablero, setAgregandoTablero] = useState(false)
   const [enviado, setEnviado] = useState(props.yaCompletado)
   const [nombre, setNombre] = useState(props.completadoPorNombre ?? cabecera.firma_nombre ?? '')
   const [rut, setRut] = useState(props.completadoPorRut ?? cabecera.firma_rut ?? '')
@@ -71,6 +75,33 @@ export default function FormularioPublico(props: Props) {
     fetch(`/api/publico/${token}/cabecera`, {
       method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
     })
+  }
+
+  const patchTablero = (tableroId: number, patch: Registro) => {
+    setTableros(prev => prev.map(t => (t.id === tableroId ? { ...t, ...patch } : t)))
+    fetch(`/api/publico/${token}/tableros/${tableroId}`, {
+      method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(patch),
+    })
+  }
+
+  const agregarTablero = async () => {
+    setAgregandoTablero(true)
+    try {
+      const res = await fetch(`/api/publico/${token}/tableros`, {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ nombre: `Tablero ${tableros.length + 1}` }),
+      })
+      const data = await res.json()
+      if (res.ok) setTableros(prev => [...prev, data])
+    } finally {
+      setAgregandoTablero(false)
+    }
+  }
+
+  const quitarTablero = async (tableroId: number) => {
+    if (!confirm('¿Quitar este tablero del Anexo SAT?')) return
+    setTableros(prev => prev.filter(t => t.id !== tableroId))
+    fetch(`/api/publico/${token}/tableros/${tableroId}`, { method: 'DELETE' })
   }
 
   const enviar = async () => {
@@ -126,7 +157,15 @@ export default function FormularioPublico(props: Props) {
         </div>
       </div>
 
-      {modulo === 'verificacion_ric' && (
+      {modulo === 'verificacion_ric' && items.length === 0 && !cabecera.incluye_anexo_sat && (
+        <div className="panel">
+          <div className="p-4 text-sm text-brand-n500">
+            Esta verificación no incluye el checklist de Sección A — solo hace falta la firma más abajo.
+          </div>
+        </div>
+      )}
+
+      {modulo === 'verificacion_ric' && items.length > 0 && (
         <>
           {BLOQUES_RIC.filter(b => b.id !== 'CIERRE').map(b => (
             <div key={b.id} className="panel">
@@ -172,22 +211,45 @@ export default function FormularioPublico(props: Props) {
               </div>
             ))}
           </div>
+        </>
+      )}
 
+      {modulo === 'verificacion_ric' && cabecera.incluye_anexo_sat && (
+        <div>
+          <div className="flex items-center gap-2 mb-2 mt-2">
+            <h2 className="text-sm font-bold text-slate-800 flex-1">Anexo Opcional SAT — Checklist por tablero</h2>
+            <span className="text-xs text-brand-n500">{tableros.length} tablero{tableros.length !== 1 ? 's' : ''}</span>
+          </div>
+          {tableros.map(t => (
+            <AnexoSatTableroPublico key={t.id} token={token} entry={t}
+              previewUrlInicial={t.foto_url ? fotosFirmadas[t.foto_url] : undefined}
+              onPatch={patch => patchTablero(t.id, patch)} onDelete={() => quitarTablero(t.id)} />
+          ))}
           <div className="panel">
-            <div className="panel-header"><h2>Cierre</h2></div>
-            <div className="p-4 space-y-4">
-              <label className="flex items-center gap-2 text-sm">
-                <input type="checkbox" checked={!!cabecera.declaracion_conformidad}
-                  onChange={e => patchCabecera({ declaracion_conformidad: e.target.checked })} />
-                Declaración de conformidad para energización completada y firmada
-              </label>
-              <CamposFirmaTexto cabecera={cabecera} patchCabecera={patchCabecera} />
-              <FirmaCampoPublico token={token} campo="firma_imagen_url"
-                previewUrlInicial={cabecera.firma_imagen_url ? fotosFirmadas[cabecera.firma_imagen_url] ?? null : null}
-                onFirmaGuardada={path => patchCabecera({ firma_imagen_url: path })} />
+            <div className="p-4">
+              <button type="button" className="btn btn-outline btn-sm" disabled={agregandoTablero} onClick={agregarTablero}>
+                <Plus size={13} /> {agregandoTablero ? 'Agregando…' : 'Agregar tablero'}
+              </button>
             </div>
           </div>
-        </>
+        </div>
+      )}
+
+      {modulo === 'verificacion_ric' && (
+        <div className="panel">
+          <div className="panel-header"><h2>Cierre</h2></div>
+          <div className="p-4 space-y-4">
+            <label className="flex items-center gap-2 text-sm">
+              <input type="checkbox" checked={!!cabecera.declaracion_conformidad}
+                onChange={e => patchCabecera({ declaracion_conformidad: e.target.checked })} />
+              Declaración de conformidad para energización completada y firmada
+            </label>
+            <CamposFirmaTexto cabecera={cabecera} patchCabecera={patchCabecera} />
+            <FirmaCampoPublico token={token} campo="firma_imagen_url"
+              previewUrlInicial={cabecera.firma_imagen_url ? fotosFirmadas[cabecera.firma_imagen_url] ?? null : null}
+              onFirmaGuardada={path => patchCabecera({ firma_imagen_url: path })} />
+          </div>
+        </div>
       )}
 
       {modulo === 'checklist_drs' && (

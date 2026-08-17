@@ -5,7 +5,8 @@ import { getSignedUrls, getSignedUrlDeBucket } from '@/lib/supabase/storage'
 import { ESTILOS_IMPRESION_DOCUMENTO } from '@/components/documentos/estilosDocumento'
 import PortadaDocumento from '@/components/documentos/PortadaDocumento'
 import { BLOQUES_RIC, A0_COORDINACION, A0_INFORMES_PROPIOS_TERRENO } from '@/lib/verificacionRic/plantilla'
-import type { VerificacionRicItem } from '@/types'
+import { ITEMS_CHECKLIST_SAT, getTipoTablero } from '@/lib/verificacionRic/anexoSat'
+import type { VerificacionRicItem, VerificacionRicTablero, PruebaAlimentadores } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
@@ -16,15 +17,19 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
   const { data: verificacion, error } = await sb.from('verificaciones_ric').select('*').eq('id', params.id).single()
   if (error || !verificacion) notFound()
 
-  const { data: items } = await sb
-    .from('verificaciones_ric_items')
-    .select('*')
-    .eq('verificacion_id', params.id)
-    .order('bloque').order('orden')
+  const [{ data: items }, { data: tableros }, { data: alimentadores }] = await Promise.all([
+    sb.from('verificaciones_ric_items').select('*').eq('verificacion_id', params.id).order('bloque').order('orden'),
+    sb.from('verificaciones_ric_tableros').select('*').eq('verificacion_id', params.id).order('orden'),
+    sb.from('pruebas_alimentadores').select('id,numero,estado').eq('verificacion_ric_id', params.id),
+  ])
 
   const todosLosItems: VerificacionRicItem[] = items ?? []
+  const todosLosTableros: VerificacionRicTablero[] = tableros ?? []
+  const alimentadoresVinculados: Pick<PruebaAlimentadores, 'id' | 'numero' | 'estado'>[] = alimentadores ?? []
+
   const paths = todosLosItems.filter(i => i.foto_url).map(i => i.foto_url as string)
-  const urls = paths.length ? await getSignedUrls(sb, paths) : {}
+  const pathsTableros = todosLosTableros.filter(t => t.foto_url).map(t => t.foto_url as string)
+  const urls = paths.length || pathsTableros.length ? await getSignedUrls(sb, [...paths, ...pathsTableros]) : {}
   const firmaUrl = verificacion.firma_imagen_url
     ? await getSignedUrlDeBucket(sb, 'verificaciones-ric', verificacion.firma_imagen_url) : null
 
@@ -64,8 +69,8 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
           />
         </div>
 
-        {/* Bloques A.0 - A.11 */}
-        {BLOQUES_RIC.filter(b => b.id !== 'CIERRE').map(b => {
+        {/* Bloques A.0 - A.11 — solo si esta verificación incluye Sección A */}
+        {verificacion.incluye_seccion_a && BLOQUES_RIC.filter(b => b.id !== 'CIERRE').map(b => {
           const verif = porBloque(b.id).filter(i => i.tipo === 'verificacion')
           const fotos = porBloque(b.id).filter(i => i.tipo === 'foto')
           const nota  = porBloque(b.id).find(i => i.tipo === 'nota')
@@ -132,26 +137,85 @@ export default async function ImprimirVerificacionRicPage({ params }: { params: 
           )
         })}
 
-        {/* Registro fotográfico general + Cierre */}
+        {/* Registro fotográfico general + Informe de Medición N°1 + Anexo SAT + Cierre */}
         <div className="doc-cierre">
-          <p className="font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Registro fotográfico general de la visita</p>
-          <table className="w-full mb-6" style={{ borderCollapse: 'collapse' }}>
-            <thead><tr><th className="doc-th">Foto</th><th className="doc-th" style={{ width: 60 }}>Hecho</th><th className="doc-th" style={{ width: 90 }}>Imagen</th></tr></thead>
-            <tbody>
-              {porBloque('CIERRE').map((item, i) => (
-                <tr key={item.id} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
-                  <td className="doc-td">{item.texto}</td>
-                  <td className="doc-td">{item.foto_tomada ? '☑' : '☐'}</td>
-                  <td className="doc-td">
-                    {item.foto_url && urls[item.foto_url] ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={urls[item.foto_url]} alt="" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
-                    ) : '—'}
-                  </td>
-                </tr>
+          {verificacion.incluye_seccion_a && (
+            <>
+              <p className="font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Registro fotográfico general de la visita</p>
+              <table className="w-full mb-6" style={{ borderCollapse: 'collapse' }}>
+                <thead><tr><th className="doc-th">Foto</th><th className="doc-th" style={{ width: 60 }}>Hecho</th><th className="doc-th" style={{ width: 90 }}>Imagen</th></tr></thead>
+                <tbody>
+                  {porBloque('CIERRE').map((item, i) => (
+                    <tr key={item.id} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
+                      <td className="doc-td">{item.texto}</td>
+                      <td className="doc-td">{item.foto_tomada ? '☑' : '☐'}</td>
+                      <td className="doc-td">
+                        {item.foto_url && urls[item.foto_url] ? (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img src={urls[item.foto_url]} alt="" style={{ width: 60, height: 60, objectFit: 'cover', borderRadius: 4 }} />
+                        ) : '—'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </>
+          )}
+
+          {verificacion.incluye_seccion_a && alimentadoresVinculados.length > 0 && (
+            <div className="mb-6 text-xs" style={{ color: 'var(--n-500)' }}>
+              <p className="font-bold text-sm mb-1" style={{ color: '#2E333A' }}>Informe de Medición N°1 — Alimentadores</p>
+              <p>Continuidad y aislamiento por alimentador — ver informe(s) aparte: {alimentadoresVinculados.map(a => a.numero).join(', ')}.</p>
+            </div>
+          )}
+
+          {verificacion.incluye_anexo_sat && todosLosTableros.length > 0 && (
+            <div className="mb-6">
+              <p className="font-bold text-sm mb-2" style={{ color: '#2E333A' }}>Anexo Opcional — Checklist SAT por tablero</p>
+              {todosLosTableros.map(t => (
+                <div key={t.id} className="mb-4">
+                  <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr>
+                        <th className="doc-th">Tablero N°</th><th className="doc-th">Nombre</th><th className="doc-th">Tipo</th>
+                        <th className="doc-th">Fabricante</th><th className="doc-th">Ui</th><th className="doc-th">In</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td className="doc-td">{t.numero_tablero ?? '—'}</td>
+                        <td className="doc-td">{t.nombre}</td>
+                        <td className="doc-td">{t.tipo ?? getTipoTablero(t.tipo_tablero_id)?.nombre ?? '—'}</td>
+                        <td className="doc-td">{t.fabricante ?? '—'}</td>
+                        <td className="doc-td">{t.ui ?? '—'}</td>
+                        <td className="doc-td">{t.in_nominal ?? '—'}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <table className="w-full mb-2" style={{ borderCollapse: 'collapse' }}>
+                    <thead><tr><th className="doc-th">Checklist</th><th className="doc-th doc-th-r" style={{ width: 90 }}>Resultado</th></tr></thead>
+                    <tbody>
+                      {ITEMS_CHECKLIST_SAT.map((item, i) => (
+                        <tr key={item.campo} style={{ backgroundColor: i % 2 === 0 ? '#FFFFFF' : '#FAFBFC' }}>
+                          <td className="doc-td">{item.texto}</td>
+                          <td className="doc-td-r" style={{ fontWeight: 600 }}>{t[item.campo] ? LABEL_RESULTADO[t[item.campo] as string] : '—'}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                  {t.foto_url && urls[t.foto_url] && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={urls[t.foto_url]} alt={`Foto de ${t.nombre}`} style={{ width: 100, height: 100, objectFit: 'cover', borderRadius: 4, marginBottom: 6 }} />
+                  )}
+                  {t.notas && (
+                    <div className="text-xs p-2 rounded" style={{ background: '#F5F6F7', color: '#4A5260', border: '1px solid #E2E4E7' }}>
+                      <strong style={{ color: '#2E333A' }}>Notas: </strong>{t.notas}
+                    </div>
+                  )}
+                </div>
               ))}
-            </tbody>
-          </table>
+            </div>
+          )}
 
           <div className="mb-8 p-3 rounded-lg text-sm" style={{ background: verificacion.declaracion_conformidad ? '#ECFDF5' : '#F5F6F7', color: '#4A5260', border: '1px solid #E2E4E7' }}>
             <strong style={{ color: '#2E333A' }}>Declaración de conformidad para energización: </strong>

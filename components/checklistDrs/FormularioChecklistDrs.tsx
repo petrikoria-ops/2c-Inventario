@@ -7,6 +7,7 @@ import { useToast } from '@/contexts/ToastContext'
 import { SECCIONES_DRS, SECCION_IMAGENES } from '@/lib/checklistDrs/plantilla'
 import CampoFirma from '@/components/documentos/CampoFirma'
 import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
+import VincularObra from '@/components/shared/VincularObra'
 import ResultadoPills from '@/components/verificacionRic/ResultadoPills'
 import FotoUploadDrs from './FotoUploadDrs'
 import type { ChecklistDrs, ChecklistDrsItem } from '@/types'
@@ -135,6 +136,12 @@ export default function FormularioChecklistDrs({ checklist, initialItems, editab
           <div><span className="label block">Inspector(es)</span>{cabecera.inspectores ?? '—'}</div>
           <div><span className="label block">N° de tableros</span>{cabecera.num_tableros ?? '—'}</div>
         </div>
+        {editable && (
+          <div className="px-4 pb-3">
+            <VincularObra proyectoId={cabecera.proyecto_id} patchUrl={`/api/checklists-drs/${checklist.id}`}
+              onVinculado={(id, nombre) => setCabecera(prev => ({ ...prev, proyecto_id: id, proyecto_nombre: nombre }))} />
+          </div>
+        )}
       </div>
 
       {/* Secciones de medición */}

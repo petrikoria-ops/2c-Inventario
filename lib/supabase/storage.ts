@@ -17,6 +17,14 @@ export async function subirFotoVerificacion(
   return subirFoto(sb, BUCKET_RIC, `${verificacionId}/${itemId}`, file)
 }
 
+// Foto general del tablero en el Anexo Opcional SAT — mismo bucket que
+// Sección A, prefijo 'sat-' para no chocar con los paths de verificaciones_ric_items.
+export async function subirFotoAnexoSatTablero(
+  sb: SupabaseClient, verificacionId: number, tableroEntryId: number, file: File
+): Promise<string> {
+  return subirFoto(sb, BUCKET_RIC, `${verificacionId}/sat-${tableroEntryId}`, file)
+}
+
 export async function subirFotoHallazgoPrevencion(
   sb: SupabaseClient, inspeccionId: number, itemId: number, file: File
 ): Promise<string> {

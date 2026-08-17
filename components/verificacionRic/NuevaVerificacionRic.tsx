@@ -16,12 +16,15 @@ export default function NuevaVerificacionRic({ proyectos, proyectoIdInicial }: P
   const [fechaVisita, setFechaVisita] = useState(new Date().toISOString().slice(0, 10))
   const [inspectores, setInspectores] = useState('')
   const [numTableros, setNumTableros] = useState('')
+  const [incluyeSeccionA, setIncluyeSeccionA] = useState(true)
+  const [incluyeAnexoSat, setIncluyeAnexoSat] = useState(false)
   const [saving, setSaving] = useState(false)
   const { showToast } = useToast()
   const router = useRouter()
 
   const crear = async () => {
     if (!proyectoId) { showToast('Selecciona una obra', 'error'); return }
+    if (!incluyeSeccionA && !incluyeAnexoSat) { showToast('Selecciona al menos un alcance: Sección A o Anexo SAT', 'error'); return }
     setSaving(true)
     try {
       const res = await fetch('/api/verificacion-ric', {
@@ -34,6 +37,8 @@ export default function NuevaVerificacionRic({ proyectos, proyectoIdInicial }: P
           fecha_visita: fechaVisita,
           inspectores,
           num_tableros: numTableros,
+          incluye_seccion_a: incluyeSeccionA,
+          incluye_anexo_sat: incluyeAnexoSat,
         }),
       })
       const data = await res.json()
@@ -54,6 +59,24 @@ export default function NuevaVerificacionRic({ proyectos, proyectoIdInicial }: P
           <p className="text-sm text-brand-n500">Verificación inicial y puesta en marcha de la instalación</p>
         </div>
         <a href="/verificacion-ric" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+      </div>
+
+      <div className="panel">
+        <div className="panel-header"><h2>Alcance de esta verificación</h2></div>
+        <div className="p-4 space-y-2">
+          <p className="text-xs mb-1" style={{ color: 'var(--n-500)' }}>
+            Elige qué incluye esta verificación — se puede hacer solo el checklist de documentación,
+            solo los ensayos SAT por tablero, o ambos. Al menos uno tiene que estar marcado.
+          </p>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={incluyeSeccionA} onChange={e => setIncluyeSeccionA(e.target.checked)} />
+            Sección A — checklist de verificación inicial RIC N°18/19 (documentación + mediciones generales)
+          </label>
+          <label className="flex items-center gap-2 text-sm">
+            <input type="checkbox" checked={incluyeAnexoSat} onChange={e => setIncluyeAnexoSat(e.target.checked)} />
+            Anexo Opcional SAT — checklist por tablero (solo si lo exigen las ET o la inspección técnica)
+          </label>
+        </div>
       </div>
 
       <div className="panel">

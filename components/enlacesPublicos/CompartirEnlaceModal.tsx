@@ -10,8 +10,12 @@ import type { EnlacePublico, ModuloPublico } from '@/types'
 
 interface Props {
   modulo: ModuloPublico
-  registroId: number
-  numero: string
+  // null = enlace "en blanco" (todavía no hay registro, lo crea la persona
+  // externa desde cero) — usado desde la tabla/listado del módulo en vez
+  // del detalle de un registro puntual.
+  registroId: number | null
+  numero?: string
+  label?: string
 }
 
 function fechaPorDefecto(): string {
@@ -27,7 +31,7 @@ function estadoEnlace(e: EnlacePublico): { texto: string; clase: string } {
   return { texto: 'Activo', clase: 'badge-yellow' }
 }
 
-export default function CompartirEnlaceModal({ modulo, registroId, numero }: Props) {
+export default function CompartirEnlaceModal({ modulo, registroId, numero, label }: Props) {
   const [open, setOpen] = useState(false)
   const [cargando, setCargando] = useState(false)
   const [enlaces, setEnlaces] = useState<EnlacePublico[]>([])
@@ -40,7 +44,8 @@ export default function CompartirEnlaceModal({ modulo, registroId, numero }: Pro
   const cargar = async () => {
     setCargando(true)
     try {
-      const res = await fetch(`/api/enlaces-publicos?modulo=${modulo}&registro_id=${registroId}`)
+      const query = registroId ? `registro_id=${registroId}` : ''
+      const res = await fetch(`/api/enlaces-publicos?modulo=${modulo}&${query}`)
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'No se pudo cargar los enlaces')
       setEnlaces(data)
@@ -99,14 +104,15 @@ export default function CompartirEnlaceModal({ modulo, registroId, numero }: Pro
   return (
     <>
       <button className="btn btn-outline btn-sm" onClick={abrir}>
-        <Link2 size={13} /> Compartir enlace
+        <Link2 size={13} /> {label ?? 'Compartir enlace'}
       </button>
 
-      <Modal open={open} title={`Enlace público — ${numero}`} onClose={() => setOpen(false)} hideFooter wide>
+      <Modal open={open} title={numero ? `Enlace público — ${numero}` : 'Enlace en blanco'} onClose={() => setOpen(false)} hideFooter wide>
         <div className="space-y-4">
           <p className="text-sm text-brand-n500">
-            Genera un link para que alguien fuera de la app (sin cuenta) complete y firme esta verificación desde su
-            celular. Queda registrado en la app apenas lo envía.
+            {registroId
+              ? 'Genera un link para que alguien fuera de la app (sin cuenta) complete y firme esta verificación desde su celular. Queda registrado en la app apenas lo envía.'
+              : 'Genera un link en blanco para que alguien fuera de la app (sin cuenta) cree una verificación nueva desde cero — obra, datos generales, checklist y firma. Queda registrada en la app apenas la envía.'}
           </p>
 
           <div className="flex flex-col md:flex-row gap-2 md:items-end p-3 rounded-lg" style={{ background: '#F5F6F7' }}>
@@ -127,7 +133,11 @@ export default function CompartirEnlaceModal({ modulo, registroId, numero }: Pro
 
           <div>
             {cargando && <p className="text-sm text-brand-n500">Cargando enlaces…</p>}
-            {!cargando && !enlaces.length && <p className="text-sm text-brand-n500">Todavía no se ha compartido esta verificación.</p>}
+            {!cargando && !enlaces.length && (
+              <p className="text-sm text-brand-n500">
+                {registroId ? 'Todavía no se ha compartido esta verificación.' : 'Todavía no se ha generado ningún enlace en blanco.'}
+              </p>
+            )}
             <div className="divide-y" style={{ borderColor: '#EDEFF2' }}>
               {enlaces.map(enlace => {
                 const est = estadoEnlace(enlace)

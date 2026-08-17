@@ -3,6 +3,7 @@ import { getSupabaseAdmin } from '@/lib/supabase/admin'
 import { getSignedUrlDeBucket } from '@/lib/supabase/storage'
 import { CONFIG_MODULOS_PUBLICOS, esModuloPublico } from '@/lib/enlacesPublicos/modulos'
 import FormularioPublico from '@/components/enlacesPublicos/FormularioPublico'
+import CrearRegistroPublico from '@/components/enlacesPublicos/CrearRegistroPublico'
 import EnlaceNoDisponible from '@/components/enlacesPublicos/EnlaceNoDisponible'
 import type { ModuloPublico } from '@/types'
 
@@ -17,12 +18,25 @@ export default async function CompletarPage({ params }: { params: { token: strin
   if (new Date(enlace.expira_en) < new Date()) return <EnlaceNoDisponible motivo="vencido" />
 
   const modulo = enlace.modulo as ModuloPublico
+
+  // Enlace "en blanco" — todavía no hay registro, lo crea la persona
+  // externa desde cero.
+  if (!enlace.registro_id) {
+    return <CrearRegistroPublico token={params.token} modulo={modulo} />
+  }
+
   const config = CONFIG_MODULOS_PUBLICOS[modulo]
   const { data: cabecera } = await sb.from(config.tabla).select('*').eq('id', enlace.registro_id).maybeSingle()
   if (!cabecera) notFound()
 
   let items: Record<string, any>[] = []
   let alimentadores: (Record<string, any> & { items: Record<string, any>[] })[] = []
+  let tableros: Record<string, any>[] = []
+
+  if (modulo === 'verificacion_ric') {
+    const { data } = await sb.from('verificaciones_ric_tableros').select('*').eq('verificacion_id', enlace.registro_id).order('orden')
+    tableros = data ?? []
+  }
 
   if (modulo === 'pruebas_alimentadores') {
     const [{ data: alims }, { data: todosLosItems }] = await Promise.all([
@@ -43,6 +57,7 @@ export default async function CompletarPage({ params }: { params: { token: strin
   const paths = new Set<string>()
   items.forEach(i => { if (i.foto_url) paths.add(i.foto_url) })
   alimentadores.forEach(a => a.items.forEach(i => { if (i.foto_url) paths.add(i.foto_url) }))
+  tableros.forEach(t => { if (t.foto_url) paths.add(t.foto_url) })
   for (const campo of config.camposCabeceraEditables) {
     if (campo.endsWith('_imagen_url') && cabecera[campo]) paths.add(cabecera[campo])
   }
@@ -59,6 +74,7 @@ export default async function CompletarPage({ params }: { params: { token: strin
       cabeceraInicial={cabecera}
       itemsIniciales={items}
       alimentadoresIniciales={alimentadores}
+      tablerosIniciales={tableros}
       fotosFirmadas={fotosFirmadas}
       yaCompletado={!!enlace.completado_en}
       completadoPorNombre={enlace.completado_por_nombre}

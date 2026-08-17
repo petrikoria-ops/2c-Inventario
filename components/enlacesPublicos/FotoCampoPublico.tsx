@@ -9,9 +9,12 @@ interface Props {
   disabled?: boolean
   onUploaded: (path: string) => void
   onRemoved: () => void
+  // Ruta alternativa (ej. tableros del Anexo SAT, que no son "ítems") — si
+  // se pasa, el id ya va en la URL y no hace falta mandar itemId en el body.
+  endpoint?: string
 }
 
-export default function FotoCampoPublico({ token, itemId, previewUrlInicial, disabled, onUploaded, onRemoved }: Props) {
+export default function FotoCampoPublico({ token, itemId, previewUrlInicial, disabled, onUploaded, onRemoved, endpoint }: Props) {
   const [preview, setPreview] = useState<string | null>(previewUrlInicial ?? null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -24,9 +27,9 @@ export default function FotoCampoPublico({ token, itemId, previewUrlInicial, dis
     setError('')
     try {
       const form = new FormData()
-      form.append('itemId', String(itemId))
+      if (!endpoint) form.append('itemId', String(itemId))
       form.append('file', file)
-      const res = await fetch(`/api/publico/${token}/foto`, { method: 'POST', body: form })
+      const res = await fetch(endpoint ?? `/api/publico/${token}/foto`, { method: 'POST', body: form })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al subir la foto')
       setPreview(URL.createObjectURL(file))

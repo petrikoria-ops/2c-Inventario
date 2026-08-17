@@ -8,9 +8,10 @@ export const dynamic = 'force-dynamic'
 export default async function VerificacionRicDetallePage({ params }: { params: { id: string } }) {
   const sb = getSupabaseServer()
 
-  const [{ data: verificacion }, { data: items }, perfil] = await Promise.all([
+  const [{ data: verificacion }, { data: items }, { data: tableros }, perfil] = await Promise.all([
     sb.from('verificaciones_ric').select('*').eq('id', params.id).single(),
     sb.from('verificaciones_ric_items').select('*').eq('verificacion_id', params.id).order('bloque').order('orden'),
+    sb.from('verificaciones_ric_tableros').select('*').eq('verificacion_id', params.id).order('orden'),
     getPerfil(),
   ])
 
@@ -23,6 +24,7 @@ export default async function VerificacionRicDetallePage({ params }: { params: {
     <FormularioVerificacionRic
       verificacion={verificacion}
       initialItems={items ?? []}
+      initialTableros={tableros ?? []}
       editable={editable}
     />
   )

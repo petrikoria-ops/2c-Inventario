@@ -6,6 +6,7 @@ import { CheckCircle2, Printer, Plus, Trash2, Zap } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import CampoFirma from '@/components/documentos/CampoFirma'
 import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
+import VincularObra from '@/components/shared/VincularObra'
 import FotoUploadAlimentador from './FotoUploadAlimentador'
 import type { PruebaAlimentadores, PruebaAlimentadoresAlimentador, PruebaAlimentadoresItem } from '@/types'
 
@@ -137,6 +138,11 @@ export default function FormularioPruebaAlimentadores({ prueba, initialAlimentad
           <p className="text-sm text-brand-n500">
             {cabecera.proyecto_nombre} · {alimentadores.length} alimentador{alimentadores.length !== 1 ? 'es' : ''} · {conValor}/{totalItems} mediciones registradas
           </p>
+          {cabecera.verificacion_ric_id && (
+            <Link href={`/verificacion-ric/${cabecera.verificacion_ric_id}`} className="text-xs hover:underline" style={{ color: '#2563EB' }}>
+              Informe de Medición N°1 de esta Verificación RIC →
+            </Link>
+          )}
         </div>
         <div className="flex gap-2">
           <Link href={`/pruebas-alimentadores/${prueba.id}/imprimir`} className="btn btn-outline btn-sm">
@@ -161,6 +167,12 @@ export default function FormularioPruebaAlimentadores({ prueba, initialAlimentad
           <div><span className="label block">Inspector(es)</span>{cabecera.inspectores ?? '—'}</div>
           <div><span className="label block">Instrumento</span>{cabecera.instrumento ?? '—'}</div>
         </div>
+        {editable && (
+          <div className="px-4 pb-3">
+            <VincularObra proyectoId={cabecera.proyecto_id} patchUrl={`/api/pruebas-alimentadores/${prueba.id}`}
+              onVinculado={(id, nombre) => setCabecera(prev => ({ ...prev, proyecto_id: id, proyecto_nombre: nombre }))} />
+          </div>
+        )}
       </div>
 
       {/* Un panel por alimentador */}

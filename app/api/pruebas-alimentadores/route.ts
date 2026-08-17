@@ -68,6 +68,7 @@ export async function POST(req: NextRequest) {
         fecha_visita: body.fecha_visita || new Date().toISOString().slice(0, 10),
         inspectores: body.inspectores || null,
         instrumento: body.instrumento || null,
+        verificacion_ric_id: body.verificacion_ric_id || null,
         creado_por: perfil?.id ?? null,
       })
       .select()

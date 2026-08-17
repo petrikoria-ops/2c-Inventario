@@ -9,15 +9,19 @@ import CampoFirma from '@/components/documentos/CampoFirma'
 import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
 import ResultadoPills from './ResultadoPills'
 import FotoUpload from './FotoUpload'
-import type { VerificacionRic, VerificacionRicItem } from '@/types'
+import PanelAnexoSat from './PanelAnexoSat'
+import PanelAlimentadoresVinculados from './PanelAlimentadoresVinculados'
+import VincularObra from '@/components/shared/VincularObra'
+import type { VerificacionRic, VerificacionRicItem, VerificacionRicTablero } from '@/types'
 
 interface Props {
   verificacion: VerificacionRic
   initialItems: VerificacionRicItem[]
+  initialTableros: VerificacionRicTablero[]
   editable: boolean
 }
 
-export default function FormularioVerificacionRic({ verificacion, initialItems, editable }: Props) {
+export default function FormularioVerificacionRic({ verificacion, initialItems, initialTableros, editable }: Props) {
   const [items, setItems] = useState(initialItems)
   const [cabecera, setCabecera] = useState(verificacion)
   const [guardando, setGuardando] = useState<number | null>(null)
@@ -79,8 +83,16 @@ export default function FormularioVerificacionRic({ verificacion, initialItems, 
               {cabecera.estado === 'completa' ? 'Completa' : 'En progreso'}
             </span>
           </div>
-          <h1 className="text-lg font-bold text-slate-800">Verificación RIC N°18/19 — Sección A</h1>
-          <p className="text-sm text-brand-n500">{cabecera.proyecto_nombre} · {resueltos}/{totalItems} ítems resueltos</p>
+          <h1 className="text-lg font-bold text-slate-800">
+            Verificación RIC N°18/19
+            {cabecera.incluye_seccion_a && cabecera.incluye_anexo_sat && ' — Sección A + Anexo SAT'}
+            {cabecera.incluye_seccion_a && !cabecera.incluye_anexo_sat && ' — Sección A'}
+            {!cabecera.incluye_seccion_a && cabecera.incluye_anexo_sat && ' — Anexo SAT'}
+          </h1>
+          <p className="text-sm text-brand-n500">
+            {cabecera.proyecto_nombre}
+            {cabecera.incluye_seccion_a && ` · ${resueltos}/${totalItems} ítems resueltos`}
+          </p>
         </div>
         <div className="flex gap-2">
           <Link href={`/verificacion-ric/${verificacion.id}/imprimir`} className="btn btn-outline btn-sm">
@@ -105,10 +117,16 @@ export default function FormularioVerificacionRic({ verificacion, initialItems, 
           <div><span className="label block">Inspector(es)</span>{cabecera.inspectores ?? '—'}</div>
           <div><span className="label block">N° de tableros</span>{cabecera.num_tableros ?? '—'}</div>
         </div>
+        {editable && (
+          <div className="px-4 pb-3">
+            <VincularObra proyectoId={cabecera.proyecto_id} patchUrl={`/api/verificacion-ric/${verificacion.id}`}
+              onVinculado={(id, nombre) => setCabecera(prev => ({ ...prev, proyecto_id: id, proyecto_nombre: nombre }))} />
+          </div>
+        )}
       </div>
 
-      {/* Bloques A.0 - A.11 */}
-      {BLOQUES_RIC.filter(b => b.id !== 'CIERRE').map(b => (
+      {/* Bloques A.0 - A.11 — solo si esta verificación incluye Sección A */}
+      {cabecera.incluye_seccion_a && BLOQUES_RIC.filter(b => b.id !== 'CIERRE').map(b => (
         <div key={b.id} className="panel">
           <div className="panel-header">
             <h2>{b.id} {b.refNormativa && <span className="text-brand-n500 font-normal">— {b.refNormativa}</span>}: {b.titulo}</h2>
@@ -176,25 +194,48 @@ export default function FormularioVerificacionRic({ verificacion, initialItems, 
         </div>
       ))}
 
-      {/* Registro fotográfico general + Cierre */}
-      <div className="panel">
-        <div className="panel-header"><h2>Registro fotográfico general de la visita</h2></div>
-        <div className="divide-y" style={{ borderColor: '#EDEFF2' }}>
-          {porBloque('CIERRE').map(item => (
-            <div key={item.id} className="flex items-center gap-3 px-4 py-2.5">
-              <input type="checkbox" checked={item.foto_tomada} disabled={!editable}
-                onChange={e => patchItem(item.id, { foto_tomada: e.target.checked })}
-                className="cursor-pointer" aria-label={item.texto} />
-              <span className="flex-1 text-sm text-slate-600">{item.texto}</span>
-              <FotoUpload
-                verificacionId={verificacion.id} itemId={item.id} fotoUrl={item.foto_url} disabled={!editable}
-                onUploaded={path => patchItem(item.id, { foto_url: path, foto_tomada: true })}
-                onRemoved={() => patchItem(item.id, { foto_url: null })}
-              />
-            </div>
-          ))}
+      {/* Registro fotográfico general — solo si incluye Sección A */}
+      {cabecera.incluye_seccion_a && (
+        <div className="panel">
+          <div className="panel-header"><h2>Registro fotográfico general de la visita</h2></div>
+          <div className="divide-y" style={{ borderColor: '#EDEFF2' }}>
+            {porBloque('CIERRE').map(item => (
+              <div key={item.id} className="flex items-center gap-3 px-4 py-2.5">
+                <input type="checkbox" checked={item.foto_tomada} disabled={!editable}
+                  onChange={e => patchItem(item.id, { foto_tomada: e.target.checked })}
+                  className="cursor-pointer" aria-label={item.texto} />
+                <span className="flex-1 text-sm text-slate-600">{item.texto}</span>
+                <FotoUpload
+                  verificacionId={verificacion.id} itemId={item.id} fotoUrl={item.foto_url} disabled={!editable}
+                  onUploaded={path => patchItem(item.id, { foto_url: path, foto_tomada: true })}
+                  onRemoved={() => patchItem(item.id, { foto_url: null })}
+                />
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Informe de Medición N°1 — solo tiene sentido junto a Sección A,
+          que es donde A.1/A.2 lo referencian */}
+      {cabecera.incluye_seccion_a && (
+        <PanelAlimentadoresVinculados verificacionId={verificacion.id} proyectoId={cabecera.proyecto_id} />
+      )}
+
+      {/* Anexo Opcional SAT — repetible por tablero */}
+      {cabecera.incluye_anexo_sat ? (
+        <PanelAnexoSat verificacionId={verificacion.id} proyectoId={cabecera.proyecto_id} initialTableros={initialTableros} editable={editable} />
+      ) : editable && (
+        <div className="panel">
+          <div className="panel-header"><h2>Anexo Opcional SAT</h2></div>
+          <div className="p-4 flex items-center justify-between gap-3">
+            <p className="text-sm text-brand-n500">Esta verificación no incluye el Anexo SAT por tablero.</p>
+            <button type="button" className="btn btn-outline btn-sm" onClick={() => patchCabecera({ incluye_anexo_sat: true })}>
+              Activar Anexo SAT
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="panel">
         <div className="panel-header"><h2>Cierre</h2></div>
