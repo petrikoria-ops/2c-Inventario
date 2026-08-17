@@ -8,6 +8,7 @@ import {
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert, Zap,
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
+  ClipboardCheck,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { puedeVer, type Perfil, type Modulo, type Departamento } from '@/lib/auth/permisos'
@@ -58,6 +59,7 @@ const NAV: NavGroup[] = [
       { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros', modulo: 'proyectos' },
       { href: '/avance-obra', Icon: ListChecks,    label: 'Avance de obra',     modulo: 'avance_obra' },
       { href: '/verificacion-ric', Icon: ShieldCheck, label: 'Verificación RIC', modulo: 'verificacion_ric' },
+      { href: '/checklist-drs', Icon: ClipboardCheck, label: 'Checklist DRS', modulo: 'checklist_drs' },
       { href: '/pruebas-alimentadores', Icon: Zap, label: 'Test de Alimentadores', modulo: 'pruebas_alimentadores' },
       { href: '/prevencion-riesgos', Icon: ShieldAlert, label: 'Inspección de riesgos', modulo: 'prevencion_riesgos' },
       { href: '/proveedores', Icon: Building2,     label: 'Proveedores', modulo: 'proveedores' },

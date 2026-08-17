@@ -5,24 +5,26 @@ import { BadgeEstadoProy } from '@/components/ui/Badge'
 import TrabajadoresObra from './TrabajadoresObra'
 import AvanceObra from './AvanceObra'
 import TablerosObra from './TablerosObra'
-import type { Proyecto, ProyectoTrabajador, AvanceObra as AvanceObraType, AvanceObraItem, VerificacionRic, Tablero } from '@/types'
+import type { Proyecto, ProyectoTrabajador, AvanceObra as AvanceObraType, AvanceObraItem, VerificacionRic, ChecklistDrs, Tablero } from '@/types'
 
 interface Props {
   proyecto: Proyecto
   initialTrabajadores: ProyectoTrabajador[]
   initialAvance: (AvanceObraType & { avances_obra_items: AvanceObraItem[] }) | null
   verificaciones: Pick<VerificacionRic, 'id' | 'numero' | 'fecha_visita' | 'estado'>[]
+  checklistsDrs: Pick<ChecklistDrs, 'id' | 'numero' | 'fecha_visita' | 'estado'>[]
   initialTableros: Tablero[] | null
   editableProyecto: boolean
   editableAvance: boolean
   editableRic: boolean
+  editableDrs: boolean
   editableTableros: boolean
   puedeEstructurarAvance: boolean
 }
 
 export default function ProyectoHub({
-  proyecto, initialTrabajadores, initialAvance, verificaciones, initialTableros,
-  editableProyecto, editableAvance, editableRic, editableTableros, puedeEstructurarAvance,
+  proyecto, initialTrabajadores, initialAvance, verificaciones, checklistsDrs, initialTableros,
+  editableProyecto, editableAvance, editableRic, editableDrs, editableTableros, puedeEstructurarAvance,
 }: Props) {
   return (
     <div className="p-5 w-full max-w-5xl mx-auto">
@@ -74,6 +76,38 @@ export default function ProyectoHub({
                   <span className="text-xs text-brand-n500">{new Date(v.fecha_visita).toLocaleDateString('es-CL')}</span>
                   <span className={`badge ml-auto ${v.estado === 'completa' ? 'badge-green' : 'badge-yellow'}`}>
                     {v.estado === 'completa' ? 'Completa' : 'En progreso'}
+                  </span>
+                  <ArrowRight size={14} className="text-slate-300" />
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Checklists DRS */}
+        <div className="panel">
+          <div className="panel-header">
+            <ClipboardCheck size={14} style={{ color: 'var(--n-500)' }} />
+            <h2>Checklist DRS</h2>
+            {editableDrs && (
+              <Link href={`/checklist-drs/nueva?proyecto=${proyecto.id}`} className="btn btn-primary btn-sm ml-auto">
+                <Plus size={13} /> Nuevo
+              </Link>
+            )}
+          </div>
+          {checklistsDrs.length === 0 ? (
+            <div className="p-6 text-center text-brand-n500 text-sm">
+              Esta obra todavía no tiene ningún checklist DRS registrado.
+            </div>
+          ) : (
+            <div className="divide-y" style={{ borderColor: '#EDEFF2' }}>
+              {checklistsDrs.map(c => (
+                <Link key={c.id} href={`/checklist-drs/${c.id}`}
+                  className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 transition-colors">
+                  <span className="code">{c.numero}</span>
+                  <span className="text-xs text-brand-n500">{new Date(c.fecha_visita).toLocaleDateString('es-CL')}</span>
+                  <span className={`badge ml-auto ${c.estado === 'completa' ? 'badge-green' : 'badge-yellow'}`}>
+                    {c.estado === 'completa' ? 'Completa' : 'En progreso'}
                   </span>
                   <ArrowRight size={14} className="text-slate-300" />
                 </Link>

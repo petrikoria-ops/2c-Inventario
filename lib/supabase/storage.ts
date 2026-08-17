@@ -9,6 +9,7 @@ const BUCKET_RIC = 'verificaciones-ric'
 const BUCKET_PREVENCION = 'prevencion-riesgos'
 const BUCKET_ALIMENTADORES = 'pruebas-alimentadores'
 const BUCKET_DOCUMENTOS_TRABAJADOR = 'documentos-trabajador'
+const BUCKET_CHECKLIST_DRS = 'checklists-drs'
 
 export async function subirFotoVerificacion(
   sb: SupabaseClient, verificacionId: number, itemId: number, file: File
@@ -26,6 +27,12 @@ export async function subirFotoAlimentador(
   sb: SupabaseClient, pruebaId: number, itemId: number, file: File
 ): Promise<string> {
   return subirFoto(sb, BUCKET_ALIMENTADORES, `${pruebaId}/${itemId}`, file)
+}
+
+export async function subirFotoChecklistDrs(
+  sb: SupabaseClient, checklistId: number, itemId: number, file: File
+): Promise<string> {
+  return subirFoto(sb, BUCKET_CHECKLIST_DRS, `${checklistId}/${itemId}`, file)
 }
 
 // Firma dibujada a mano (PNG del canvas de FirmaCanvas) — mismo criterio que
@@ -105,6 +112,19 @@ export async function getSignedUrlAlimentador(sb: SupabaseClient, path: string, 
 export async function getSignedUrlsAlimentador(sb: SupabaseClient, paths: string[], expiresIn = 3600): Promise<Record<string, string>> {
   if (!paths.length) return {}
   const { data } = await sb.storage.from(BUCKET_ALIMENTADORES).createSignedUrls(paths, expiresIn)
+  const map: Record<string, string> = {}
+  data?.forEach(d => { if (d.signedUrl && d.path) map[d.path] = d.signedUrl })
+  return map
+}
+
+export async function getSignedUrlChecklistDrs(sb: SupabaseClient, path: string, expiresIn = 3600): Promise<string | null> {
+  const { data } = await sb.storage.from(BUCKET_CHECKLIST_DRS).createSignedUrl(path, expiresIn)
+  return data?.signedUrl ?? null
+}
+
+export async function getSignedUrlsChecklistDrs(sb: SupabaseClient, paths: string[], expiresIn = 3600): Promise<Record<string, string>> {
+  if (!paths.length) return {}
+  const { data } = await sb.storage.from(BUCKET_CHECKLIST_DRS).createSignedUrls(paths, expiresIn)
   const map: Record<string, string> = {}
   data?.forEach(d => { if (d.signedUrl && d.path) map[d.path] = d.signedUrl })
   return map

@@ -18,7 +18,7 @@ import {
   Calculator, CheckSquare, Bot,
   ShieldCheck, ShieldAlert, BarChart3, Warehouse, Hammer,
   DraftingCompass, HeartPulse, Crown, LayoutGrid, FileBarChart,
-  Truck, RotateCcw, FileText, MapPin, UserPlus,
+  Truck, RotateCcw, FileText, MapPin, UserPlus, ClipboardCheck,
 } from 'lucide-react'
 
 export interface AccionRapida {
@@ -230,6 +230,7 @@ const DIRECTIVA: DeptConfig = {
     { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras activas',  desc: 'Estado de cada proyecto', modulo: 'proyectos', acento: A.ambar },
     { href: '/avance-obra', Icon: ListChecks,  titulo: 'Avance de obra', desc: 'Etapas por proyecto', modulo: 'avance_obra', acento: A.teal },
     { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric', acento: A.verde },
+    { href: '/checklist-drs', Icon: ClipboardCheck, titulo: 'Checklist DRS', desc: 'Protocolo de inspección técnica', modulo: 'checklist_drs', acento: A.teal },
     { href: '/agente',     Icon: Bot,          titulo: 'Agente IA',      desc: 'Pregunta por el negocio', modulo: 'agente', acento: A.violeta },
     { href: '/materiales', Icon: Package,      titulo: 'Inventario',     desc: 'Valor y existencias', modulo: 'materiales', acento: A.pizarra },
   ],
@@ -242,6 +243,7 @@ const DIRECTIVA: DeptConfig = {
     { titulo: 'Terreno', items: [
       { href: '/avance-obra',      Icon: ListChecks,  titulo: 'Avance de obra',    desc: 'Plan de etapas por obra', modulo: 'avance_obra' },
       { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC',  desc: 'Verificación inicial y puesta en marcha', modulo: 'verificacion_ric' },
+      { href: '/checklist-drs',    Icon: ClipboardCheck, titulo: 'Checklist DRS',  desc: 'Protocolo de inspección técnica DRS', modulo: 'checklist_drs' },
       { href: '/pedidos-bodega',   Icon: Truck,       titulo: 'Pedidos a bodega',  desc: 'Material contra stock existente', modulo: 'pedidos_bodega' },
     ]},
     { titulo: 'Inventario y compras', items: [
@@ -276,6 +278,7 @@ const SUPERVISION_TERRENO: DeptConfig = {
   acciones: [
     { href: '/avance-obra',              Icon: ListChecks,  titulo: 'Avance de obra',      desc: 'Marcar etapas completadas',        modulo: 'avance_obra',          acento: A.teal },
     { href: '/verificacion-ric/nueva',   Icon: ShieldCheck, titulo: 'Verificación RIC',    desc: 'Puesta en marcha N°18/19',         modulo: 'verificacion_ric',     acento: A.verde },
+    { href: '/checklist-drs/nueva',      Icon: ClipboardCheck, titulo: 'Checklist DRS',    desc: 'Protocolo de inspección técnica',  modulo: 'checklist_drs',        acento: A.teal },
     { href: '/pruebas-alimentadores/nueva', Icon: ShieldAlert, titulo: 'Test de alimentadores', desc: 'Pruebas SAT',                 modulo: 'pruebas_alimentadores', acento: A.indigo },
     { href: '/pedidos-bodega/nueva',     Icon: Truck,       titulo: 'Pedido a bodega',     desc: 'Material contra stock existente',  modulo: 'pedidos_bodega',       acento: A.azul },
     { href: '/solicitudes/nueva',        Icon: ShoppingCart,titulo: 'Solicitud de compra', desc: 'Pedir material a un proveedor',    modulo: 'compras',              acento: A.ambar },
@@ -285,6 +288,7 @@ const SUPERVISION_TERRENO: DeptConfig = {
       { href: '/proyectos',              Icon: ClipboardList, titulo: 'Obras activas',       desc: 'Buscar tu obra asignada',            modulo: 'proyectos' },
       { href: '/avance-obra',            Icon: ListChecks,    titulo: 'Avance de obra',       desc: 'Plan de etapas por obra',            modulo: 'avance_obra' },
       { href: '/verificacion-ric',       Icon: ShieldCheck,   titulo: 'Verificación RIC',     desc: 'Historial de verificaciones',        modulo: 'verificacion_ric' },
+      { href: '/checklist-drs',          Icon: ClipboardCheck, titulo: 'Checklist DRS',       desc: 'Historial de checklists DRS',        modulo: 'checklist_drs' },
       { href: '/pruebas-alimentadores',  Icon: ShieldAlert,   titulo: 'Test de alimentadores', desc: 'Pruebas SAT registradas',           modulo: 'pruebas_alimentadores' },
     ]},
     { titulo: 'Abastecimiento', items: [

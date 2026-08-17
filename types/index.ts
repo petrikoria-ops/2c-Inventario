@@ -390,6 +390,44 @@ export interface VerificacionRic {
   verificaciones_ric_items?: VerificacionRicItem[]
 }
 
+export interface ChecklistDrsItem {
+  id: number
+  checklist_id: number
+  seccion: string
+  tipo: 'medicion' | 'foto'
+  orden: number
+  etiqueta: string
+  referencia: string | null
+  valor: string | null
+  estado: 'pasa' | 'no_pasa' | 'na' | null
+  foto_tomada: boolean
+  foto_url: string | null
+  editable_fila: boolean
+  notas: string | null
+  actualizado_en: string
+}
+
+export interface ChecklistDrs {
+  id: number
+  numero: string
+  proyecto_id: number | null
+  proyecto_nombre: string | null
+  cliente_mandante: string | null
+  ubicacion: string | null
+  fecha_visita: string
+  inspectores: string | null
+  num_tableros: number | null
+  estado: 'en_progreso' | 'completa'
+  firma_nombre: string | null
+  firma_rut: string | null
+  firma_cargo: string | null
+  firma_imagen_url: string | null
+  creado_por: string | null
+  creado_en: string
+  actualizado_en: string
+  checklists_drs_items?: ChecklistDrsItem[]
+}
+
 export interface CatalogoHallazgo {
   id: string
   checklist_n: number | null
