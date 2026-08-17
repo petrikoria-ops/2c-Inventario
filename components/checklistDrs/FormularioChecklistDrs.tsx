@@ -6,6 +6,7 @@ import { CheckCircle2, Printer, Plus, Trash2, Camera as CameraIcon } from 'lucid
 import { useToast } from '@/contexts/ToastContext'
 import { SECCIONES_DRS, SECCION_IMAGENES } from '@/lib/checklistDrs/plantilla'
 import CampoFirma from '@/components/documentos/CampoFirma'
+import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
 import ResultadoPills from '@/components/verificacionRic/ResultadoPills'
 import FotoUploadDrs from './FotoUploadDrs'
 import type { ChecklistDrs, ChecklistDrsItem } from '@/types'
@@ -115,6 +116,7 @@ export default function FormularioChecklistDrs({ checklist, initialItems, editab
           <Link href={`/checklist-drs/${checklist.id}/imprimir`} className="btn btn-outline btn-sm">
             <Printer size={13} /> Ver / Imprimir
           </Link>
+          {editable && <CompartirEnlaceModal modulo="checklist_drs" registroId={checklist.id} numero={cabecera.numero} />}
           {editable && cabecera.estado !== 'completa' && (
             <button className="btn btn-primary btn-sm" onClick={marcarCompleta}>
               <CheckCircle2 size={13} /> Marcar como completa

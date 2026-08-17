@@ -5,6 +5,7 @@ import Link from 'next/link'
 import { CheckCircle2, Printer, Plus, Trash2, Zap } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import CampoFirma from '@/components/documentos/CampoFirma'
+import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
 import FotoUploadAlimentador from './FotoUploadAlimentador'
 import type { PruebaAlimentadores, PruebaAlimentadoresAlimentador, PruebaAlimentadoresItem } from '@/types'
 
@@ -141,6 +142,7 @@ export default function FormularioPruebaAlimentadores({ prueba, initialAlimentad
           <Link href={`/pruebas-alimentadores/${prueba.id}/imprimir`} className="btn btn-outline btn-sm">
             <Printer size={13} /> Ver / Imprimir
           </Link>
+          {editable && <CompartirEnlaceModal modulo="pruebas_alimentadores" registroId={prueba.id} numero={cabecera.numero} />}
           {editable && cabecera.estado !== 'completa' && (
             <button className="btn btn-primary btn-sm" onClick={marcarCompleta}>
               <CheckCircle2 size={13} /> Marcar como completa

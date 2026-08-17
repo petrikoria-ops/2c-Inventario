@@ -569,6 +569,27 @@ export interface PerfilDirectorio {
   puesto: string
 }
 
+// Enlaces públicos (sin login) para que alguien externo llene una
+// verificación ya creada — ver lib/enlacesPublicos/modulos.ts.
+export type ModuloPublico = 'verificacion_ric' | 'checklist_drs' | 'prevencion_riesgos' | 'pruebas_alimentadores'
+
+export interface EnlacePublico {
+  id: number
+  token: string
+  modulo: ModuloPublico
+  registro_id: number
+  descripcion: string | null
+  activo: boolean
+  expira_en: string
+  creado_por: string | null
+  creado_por_nombre: string | null
+  creado_en: string
+  ultima_actividad_en: string | null
+  completado_en: string | null
+  completado_por_nombre: string | null
+  completado_por_rut: string | null
+}
+
 export type ModuloTarea = 'pruebas_alimentadores' | 'verificacion_ric' | 'prevencion_riesgos' | 'avance_obra'
 export type EstadoTarea = 'pendiente' | 'aceptada' | 'rechazada' | 'completada'
 

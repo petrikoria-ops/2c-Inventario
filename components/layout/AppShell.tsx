@@ -30,7 +30,9 @@ export default function AppShell({
 }) {
   const pathname = usePathname()
 
-  if (SIN_SIDEBAR.includes(pathname)) return <>{children}</>
+  // /completar/[token] es dinámica (token en la URL) — no calza con el
+  // .includes() de rutas fijas de arriba, por eso el prefijo aparte.
+  if (SIN_SIDEBAR.includes(pathname) || pathname.startsWith('/completar/')) return <>{children}</>
 
   return (
     <div className="flex min-h-screen">

@@ -37,11 +37,16 @@ export async function middleware(req: NextRequest) {
   // /crear-password también es pública: el link del correo de invitación
   // llega sin sesión (los tokens vienen en la URL) — la sesión recién se
   // arma en el navegador cuando esa página carga y procesa el código.
+  // /completar/[token] es el enlace público que se manda a alguien ajeno a
+  // la app para que llene/firme una verificación — llega sin sesión, y su
+  // control de acceso es el token (ver lib/enlacesPublicos/token.server.ts),
+  // no esta cookie de sesión.
   const isPublicPage =
     path === '/login' ||
     path === '/solicitar-acceso' ||
     path === '/crear-password' ||
-    path === '/auth/callback'
+    path === '/auth/callback' ||
+    path.startsWith('/completar/')
 
   const isPendingPage = path === '/pendiente-aprobacion'
 
@@ -59,7 +64,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(url)
   }
 
-   if (session && isPublicPage && path !== '/crear-password' && path !== '/auth/callback') {
+   if (session && isPublicPage && path !== '/crear-password' && path !== '/auth/callback' && !path.startsWith('/completar/')) {
      const url = req.nextUrl.clone()
      url.pathname = '/'
      url.search = ''

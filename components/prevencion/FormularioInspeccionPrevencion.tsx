@@ -8,6 +8,7 @@ import { CATEGORIAS_CHECKLIST_FAENA } from '@/lib/prevencion/checklistFaena'
 import { NIVELES_RIESGO, getNivelRiesgo, type NivelRiesgo } from '@/lib/prevencion/clasificacionRiesgo'
 import { MEDIDAS_MP } from '@/lib/prevencion/medidasMp'
 import CampoFirma from '@/components/documentos/CampoFirma'
+import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
 import ResultadoPillsPrevencion from './ResultadoPillsPrevencion'
 import BuscadorCatalogo from './BuscadorCatalogo'
 import BadgeNivel from './BadgeNivel'
@@ -124,6 +125,7 @@ export default function FormularioInspeccionPrevencion({ inspeccion, initialItem
           <Link href={`/prevencion-riesgos/${inspeccion.id}/imprimir`} className="btn btn-outline btn-sm">
             <Printer size={13} /> Ver / Imprimir
           </Link>
+          {editable && <CompartirEnlaceModal modulo="prevencion_riesgos" registroId={inspeccion.id} numero={cabecera.numero} />}
           {editable && cabecera.estado !== 'completa' && (
             <button className="btn btn-primary btn-sm" onClick={marcarCompleta}>
               <CheckCircle2 size={13} /> Marcar como completa

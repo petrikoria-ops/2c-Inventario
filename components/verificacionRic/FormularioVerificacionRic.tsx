@@ -6,6 +6,7 @@ import { CheckCircle2, Printer } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
 import { BLOQUES_RIC, A0_COORDINACION, A0_INFORMES_PROPIOS_TERRENO } from '@/lib/verificacionRic/plantilla'
 import CampoFirma from '@/components/documentos/CampoFirma'
+import CompartirEnlaceModal from '@/components/enlacesPublicos/CompartirEnlaceModal'
 import ResultadoPills from './ResultadoPills'
 import FotoUpload from './FotoUpload'
 import type { VerificacionRic, VerificacionRicItem } from '@/types'
@@ -85,6 +86,7 @@ export default function FormularioVerificacionRic({ verificacion, initialItems, 
           <Link href={`/verificacion-ric/${verificacion.id}/imprimir`} className="btn btn-outline btn-sm">
             <Printer size={13} /> Ver / Imprimir
           </Link>
+          {editable && <CompartirEnlaceModal modulo="verificacion_ric" registroId={verificacion.id} numero={cabecera.numero} />}
           {editable && cabecera.estado !== 'completa' && (
             <button className="btn btn-primary btn-sm" onClick={marcarCompleta}>
               <CheckCircle2 size={13} /> Marcar como completa
