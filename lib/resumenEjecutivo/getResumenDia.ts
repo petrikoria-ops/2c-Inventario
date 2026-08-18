@@ -11,10 +11,10 @@ import {
   ArrowUpDown, PackageOpen, HardHat, ShoppingCart, ListChecks, ShieldCheck,
   ClipboardList, CheckSquare, PackageX, Wrench, Search, ShieldAlert, LayoutGrid, FileText,
 } from 'lucide-react'
-import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
 import { puedeVer, type Perfil, type Modulo } from '@/lib/auth/permisos'
 import { GRUPOS_DOCUMENTOS } from '@/lib/departamentos/documentosTrabajador'
+import type { MaterialAlerta } from '@/lib/supabase/fetchAll'
 
 const CATEGORIAS_RRHH = GRUPOS_DOCUMENTOS.find(g => g.modulo === 'trabajadores')!.categorias.map(c => c.value)
 const CATEGORIAS_PREVENCION_DOCS = GRUPOS_DOCUMENTOS.find(g => g.modulo === 'prevencion_riesgos')!.categorias.map(c => c.value)
@@ -61,7 +61,11 @@ const puedeVerModulo = (perfil: Perfil | null, modulo: Modulo) => !perfil || pue
 
 const MENSAJE_SIN_ACTIVIDAD = 'No se registraron movimientos relevantes durante esta jornada.'
 
-export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil | null): Promise<ResumenEjecutivoDia> {
+// `materiales` viene ya cargado desde HomePage (app/page.tsx) — esta misma
+// tabla completa (2000+ filas, paginada) se pedía OTRA VEZ acá adentro y una
+// tercera vez en el Widget del departamento, las 3 en la misma carga del
+// home. Recibirla como parámetro evita repetir esa consulta.
+export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil | null, materiales: MaterialAlerta[]): Promise<ResumenEjecutivoDia> {
   const ahora = new Date()
   // Mismo patrón que startOfMonth en dashboard/page.tsx y WidgetBodega —
   // sin conversión de zona horaria explícita, para no introducir un
@@ -98,7 +102,6 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   const misHerramientasQuery = verHerramientas && !esJefe && perfil?.nombre_completo
 
   const [
-    materiales,
     herRep, herExt, entregasHoy, misHerramientas,
     movHoy, valesHoy,
     solNuevasHoy, solRecibidasHoy, solPend,
@@ -108,12 +111,6 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
     docsVencenRrhh, docsVencenPrev,
     tareas,
   ] = await Promise.all([
-    verMateriales
-      ? fetchAllMateriales<{ id: number; codigo: string; descripcion: string; stock_actual: number; stock_minimo: number }>(
-          sb, 'id,codigo,descripcion,stock_actual,stock_minimo',
-        )
-      : Promise.resolve([] as { id: number; codigo: string; descripcion: string; stock_actual: number; stock_minimo: number }[]),
-
     verHerramientas ? sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion').eq('activo', true) : vacioConteo,
     verHerramientas ? sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'extraviada').eq('activo', true) : vacioConteo,
     verHerramientas
@@ -190,7 +187,7 @@ export async function getResumenEjecutivoDia(sb: SupabaseClient, perfil: Perfil 
   ])
 
   // ── Materiales: stock ────────────────────────────────────────────
-  const matData     = (materiales ?? []) as { id: number; codigo: string; descripcion: string; stock_actual: number; stock_minimo: number }[]
+  const matData      = verMateriales ? materiales : []
   const sinStock     = matData.filter(m => m.stock_actual <= 0)
   const bajoMinimo   = matData.filter(m => m.stock_actual > 0 && estaBajoMinimo(m.stock_actual, m.stock_minimo))
 

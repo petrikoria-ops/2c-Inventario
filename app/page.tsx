@@ -1,7 +1,7 @@
 import Link from 'next/link'
 import { Suspense } from 'react'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
+import { fetchAllMateriales, type MaterialAlerta } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo } from '@/lib/utils'
 import { puedeVer, type Departamento } from '@/lib/auth/permisos.server'
 import { getContextoUsuario, NOMBRE_DEPARTAMENTO } from '@/lib/auth/verComo'
@@ -26,7 +26,9 @@ import {
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
 
-const WIDGETS: Record<Departamento, (() => Promise<JSX.Element>) | null> = {
+type WidgetComponent = (props: { materiales: MaterialAlerta[] }) => Promise<JSX.Element>
+
+const WIDGETS: Record<Departamento, WidgetComponent | null> = {
   bodega: WidgetBodega,
   taller: WidgetTaller,
   oficina_tecnica: WidgetOficinaTecnica,
@@ -52,8 +54,13 @@ export default async function HomePage() {
   const departamentoMostrado = perfilEfectivo?.departamento as Departamento | undefined
   const cfg = getDeptConfig(departamentoMostrado, perfilEfectivo?.puesto)
 
+  // Columnas superset: cubren lo que necesitan tanto el contador de acá
+  // abajo como ResumenEjecutivoDia y el Widget del departamento (Bodega) —
+  // los 3 se pintan en esta misma página y antes cada uno pedía la tabla
+  // completa de materiales por su cuenta (3 fetches paginados de la misma
+  // tabla en una sola carga del home).
   const [materiales, { count: proyActivos }, solicRes] = await Promise.all([
-    fetchAllMateriales<{ stock_actual: number; stock_minimo: number }>(sb, 'stock_actual,stock_minimo'),
+    fetchAllMateriales<MaterialAlerta>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion'),
     sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
     sb.from('solicitudes_compra').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
   ])
@@ -113,7 +120,7 @@ export default async function HomePage() {
           existentes, streameada aparte con Suspense para no bloquear el
           resto del cockpit. */}
       <Suspense fallback={<ResumenEjecutivoDiaSkeleton />}>
-        <ResumenEjecutivoDia perfil={perfilEfectivo} acento={cfg.acento} />
+        <ResumenEjecutivoDia perfil={perfilEfectivo} acento={cfg.acento} materiales={materiales} />
       </Suspense>
 
       {/* Pulso general — 3 KPIs con contador animado */}
@@ -200,7 +207,7 @@ export default async function HomePage() {
           <h2 className="seccion-label" style={{ '--seccion-acento': cfg.acento } as React.CSSProperties}>
             <span className="dot" /> Tu panel de {cfg.nombre} en vivo
           </h2>
-          <Widget />
+          <Widget materiales={materiales} />
         </Reveal>
       )}
 

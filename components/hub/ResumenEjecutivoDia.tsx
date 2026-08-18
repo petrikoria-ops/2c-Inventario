@@ -5,6 +5,7 @@ import { getResumenEjecutivoDia } from '@/lib/resumenEjecutivo/getResumenDia'
 import { logError } from '@/lib/errors/logError'
 import { fechaHora, cn } from '@/lib/utils'
 import type { Perfil } from '@/lib/auth/permisos'
+import type { MaterialAlerta } from '@/lib/supabase/fetchAll'
 
 /**
  * "Resumen ejecutivo del día" / "Pulso diario de la operación" — capa de
@@ -13,11 +14,11 @@ import type { Perfil } from '@/lib/auth/permisos'
  * tabla: cada ítem enlaza al registro real. Maneja su propio error para no
  * tumbar el resto del cockpit si alguna consulta falla.
  */
-export default async function ResumenEjecutivoDia({ perfil, acento }: { perfil: Perfil | null; acento: string }) {
+export default async function ResumenEjecutivoDia({ perfil, acento, materiales }: { perfil: Perfil | null; acento: string; materiales: MaterialAlerta[] }) {
   let resumen
   try {
     const sb = getSupabaseServer()
-    resumen = await getResumenEjecutivoDia(sb, perfil)
+    resumen = await getResumenEjecutivoDia(sb, perfil, materiales)
   } catch (err: any) {
     await logError({
       mensaje: `Resumen ejecutivo del día: ${err?.message ?? 'error desconocido'}`,

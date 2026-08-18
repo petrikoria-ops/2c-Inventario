@@ -27,49 +27,43 @@ export const metadata: Metadata = {
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
   const { real, efectivo, puedeSimular, verComo, verComoPuesto } = await getContextoUsuario()
 
-  // El conteo de errores pendientes depende del rol REAL (no del simulado).
-  let erroresPendientes = 0
-  if (puedeSimular) {
-    const sb = getSupabaseServer()
-    const { count } = await sb.from('error_log').select('*', { count: 'exact', head: true }).eq('resuelto', false)
-    erroresPendientes = count ?? 0
-  }
+  // Las 4 consultas de abajo son independientes entre sí (tablas y filtros
+  // distintos) — antes se esperaban en serie con 4 `await` seguidos, uno
+  // detrás del otro, en el layout raíz que corre en TODA navegación de la
+  // app. Promise.all() las dispara juntas: el tiempo total pasa a ser el de
+  // la más lenta de las 4, no la suma de las 4. Mismo `sb` para las 4 en vez
+  // de instanciar un cliente nuevo por consulta.
+  const sb = getSupabaseServer()
+  const [erroresRes, mensajesRes, directorioRes, tareasRes] = await Promise.all([
+    // El conteo de errores pendientes depende del rol REAL (no del simulado).
+    puedeSimular
+      ? sb.from('error_log').select('*', { count: 'exact', head: true }).eq('resuelto', false)
+      : Promise.resolve({ count: 0 }),
 
-  // Presencia/mensajería son de la PERSONA real que inició sesión, nunca del
-  // perfil simulado por "Ver como" — un admin viendo "bodega" sigue siendo
-  // él mismo en el chat, no se convierte en un bodeguero fantasma.
-  let mensajesNoLeidos = 0
-  if (real) {
-    const sb = getSupabaseServer()
-    const { count } = await sb
-      .from('mensajes')
-      .select('*', { count: 'exact', head: true })
-      .eq('destinatario_id', real.id)
-      .is('leido_en', null)
-    mensajesNoLeidos = count ?? 0
-  }
+    // Presencia/mensajería son de la PERSONA real que inició sesión, nunca
+    // del perfil simulado por "Ver como" — un admin viendo "bodega" sigue
+    // siendo él mismo en el chat, no se convierte en un bodeguero fantasma.
+    real
+      ? sb.from('mensajes').select('*', { count: 'exact', head: true }).eq('destinatario_id', real.id).is('leido_en', null)
+      : Promise.resolve({ count: 0 }),
 
-  // Directorio para el desplegable "Conectados" de la barra lateral — solo
-  // se pide si el perfil REAL puede verlo (jefatura desde Visitador de obra
-  // hacia arriba), para no traer datos que ni se van a mostrar.
-  let directorioConectados: PerfilDirectorio[] = []
-  if (real && puedeVerConectados(real)) {
-    const sb = getSupabaseServer()
-    const { data } = await sb.rpc('perfiles_directorio')
-    directorioConectados = data ?? []
-  }
+    // Directorio para el desplegable "Conectados" de la barra lateral —
+    // solo se pide si el perfil REAL puede verlo (jefatura desde Visitador
+    // de obra hacia arriba), para no traer datos que ni se van a mostrar.
+    real && puedeVerConectados(real)
+      ? sb.rpc('perfiles_directorio')
+      : Promise.resolve({ data: [] as PerfilDirectorio[] }),
 
-  // Badge de "Itinerario" — tareas asignadas a mí que sigo sin aceptar/rechazar.
-  let tareasPendientes = 0
-  if (real) {
-    const sb = getSupabaseServer()
-    const { count } = await sb
-      .from('tareas_asignadas')
-      .select('*', { count: 'exact', head: true })
-      .eq('asignado_a', real.id)
-      .eq('estado', 'pendiente')
-    tareasPendientes = count ?? 0
-  }
+    // Badge de "Itinerario" — tareas asignadas a mí que sigo sin aceptar/rechazar.
+    real
+      ? sb.from('tareas_asignadas').select('*', { count: 'exact', head: true }).eq('asignado_a', real.id).eq('estado', 'pendiente')
+      : Promise.resolve({ count: 0 }),
+  ])
+
+  const erroresPendientes    = erroresRes.count ?? 0
+  const mensajesNoLeidos     = mensajesRes.count ?? 0
+  const directorioConectados: PerfilDirectorio[] = directorioRes.data ?? []
+  const tareasPendientes     = tareasRes.count ?? 0
 
   return (
     <html lang="es" className={inter.variable}>

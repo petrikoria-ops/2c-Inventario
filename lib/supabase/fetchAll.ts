@@ -1,5 +1,18 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 
+// Columnas que necesitan, entre las tres, HomePage (app/page.tsx), el
+// Resumen ejecutivo del día y el Widget de Bodega para calcular alertas de
+// stock — se pide una sola vez en HomePage y se pasa como prop a los otros
+// dos en vez de que cada uno vuelva a traer toda la tabla.
+export interface MaterialAlerta {
+  id: number
+  codigo: string
+  descripcion: string
+  stock_actual: number
+  stock_minimo: number
+  ubicacion: string | null
+}
+
 const PAGE_SIZE = 1000
 
 // PostgREST devuelve como máximo db-max-rows filas por defecto (1000 en

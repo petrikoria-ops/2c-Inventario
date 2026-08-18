@@ -1,17 +1,17 @@
 import Link from 'next/link'
 import { AlertTriangle, PackageOpen, Wrench } from 'lucide-react'
 import { getSupabaseServer } from '@/lib/supabase/server'
-import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import { estaBajoMinimo, num } from '@/lib/utils'
+import type { MaterialAlerta } from '@/lib/supabase/fetchAll'
 
-export default async function WidgetBodega() {
+// `materiales` viene de HomePage (app/page.tsx), que ya trae toda la tabla
+// paginada para calcular "Alertas de stock" — antes este widget pedía la
+// misma tabla completa por segunda vez en la misma carga del home.
+export default async function WidgetBodega({ materiales }: { materiales: MaterialAlerta[] }) {
   const sb = getSupabaseServer()
   const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
 
-  const [materiales, { count: despachosMes }, { count: herRepar }] = await Promise.all([
-    fetchAllMateriales<{ id: number; codigo: string; descripcion: string; stock_actual: number; stock_minimo: number; ubicacion: string | null }>(
-      sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion',
-    ),
+  const [{ count: despachosMes }, { count: herRepar }] = await Promise.all([
     sb.from('vales_despacho').select('*', { count: 'exact', head: true }).gte('fecha', startOfMonth),
     sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion'),
   ])

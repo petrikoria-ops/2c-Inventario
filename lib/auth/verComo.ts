@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { cookies } from 'next/headers'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { getPerfil, resolverPermisos, PUESTOS_POR_DEPARTAMENTO, type Perfil, type Departamento, type NivelAcceso } from './permisos.server'
@@ -63,8 +64,12 @@ function puestoRepresentativo(departamento: Departamento): { puesto: string; niv
 /**
  * Resuelve el perfil efectivo aplicando la cookie "ver como" si corresponde.
  * Úsalo en layout.tsx y en páginas que adapten su contenido al departamento.
+ * Memoizado con React cache() — layout.tsx y la page.tsx de cada ruta la
+ * llaman cada uno por su lado; sin esto se repetía getPerfil() (ya cacheado
+ * aparte) más, si "ver como" está activo, una consulta extra de permisos
+ * simulados en cada llamada.
  */
-export async function getContextoUsuario(): Promise<ContextoUsuario> {
+async function resolverContextoUsuario(): Promise<ContextoUsuario> {
   const real = await getPerfil()
   const puedeSimular = esAdminTotal(real)
 
@@ -94,3 +99,5 @@ export async function getContextoUsuario(): Promise<ContextoUsuario> {
 
   return { real, efectivo, puedeSimular, verComo, verComoPuesto }
 }
+
+export const getContextoUsuario = cache(resolverContextoUsuario)

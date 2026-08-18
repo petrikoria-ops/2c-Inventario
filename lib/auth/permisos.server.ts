@@ -1,3 +1,4 @@
+import { cache } from 'react'
 import { NextResponse } from 'next/server'
 import type { SupabaseClient } from '@supabase/supabase-js'
 import { getSupabaseServer } from '@/lib/supabase/server'
@@ -44,7 +45,7 @@ export async function resolverPermisos(
   return mapa
 }
 
-export async function getPerfil(): Promise<Perfil | null> {
+async function fetchPerfil(): Promise<Perfil | null> {
   const sb = getSupabaseServer()
   const { data: auth } = await sb.auth.getUser()
   if (!auth.user) return null
@@ -54,6 +55,15 @@ export async function getPerfil(): Promise<Perfil | null> {
   const permisos = await resolverPermisos(sb, data.departamento, data.puesto, data.id)
   return { ...data, permisos } as Perfil
 }
+
+// Memoizado con React cache(): layout.tsx, cada page.tsx y los Server
+// Components anidados (Widgets del hub, etc.) llaman getPerfil() por su
+// cuenta — sin esto, cada llamada repetía las mismas 4 consultas a Supabase
+// (auth.getUser + perfiles + permisos_puesto + permisos_usuario_overrides).
+// cache() las reduce a una sola ejecución por request; una request nueva
+// arranca con la caché vacía, así que no hay riesgo de mezclar perfiles
+// entre usuarios distintos.
+export const getPerfil = cache(fetchPerfil)
 
 // Para usar al principio de un handler POST de una API route que crea un
 // registro nuevo (colección, ej. /api/verificacion-ric):
