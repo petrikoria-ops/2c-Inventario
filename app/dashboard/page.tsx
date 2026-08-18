@@ -3,23 +3,50 @@ import { getSupabaseServer } from '@/lib/supabase/server'
 import { getPerfil, puedeVer, puedeVerPrecios } from '@/lib/auth/permisos.server'
 import { fetchAllMateriales } from '@/lib/supabase/fetchAll'
 import AlertasStockRealtime from '@/components/dashboard/AlertasStockRealtime'
+import { MovimientosTrend, BarraCategorias, BarraProporcion, type SerieDia, type CategoriaValor, type Segmento } from '@/components/dashboard/DashboardCharts'
 import { clp, fechaHora, num, estaBajoMinimo } from '@/lib/utils'
-import { BadgeTipo, BadgeEstadoProy } from '@/components/ui/Badge'
+import { BadgeTipo } from '@/components/ui/Badge'
 import {
   Package, AlertTriangle, DollarSign, ClipboardList,
   CheckCircle, Wrench, Search, ShoppingCart, PackageOpen,
-  ArrowUpDown, type LucideIcon,
+  ArrowUpDown, TrendingUp, BarChart3, type LucideIcon,
 } from 'lucide-react'
-import type { Material } from '@/types'
+import type { Material, Categoria } from '@/types'
 import type { Metadata } from 'next'
 
-type MaterialDashboard = Pick<Material, 'id' | 'codigo' | 'descripcion' | 'stock_actual' | 'stock_minimo' | 'ubicacion' | 'precio_unitario'>
+type MaterialDashboard = Pick<Material, 'id' | 'codigo' | 'descripcion' | 'stock_actual' | 'stock_minimo' | 'ubicacion' | 'precio_unitario' | 'categoria_id'> & {
+  categorias: Pick<Categoria, 'nombre' | 'color'> | null
+}
 
 export const metadata: Metadata = { title: 'Métricas — 2C Inventario' }
 export const dynamic   = 'force-dynamic'
 export const revalidate = 0
 
 const ESTADOS_PROY = ['presupuesto', 'en_proceso', 'terminado', 'entregado', 'cancelado'] as const
+
+// Mismos colores que ya usan BadgeEstadoProy / BadgeEstadoHer / BadgeTipo
+// (components/ui/Badge.tsx) — se reutilizan tal cual para que un mismo
+// estado se vea siempre del mismo color en toda la app.
+const COLOR_PROY: Record<string, string> = {
+  presupuesto: 'var(--n-500)', en_proceso: '#D97706', terminado: '#1D4ED8',
+  entregado: '#059669', cancelado: '#DC2626',
+}
+const LABEL_PROY: Record<string, string> = {
+  presupuesto: 'Presupuesto', en_proceso: 'En proceso', terminado: 'Terminado',
+  entregado: 'Entregado', cancelado: 'Cancelado',
+}
+const ESTADOS_HER = ['operativa', 'en_reparacion', 'extraviada', 'dada_de_baja'] as const
+const COLOR_HER: Record<string, string> = {
+  operativa: '#059669', en_reparacion: '#D97706', extraviada: '#DC2626', dada_de_baja: 'var(--n-500)',
+}
+const LABEL_HER: Record<string, string> = {
+  operativa: 'Operativa', en_reparacion: 'En reparación', extraviada: 'Extraviada', dada_de_baja: 'Dada de baja',
+}
+
+// Ventana de la tendencia de movimientos — 14 días es suficiente para ver
+// el pulso reciente de bodega sin cargar demasiadas filas.
+const DIAS_TENDENCIA = 14
+const MAX_CATEGORIAS_CHART = 8
 
 export default async function DashboardPage() {
   const perfil = await getPerfil()
@@ -29,29 +56,34 @@ export default async function DashboardPage() {
 
   const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
 
+  const inicioTendencia = new Date()
+  inicioTendencia.setHours(0, 0, 0, 0)
+  inicioTendencia.setDate(inicioTendencia.getDate() - (DIAS_TENDENCIA - 1))
+
   const [
     { count: totalItems },
     materiales,
-    { count: herEnRep },
-    { count: herExtraviadas },
-    { count: herOperativas },
+    { data: herramientasEstado },
     { count: proyActivos },
     { data: proyectosTodos },
     { data: ultMov },
+    { data: movTendencia },
     solicRes,
     salidasRes,
   ] = await Promise.all([
     sb.from('materiales').select('*', { count: 'exact', head: true }).eq('activo', true),
-    fetchAllMateriales<MaterialDashboard>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario'),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'en_reparacion').eq('activo', true),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'extraviada').eq('activo', true),
-    sb.from('herramientas').select('*', { count: 'exact', head: true }).eq('estado', 'operativa').eq('activo', true),
+    fetchAllMateriales<MaterialDashboard>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario,categoria_id,categorias(nombre,color)'),
+    sb.from('herramientas').select('estado').eq('activo', true),
     sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
     sb.from('proyectos').select('estado'),
     sb.from('movimientos')
       .select('*,materiales(codigo,descripcion,unidad),proyectos(ot)')
       .order('fecha', { ascending: false })
       .limit(10),
+    sb.from('movimientos')
+      .select('fecha,tipo')
+      .gte('fecha', inicioTendencia.toISOString())
+      .in('tipo', ['entrada', 'salida']),
     sb.from('solicitudes_compra').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
     sb.from('vales_despacho').select('*', { count: 'exact', head: true }).gte('fecha', startOfMonth),
   ])
@@ -66,6 +98,59 @@ export default async function DashboardPage() {
     acc[p.estado] = (acc[p.estado] ?? 0) + 1
     return acc
   }, {})
+  const proyeccionSegmentos: Segmento[] = ESTADOS_PROY
+    .map(e => ({ label: LABEL_PROY[e], count: proyPorEstado[e] ?? 0, color: COLOR_PROY[e] }))
+
+  const herPorEstado = (herramientasEstado ?? []).reduce<Record<string, number>>((acc, h: any) => {
+    acc[h.estado] = (acc[h.estado] ?? 0) + 1
+    return acc
+  }, {})
+  const herramientasSegmentos: Segmento[] = ESTADOS_HER
+    .map(e => ({ label: LABEL_HER[e], count: herPorEstado[e] ?? 0, color: COLOR_HER[e] }))
+  const herOperativas   = herPorEstado['operativa']     ?? 0
+  const herEnRep        = herPorEstado['en_reparacion'] ?? 0
+  const herExtraviadas  = herPorEstado['extraviada']    ?? 0
+
+  // Tendencia de movimientos — se arma un balde por día (aunque no haya
+  // movimientos ese día) para que el gráfico no "salte" fechas.
+  const diasTendencia: SerieDia[] = Array.from({ length: DIAS_TENDENCIA }, (_, i) => {
+    const fecha = new Date(inicioTendencia)
+    fecha.setDate(fecha.getDate() + i)
+    return { fecha, entradas: 0, salidas: 0 }
+  })
+  const indicePorDia = new Map(diasTendencia.map(d => [d.fecha.toISOString().slice(0, 10), d]))
+  for (const m of movTendencia ?? []) {
+    const dia = indicePorDia.get(String(m.fecha).slice(0, 10))
+    if (!dia) continue
+    if (m.tipo === 'entrada') dia.entradas++
+    else if (m.tipo === 'salida') dia.salidas++
+  }
+
+  // Valor de inventario por categoría — solo tiene sentido calcularlo si
+  // el perfil puede ver precios (mismo gate que "Valor inventario" arriba).
+  let categoriasValor: CategoriaValor[] = []
+  let valorCategorizado = 0
+  if (verPrecios) {
+    const acc = new Map<string, CategoriaValor>()
+    for (const m of materiales) {
+      const valor = m.stock_actual * (m.precio_unitario ?? 0)
+      if (valor <= 0) continue
+      const nombre = m.categorias?.nombre ?? 'Sin categoría'
+      const color  = m.categorias?.color ?? 'var(--n-400)'
+      const prev = acc.get(nombre) ?? { nombre, color, valor: 0 }
+      prev.valor += valor
+      acc.set(nombre, prev)
+    }
+    const todas = Array.from(acc.values()).sort((a, b) => b.valor - a.valor)
+    valorCategorizado = todas.reduce((s, c) => s + c.valor, 0)
+    if (todas.length > MAX_CATEGORIAS_CHART) {
+      const top = todas.slice(0, MAX_CATEGORIAS_CHART - 1)
+      const resto = todas.slice(MAX_CATEGORIAS_CHART - 1).reduce((s, c) => s + c.valor, 0)
+      categoriasValor = [...top, { nombre: 'Otras', color: 'var(--n-400)', valor: resto }]
+    } else {
+      categoriasValor = todas
+    }
+  }
 
   const stats: { Icon: LucideIcon; label: string; value: string; bg: string; iconColor: string }[] = [
     { Icon: Package,       label: 'Ítems en inventario', value: num(totalItems    ?? 0, 0), bg: 'bg-blue-100',   iconColor: '#1D4ED8' },
@@ -108,24 +193,58 @@ export default async function DashboardPage() {
         ))}
       </div>
 
-      {/* Proyectos por estado */}
-      {Object.keys(proyPorEstado).length > 0 && (
-        <div className="panel mb-5">
+      {/* Tendencia de movimientos */}
+      <div className="panel">
+        <div className="panel-header">
+          <TrendingUp size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
+          <h2>Movimientos por día</h2>
+          <a href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</a>
+        </div>
+        <div className="p-4">
+          <MovimientosTrend dias={diasTendencia} />
+        </div>
+      </div>
+
+      {/* Valor de inventario por categoría — jefatura solamente */}
+      {verPrecios && categoriasValor.length > 0 && (
+        <div className="panel">
           <div className="panel-header">
-            <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
-            <h2>Proyectos por estado</h2>
-            <a href="/proyectos" className="btn btn-ghost btn-sm">Ver todos →</a>
+            <BarChart3 size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
+            <h2>Valor de inventario por categoría</h2>
+            <span className="text-xs text-brand-n500 font-medium">{clp(valorCategorizado)} total</span>
           </div>
-          <div className="flex flex-wrap gap-3 p-4">
-            {ESTADOS_PROY.filter(e => proyPorEstado[e]).map(est => (
-              <div key={est} className="flex items-center gap-2 bg-slate-50 rounded-lg px-3 py-2">
-                <BadgeEstadoProy estado={est} />
-                <span className="text-xl font-bold text-slate-800">{proyPorEstado[est]}</span>
-              </div>
-            ))}
+          <div className="p-4">
+            <BarraCategorias categorias={categoriasValor} total={valorCategorizado} />
           </div>
         </div>
       )}
+
+      {/* Proyectos y herramientas por estado */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+        {Object.keys(proyPorEstado).length > 0 && (
+          <div className="panel mb-0">
+            <div className="panel-header">
+              <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
+              <h2>Proyectos por estado</h2>
+              <a href="/proyectos" className="btn btn-ghost btn-sm">Ver todos →</a>
+            </div>
+            <div className="p-4">
+              <BarraProporcion segmentos={proyeccionSegmentos} />
+            </div>
+          </div>
+        )}
+
+        <div className="panel mb-0">
+          <div className="panel-header">
+            <Wrench size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
+            <h2>Herramientas por estado</h2>
+            <a href="/herramientas" className="btn btn-ghost btn-sm">Ver todas →</a>
+          </div>
+          <div className="p-4">
+            <BarraProporcion segmentos={herramientasSegmentos} />
+          </div>
+        </div>
+      </div>
 
       {/* Alertas con Realtime — solo los campos que la tabla realmente
           pinta, para no viajar precio_unitario al cliente igual (Material[]
