@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
@@ -44,6 +45,9 @@ export default function NuevaVerificacionRic({ proyectos, proyectoIdInicial }: P
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al crear la verificación')
       showToast(`Verificación ${data.numero} creada`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/verificacion-ric/${data.id}`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -58,7 +62,7 @@ export default function NuevaVerificacionRic({ proyectos, proyectoIdInicial }: P
           <h1 className="text-lg font-bold text-slate-800">Nueva verificación RIC N°18/19</h1>
           <p className="text-sm text-brand-n500">Verificación inicial y puesta en marcha de la instalación</p>
         </div>
-        <a href="/verificacion-ric" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/verificacion-ric" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       <div className="panel">

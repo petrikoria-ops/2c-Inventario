@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Package, AlertTriangle, Handshake } from 'lucide-react'
@@ -107,6 +108,9 @@ export default function NuevaEntrega() {
         return
       }
       showToast(`Comprobante ${data.numero} generado — stock descontado`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/salidas/${data.id}/imprimir`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -126,7 +130,7 @@ export default function NuevaEntrega() {
           <h1 className="text-lg font-bold text-slate-800">Entrega por mano</h1>
           <p className="text-sm text-brand-n500">Genera comprobante, descuenta stock y registra el movimiento</p>
         </div>
-        <a href="/salidas" className="btn btn-ghost btn-sm ml-auto">← Volver a despachos</a>
+        <Link href="/salidas" className="btn btn-ghost btn-sm ml-auto">← Volver a despachos</Link>
       </div>
 
       {/* Datos de la entrega */}
@@ -278,7 +282,7 @@ export default function NuevaEntrega() {
             ? <><Loader2 size={14} className="animate-spin" /> Procesando…</>
             : `Confirmar entrega (${items.length} ítem${items.length !== 1 ? 's' : ''})`}
         </button>
-        <a href="/salidas" className="btn btn-outline">Cancelar</a>
+        <Link href="/salidas" className="btn btn-outline">Cancelar</Link>
         {!persona.trim() && items.length > 0 && (
           <span className="text-sm text-amber-600 font-medium flex items-center gap-1">
             <AlertTriangle size={13} /> Indica quién retira

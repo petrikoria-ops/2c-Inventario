@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
@@ -45,6 +46,9 @@ export default function NuevaInspeccionPrevencion({ proyectos, prevencionistaIni
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al crear la inspección')
       showToast(`Inspección ${data.numero} creada`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/prevencion-riesgos/${data.id}`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -59,7 +63,7 @@ export default function NuevaInspeccionPrevencion({ proyectos, prevencionistaIni
           <h1 className="text-lg font-bold text-slate-800">Nueva inspección de faena</h1>
           <p className="text-sm text-brand-n500">Checklist de verificación DS 594 — condiciones sanitarias y ambientales básicas</p>
         </div>
-        <a href="/prevencion-riesgos" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/prevencion-riesgos" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       <div className="panel">

@@ -1,12 +1,27 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   experimental: {
-    // El Client Router Cache reutiliza el RSC payload de rutas visitadas en
-    // navegación soft (<Link>) sin volver a pedirlo al servidor durante su
-    // staleTime (default ~30s). Por eso /materiales mostraba una versión vieja
-    // al volver desde otra pestaña aunque el servidor siempre tuviera el dato
-    // fresco. dynamic:0 fuerza a que toda ruta dinámica se revalide siempre.
-    staleTimes: { dynamic: 0 },
+    // Client Router Cache: cuánto tiempo el navegador puede reutilizar el RSC
+    // payload de una ruta ya visitada al volver a ella con <Link>.
+    //
+    // Estaba en `dynamic: 0`, que lo desactivaba por completo: TODA navegación
+    // entre pestañas —incluso volver a una que se acababa de ver— disparaba un
+    // request nuevo al servidor (Chile → función en us-east-1 → Supabase →
+    // vuelta), con sus ~250ms de red antes de siquiera empezar a consultar.
+    // Peor todavía: con staleTime 0 el prefetch de <Link> queda inservible
+    // (lo que se precarga se descarta al instante), así que el menú lateral
+    // estaba precargando rutas para nada.
+    //
+    // El motivo original de ponerlo en 0 era que /materiales mostraba datos
+    // viejos al volver desde otra pestaña. Eso ahora se resuelve donde
+    // corresponde: cada flujo que muta datos llama a router.refresh(), que
+    // invalida esta caché entera al instante. Así se tiene lo mejor de los
+    // dos lados — navegación instantánea entre pestañas, y dato fresco apenas
+    // alguien crea/edita/elimina algo.
+    staleTimes: {
+      dynamic: 30,  // rutas dinámicas (todas las de la app)
+      static: 180,  // rutas estáticas / prefetch completo
+    },
   },
   async headers() {
     return [

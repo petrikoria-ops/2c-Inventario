@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { notFound }           from 'next/navigation'
 import PrintButton            from '@/components/solicitudes/PrintButton'
@@ -45,7 +46,7 @@ export default async function ImprimirValePage({ params }: { params: { id: strin
 
       {/* Barra de acciones */}
       <div className="no-print flex items-center gap-3 p-4 bg-white border-b border-slate-200 shadow-sm">
-        <a href="/salidas" className="btn btn-ghost btn-sm">← Volver</a>
+        <Link href="/salidas" className="btn btn-ghost btn-sm">← Volver</Link>
         <span className="text-sm text-brand-n500 flex-1">
           Vale de despacho <strong className="text-slate-800">{vale.numero}</strong>
         </span>

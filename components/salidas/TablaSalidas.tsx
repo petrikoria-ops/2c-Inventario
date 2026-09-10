@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useMemo, useCallback } from 'react'
 import { PackageOpen, Search, Printer, Trash2 } from 'lucide-react'
 import { useToast } from '@/contexts/ToastContext'
@@ -34,7 +35,7 @@ export default function TablaSalidas({ initialData, editable = true }: Props) {
       <div className="panel-header">
         <PackageOpen size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
         <h2>Vales de despacho</h2>
-        {editable && <a href="/salidas/nueva" className="btn btn-primary btn-sm">+ Nuevo despacho</a>}
+        {editable && <Link href="/salidas/nueva" className="btn btn-primary btn-sm">+ Nuevo despacho</Link>}
       </div>
       {!editable && (
         <div className="px-4 py-2.5 text-xs border-b" style={{ background: '#F3F4F6', borderColor: '#E8EAED', color: '#6B7280' }}>
@@ -73,9 +74,9 @@ export default function TablaSalidas({ initialData, editable = true }: Props) {
                 <td className="td text-right font-medium">{v.vales_despacho_items?.length ?? 0}</td>
                 <td className="td">
                   <div className="flex gap-0.5">
-                    <a href={`/salidas/${v.id}/imprimir`} className="btn-icon" title="Ver / Imprimir" aria-label="Ver / Imprimir">
+                    <Link href={`/salidas/${v.id}/imprimir`} className="btn-icon" title="Ver / Imprimir" aria-label="Ver / Imprimir">
                       <Printer size={13} />
-                    </a>
+                    </Link>
                     {editable && (
                       <button onClick={() => eliminar(v)} className="btn-icon" title="Eliminar" aria-label="Eliminar">
                         <Trash2 size={13} />

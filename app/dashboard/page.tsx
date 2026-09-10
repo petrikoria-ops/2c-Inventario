@@ -1,3 +1,4 @@
+import Link from 'next/link'
 import { redirect } from 'next/navigation'
 import { getSupabaseServer } from '@/lib/supabase/server'
 import { getPerfil, puedeVer, puedeVerPrecios } from '@/lib/auth/permisos.server'
@@ -49,9 +50,6 @@ const DIAS_TENDENCIA = 14
 const MAX_CATEGORIAS_CHART = 8
 
 export default async function DashboardPage() {
-  const perfil = await getPerfil()
-  if (perfil && !puedeVer(perfil, 'metricas')) redirect('/')
-
   const sb = getSupabaseServer()
 
   const startOfMonth = new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString()
@@ -60,7 +58,13 @@ export default async function DashboardPage() {
   inicioTendencia.setHours(0, 0, 0, 0)
   inicioTendencia.setDate(inicioTendencia.getDate() - (DIAS_TENDENCIA - 1))
 
+  // getPerfil() entra al Promise.all en vez de esperarse antes: no decide QUÉ
+  // se consulta, solo qué se muestra. Esperarlo aparte encadenaba sus viajes
+  // a Supabase por delante de los de los datos, en una de las pestañas más
+  // pesadas de la app. El chequeo de permiso se hace igual, justo abajo,
+  // antes de renderizar nada (mismo patrón que /materiales).
   const [
+    perfil,
     { count: totalItems },
     materiales,
     { data: herramientasEstado },
@@ -71,6 +75,7 @@ export default async function DashboardPage() {
     solicRes,
     salidasRes,
   ] = await Promise.all([
+    getPerfil(),
     sb.from('materiales').select('*', { count: 'exact', head: true }).eq('activo', true),
     fetchAllMateriales<MaterialDashboard>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion,precio_unitario,categoria_id,categorias(nombre,color)'),
     sb.from('herramientas').select('estado').eq('activo', true),
@@ -87,6 +92,8 @@ export default async function DashboardPage() {
     sb.from('solicitudes_compra').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
     sb.from('vales_despacho').select('*', { count: 'exact', head: true }).gte('fecha', startOfMonth),
   ])
+
+  if (perfil && !puedeVer(perfil, 'metricas')) redirect('/')
 
   const verPrecios      = puedeVerPrecios(perfil)
   const alertas         = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo))
@@ -198,7 +205,7 @@ export default async function DashboardPage() {
         <div className="panel-header">
           <TrendingUp size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Movimientos por día</h2>
-          <a href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</a>
+          <Link href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</Link>
         </div>
         <div className="p-4">
           <MovimientosTrend dias={diasTendencia} />
@@ -226,7 +233,7 @@ export default async function DashboardPage() {
             <div className="panel-header">
               <ClipboardList size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
               <h2>Proyectos por estado</h2>
-              <a href="/proyectos" className="btn btn-ghost btn-sm">Ver todos →</a>
+              <Link href="/proyectos" className="btn btn-ghost btn-sm">Ver todos →</Link>
             </div>
             <div className="p-4">
               <BarraProporcion segmentos={proyeccionSegmentos} />
@@ -238,7 +245,7 @@ export default async function DashboardPage() {
           <div className="panel-header">
             <Wrench size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
             <h2>Herramientas por estado</h2>
-            <a href="/herramientas" className="btn btn-ghost btn-sm">Ver todas →</a>
+            <Link href="/herramientas" className="btn btn-ghost btn-sm">Ver todas →</Link>
           </div>
           <div className="p-4">
             <BarraProporcion segmentos={herramientasSegmentos} />
@@ -257,7 +264,7 @@ export default async function DashboardPage() {
         <div className="panel-header">
           <ArrowUpDown size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Últimos movimientos</h2>
-          <a href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</a>
+          <Link href="/movimientos" className="btn btn-ghost btn-sm">Ver todos →</Link>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full">

@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '@/contexts/ToastContext'
@@ -39,6 +40,9 @@ export default function NuevoChecklistDrs({ proyectos, proyectoIdInicial }: Prop
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al crear el checklist')
       showToast(`Checklist ${data.numero} creado`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/checklist-drs/${data.id}`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -53,7 +57,7 @@ export default function NuevoChecklistDrs({ proyectos, proyectoIdInicial }: Prop
           <h1 className="text-lg font-bold text-slate-800">Nuevo checklist DRS</h1>
           <p className="text-sm text-brand-n500">Protocolo de pruebas de verificación inicial e informe de imágenes</p>
         </div>
-        <a href="/checklist-drs" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/checklist-drs" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       <div className="panel">

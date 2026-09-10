@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Trash2 } from 'lucide-react'
@@ -82,6 +83,9 @@ export default function NuevaPruebaAlimentadores({ proyectos, proyectoIdInicial,
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al crear el test')
       showToast(`Test ${data.numero} creado`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/pruebas-alimentadores/${data.id}`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -96,7 +100,7 @@ export default function NuevaPruebaAlimentadores({ proyectos, proyectoIdInicial,
           <h1 className="text-lg font-bold text-slate-800">Nuevo Test de Alimentadores</h1>
           <p className="text-sm text-brand-n500">Mediciones entre fases, neutro y tierra de los alimentadores de una obra</p>
         </div>
-        <a href="/pruebas-alimentadores" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/pruebas-alimentadores" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       {verificacionRicIdInicial && (

@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Download, ClipboardList, CheckCircle, AlertTriangle, Circle, Square, ShoppingCart } from 'lucide-react'
@@ -201,6 +202,9 @@ export default function FactibilidadProyecto({
       const data = await res.json()
       if (!res.ok) throw new Error(data.error)
       showToast(`Solicitud ${data.numero} creada`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/solicitudes/${data.id}/imprimir`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -268,7 +272,7 @@ export default function FactibilidadProyecto({
       <div className="flex items-start gap-3 mb-5">
         <div className="flex-1">
           <div className="flex items-center gap-2 mb-1">
-            <a href="/proyectos" className="text-sm text-blue-600 hover:underline">← Proyectos</a>
+            <Link href="/proyectos" className="text-sm text-blue-600 hover:underline">← Proyectos</Link>
           </div>
           <h1 className="text-lg font-bold text-slate-800">
             Factibilidad — {proyecto.ot}

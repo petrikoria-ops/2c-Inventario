@@ -48,22 +48,32 @@ function saludoSegunHora(): string {
 export default async function HomePage() {
   const sb = getSupabaseServer()
 
-  // Contexto: perfil real + perfil efectivo (aplica "ver como" si está activo).
-  const { real: perfil, efectivo: perfilEfectivo, puedeSimular, verComo, verComoPuesto } = await getContextoUsuario()
-
-  const departamentoMostrado = perfilEfectivo?.departamento as Departamento | undefined
-  const cfg = getDeptConfig(departamentoMostrado, perfilEfectivo?.puesto)
-
+  // El contexto del usuario y los datos del tablero no dependen entre sí: el
+  // perfil (y el "ver como") no cambia QUÉ se consulta acá abajo, solo cómo
+  // se muestra después. Antes se esperaba el contexto entero —que por dentro
+  // son varios viajes a Supabase encadenados— y recién ahí arrancaban las
+  // consultas de datos. Ahora salen todas juntas, así el Inicio tarda lo que
+  // la más lenta y no la suma de todas. Es la pestaña más visitada de la app.
+  //
   // Columnas superset: cubren lo que necesitan tanto el contador de acá
   // abajo como ResumenEjecutivoDia y el Widget del departamento (Bodega) —
   // los 3 se pintan en esta misma página y antes cada uno pedía la tabla
   // completa de materiales por su cuenta (3 fetches paginados de la misma
   // tabla en una sola carga del home).
-  const [materiales, { count: proyActivos }, solicRes] = await Promise.all([
+  const [
+    { real: perfil, efectivo: perfilEfectivo, puedeSimular, verComo, verComoPuesto },
+    materiales,
+    { count: proyActivos },
+    solicRes,
+  ] = await Promise.all([
+    getContextoUsuario(),
     fetchAllMateriales<MaterialAlerta>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion'),
     sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
     sb.from('solicitudes_compra').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
   ])
+
+  const departamentoMostrado = perfilEfectivo?.departamento as Departamento | undefined
+  const cfg = getDeptConfig(departamentoMostrado, perfilEfectivo?.puesto)
 
   const alertas   = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo)).length
   const solicPend = solicRes.error ? 0 : (solicRes.count ?? 0)
@@ -112,7 +122,7 @@ export default async function HomePage() {
         <div className="alert alert-red mb-6 anim-fade-in">
           <AlertTriangle size={15} />
           {alertas} material{alertas !== 1 ? 'es' : ''} bajo stock mínimo.{' '}
-          <a href="/materiales?bajo_minimo=1" className="underline font-semibold">Ver ahora →</a>
+          <Link href="/materiales?bajo_minimo=1" className="underline font-semibold">Ver ahora →</Link>
         </div>
       )}
 

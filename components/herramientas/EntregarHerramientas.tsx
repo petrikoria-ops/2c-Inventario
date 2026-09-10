@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Wrench, AlertTriangle } from 'lucide-react'
@@ -100,6 +101,9 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       showToast(`Comprobante ${data.numero} generado`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/herramientas/entregas/${data.id}/imprimir`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -117,7 +121,7 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
           <h1 className="text-lg font-bold text-slate-800">Entrega de herramientas</h1>
           <p className="text-sm text-brand-n500">Genera comprobante y actualiza el responsable de cada herramienta</p>
         </div>
-        <a href="/trabajadores" className="btn btn-ghost btn-sm ml-auto">← Trabajadores</a>
+        <Link href="/trabajadores" className="btn btn-ghost btn-sm ml-auto">← Trabajadores</Link>
       </div>
 
       {/* Responsable */}
@@ -248,7 +252,7 @@ export default function EntregarHerramientas({ trabajadores: initialTrabajadores
             ? <><Loader2 size={14} className="animate-spin" /> Procesando…</>
             : `Confirmar entrega (${items.length} herramienta${items.length !== 1 ? 's' : ''})`}
         </button>
-        <a href="/herramientas" className="btn btn-outline">Cancelar</a>
+        <Link href="/herramientas" className="btn btn-outline">Cancelar</Link>
         {!trabajadorId && !usuario.trim() && items.length > 0 && (
           <span className="text-sm text-amber-600 flex items-center gap-1">
             <AlertTriangle size={13} /> Indica el trabajador responsable

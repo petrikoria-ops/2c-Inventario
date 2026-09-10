@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useCallback, useRef, DragEvent, ChangeEvent } from 'react'
 import { useRouter } from 'next/navigation'
 import * as XLSX from 'xlsx'
@@ -166,6 +167,9 @@ export default function ImportarSolicitudExcel() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       showToast(`Solicitud ${data.numero} creada con ${rows.length} ítems`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/solicitudes/${data.id}/imprimir`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -184,7 +188,7 @@ export default function ImportarSolicitudExcel() {
               Sube la planilla estándar que envía el supervisor de terreno (hoja "MATERIALES")
             </p>
           </div>
-          <a href="/solicitudes" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+          <Link href="/solicitudes" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
         </div>
 
         <div
@@ -342,7 +346,7 @@ export default function ImportarSolicitudExcel() {
         <button onClick={guardar} disabled={saving || rows.length === 0} className="btn btn-primary">
           {saving ? <><Loader2 size={14} className="animate-spin" /> Guardando…</> : <><CheckCircle2 size={14} /> Guardar solicitud ({rows.length} ítems)</>}
         </button>
-        <a href="/solicitudes" className="btn btn-outline">Cancelar</a>
+        <Link href="/solicitudes" className="btn btn-outline">Cancelar</Link>
       </div>
     </div>
   )

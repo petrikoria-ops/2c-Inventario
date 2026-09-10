@@ -7,11 +7,18 @@ export const dynamic  = 'force-dynamic'
 export const metadata = { title: 'Trabajadores | 2C Inventario' }
 
 export default async function TrabajadoresPage() {
-  const perfil = await getPerfil()
+  const sb = getSupabaseServer()
+
+  // El perfil y la lista de trabajadores no dependen entre sí: se piden
+  // juntos en vez de encadenar los viajes a Supabase del perfil por delante
+  // de la consulta. El permiso se sigue comprobando antes de renderizar.
+  const [perfil, { data }] = await Promise.all([
+    getPerfil(),
+    sb.from('trabajadores').select('*').eq('activo', true).order('nombre'),
+  ])
+
   if (!perfil || !puedeVer(perfil, 'trabajadores')) redirect('/')
 
-  const sb = getSupabaseServer()
-  const { data } = await sb.from('trabajadores').select('*').eq('activo', true).order('nombre')
   const editable = puedeEditar(perfil, 'trabajadores')
   return (
     <div className="p-5 w-full">

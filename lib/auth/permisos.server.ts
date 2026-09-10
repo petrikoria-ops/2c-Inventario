@@ -6,12 +6,29 @@ import { puedeCrear, puedeModificar, puedeEliminar, type Departamento, type Modu
 
 export * from './permisos'
 
+// Una fila de excepción individual, tal como sale de permisos_usuario_overrides.
+export interface OverridePermiso {
+  modulo: string
+  ver: boolean | null
+  crear: boolean | null
+  modificar: boolean | null
+  eliminar: boolean | null
+}
+
 // Resuelve el mapa ver/crear/modificar efectivo para un (departamento,
 // puesto): trae la fila base de permisos_puesto y, si se pasa usuarioId,
 // aplica encima las excepciones individuales de permisos_usuario_overrides
 // (solo pisan el campo que no sea NULL — NULL = hereda del puesto).
+//
+// `overridesPrecargados` evita una consulta: quien ya pidió las excepciones
+// del usuario por su cuenta (ver fetchPerfil, que las pide en paralelo con
+// el perfil) las pasa hechas en vez de que se vuelvan a buscar aquí.
 export async function resolverPermisos(
-  sb: SupabaseClient, departamento: Departamento, puesto: string, usuarioId?: string
+  sb: SupabaseClient,
+  departamento: Departamento,
+  puesto: string,
+  usuarioId?: string,
+  overridesPrecargados?: OverridePermiso[],
 ): Promise<MapaPermisos> {
   const mapa: MapaPermisos = {}
 
@@ -25,34 +42,54 @@ export async function resolverPermisos(
     mapa[f.modulo as Modulo] = { ver: f.ver, crear: f.crear, modificar: f.modificar, eliminar: f.eliminar }
   })
 
-  if (usuarioId) {
-    const { data: overrides } = await sb
+  let overrides: OverridePermiso[] | null | undefined = overridesPrecargados
+  if (!overrides && usuarioId) {
+    const { data } = await sb
       .from('permisos_usuario_overrides')
       .select('modulo,ver,crear,modificar,eliminar')
       .eq('usuario_id', usuarioId)
-
-    overrides?.forEach(o => {
-      const base = mapa[o.modulo as Modulo] ?? { ver: false, crear: false, modificar: false, eliminar: false }
-      mapa[o.modulo as Modulo] = {
-        ver: o.ver ?? base.ver,
-        crear: o.crear ?? base.crear,
-        modificar: o.modificar ?? base.modificar,
-        eliminar: o.eliminar ?? base.eliminar,
-      }
-    })
+    overrides = data as OverridePermiso[] | null
   }
+
+  overrides?.forEach(o => {
+    const base = mapa[o.modulo as Modulo] ?? { ver: false, crear: false, modificar: false, eliminar: false }
+    mapa[o.modulo as Modulo] = {
+      ver: o.ver ?? base.ver,
+      crear: o.crear ?? base.crear,
+      modificar: o.modificar ?? base.modificar,
+      eliminar: o.eliminar ?? base.eliminar,
+    }
+  })
 
   return mapa
 }
 
+// Antes esto encadenaba 4 viajes a Supabase, uno detrás de otro:
+// auth.getUser() → perfiles → permisos_puesto → permisos_usuario_overrides.
+// Como corre en el render de casi toda página, esos 4 saltos de red se
+// sumaban al tiempo de cada cambio de pestaña.
+//
+// El perfil y las excepciones individuales solo dependen del id del usuario,
+// así que se piden JUNTOS. permisos_puesto sí necesita el departamento y el
+// puesto (que salen del perfil), así que queda después. Total: 3 saltos en
+// serie en vez de 4, sin cambiar en nada el resultado.
 async function fetchPerfil(): Promise<Perfil | null> {
   const sb = getSupabaseServer()
   const { data: auth } = await sb.auth.getUser()
   if (!auth.user) return null
-  const { data } = await sb.from('perfiles').select('*').eq('id', auth.user.id).eq('activo', true).maybeSingle()
+  const uid = auth.user.id
+
+  const [perfilRes, overridesRes] = await Promise.all([
+    sb.from('perfiles').select('*').eq('id', uid).eq('activo', true).maybeSingle(),
+    sb.from('permisos_usuario_overrides').select('modulo,ver,crear,modificar,eliminar').eq('usuario_id', uid),
+  ])
+
+  const data = perfilRes.data
   if (!data) return null
 
-  const permisos = await resolverPermisos(sb, data.departamento, data.puesto, data.id)
+  const permisos = await resolverPermisos(
+    sb, data.departamento, data.puesto, uid, (overridesRes.data ?? []) as OverridePermiso[],
+  )
   return { ...data, permisos } as Perfil
 }
 

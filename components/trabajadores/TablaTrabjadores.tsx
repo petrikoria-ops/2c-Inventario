@@ -62,9 +62,9 @@ export default function TablaTrabjadores({ initialData, editable = true }: { ini
         <div className="panel-header">
           <Users size={14} style={{ color: 'var(--n-500)', flexShrink: 0 }} />
           <h2>Trabajadores</h2>
-          <a href="/herramientas/entregar" className="btn btn-outline btn-sm ml-auto">
+          <Link href="/herramientas/entregar" className="btn btn-outline btn-sm ml-auto">
             Entregar herramientas →
-          </a>
+          </Link>
           {editable && (
             <button className="btn btn-primary btn-sm"
               onClick={() => { setEditando(BLANK); setModalOpen(true) }}>

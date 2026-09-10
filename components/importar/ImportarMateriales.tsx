@@ -774,7 +774,7 @@ function StepDone({ result, onReset, importType }: { result: ImportResult; onRes
         </div>
       )}
       <div className="flex gap-3">
-        <button onClick={() => router.push(destHref)} className="btn btn-primary">{destLabel}</button>
+        <button onClick={() => { router.refresh(); router.push(destHref) }} className="btn btn-primary">{destLabel}</button>
         <button onClick={onReset} className="btn btn-outline">Importar otro archivo</button>
       </div>
     </div>

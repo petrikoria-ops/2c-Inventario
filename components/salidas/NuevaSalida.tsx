@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Package, AlertTriangle } from 'lucide-react'
@@ -111,6 +112,9 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       showToast(`Vale ${data.numero} creado — stock actualizado`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/salidas/${data.id}/imprimir`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -128,7 +132,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
           <h1 className="text-lg font-bold text-slate-800">Nuevo vale de despacho</h1>
           <p className="text-sm text-brand-n500">Registra la salida y descuenta el stock automáticamente</p>
         </div>
-        <a href="/salidas" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/salidas" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       {/* Datos del despacho */}
@@ -283,7 +287,7 @@ export default function NuevaSalida({ proyectos: initialProyectos }: { proyectos
           className="btn btn-primary">
           {saving ? <><Loader2 size={14} className="animate-spin" /> Procesando…</> : `Confirmar despacho (${items.length} ítem${items.length !== 1 ? 's' : ''})`}
         </button>
-        <a href="/salidas" className="btn btn-outline">Cancelar</a>
+        <Link href="/salidas" className="btn btn-outline">Cancelar</Link>
         {hasStockError && (
           <span className="text-sm text-red-600 font-medium flex items-center gap-1"><AlertTriangle size={13} /> Corrige el stock antes de confirmar</span>
         )}

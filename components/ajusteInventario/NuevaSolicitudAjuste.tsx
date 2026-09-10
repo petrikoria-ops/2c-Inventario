@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search } from 'lucide-react'
@@ -63,6 +64,9 @@ export default function NuevaSolicitudAjuste() {
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       showToast(`Solicitud ${data.numero} enviada para aprobación`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push('/solicitudes-ajuste')
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -77,7 +81,7 @@ export default function NuevaSolicitudAjuste() {
           <h1 className="text-lg font-bold text-slate-800">Solicitud de ajuste de inventario</h1>
           <p className="text-sm text-brand-n500">El stock no cambia hasta que el jefe de bodega apruebe.</p>
         </div>
-        <a href="/solicitudes-ajuste" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/solicitudes-ajuste" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       <div className="panel-search mb-4">
@@ -143,7 +147,7 @@ export default function NuevaSolicitudAjuste() {
         <button onClick={handleSave} disabled={saving} className="btn btn-primary">
           {saving ? <><Loader2 size={14} className="animate-spin" /> Enviando…</> : 'Enviar para aprobación'}
         </button>
-        <a href="/solicitudes-ajuste" className="btn btn-outline">Cancelar</a>
+        <Link href="/solicitudes-ajuste" className="btn btn-outline">Cancelar</Link>
       </div>
     </div>
   )

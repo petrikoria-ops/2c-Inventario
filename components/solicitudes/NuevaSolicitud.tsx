@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, Zap, ClipboardList } from 'lucide-react'
@@ -143,6 +144,9 @@ export default function NuevaSolicitud({ proyectos: initialProyectos = [] }: { p
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       showToast(`Solicitud ${data.numero} creada`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push(`/solicitudes/${data.id}/imprimir`)
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -164,7 +168,7 @@ export default function NuevaSolicitud({ proyectos: initialProyectos = [] }: { p
             Busca materiales o usa "Autollenar" para agregar todos los ítems bajo stock mínimo
           </p>
         </div>
-        <a href="/solicitudes" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/solicitudes" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       {/* Buscador + Autollenar — usa panel-search (sin overflow-hidden) para que el dropdown no se corte */}
@@ -344,7 +348,7 @@ export default function NuevaSolicitud({ proyectos: initialProyectos = [] }: { p
         >
           {saving ? <><Loader2 size={14} className="animate-spin" /> Guardando…</> : `Guardar y ver documento (${items.length} ítem${items.length !== 1 ? 's' : ''})`}
         </button>
-        <a href="/solicitudes" className="btn btn-outline">Cancelar</a>
+        <Link href="/solicitudes" className="btn btn-outline">Cancelar</Link>
       </div>
     </div>
   )

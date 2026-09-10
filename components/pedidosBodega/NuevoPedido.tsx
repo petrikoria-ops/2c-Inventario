@@ -1,4 +1,5 @@
 'use client'
+import Link from 'next/link'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { Loader2, Search, PackageOpen } from 'lucide-react'
@@ -92,6 +93,9 @@ export default function NuevoPedido({ proyectos: initialProyectos = [] }: { proy
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Error al guardar')
       showToast(`Pedido ${data.numero} enviado a bodega`, 'success')
+      // Acaba de cambiar el dato en el servidor: invalida la caché de
+      // navegación para que las listas no se vean viejas al volver a ellas.
+      router.refresh()
       router.push('/pedidos-bodega')
     } catch (e: any) {
       showToast(e.message, 'error')
@@ -106,7 +110,7 @@ export default function NuevoPedido({ proyectos: initialProyectos = [] }: { proy
           <h1 className="text-lg font-bold text-slate-800">Nuevo pedido a bodega</h1>
           <p className="text-sm text-brand-n500">Material que ya existe en stock — el jefe de bodega lo aprueba y arma el despacho.</p>
         </div>
-        <a href="/pedidos-bodega" className="btn btn-ghost btn-sm ml-auto">← Cancelar</a>
+        <Link href="/pedidos-bodega" className="btn btn-ghost btn-sm ml-auto">← Cancelar</Link>
       </div>
 
       <div className="panel mb-4">
@@ -221,7 +225,7 @@ export default function NuevoPedido({ proyectos: initialProyectos = [] }: { proy
         <button onClick={handleSave} disabled={saving || items.length === 0} className="btn btn-primary">
           {saving ? <><Loader2 size={14} className="animate-spin" /> Enviando…</> : `Enviar a bodega (${items.length} ítem${items.length !== 1 ? 's' : ''})`}
         </button>
-        <a href="/pedidos-bodega" className="btn btn-outline">Cancelar</a>
+        <Link href="/pedidos-bodega" className="btn btn-outline">Cancelar</Link>
       </div>
     </div>
   )
