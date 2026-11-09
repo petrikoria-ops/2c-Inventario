@@ -158,7 +158,7 @@ textarea.nota{width:100%;min-height:76px;margin-top:10px;border:1.5px solid var(
 </head>
 <body>
 <header>
-  <p class="k">2C Electricidad · Ruta de verificación · versión 9-nov 16:55</p>
+  <p class="k">2C Electricidad · Ruta de verificación · versión 9-nov 17:45</p>
   <h1>Unimarc San Bernardo · Local 0249</h1>
   <div class="prog"><div class="bar"><i id="pb"></i></div><b id="pt">0/0</b></div>
   <div class="sub"><span id="ps">Enchufes 0/0 · Iluminación 0/0</span><span id="pg">Guardado en este dispositivo</span></div>
@@ -217,7 +217,9 @@ const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&': '&amp
 const C = DATA.circuitos, P = DATA.plano;
 const tipoTxt = c => c.kind === 'L' ? 'Alumbrado' : c.kind === 'N' ? 'Enchufe normal' : c.kind === 'C' ? 'Computación' : 'Fuerza';
 const mod = c => c.kind === 'L' ? 'L' : 'E';
-const estado = c => (EST[c.id] && EST[c.id].s) || '';
+const REM_R = {m: new Map(), firma: '', pend: false};   // avance que marcan los otros teléfonos
+const estado = c => { const L = EST[c.id], R = REM_R.m.get(c.id); if (R && R.s && (!L || !L.s || (R.t || 0) > (L.t || 0))) return R.s; return (L && L.s) || ''; };
+const remNotaHTML = c => { const R = REM_R.m.get(c.id); return R && (R.n || R.s) ? '<p class="inst"><b>' + esc(R.autor) + ':</b> ' + (R.s === 'ok' ? 'marcado listo. ' : R.s === 'obs' ? 'con observación. ' : '') + esc(R.n || '') + '</p>' : ''; };
 const nombre = c => c.id;
 function limpiar(d) { return d.replace(/^ENCHUFE (NORMAL |FUERZA )?(SIMPLE |INDUSTRIAL )?/i, '').replace(/^ARRANQUE (NORMAL )?(SIMPLE )?/i, 'Arranque ').trim(); }
 const titulo = c => { const d = limpiar(c.desc || ''); return d ? d.charAt(0) + d.slice(1).toLowerCase() : tipoTxt(c); };
@@ -248,6 +250,7 @@ function itemHTML(c) {
     if (c.kind === 'L') h += '<p class="inst"><b>Qué revisar:</b> luminarias del circuito en la zona marcada. Medir en la última luminaria de la línea y probar el diferencial.</p>';
     else if (c.tags && c.tags.length) h += '<p class="inst"><b>Medir en el enchufe más lejano</b> (círculo rojo)' + (c.tags.length > 1 ? ', el circuito tiene ' + c.tags.length + ' puntos en el plano' : '') + '. Una medición por circuito: bucle y diferencial.</p>';
     h += (c.nota ? '<p class="inst warn">' + esc(c.nota) + '</p>' : '') + (c.revisar ? '<p class="inst warn">⚠ ' + esc(c.revisar) + '</p>' : '');
+    h += remNotaHTML(c);
     if (!(c.tags && c.tags.length)) h += '<p class="inst warn">' + (c.tab === 'PAN' ? 'El plano 004 no trae etiquetas de los circuitos de panadería. Ubica los equipos en la sala de proceso (vista de la zona) y mide en el enchufe más lejano del tablero.' : 'Este circuito no tiene etiqueta en el plano. Ubícalo en terreno según la descripción y mide en el punto más lejano.') + '</p>';
     if (DATA.imgs[c.id]) h += '<figure class="fig" data-a="zoomimg"><img alt="Recorte del plano" src="' + DATA.imgs[c.id] + '"><span class="zoom">Ampliar</span><figcaption>' + (c.kind === 'L' ? 'Plano de iluminación ' + (t ? t.sheet : '') : 'Plano 004 · enchufe más lejano') + ' · escala 1:100</figcaption></figure>';
     if (c.tags && c.tags.length) h += '<div data-a="zoommapa">' + planoHTML(marcasDe(c)).replace('class="plano"', 'class="plano" style="margin-bottom:10px"') + '</div>';
@@ -323,7 +326,7 @@ function resumen() {
   let g = '';
   C.slice().sort((a, b) => (a.grupo < b.grupo ? -1 : a.grupo > b.grupo ? 1 : a.orden - b.orden)).forEach(c => {
     if (c.grupo !== g) { g = c.grupo; l.push('', g.toUpperCase()); }
-    const e = estado(c), n = (EST[c.id] && EST[c.id].n || '').replace(/\s+/g, ' ').trim();
+    const e = estado(c), n = ((EST[c.id] && EST[c.id].n) || (REM_R.m.get(c.id) || {}).n || '').replace(/\s+/g, ' ').trim();
     l.push((e === 'ok' ? '[OK] ' : e === 'obs' ? '[OBS] ' : '[  ] ') + nombre(c) + ' · ' + titulo(c) + (c.ub ? ' (' + c.ub.toLowerCase() + ')' : '') + (n ? ' — ' + n : ''));
   });
   return l.join('\n');
@@ -386,6 +389,7 @@ function renderMapa() {
   let h = '<div class="nx-h"><span class="flecha"><svg viewBox="0 0 24 24" style="transform:rotate(' + (-ang).toFixed(0) + 'deg)"><path d="M4 12h16M14 6l6 6-6 6"/></svg></span><div class="nx-t"><b>' + cur.id + (s ? ' ' + (s === 'ok' ? '✓' : '⚠') : '') + '</b><span>' + (cur.aprox ? '~' : '≈ ') + Math.round(dist) + ' m ' + dirTxt(dx, dy) + ' · desde ' + esc(fromN) + '</span></div><span class="ord">' + (i + 1) + '/' + lst.length + '</span></div>';
   h += '<p class="nx-d"><b>' + esc(titulo(cur)) + '</b>' + (cur.ub ? '<br><span class="muted">' + esc(cur.ub.toLowerCase()) + '</span>' : '') + (cur.aprox ? '<br><span class="muted">Ubicación aproximada: sin etiqueta en el plano, ver zona.</span>' : '') + '</p>';
   h += (cur.nota ? '<p class="inst warn">' + esc(cur.nota) + '</p>' : '') + (cur.revisar ? '<p class="inst warn">⚠ ' + esc(cur.revisar) + '</p>' : '');
+  h += remNotaHTML(cur);
   if (DATA.imgs[cur.id]) h += '<figure class="fig" data-a="mzoom" style="margin-bottom:8px"><img alt="Recorte" src="' + DATA.imgs[cur.id] + '"><span class="zoom">Ampliar</span></figure>';
   h += '<textarea class="nota" data-a="mnota" style="min-height:52px;margin:0 0 8px" placeholder="Nota (valor medido, falla…)">' + esc(nota) + '</textarea>';
   h += '<div class="acc"><button class="btn bok" data-a="mok">' + ICO.chk + ' Listo → siguiente</button><button class="btn bobs" data-a="mobs">Obs. → siguiente</button></div>';
@@ -493,8 +497,30 @@ function pintarNubeR() {
   el.textContent = NUBE_R.err ? '☁ Error: ' + NUBE_R.err.slice(0, 40) : NUBE_R.ts ? '☁ En la nube ' + new Date(NUBE_R.ts).toLocaleTimeString('es-CL', {hour: '2-digit', minute: '2-digit'}) : '☁ Conectando…';
 }
 window.addEventListener('online', () => nubeRuta(true));
+
+/* ===== equipo: ver aquí mismo lo que marcan los otros teléfonos ===== */
+async function remRuta() {
+  if (!NUBE_R.codigo || !/^https?:$/.test(location.protocol) || document.hidden) return;
+  let j; try { const r = await fetch('/api/terreno/informe', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({codigo: NUBE_R.codigo, solo: 'estados'})}); if (!r.ok) return; j = await r.json(); } catch (e) { return; }
+  const m = new Map();
+  (j.estados || []).filter(e => e.tipo === 'ruta' && e.dispositivo !== NUBE_R.dispositivo).forEach(e => Object.entries((e.datos && e.datos.est) || {}).forEach(([id, v]) => {
+    if (!v) return; const t = v.t || e.ts || 0, prev = m.get(id), autor = e.autor || ('Teléfono ' + String(e.dispositivo || '').slice(0, 4));
+    if (!prev || t > prev.t) m.set(id, {s: v.s || '', n: v.n || (prev && prev.n) || '', t, autor}); else if (v.n && !prev.n) prev.n = v.n;
+  }));
+  const firma = JSON.stringify([...m.entries()].sort());
+  REM_R.m = m;
+  if (firma !== REM_R.firma) { REM_R.firma = firma; remRutaPintar(); }
+}
+function remRutaPintar() {
+  const a = document.activeElement;
+  if ((a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT')) || !$('#lb').hidden || !$('#hExp').hidden) { REM_R.pend = true; return; }
+  REM_R.pend = false; render();
+}
+setInterval(() => { if (REM_R.pend) remRutaPintar(); }, 1500);
+setInterval(remRuta, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) remRuta(); });
 render();
-pintarNubeR(); nubeRuta(true);
+pintarNubeR(); nubeRuta(true); remRuta();
 </script>
 </body>
 </html>

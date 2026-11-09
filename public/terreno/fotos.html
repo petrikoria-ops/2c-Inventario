@@ -213,6 +213,8 @@ details.inf-s{border:1px solid var(--line);border-radius:12px;margin:8px 0;backg
 .inf-it{border-top:1px solid var(--line);padding:9px 12px}.inf-it .t{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:650}.inf-it .n{font-size:12.5px;color:var(--mut);margin-top:3px}
 .chip{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px;white-space:nowrap;align-self:flex-start}.chip.ok{background:#DCF3E5;color:#11673A}.chip.fa{background:#FFF0D1;color:#8A5300}.chip.pe{background:#ECEFF3;color:#4A5563}.chip.na{background:#E7ECF7;color:#2C4A86}
 .inf-it .nb-g{margin-top:7px}
+.th.rem{position:relative}.th .au{position:absolute;right:3px;top:3px;min-width:18px;height:18px;border-radius:9px;background:#1F3A5F;color:#fff;font:700 11px/18px system-ui;text-align:center;padding:0 4px}
+.rem-n{margin:6px 0 0;font-size:13.5px;color:var(--mut)}
 </style>
 </head>
 <body>
@@ -240,7 +242,7 @@ details.inf-s{border:1px solid var(--line);border-radius:12px;margin:8px 0;backg
     </div>
     <div class="top-2"><div class="pbar"><i id="hBar"></i></div><span class="pnum" id="hProg">0/0 · 0%</span></div>
     <div class="top-3"><span id="hFotos">0 fotos · 0 MB</span><span id="hAlm"></span></div>
-    <div class="top-3 nube-f" id="hNubeF" hidden><span id="hNube"></span><button type="button" class="nube-ver" id="hNubeVer">Informe</button></div>
+    <div class="top-3 nube-f" id="hNubeF" hidden><span id="hNube"></span></div>
   </header>
 
   <div class="herr">
@@ -310,7 +312,6 @@ details.inf-s{border:1px solid var(--line);border-radius:12px;margin:8px 0;backg
   <button class="fila" data-m="datos">Datos de la obra</button>
   <button class="fila" data-m="seccion">Nueva sección</button>
   <button class="fila" data-m="lista">Editar lista (texto)</button>
-  <button class="fila" data-m="nube">Informe en vivo (todos los teléfonos)</button>
   <button class="fila" data-m="ayuda">Ayuda</button>
   <button class="fila rojo" data-m="borrar">Borrar fotos y notas…</button>
   <p class="muted sm" id="mAlm"></p>
@@ -480,11 +481,13 @@ const DB = {
     return r;
   },
   borrar(ids) {
+    try { ids.forEach(i => BORR.add(i)); this.setKV('borradas', Array.from(BORR).slice(-3000)).catch(() => {}); setTimeout(() => nubeEstado(), 0); } catch (e) {}
     if (!ids.length) return Promise.resolve();
     if (this.modo === 'idb') return this._w(['fotos', 'blobs'], t => ids.forEach(id => { t.objectStore('fotos').delete(id); t.objectStore('blobs').delete(id); }));
     ids.forEach(id => { this.mem.fotos.delete(id); this.mem.blobs.delete(id); }); return Promise.resolve();
   },
   borrarFotos() {
+    try { FOTOS.forEach(a => a.forEach(m => BORR.add(m.id))); this.setKV('borradas', Array.from(BORR).slice(-3000)).catch(() => {}); setTimeout(() => nubeEstado(), 0); } catch (e) {}
     if (this.modo === 'idb') return this._w(['fotos', 'blobs'], t => { t.objectStore('fotos').clear(); t.objectStore('blobs').clear(); });
     this.mem.fotos.clear(); this.mem.blobs.clear(); return Promise.resolve();
   }
@@ -505,16 +508,20 @@ const valido = s => !!(s && Array.isArray(s.secciones) && s.secciones.every(x =>
 const tiposDe = sec => sec && Array.isArray(sec.tipos) && sec.tipos.length ? sec.tipos : null;   // fotos obligatorias por ítem (ej.: Bucle, Dif)
 function faltan(it, sec) {
   const t = tiposDe(sec); if (!t) return [];
-  const arr = FOTOS.get(it.id) || [];
+  const arr = (FOTOS.get(it.id) || []).concat(REM.fotos.get(it.id) || []);
   return t.filter(x => !arr.some(m => m.slot === x));
 }
 function hecho(it, sec) {
-  if (it.na) return true;
-  return tiposDe(sec) ? faltan(it, sec).length === 0 : (FOTOS.get(it.id) || []).length > 0;
+  if (it.na || remNA(it.id)) return true;
+  return tiposDe(sec) ? faltan(it, sec).length === 0 : ((FOTOS.get(it.id) || []).length + (REM.fotos.get(it.id) || []).length) > 0;
 }
+/* ---------- equipo: lo que suben los otros teléfonos se ve aquí mismo (fotos, N/A y notas) ---------- */
+const REM = {fotos: new Map(), notas: new Map(), firma: '', urls: new Map(), n: 0, pend: false};
+const BORR = new Set();   // fotos borradas en este teléfono (para no verlas volver desde la nube)
+const remNA = id => (REM.notas.get(id) || []).some(x => x.na);
 function ordenFotos(it, sec) {
-  const arr = (FOTOS.get(it.id) || []).slice(), t = tiposDe(sec);
-  if (!t) return arr;
+  const arr = (FOTOS.get(it.id) || []).concat(REM.fotos.get(it.id) || []), t = tiposDe(sec);
+  if (!t) return arr.sort((a, b) => a.ts - b.ts);
   const pos = m => { const k = t.indexOf(m.slot); return k < 0 ? t.length : k; };
   return arr.sort((a, b) => pos(a) - pos(b) || a.ts - b.ts);
 }
@@ -525,6 +532,7 @@ function totales() {
   for (const s of S.secciones) for (const it of s.items) {
     t++; if (hecho(it, s)) h++;
     const a = FOTOS.get(it.id); if (a) { f += a.length; a.forEach(m => { b += m.size; }); }
+    const r = REM.fotos.get(it.id); if (r) { f += r.length; r.forEach(m => { b += m.size || 0; }); }
   }
   return {t, h, f, b};
 }
@@ -596,9 +604,12 @@ function htmlItem(it, sec) {
   const tipos = tiposDe(sec), fotos = ordenFotos(it, sec), n = fotos.length, ok = hecho(it, sec), ab = UI.item === it.id;
   const falta = tipos && !it.na ? faltan(it, sec) : [];
   const parcial = !!tipos && !it.na && n > 0 && falta.length > 0;
-  const sub = it.na ? 'No aplica' : parcial ? 'Falta: ' + falta.join(' y ') : (it.ref || '');
-  const th = (m, i) => '<button class="th" data-a="ver" data-f="' + esc(m.id) + '" aria-label="Ver foto ' + (m.slot ? esc(m.slot) : i + 1) + '"><img data-th="' + esc(m.id) + '"' +
+  const sub = it.na ? 'No aplica' : (REM.notas.get(it.id) || []).some(x => x.na) ? 'No aplica (' + (REM.notas.get(it.id) || []).find(x => x.na).autor + ')' : parcial ? 'Falta: ' + falta.join(' y ') : (it.ref || '');
+  const th = (m, i) => m.remota
+    ? '<button class="th rem" data-a="ver" data-f="' + esc(m.id) + '" aria-label="Ver foto de ' + esc(m.autor || 'otro teléfono') + '"><img src="' + esc(m.mini || m.url) + '" alt="" loading="lazy">' + (i >= 0 ? '<span class="n">' + (i + 1) + '</span>' : '') + '<span class="au">' + esc((m.autor || '☁').slice(0, 1).toUpperCase()) + '</span></button>'
+    : '<button class="th" data-a="ver" data-f="' + esc(m.id) + '" aria-label="Ver foto ' + (m.slot ? esc(m.slot) : i + 1) + '"><img data-th="' + esc(m.id) + '"' +
     (TH.get(m.id) ? ' src="' + TH.get(m.id) + '"' : '') + ' alt="">' + (i >= 0 ? '<span class="n">' + (i + 1) + '</span>' : '') + '</button>';
+  const rn = REM.notas.get(it.id) || [], rNA = !it.na && rn.find(x => x.na);
   const der = tipos
     ? '<div class="slots">' + tipos.map(t => {
         const lleno = fotos.some(m => m.slot === t);
@@ -607,9 +618,9 @@ function htmlItem(it, sec) {
       }).join('') + '</div>'
     : '<button class="cam" data-a="cam" aria-label="Tomar foto: ' + esc(it.nombre) + '"><span>' + IC.cam + '</span></button>';
   let h = '<div class="it' + (ok ? ' ok' : '') + (parcial ? ' parcial' : '') + (it.na ? ' na' : '') + (ab ? ' abierto' : '') + '" data-it="' + esc(it.id) + '"><div class="it-r">' +
-    '<button class="it-m" data-a="item" aria-expanded="' + ab + '"><span class="dot">' + (it.na ? '–' : ok ? IC.ok : '') + '</span>' +
+    '<button class="it-m" data-a="item" aria-expanded="' + ab + '"><span class="dot">' + (it.na || rNA ? '–' : ok ? IC.ok : '') + '</span>' +
     '<span class="it-t"><b>' + esc(it.nombre) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') +
-    (!ab && it.nota ? '<small>Nota: ' + esc(it.nota) + '</small>' : '') + '</span>' +
+    (!ab && it.nota ? '<small>Nota: ' + esc(it.nota) + '</small>' : '') + (!ab ? rn.filter(x => x.txt).map(x => '<small>' + esc(x.autor) + ': ' + esc(x.txt) + '</small>').join('') : '') + '</span>' +
     (n && !tipos ? '<span class="cnt">' + n + '</span>' : '') + '</button>' + der + '</div>';
   if (ab) {
     let cuerpo;
@@ -629,6 +640,7 @@ function htmlItem(it, sec) {
     }
     h += '<div class="det">' + cuerpo +
       '<textarea class="nota" data-a="nota" rows="2" placeholder="Nota (opcional)">' + esc(it.nota) + '</textarea>' +
+      rn.filter(x => x.txt || x.na).map(x => '<p class="rem-n"><b>' + esc(x.autor) + ':</b> ' + (x.na ? 'No aplica. ' : '') + esc(x.txt) + '</p>').join('') +
       '<div class="det-f"><label class="chk"><input type="checkbox" data-a="na"' + (it.na ? ' checked' : '') + '>No aplica</label><span class="sp"></span>' +
       '<button class="lnk" data-a="ren">Renombrar</button><button class="lnk rojo" data-a="idel">Eliminar</button></div></div>';
   }
@@ -832,6 +844,8 @@ async function mostrarLB() {
   $('#lbPrev').disabled = LB.idx === 0; $('#lbNext').disabled = LB.idx >= arr.length - 1;
   const img = $('#lbImg'); img.removeAttribute('src');
   if (LB.url) { URL.revokeObjectURL(LB.url); LB.url = null; }
+  $('#lbDel').hidden = !!m.remota;
+  if (m.remota) { $('#lbInfo').textContent = [fmtMB(m.size), fFecha(d) + ' ' + fHora(d), m.autor ? 'de ' + m.autor : 'de otro teléfono'].filter(Boolean).join(' · '); img.src = m.url; return; }
   try {
     const b = await DB.blob(m.id);
     if (tok !== LB.tok || !b || !b.orig) return;
@@ -844,7 +858,7 @@ function cerrarLB() {
   if (!$$('.hoja:not([hidden])').length) document.body.classList.remove('modal');
 }
 async function borrarFotoLB() {
-  const arr = listaLB(), m = arr[LB.idx]; if (!m) return;
+  const arr = listaLB(), m = arr[LB.idx]; if (!m || m.remota) return;
   if (!confirm('¿Eliminar esta foto' + (m.slot ? ' (' + m.slot + ')' : '') + '?')) return;
   try { await DB.borrar([m.id]); } catch (e) { return toast('No se pudo eliminar: ' + msgErr(e), true); }
   const todas = FOTOS.get(LB.item) || [], k = todas.indexOf(m);
@@ -908,12 +922,16 @@ async function construirZip(secs, todo, prog) {
     for (const it of sec.items) {
       const arr = ordenFotos(it, sec), archivos = [], cuenta = {};
       for (let i = 0; i < arr.length; i++) {
-        const m = arr[i];
+        let m = arr[i];
         let base = limpio(it.nombre);
         if (tipos && tipos.indexOf(m.slot) >= 0) { cuenta[m.slot] = (cuenta[m.slot] || 0) + 1; base += '_' + limpio(m.slot) + (cuenta[m.slot] > 1 ? '_' + cuenta[m.slot] : ''); }
         else { cuenta[''] = (cuenta[''] || 0) + 1; base += (tipos ? '_extra_' : '_') + cuenta['']; }
         const ruta = unico(carpeta + '/' + base + '.' + extension(m), usados);
-        const b = await DB.blob(m.id);
+        let b;
+        if (m.remota) {
+          const rr = await fetch(m.url); if (!rr.ok) throw new Error('no se pudo bajar la foto de ' + (m.autor || 'otro teléfono') + ' («' + it.nombre + '», ' + rr.status + ')');
+          const bl = await rr.blob(); b = {orig: bl}; m = Object.assign({}, m, {size: bl.size, crc: crc32(new Uint8Array(await bl.arrayBuffer()))});
+        } else b = await DB.blob(m.id);
         if (!b || !b.orig) throw new Error('falta la foto ' + (m.slot || i + 1) + ' de ' + it.nombre);
         if (!b.orig.size || b.orig.size !== m.size) throw new Error('la foto ' + (m.slot || i + 1) + ' de «' + it.nombre + '» está vacía o dañada (' + b.orig.size + ' de ' + m.size + ' bytes). Usa «Guardar fotos una a una».');
         let crc = m.crc;
@@ -1188,7 +1206,7 @@ async function abrirGaleria() {
   cerrarHoja('#hZip'); GAL.forEach(u => URL.revokeObjectURL(u)); GAL = [];
   const box = $('#gList'); box.innerHTML = ''; abrirHoja('#hGal'); let n = 0, buenas = 0;
   const res = document.createElement('p'); res.className = 'muted sm'; res.textContent = 'Leyendo fotos…'; box.appendChild(res);
-  for (const sec of S.secciones) for (const it of sec.items) for (const m of ordenFotos(it, sec)) {
+  for (const sec of S.secciones) for (const it of sec.items) for (const m of ordenFotos(it, sec).filter(x => !x.remota)) {
     n++; const d = document.createElement('div'); d.className = 'gi'; const p = document.createElement('p');
     const rot = n + '. ' + sec.titulo + ' — ' + it.nombre + (m.slot ? ' · ' + m.slot : '');
     p.textContent = rot + ' · leyendo…'; d.appendChild(p); box.appendChild(d);
@@ -1227,8 +1245,8 @@ async function rescatarClaude() {
   let A = null; try { A = window.claude && claude.use ? await claude.use('assets') : null; } catch (e) { A = null; }
   if (!A) { st.className = 'estado err'; st.textContent = 'Esta función solo está en el link del artifact, con tu sesión de Claude iniciada.'; return; }
   $('#gResc').disabled = true; const filas = []; let n = 0, ok = 0, tot = 0;
-  S.secciones.forEach(sec => sec.items.forEach(it => tot += ordenFotos(it, sec).length));
-  for (const sec of S.secciones) for (const it of sec.items) for (const m of ordenFotos(it, sec)) {
+  S.secciones.forEach(sec => sec.items.forEach(it => tot += ordenFotos(it, sec).filter(x => !x.remota).length));
+  for (const sec of S.secciones) for (const it of sec.items) for (const m of ordenFotos(it, sec).filter(x => !x.remota)) {
     n++; st.textContent = 'Rescatando ' + n + ' de ' + tot + '… (' + ok + ' subidas)';
     const fila = {n, seccion: sec.titulo, item: it.nombre, slot: m.slot || '', ts: m.ts, nombre: m.nombre || '', tipo: m.tipo || '', esperado: m.size};
     try {
@@ -1283,7 +1301,7 @@ const formato = buf => { const u = new Uint8Array(buf, 0, Math.min(12, buf.byteL
 async function ultimoRescate() {
   const box = $('#gList'), st = $('#gRes'); st.hidden = false; st.className = 'estado'; $('#gUlt').disabled = true;
   GAL.forEach(u => URL.revokeObjectURL(u)); GAL = []; box.innerHTML = '';
-  const lista = []; S.secciones.forEach(sec => sec.items.forEach(it => ordenFotos(it, sec).forEach(m => lista.push({sec, it, m}))));
+  const lista = []; S.secciones.forEach(sec => sec.items.forEach(it => ordenFotos(it, sec).filter(x => !x.remota).forEach(m => lista.push({sec, it, m}))));
   const total = lista.reduce((a, x) => a + (x.m.size || 0), 0);
   st.textContent = 'Último rescate: midiendo el almacenamiento…';
   let usado = null; try { const e = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null; usado = e && typeof e.usage === 'number' ? e.usage : null; } catch (e) {}
@@ -1347,15 +1365,51 @@ async function nubeIniciar() {
   NUBE.codigo = c; NUBE.activo = !!c && /^https?:$/.test(location.protocol);
   try { let d = await DB.getKV('dispositivo'); if (!d) { d = Math.random().toString(36).slice(2, 12); await DB.setKV('dispositivo', d); } NUBE.dispositivo = d; } catch (e) { NUBE.dispositivo = 'c' + Math.random().toString(36).slice(2, 10); }
   try { if (c) localStorage.setItem('terreno_nube_codigo', c); localStorage.setItem('terreno_dispositivo', NUBE.dispositivo); } catch (e) {}
-  nubePintar(); if (NUBE.activo) { nubeCola(); nubeEstado(true); if (/[#&]informe\b/.test(location.hash)) setTimeout(abrirNube, 400); }
+  try { ((await DB.getKV('borradas')) || []).forEach(x => BORR.add(x)); } catch (e) {}
+  nubePintar(); if (NUBE.activo) { nubeCola(); nubeEstado(true); remCargar(); }
 }
+async function remCargar() {
+  if (!NUBE.activo || !S || document.hidden) return;
+  let j; try { j = await nubeJSON('/informe', {codigo: NUBE.codigo}); } catch (e) { return; }
+  const mias = new Set(BORR); FOTOS.forEach(a => a.forEach(m => mias.add(m.id)));
+  const otros = (j.estados || []).filter(e => e.dispositivo !== NUBE.dispositivo);
+  otros.forEach(e => ((e.datos && e.datos.borradas) || []).forEach(x => mias.add(x)));
+  const fotos = new Map(), ahora = Date.now(); let n = 0;
+  (j.fotos || []).forEach(f => {
+    if (!f.url || !f.itemId || mias.has(f.id) || (f.dispositivo && f.dispositivo === NUBE.dispositivo)) return;
+    let u = REM.urls.get(f.nombre); if (!u || u.exp < ahora) { u = {url: f.url, mini: f.mini || f.url, exp: ahora + 50 * 60 * 1000}; REM.urls.set(f.nombre, u); }
+    if (!fotos.has(f.itemId)) fotos.set(f.itemId, []);
+    fotos.get(f.itemId).push({id: f.id, remota: true, item: f.itemId, slot: f.slot || null, ts: f.ts || 0, autor: f.autor || '', url: u.url, mini: u.mini, size: f.size || 0, tipo: f.mime || '', nombre: f.nombre || '', w: 0, h: 0, nube: 1});
+    n++;
+  });
+  const notas = new Map();
+  otros.filter(e => e.tipo === 'checklist').forEach(e => ((e.datos && e.datos.secciones) || []).forEach(s => (s.items || []).forEach(it => {
+    if (!it.na && !it.nota) return;
+    if (!notas.has(it.id)) notas.set(it.id, []);
+    notas.get(it.id).push({autor: e.autor || ('Teléfono ' + String(e.dispositivo || '').slice(0, 4)), txt: it.nota || '', na: !!it.na});
+  })));
+  const firma = JSON.stringify([[...fotos.entries()].map(([k, a]) => [k, a.map(x => x.id).sort()]).sort(), [...notas.entries()].sort()]);
+  REM.fotos = fotos; REM.notas = notas; REM.n = n;
+  if (firma !== REM.firma) { REM.firma = firma; remRepintar(); } else nubePintar();
+}
+function remRepintar() {
+  const a = document.activeElement;
+  if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT') && $('#lista').contains(a)) { REM.pend = true; return; }   // no interrumpir si está escribiendo
+  if (!$('#lb').hidden || $$('.hoja:not([hidden])').length) { REM.pend = true; return; }
+  REM.pend = false; renderHeader();
+  if (UI.item) renderConservando('[data-it="' + UI.item + '"]'); else renderLista();
+  nubePintar();
+}
+setInterval(() => { if (REM.pend) remRepintar(); }, 1500);
+setInterval(remCargar, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) remCargar(); });
 /* estado de la checklist en la nube (para el informe en vivo): ítems, N/A, notas y conteo de fotos */
 let tNE = null;
 function nubeEstado(ya) { if (!NUBE.activo) return; clearTimeout(tNE); tNE = setTimeout(nubeEstadoSubir, ya ? 50 : 3000); }
 async function nubeEstadoSubir() {
   if (!NUBE.activo || !S) return;
   try { localStorage.setItem('terreno_autor', S.tecnico || ''); } catch (e) {}
-  const datos = {obra: S.obra || '', tecnico: S.tecnico || '', secciones: S.secciones.map(s => ({id: s.id, titulo: s.titulo, tipos: tiposDe(s),
+  const datos = {obra: S.obra || '', tecnico: S.tecnico || '', borradas: Array.from(BORR).slice(-3000), secciones: S.secciones.map(s => ({id: s.id, titulo: s.titulo, tipos: tiposDe(s),
     items: s.items.map(it => { const a = FOTOS.get(it.id) || []; return {id: it.id, nombre: it.nombre, ref: it.ref || '', na: !!it.na, nota: it.nota || '', fotos: a.length, enNube: a.filter(m => m.nube).length}; })}))};
   try { await nubeJSON('/estado', {codigo: NUBE.codigo, tipo: 'checklist', dispositivo: NUBE.dispositivo, autor: S.tecnico || '', datos}); NUBE.estadoTs = Date.now(); }
   catch (e) { NUBE.ultimoError = NUBE.ultimoError || ('estado: ' + msgErr(e)); nubePintar(); }
@@ -1366,8 +1420,8 @@ function nubePintar() {
   if (!NUBE.activo) { f.hidden = true; return; }
   f.hidden = false; e.classList.remove('err');
   const {tot, ok, pend} = nubeConteo();
-  if (!tot) e.textContent = '☁ Nube activa';
-  else if (!pend) e.textContent = '☁ ' + ok + '/' + tot + ' respaldadas en la nube';
+  if (!tot) e.textContent = '☁ Nube activa' + (REM.n ? ' · ' + REM.n + ' fotos del equipo' : '');
+  else if (!pend) e.textContent = '☁ ' + ok + '/' + tot + ' respaldadas en la nube' + (REM.n ? ' · +' + REM.n + ' del equipo' : '');
   else if (NUBE.ocupado) e.textContent = '☁ Subiendo… ' + ok + '/' + tot;
   else if (navigator.onLine === false) e.textContent = '☁ Sin señal · ' + pend + ' por subir';
   else if (NUBE.ultimoError) { e.textContent = '☁ Error: ' + NUBE.ultimoError.slice(0, 70) + ' · ' + pend + ' por subir'; e.classList.add('err'); }
@@ -1384,7 +1438,7 @@ async function nubeSubir(m, it, sec) {
   if (!b || !b.orig || !b.orig.size) throw new Error('la foto no tiene datos locales');
   const mime = /^image\//.test(b.orig.type) ? b.orig.type : (/^image\//.test(m.tipo || '') ? m.tipo : 'image/jpeg');
   const j = await nubeJSON('/subir', {codigo: NUBE.codigo, id: m.id, ts: m.ts, mime, size: b.orig.size,
-    meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || ''}});
+    meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || '', dv: NUBE.dispositivo}});
   if (!j.ya) {
     const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([b.orig], {type: mime}), 'foto');
     const h = {'x-upsert': 'false'}; if (j.anon) { h.apikey = j.anon; h.authorization = 'Bearer ' + j.anon; }
@@ -1401,7 +1455,7 @@ async function nubeSubirMini(m, it, sec, b) {   // miniatura para el informe en 
     if (!b) b = await DB.blob(m.id);
     if (!b || !b.mini || !b.mini.size) { m.sinMini = true; await DB.guardarMeta(m); return; }
     const jm = await nubeJSON('/subir', {codigo: NUBE.codigo, id: m.id, ts: m.ts, mime: 'image/jpeg', size: b.mini.size, variante: 'mini',
-      meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || ''}});
+      meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || '', dv: NUBE.dispositivo}});
     if (!jm.ya) {
       const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([b.mini], {type: 'image/jpeg'}), 'mini');
       const h = {'x-upsert': 'false'}; if (jm.anon) { h.apikey = jm.anon; h.authorization = 'Bearer ' + jm.anon; }
@@ -1531,7 +1585,6 @@ async function abrirNube() {
 $('#nbRes').addEventListener('toggle', e => { const dt = e.target; if (!dt.matches || !dt.matches('details.inf-s')) return; const id = dt.dataset.id; if (dt.open) { if (!INF.abiertas.has(id)) { INF.abiertas.add(id); if (INF.j) infRender(INF.j); } } else INF.abiertas.delete(id); }, true);
 $('#nbRes').addEventListener('click', e => { const f = e.target.closest('figure[data-full]'); if (!f) return; f.classList.toggle('grande'); const im = f.querySelector('img'); if (f.classList.contains('grande') && im && im.src !== f.dataset.full) im.src = f.dataset.full; });
 $('#nbList').addEventListener('click', e => { const f = e.target.closest('figure[data-k]'); if (f) f.classList.toggle('grande'); });
-$('#hNubeVer').addEventListener('click', abrirNube);
 $('#nbCerrar').addEventListener('click', () => { nbLimpiarZip(); cerrarHoja('#hNubeS'); });
 $('#nbCodOk').addEventListener('click', async () => {
   const c = $('#nbCodIn').value.trim(); if (!c) return;
@@ -1577,7 +1630,7 @@ function autoRespaldo() {
   if (SIN_RESP >= 5 || Date.now() - ULT_AUTO > 240000) { SIN_RESP = 0; ULT_AUTO = Date.now(); abrirExport(); prepararZip(); toast('Respaldo automático: toca Descargar para guardarlo', false); }
 }
 setInterval(() => { try { autoRespaldo(); } catch (e) {} try {
-  const n = S ? totales().f : 0; let pend = 0;
+  let n = 0; FOTOS.forEach(a => { n += a.length; }); let pend = 0;
   if (DB.modo === 'idb' && S) FOTOS.forEach(arr => arr.forEach(m => { if (m.ts > ULT_EXPORT && !m.nube) pend++; }));
   nubePintar();
   const memo = DB.modo !== 'idb' && n > 0, recu = !memo && pend >= 15;

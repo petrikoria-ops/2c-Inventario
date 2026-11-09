@@ -39,7 +39,7 @@ export function obraDesdeCodigo(codigo: unknown): string | null {
   return a.length === b.length && timingSafeEqual(a, b) ? slug : null
 }
 
-export type MetaFoto = { s: string; i: string; id: string; sl: string; a: string }
+export type MetaFoto = { s: string; i: string; id: string; sl: string; a: string; dv?: string }
 
 const corta = (v: unknown, n: number) => String(v ?? '').slice(0, n)
 
@@ -53,6 +53,8 @@ export function rutaFoto(slug: string, ts: number, id: string, ext: string, meta
     s: corta(meta.s, 120), i: corta(meta.i, 120), id: corta(meta.id, 60),
     sl: corta(meta.sl, 60), a: corta(meta.a, 60),
   }
+  const dv = corta(meta.dv, 24)
+  if (/^[a-z0-9]{4,24}$/i.test(dv)) m.dv = dv   // teléfono que la sacó (para no mostrarle su propia foto como ajena)
   const b64 = Buffer.from(JSON.stringify(m), 'utf8').toString('base64url')
   return `obras/${slug}/${carpeta}/${ts}.${id}.${b64}.${ext}`
 }
@@ -102,7 +104,7 @@ export async function asegurarBucketDatos(sb: SupabaseClient) {
 
 export type FotoNube = {
   nombre: string; url: string | null; mini: string | null; size: number; mime: string; subida: string | null
-  ts: number; id: string; ext: string; seccion: string; item: string; itemId: string; slot: string; autor: string
+  ts: number; id: string; ext: string; seccion: string; item: string; itemId: string; slot: string; autor: string; dispositivo: string
 }
 
 /** Todas las fotos de la obra (de todos los teléfonos) con URL firmada de 1 hora. */
@@ -142,6 +144,7 @@ export async function listarFotos(sb: SupabaseClient, slug: string): Promise<Fot
       nombre: o.name, url: urls[k], mini: minis.get(o.name.replace(/\.[^.]+$/, '')) ?? null, size: Number(o.metadata?.size ?? 0), mime: String(o.metadata?.mimetype ?? ''),
       subida: o.created_at, ts: n?.ts ?? 0, id: n?.id ?? '', ext: n?.ext ?? 'jpg',
       seccion: n?.meta.s ?? '', item: n?.meta.i ?? '', itemId: n?.meta.id ?? '', slot: n?.meta.sl ?? '', autor: n?.meta.a ?? '',
+      dispositivo: n?.meta.dv ?? '',
     }
   })
 }

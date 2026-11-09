@@ -22,7 +22,8 @@ export async function POST(req: NextRequest) {
     const sb = getSupabaseAdmin()
     await asegurarBucket(sb)
     await asegurarBucketDatos(sb)
-    const fotos = await listarFotos(sb, slug)
+    // solo:'estados' → sin fotos (más liviano; lo usa la ruta para ver el avance del equipo)
+    const fotos = body.solo === 'estados' ? [] : await listarFotos(sb, slug)
 
     const prefijo = `obras/${slug}/estado`
     const { data: lista, error } = await sb.storage.from(BUCKET_DATOS).list(prefijo, { limit: 100 })
