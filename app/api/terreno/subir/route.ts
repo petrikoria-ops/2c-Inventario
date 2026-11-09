@@ -21,12 +21,14 @@ export async function POST(req: NextRequest) {
   const slug = obraDesdeCodigo(body.codigo)
   if (!slug) return NextResponse.json({ error: 'Código de obra no válido.' }, { status: 403 })
 
-  const mime = String(body.mime ?? '')
+  // variante 'mini': miniatura JPEG de la misma foto, para que el informe en vivo no baje originales pesados.
+  const mini = body.variante === 'mini'
+  const mime = mini ? 'image/jpeg' : String(body.mime ?? '')
   const ext = EXT_POR_MIME[mime]
   if (!ext) return NextResponse.json({ error: 'Formato de imagen no admitido: ' + mime }, { status: 400 })
 
   const size = Number(body.size)
-  if (!(size > 0 && size <= MAX_BYTES_FOTO)) return NextResponse.json({ error: 'Tamaño de foto no válido.' }, { status: 400 })
+  if (!(size > 0 && size <= (mini ? 2 * 1024 * 1024 : MAX_BYTES_FOTO))) return NextResponse.json({ error: 'Tamaño de foto no válido.' }, { status: 400 })
 
   const ts = Number(body.ts)
   const id = String(body.id ?? '')
@@ -37,7 +39,7 @@ export async function POST(req: NextRequest) {
   try {
     const sb = getSupabaseAdmin()
     await asegurarBucket(sb)
-    const path = rutaFoto(slug, ts, id, ext, (body.meta ?? {}) as Record<string, string>)
+    const path = rutaFoto(slug, ts, id, ext, (body.meta ?? {}) as Record<string, string>, mini ? 'm' : 'f')
     const { data, error } = await sb.storage.from(BUCKET_TERRENO).createSignedUploadUrl(path)
     if (error) {
       // Ya estaba subida (reintento tras un corte): para el teléfono es éxito.

@@ -16,6 +16,8 @@ export const OBRAS_TERRENO: Record<string, { nombre: string; sha256: string }> =
 }
 
 export const BUCKET_TERRENO = 'terreno'
+// Estado de la checklist y de la ruta de cada teléfono (JSON chico), para el informe en vivo.
+export const BUCKET_DATOS = 'terreno-datos'
 export const MAX_BYTES_FOTO = 50 * 1024 * 1024
 
 export const EXT_POR_MIME: Record<string, string> = {
@@ -46,13 +48,13 @@ const corta = (v: unknown, n: number) => String(v ?? '').slice(0, n)
  * listar la obra sea UNA sola llamada, sin tabla extra:
  *   obras/<slug>/f/<ts>.<id>.<meta>.<ext>
  */
-export function rutaFoto(slug: string, ts: number, id: string, ext: string, meta: Partial<MetaFoto>) {
+export function rutaFoto(slug: string, ts: number, id: string, ext: string, meta: Partial<MetaFoto>, carpeta: 'f' | 'm' = 'f') {
   const m: MetaFoto = {
     s: corta(meta.s, 120), i: corta(meta.i, 120), id: corta(meta.id, 60),
     sl: corta(meta.sl, 60), a: corta(meta.a, 60),
   }
   const b64 = Buffer.from(JSON.stringify(m), 'utf8').toString('base64url')
-  return `obras/${slug}/f/${ts}.${id}.${b64}.${ext}`
+  return `obras/${slug}/${carpeta}/${ts}.${id}.${b64}.${ext}`
 }
 
 export function leerNombre(nombre: string): { ts: number; id: string; ext: string; meta: MetaFoto } | null {
@@ -80,4 +82,66 @@ export async function asegurarBucket(sb: SupabaseClient) {
     if (error && !/exist/i.test(error.message)) throw error
   }
   bucketListo = true
+}
+
+let bucketDatosListo = false
+/** Bucket privado para los estados (JSON) que suben los teléfonos. */
+export async function asegurarBucketDatos(sb: SupabaseClient) {
+  if (bucketDatosListo) return
+  const { data } = await sb.storage.getBucket(BUCKET_DATOS)
+  if (!data) {
+    const { error } = await sb.storage.createBucket(BUCKET_DATOS, {
+      public: false,
+      fileSizeLimit: 5 * 1024 * 1024,
+      allowedMimeTypes: ['application/json'],
+    })
+    if (error && !/exist/i.test(error.message)) throw error
+  }
+  bucketDatosListo = true
+}
+
+export type FotoNube = {
+  nombre: string; url: string | null; mini: string | null; size: number; mime: string; subida: string | null
+  ts: number; id: string; ext: string; seccion: string; item: string; itemId: string; slot: string; autor: string
+}
+
+/** Todas las fotos de la obra (de todos los teléfonos) con URL firmada de 1 hora. */
+export async function listarFotos(sb: SupabaseClient, slug: string): Promise<FotoNube[]> {
+  const prefijo = `obras/${slug}/f`
+  const objetos: { name: string; id: string | null; metadata: Record<string, unknown> | null; created_at: string | null }[] = []
+  for (let offset = 0; ; offset += 1000) {
+    const { data, error } = await sb.storage.from(BUCKET_TERRENO).list(prefijo, {
+      limit: 1000, offset, sortBy: { column: 'name', order: 'asc' },
+    })
+    if (error) throw error
+    objetos.push(...(data ?? []))
+    if (!data || data.length < 1000) break
+  }
+  const archivos = objetos.filter(o => o.id)
+  // miniaturas (mismo nombre, carpeta m/, siempre .jpg)
+  const minis = new Map<string, string>()
+  {
+    const { data } = await sb.storage.from(BUCKET_TERRENO).list(`obras/${slug}/m`, { limit: 1000, sortBy: { column: 'name', order: 'asc' } })
+    const nm = (data ?? []).filter(o => o.id).map(o => o.name)
+    for (let i = 0; i < nm.length; i += 100) {
+      const lote = nm.slice(i, i + 100)
+      const { data: fir } = await sb.storage.from(BUCKET_TERRENO).createSignedUrls(lote.map(n => `obras/${slug}/m/${n}`), 3600)
+      lote.forEach((n, k) => { const u = fir?.[k]?.signedUrl; if (u) minis.set(n.replace(/\.[^.]+$/, ''), u) })
+    }
+  }
+  const urls: (string | null)[] = []
+  for (let i = 0; i < archivos.length; i += 100) {
+    const lote = archivos.slice(i, i + 100).map(o => `${prefijo}/${o.name}`)
+    const { data, error } = await sb.storage.from(BUCKET_TERRENO).createSignedUrls(lote, 3600)
+    if (error) throw error
+    lote.forEach((_, k) => urls.push(data?.[k]?.signedUrl ?? null))
+  }
+  return archivos.map((o, k) => {
+    const n = leerNombre(o.name)
+    return {
+      nombre: o.name, url: urls[k], mini: minis.get(o.name.replace(/\.[^.]+$/, '')) ?? null, size: Number(o.metadata?.size ?? 0), mime: String(o.metadata?.mimetype ?? ''),
+      subida: o.created_at, ts: n?.ts ?? 0, id: n?.id ?? '', ext: n?.ext ?? 'jpg',
+      seccion: n?.meta.s ?? '', item: n?.meta.i ?? '', itemId: n?.meta.id ?? '', slot: n?.meta.sl ?? '', autor: n?.meta.a ?? '',
+    }
+  })
 }

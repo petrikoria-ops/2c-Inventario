@@ -210,7 +210,7 @@ let EST = {}, memOnly = false, SIN = 0, ULT = Date.now(), DLC = null;
 try { localStorage.setItem(KEY + '_t', '1'); if (localStorage.getItem(KEY + '_t') !== '1') throw 0; localStorage.removeItem(KEY + '_t'); EST = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { memOnly = true; EST = {}; }
 try { if (window.claude && claude.use) claude.use('downloads').then(d => { DLC = d; }).catch(() => {}); } catch (e) {}
 try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}
-function guardar() { try { localStorage.setItem(KEY, JSON.stringify(EST)); if (localStorage.getItem(KEY) === null) throw 0; } catch (e) { memOnly = true; $('#pg').textContent = 'Sin guardado en este visor'; } }
+function guardar() { try { nubeRuta(); } catch (e) {} try { localStorage.setItem(KEY, JSON.stringify(EST)); if (localStorage.getItem(KEY) === null) throw 0; } catch (e) { memOnly = true; $('#pg').textContent = 'Sin guardado en este visor'; } }
 const UI = {m: 'E', f: 'todos', abiertas: new Set(), item: null, gm: null, cur: {}};
 const ICO = {chk: '<svg viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>', fl: '<svg class="fl" viewBox="0 0 24 24"><path d="m6 9 6 6 6-6"/></svg>'};
 const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
@@ -287,7 +287,7 @@ function progreso() {
 }
 function toast(t) { const e = $('#toast'); e.textContent = t; e.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => e.hidden = true, 2200); }
 function marcar(id, s) {
-  EST[id] = Object.assign(EST[id] || {}, {s}); if (!s && !EST[id].n) delete EST[id]; guardar(); SIN++;
+  EST[id] = Object.assign(EST[id] || {}, {s, t: Date.now()}); if (!s && !EST[id].n) delete EST[id]; guardar(); SIN++;
 }
 function abrirLB(titulo, html) { $('#lbT').textContent = titulo; $('#lbS').innerHTML = html; $('#lb').hidden = false; document.body.style.overflow = 'hidden'; }
 function cerrarLB() { $('#lb').hidden = true; document.body.style.overflow = ''; }
@@ -307,9 +307,9 @@ document.addEventListener('click', ev => {
   if (a === 'zoommapa') { abrirLB('Plano general · ' + nombre(c), planoHTML(marcasDe(c))); return; }
 });
 document.addEventListener('input', ev => {
-  const mt = ev.target.closest('textarea[data-a="mnota"]'); if (mt) { const id = UI.cur[UI.gm]; EST[id] = Object.assign(EST[id] || {}, {n: mt.value}); if (!EST[id].n && !EST[id].s) delete EST[id]; clearTimeout(input.t); input.t = setTimeout(guardar, 400); return; }
+  const mt = ev.target.closest('textarea[data-a="mnota"]'); if (mt) { const id = UI.cur[UI.gm]; EST[id] = Object.assign(EST[id] || {}, {n: mt.value, t: Date.now()}); if (!EST[id].n && !EST[id].s) delete EST[id]; clearTimeout(input.t); input.t = setTimeout(guardar, 400); return; }
   const t = ev.target.closest('textarea[data-a="nota"]'); if (!t) return;
-  const id = t.closest('.it').dataset.id; EST[id] = Object.assign(EST[id] || {}, {n: t.value}); if (!EST[id].n && !EST[id].s) delete EST[id]; clearTimeout(input.t); input.t = setTimeout(guardar, 400);
+  const id = t.closest('.it').dataset.id; EST[id] = Object.assign(EST[id] || {}, {n: t.value, t: Date.now()}); if (!EST[id].n && !EST[id].s) delete EST[id]; clearTimeout(input.t); input.t = setTimeout(guardar, 400);
 });
 function input() {}
 $('#lbX').addEventListener('click', cerrarLB);
@@ -469,7 +469,32 @@ setInterval(() => {
   } catch (e) {}
 }, 1200);
 window.addEventListener('beforeunload', e => { if (memOnly && Object.keys(EST).length) { e.preventDefault(); e.returnValue = ''; } });
+
+/* ===== nube: el avance de la ruta se sube solo (para el informe en vivo) ===== */
+const NUBE_R = {codigo: '', dispositivo: '', ts: 0, err: ''};
+try { const m = location.hash.match(/[#&]c=([^&]+)/); NUBE_R.codigo = m ? decodeURIComponent(m[1]).trim() : (localStorage.getItem('terreno_nube_codigo') || ''); if (m) localStorage.setItem('terreno_nube_codigo', NUBE_R.codigo); } catch (e) {}
+try { NUBE_R.dispositivo = localStorage.getItem('terreno_dispositivo') || ''; if (!NUBE_R.dispositivo) { NUBE_R.dispositivo = Math.random().toString(36).slice(2, 12); localStorage.setItem('terreno_dispositivo', NUBE_R.dispositivo); } } catch (e) { NUBE_R.dispositivo = 'r' + Math.random().toString(36).slice(2, 10); }
+let tNR = null;
+function nubeRuta(ya) {
+  if (!NUBE_R.codigo || !/^https?:$/.test(location.protocol)) return;
+  clearTimeout(tNR); tNR = setTimeout(async () => {
+    try {
+      let autor = ''; try { autor = localStorage.getItem('terreno_autor') || ''; } catch (e) {}
+      const r = await fetch('/api/terreno/estado', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({codigo: NUBE_R.codigo, tipo: 'ruta', dispositivo: NUBE_R.dispositivo, autor, datos: {est: EST, tot: {E: C.filter(c => mod(c) === 'E').length, L: C.filter(c => mod(c) === 'L').length}, info: Object.fromEntries(Object.keys(EST).map(id => { const c = C.find(x => x.id === id); return [id, c ? {g: c.grupo, d: titulo(c)} : {}]; }))}})});
+      let j = {}; try { j = await r.json(); } catch (e) {}
+      if (!r.ok) throw new Error(j.error || ('servidor ' + r.status));
+      NUBE_R.ts = Date.now(); NUBE_R.err = '';
+    } catch (e) { NUBE_R.err = (e && e.message) || String(e); }
+    pintarNubeR();
+  }, ya ? 100 : 2500);
+}
+function pintarNubeR() {
+  if (!NUBE_R.codigo) return; const el = $('#pg');
+  el.textContent = NUBE_R.err ? '☁ Error: ' + NUBE_R.err.slice(0, 40) : NUBE_R.ts ? '☁ En la nube ' + new Date(NUBE_R.ts).toLocaleTimeString('es-CL', {hour: '2-digit', minute: '2-digit'}) : '☁ Conectando…';
+}
+window.addEventListener('online', () => nubeRuta(true));
 render();
+pintarNubeR(); nubeRuta(true);
 </script>
 </body>
 </html>

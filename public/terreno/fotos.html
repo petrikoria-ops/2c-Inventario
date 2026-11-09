@@ -205,6 +205,14 @@ body.kb .toast{bottom:12px}
 .nb-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.nb-g figure{margin:0}.nb-g img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--campo);-webkit-touch-callout:default}
 .nb-g figure.grande{grid-column:1/-1}.nb-g figure.grande img{aspect-ratio:auto;object-fit:contain}
 .nb-g figcaption{font-size:11px;line-height:1.25;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inf-k{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.inf-k div{background:var(--campo);border:1px solid var(--line);border-radius:12px;padding:9px 10px}.inf-k b{display:block;font-size:20px;line-height:1.1}.inf-k span{font-size:12px;color:var(--mut)}
+.inf-eq{font-size:12.5px;color:var(--mut);margin:4px 0 10px}.inf-h{font-size:15px;font-weight:800;margin:16px 0 6px}
+.inf-obs{margin:0;padding-left:18px;font-size:13.5px;line-height:1.35}.inf-obs li{margin:4px 0}
+details.inf-s{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card)}details.inf-s>summary{list-style:none;cursor:pointer;padding:11px 12px;font-weight:750;display:flex;justify-content:space-between;gap:8px}details.inf-s>summary::-webkit-details-marker{display:none}
+.inf-bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin:0 12px 10px}.inf-bar i{display:block;height:100%;background:var(--ok,#17924F)}
+.inf-it{border-top:1px solid var(--line);padding:9px 12px}.inf-it .t{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:650}.inf-it .n{font-size:12.5px;color:var(--mut);margin-top:3px}
+.chip{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px;white-space:nowrap;align-self:flex-start}.chip.ok{background:#DCF3E5;color:#11673A}.chip.fa{background:#FFF0D1;color:#8A5300}.chip.pe{background:#ECEFF3;color:#4A5563}.chip.na{background:#E7ECF7;color:#2C4A86}
+.inf-it .nb-g{margin-top:7px}
 </style>
 </head>
 <body>
@@ -232,7 +240,7 @@ body.kb .toast{bottom:12px}
     </div>
     <div class="top-2"><div class="pbar"><i id="hBar"></i></div><span class="pnum" id="hProg">0/0 · 0%</span></div>
     <div class="top-3"><span id="hFotos">0 fotos · 0 MB</span><span id="hAlm"></span></div>
-    <div class="top-3 nube-f" id="hNubeF" hidden><span id="hNube"></span><button type="button" class="nube-ver" id="hNubeVer">Ver nube</button></div>
+    <div class="top-3 nube-f" id="hNubeF" hidden><span id="hNube"></span><button type="button" class="nube-ver" id="hNubeVer">Informe</button></div>
   </header>
 
   <div class="herr">
@@ -276,8 +284,9 @@ body.kb .toast{bottom:12px}
 </div></div>
 
 <div class="hoja" id="hNubeS" hidden><div class="hoja-c">
-  <h3>Fotos en la nube</h3>
+  <h3>Informe en vivo</h3>
   <p class="muted sm" id="nbInfo">Cargando…</p>
+  <div id="nbRes"></div>
   <div class="nb-cod" id="nbCod" hidden><input id="nbCodIn" placeholder="Pega el código de obra" autocomplete="off"><button class="btn pri" id="nbCodOk" type="button">Activar</button></div>
   <div class="nb-zip" id="nbZipF" hidden><select id="nbSec"></select><button class="btn pri" id="nbZip" type="button">Preparar ZIP</button></div>
   <p class="estado" id="nbEst" hidden></p>
@@ -301,7 +310,7 @@ body.kb .toast{bottom:12px}
   <button class="fila" data-m="datos">Datos de la obra</button>
   <button class="fila" data-m="seccion">Nueva sección</button>
   <button class="fila" data-m="lista">Editar lista (texto)</button>
-  <button class="fila" data-m="nube">Fotos en la nube (todos los teléfonos)</button>
+  <button class="fila" data-m="nube">Informe en vivo (todos los teléfonos)</button>
   <button class="fila" data-m="ayuda">Ayuda</button>
   <button class="fila rojo" data-m="borrar">Borrar fotos y notas…</button>
   <p class="muted sm" id="mAlm"></p>
@@ -522,6 +531,7 @@ function totales() {
 
 let tG = null, tU = null;
 function guardar(ya) {
+  try { nubeEstado(); } catch (e) {}
   clearTimeout(tG); tG = null;
   const f = () => DB.setKV('estado', S).catch(e => toast('No se pudo guardar: ' + msgErr(e), true));
   if (ya) return f();
@@ -1328,14 +1338,27 @@ $('#gUlt').addEventListener('click', ultimoRescate);
    Acceso sin cuenta con el código de obra que trae el link (#c=...).
    Los bytes van directo a Supabase Storage con una URL firmada que entrega /api/terreno/subir. */
 const NUBE_API = '/api/terreno';
-const NUBE = {codigo: '', activo: false, ocupado: false, ultimoError: ''};
+const NUBE = {codigo: '', activo: false, ocupado: false, ultimoError: '', dispositivo: '', estadoTs: 0};
 async function nubeIniciar() {
   let c = '';
   try { const m = location.hash.match(/[#&]c=([^&]+)/); if (m) c = decodeURIComponent(m[1]).trim(); } catch (e) {}
   if (c) { try { await DB.setKV('nubeCodigo', c); } catch (e) {} }
   else { try { c = (await DB.getKV('nubeCodigo')) || ''; } catch (e) {} }
   NUBE.codigo = c; NUBE.activo = !!c && /^https?:$/.test(location.protocol);
-  nubePintar(); if (NUBE.activo) nubeCola();
+  try { let d = await DB.getKV('dispositivo'); if (!d) { d = Math.random().toString(36).slice(2, 12); await DB.setKV('dispositivo', d); } NUBE.dispositivo = d; } catch (e) { NUBE.dispositivo = 'c' + Math.random().toString(36).slice(2, 10); }
+  try { if (c) localStorage.setItem('terreno_nube_codigo', c); localStorage.setItem('terreno_dispositivo', NUBE.dispositivo); } catch (e) {}
+  nubePintar(); if (NUBE.activo) { nubeCola(); nubeEstado(true); if (/[#&]informe\b/.test(location.hash)) setTimeout(abrirNube, 400); }
+}
+/* estado de la checklist en la nube (para el informe en vivo): ítems, N/A, notas y conteo de fotos */
+let tNE = null;
+function nubeEstado(ya) { if (!NUBE.activo) return; clearTimeout(tNE); tNE = setTimeout(nubeEstadoSubir, ya ? 50 : 3000); }
+async function nubeEstadoSubir() {
+  if (!NUBE.activo || !S) return;
+  try { localStorage.setItem('terreno_autor', S.tecnico || ''); } catch (e) {}
+  const datos = {obra: S.obra || '', tecnico: S.tecnico || '', secciones: S.secciones.map(s => ({id: s.id, titulo: s.titulo, tipos: tiposDe(s),
+    items: s.items.map(it => { const a = FOTOS.get(it.id) || []; return {id: it.id, nombre: it.nombre, ref: it.ref || '', na: !!it.na, nota: it.nota || '', fotos: a.length, enNube: a.filter(m => m.nube).length}; })}))};
+  try { await nubeJSON('/estado', {codigo: NUBE.codigo, tipo: 'checklist', dispositivo: NUBE.dispositivo, autor: S.tecnico || '', datos}); NUBE.estadoTs = Date.now(); }
+  catch (e) { NUBE.ultimoError = NUBE.ultimoError || ('estado: ' + msgErr(e)); nubePintar(); }
 }
 function nubeConteo() { let tot = 0, ok = 0; FOTOS.forEach(a => a.forEach(m => { tot++; if (m.nube) ok++; })); return {tot, ok, pend: tot - ok}; }
 function nubePintar() {
@@ -1369,6 +1392,24 @@ async function nubeSubir(m, it, sec) {
     if (!u.ok) { let t = ''; try { t = await u.text(); } catch (e) {} if (!/exist|duplicate/i.test(t)) throw new Error('subida ' + u.status + (t ? ': ' + t.slice(0, 90) : '')); }
   }
   m.nube = Date.now(); await DB.guardarMeta(m);
+  await nubeSubirMini(m, it, sec, b);
+  nubeEstado();
+}
+async function nubeSubirMini(m, it, sec, b) {   // miniatura para el informe en vivo (si falla, no bloquea nada)
+  if (m.nubeMini || m.sinMini) return;
+  try {
+    if (!b) b = await DB.blob(m.id);
+    if (!b || !b.mini || !b.mini.size) { m.sinMini = true; await DB.guardarMeta(m); return; }
+    const jm = await nubeJSON('/subir', {codigo: NUBE.codigo, id: m.id, ts: m.ts, mime: 'image/jpeg', size: b.mini.size, variante: 'mini',
+      meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || ''}});
+    if (!jm.ya) {
+      const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([b.mini], {type: 'image/jpeg'}), 'mini');
+      const h = {'x-upsert': 'false'}; if (jm.anon) { h.apikey = jm.anon; h.authorization = 'Bearer ' + jm.anon; }
+      const u = await fetch(jm.url, {method: 'PUT', headers: h, body: fd});
+      if (!u.ok) { let t = ''; try { t = await u.text(); } catch (e) {} if (!/exist|duplicate/i.test(t)) return; }
+    }
+    m.nubeMini = Date.now(); await DB.guardarMeta(m);
+  } catch (e) {}
 }
 async function nubeCola() {
   if (!NUBE.activo || NUBE.ocupado || !S) return;
@@ -1378,6 +1419,9 @@ async function nubeCola() {
       if (m.nube) continue;
       if (navigator.onLine === false) throw new Error('sin señal');
       await nubeSubir(m, it, sec); NUBE.ultimoError = ''; nubePintar();
+    }
+    for (const sec of S.secciones) for (const it of sec.items) for (const m of (FOTOS.get(it.id) || []).slice()) {
+      if (m.nube && !m.nubeMini && !m.sinMini && navigator.onLine !== false) await nubeSubirMini(m, it, sec);
     }
     NUBE.ultimoError = '';
   } catch (e) { NUBE.ultimoError = msgErr(e); }
@@ -1391,30 +1435,101 @@ document.addEventListener('visibilitychange', () => { if (!document.hidden) nube
 const NB = {fotos: [], zip: null, url: null};
 function nbEstado(t, err) { const e = $('#nbEst'); e.hidden = !t; e.textContent = t || ''; e.className = 'estado' + (err ? ' err' : ''); }
 function nbLimpiarZip() { if (NB.url) URL.revokeObjectURL(NB.url); NB.zip = null; NB.url = null; $('#nbShare').hidden = true; $('#nbDown').hidden = true; }
+const INF = {timer: null, firma: '', abiertas: new Set(['__res']), urls: new Map(), j: null};
+function infURL(f) {   // URL estable por foto (las firmadas duran 1 h): evita re-descargar en cada refresco
+  const c = INF.urls.get(f.nombre), ahora = Date.now();
+  if (c && c.exp > ahora) return c;
+  const v = {mini: f.mini || f.url, url: f.url, exp: ahora + 50 * 60 * 1000}; INF.urls.set(f.nombre, v); return v;
+}
+const infNom = e => e.autor || ('Teléfono ' + String(e.dispositivo || '').slice(0, 4));
+function infProcesar(j) {
+  const est = j.estados || [], ck = est.filter(e => e.tipo === 'checklist').sort((a, b) => b.ts - a.ts), rt = est.filter(e => e.tipo === 'ruta');
+  const fotos = (j.fotos || []).filter(f => f.url), porItem = new Map();
+  fotos.forEach(f => { const k = f.itemId || (f.seccion + '|' + f.item); if (!porItem.has(k)) porItem.set(k, []); porItem.get(k).push(f); });
+  let secs = [];
+  const idx = new Map();
+  if (ck.length) {
+    ck.forEach(e => ((e.datos && e.datos.secciones) || []).forEach(s => {
+      let sec = secs.find(x => x.id === s.id); if (!sec) { sec = {id: s.id, titulo: s.titulo, tipos: s.tipos, items: []}; secs.push(sec); }
+      (s.items || []).forEach(it => {
+        let t = idx.get(it.id); if (!t) { t = {id: it.id, nombre: it.nombre, ref: it.ref || '', na: false, notas: []}; sec.items.push(t); idx.set(it.id, t); }
+        if (it.na) t.na = true;
+        if (it.nota && !t.notas.some(n => n.txt === it.nota)) t.notas.push({txt: it.nota, autor: infNom(e)});
+      });
+    }));
+  }
+  const usadas = new Set();
+  secs.forEach(s => s.items.forEach(it => { const a = porItem.get(it.id) || porItem.get(s.titulo + '|' + it.nombre) || []; a.forEach(f => usadas.add(f.nombre)); it.fotos = a.sort((x, y) => x.ts - y.ts); }));
+  const sueltas = fotos.filter(f => !usadas.has(f.nombre));   // fotos de ítems que ningún teléfono ha informado todavía
+  if (sueltas.length) {
+    const m = new Map(); sueltas.forEach(f => { const k = (f.seccion || 'Sin sección') + '|' + (f.item || 'Sin ítem'); if (!m.has(k)) m.set(k, []); m.get(k).push(f); });
+    m.forEach((a, k) => { const [st, nm] = k.split('|'); let sec = secs.find(x => x.titulo === st); if (!sec) { sec = {id: 'x-' + st, titulo: st, tipos: null, items: []}; secs.push(sec); } sec.items.push({id: 'x-' + k, nombre: nm, ref: '', na: false, notas: [], fotos: a}); });
+  }
+  let tot = 0, ok = 0;
+  secs.forEach(s => { s.h = 0; s.items.forEach(it => {
+    const slots = new Set((it.fotos || []).map(f => f.slot)); it.faltan = s.tipos ? s.tipos.filter(x => !slots.has(x)) : [];
+    it.hecho = it.na || (s.tipos ? it.faltan.length === 0 : (it.fotos || []).length > 0); tot++; if (it.hecho) { ok++; s.h++; }
+  }); });
+  const R = {}, info = {}, totR = {E: 0, L: 0};
+  rt.forEach(e => { const d = e.datos || {}; if (d.tot) { totR.E = Math.max(totR.E, d.tot.E || 0); totR.L = Math.max(totR.L, d.tot.L || 0); } Object.assign(info, d.info || {});
+    Object.entries(d.est || {}).forEach(([id, v]) => { if (!v) return; const t = v.t || e.ts; if (!R[id] || t > R[id].t) R[id] = {s: v.s || '', n: v.n || (R[id] && R[id].n) || '', t, autor: infNom(e)}; else if (v.n && !R[id].n) R[id].n = v.n; }); });
+  const esL = id => /^(IL|SVL)-/.test(id), rk = Object.keys(R).filter(id => R[id].s);
+  const ruta = {E: rk.filter(id => !esL(id)).length, L: rk.filter(id => esL(id)).length, obs: rk.filter(id => R[id].s === 'obs'), totR, R, info};
+  const equipo = est.map(e => ({n: infNom(e), tipo: e.tipo, ts: e.ts})).sort((a, b) => b.ts - a.ts);
+  return {secs, tot, ok, fotos, ruta, equipo};
+}
+function infRender(j) {
+  const d = infProcesar(j), h = [], hora = t => fHora(new Date(t));
+  const pct = d.tot ? Math.round(d.ok / d.tot * 100) : 0;
+  h.push('<div class="inf-k"><div><b>' + d.ok + '/' + d.tot + '</b><span>ítems completos (' + pct + '%)</span></div><div><b>' + d.fotos.length + '</b><span>fotos en la nube</span></div>' +
+    '<div><b>' + d.ruta.E + (d.ruta.totR.E ? '/' + d.ruta.totR.E : '') + '</b><span>enchufes revisados</span></div><div><b>' + d.ruta.L + (d.ruta.totR.L ? '/' + d.ruta.totR.L : '') + '</b><span>circuitos de iluminación</span></div></div>');
+  const eq = []; const vistos = new Set(); d.equipo.forEach(e => { if (!vistos.has(e.n)) { vistos.add(e.n); eq.push(esc(e.n) + ' ' + hora(e.ts)); } });
+  h.push('<p class="inf-eq">Actualizado ' + hora(Date.now()) + ' · se actualiza solo' + (eq.length ? ' · equipo: ' + eq.join(', ') : '') + '</p>');
+  const obs = [];
+  d.secs.forEach(s => s.items.forEach(it => it.notas.forEach(n => obs.push(esc(s.titulo) + ' — <b>' + esc(it.nombre) + '</b>: ' + esc(n.txt) + ' <span class="muted">(' + esc(n.autor) + ')</span>'))));
+  d.ruta.obs.forEach(id => { const r = d.ruta.R[id], inf = d.ruta.info[id] || {}; obs.push('Ruta — <b>' + esc(id) + '</b>' + (inf.d ? ' ' + esc(inf.d) : '') + ': ' + esc(r.n || 'con observación') + ' <span class="muted">(' + esc(r.autor) + ')</span>'); });
+  if (obs.length) h.push('<div class="inf-h">Observaciones (' + obs.length + ')</div><ul class="inf-obs"><li>' + obs.join('</li><li>') + '</li></ul>');
+  h.push('<div class="inf-h">Checklist por sección</div>');
+  d.secs.forEach(s => {
+    const n = s.items.length, p = n ? Math.round(s.h / n * 100) : 0, abierta = INF.abiertas.has(s.id);
+    h.push('<details class="inf-s" data-id="' + esc(s.id) + '"' + (abierta ? ' open' : '') + '><summary><span>' + esc(s.titulo) + '</span><span>' + s.h + '/' + n + '</span></summary><div class="inf-bar"><i style="width:' + p + '%"></i></div>');
+    if (abierta) s.items.forEach(it => {
+      const ch = it.na ? '<span class="chip na">N/A</span>' : it.hecho ? '<span class="chip ok">✓ Listo</span>' : (it.fotos || []).length ? '<span class="chip fa">Falta ' + esc(it.faltan.join(' y ')) + '</span>' : '<span class="chip pe">Pendiente</span>';
+      h.push('<div class="inf-it"><div class="t"><span>' + esc(it.nombre) + (it.ref ? ' <span class="muted" style="font-weight:500">· ' + esc(it.ref) + '</span>' : '') + '</span>' + ch + '</div>');
+      if (it.notas.length) h.push('<div class="n">' + it.notas.map(x => esc(x.txt) + ' (' + esc(x.autor) + ')').join(' · ') + '</div>');
+      if ((it.fotos || []).length) h.push('<div class="nb-g">' + it.fotos.map(f => { const u = infURL(f); return '<figure data-full="' + esc(u.url) + '"><img loading="lazy" alt="" src="' + esc(u.mini) + '"><figcaption>' + esc((f.slot ? f.slot + ' · ' : '') + fHora(new Date(f.ts || Date.now())) + (f.autor ? ' · ' + f.autor : '')) + '</figcaption></figure>'; }).join('') + '</div>');
+      h.push('</div>');
+    });
+    h.push('</details>');
+  });
+  const rObs = d.ruta.obs.length, rOk = Object.keys(d.ruta.R).filter(id => d.ruta.R[id].s === 'ok').length;
+  h.push('<div class="inf-h">Ruta de enchufes e iluminación</div><p class="sm" style="margin:0 0 6px">' + rOk + ' listos · ' + rObs + ' con observación' + (d.ruta.totR.E + d.ruta.totR.L ? ' · ' + (d.ruta.totR.E + d.ruta.totR.L - rOk - rObs) + ' pendientes' : '') + '</p>');
+  $('#nbRes').innerHTML = h.join('');
+  $('#nbInfo').textContent = (j.obra || '') + ' · informe en vivo';
+}
+async function infCargar(silencioso) {
+  if (!NUBE.codigo) return;
+  try {
+    const j = await nubeJSON('/informe', {codigo: NUBE.codigo});
+    const firma = JSON.stringify([(j.fotos || []).map(f => f.nombre), (j.estados || []).map(e => e.dispositivo + e.tipo + e.ts)]);
+    NB.fotos = (j.fotos || []).filter(f => f.url).sort((a, b) => (a.seccion || '').localeCompare(b.seccion || '') || (a.item || '').localeCompare(b.item || '') || a.ts - b.ts);
+    const secs = Array.from(new Set(NB.fotos.map(f => f.seccion || 'Sin sección'))), selAct = $('#nbSec').value;
+    $('#nbSec').innerHTML = '<option value="*">ZIP: todo (' + NB.fotos.length + ' fotos)</option>' + secs.map(x => '<option value="' + esc(x) + '">ZIP: ' + esc(x) + ' (' + NB.fotos.filter(f => (f.seccion || 'Sin sección') === x).length + ')</option>').join('');
+    if (selAct) $('#nbSec').value = selAct;
+    $('#nbZipF').hidden = !NB.fotos.length;
+    if (firma !== INF.firma || !silencioso) { INF.firma = firma; INF.j = j; infRender(j); }
+    else { const p = $('#nbRes .inf-eq'); if (p) p.textContent = p.textContent.replace(/^Actualizado \S+/, 'Actualizado ' + fHora(new Date())); }
+  } catch (e) { if (!silencioso) $('#nbInfo').textContent = 'No se pudo leer la nube: ' + msgErr(e); }
+}
 async function abrirNube() {
   abrirHoja('#hNubeS'); nbLimpiarZip(); nbEstado(''); $('#nbList').innerHTML = ''; $('#nbZipF').hidden = true;
-  if (!NUBE.codigo) { $('#nbInfo').textContent = 'Este teléfono no tiene el código de obra. Ábrelo con el link de la obra o pega el código aquí.'; $('#nbCod').hidden = false; return; }
-  $('#nbCod').hidden = true; $('#nbInfo').textContent = 'Cargando fotos de la nube…';
-  try {
-    const j = await nubeJSON('/listado', {codigo: NUBE.codigo});
-    NB.fotos = (j.fotos || []).filter(f => f.url).sort((a, b) => (a.seccion || '').localeCompare(b.seccion || '') || (a.item || '').localeCompare(b.item || '') || a.ts - b.ts);
-    const autores = Array.from(new Set(NB.fotos.map(f => f.autor).filter(Boolean)));
-    $('#nbInfo').textContent = (j.obra || '') + ' · ' + plural(NB.fotos.length, 'foto') + ' en la nube · ' + fmtMB(NB.fotos.reduce((a, f) => a + (f.size || 0), 0)) + (autores.length ? ' · de: ' + autores.join(', ') : '') + '. Mantén presionada una foto para guardarla.';
-    const secs = Array.from(new Set(NB.fotos.map(f => f.seccion || 'Sin sección')));
-    $('#nbSec').innerHTML = '<option value="*">Todo (' + NB.fotos.length + ')</option>' + secs.map(s => '<option value="' + esc(s) + '">' + esc(s) + ' (' + NB.fotos.filter(f => (f.seccion || 'Sin sección') === s).length + ')</option>').join('');
-    $('#nbZipF').hidden = !NB.fotos.length;
-    let h = '', sAct = null, iAct = null;
-    NB.fotos.forEach((f, k) => {
-      const sec = f.seccion || 'Sin sección', item = f.item || 'Sin ítem';
-      if (sec !== sAct) { if (sAct !== null) h += '</div>'; h += '<div class="nb-sec">' + esc(sec) + '</div>'; sAct = sec; iAct = null; }
-      if (item !== iAct) { if (iAct !== null) h += '</div>'; h += '<div class="nb-it">' + esc(item) + '</div><div class="nb-g">'; iAct = item; }
-      const d = new Date(f.ts || Date.now());
-      h += '<figure data-k="' + k + '"><img loading="lazy" alt="" src="' + esc(f.url) + '"><figcaption>' + esc((f.slot ? f.slot + ' · ' : '') + fHora(d) + (f.autor ? ' · ' + f.autor : '')) + '</figcaption></figure>';
-    });
-    if (iAct !== null) h += '</div>';
-    $('#nbList').innerHTML = h || '<p class="muted">Aún no hay fotos en la nube.</p>';
-  } catch (e) { $('#nbInfo').textContent = 'No se pudo leer la nube: ' + msgErr(e); }
+  if (!NUBE.codigo) { $('#nbRes').innerHTML = ''; $('#nbInfo').textContent = 'Este teléfono no tiene el código de obra. Ábrelo con el link de la obra o pega el código aquí.'; $('#nbCod').hidden = false; return; }
+  $('#nbCod').hidden = true; $('#nbInfo').textContent = 'Cargando informe…';
+  nubeEstado(true); await infCargar(false);
+  clearInterval(INF.timer); INF.timer = setInterval(() => { if ($('#hNubeS').hidden) { clearInterval(INF.timer); return; } infCargar(true); }, 20000);
 }
+$('#nbRes').addEventListener('toggle', e => { const dt = e.target; if (!dt.matches || !dt.matches('details.inf-s')) return; const id = dt.dataset.id; if (dt.open) { if (!INF.abiertas.has(id)) { INF.abiertas.add(id); if (INF.j) infRender(INF.j); } } else INF.abiertas.delete(id); }, true);
+$('#nbRes').addEventListener('click', e => { const f = e.target.closest('figure[data-full]'); if (!f) return; f.classList.toggle('grande'); const im = f.querySelector('img'); if (f.classList.contains('grande') && im && im.src !== f.dataset.full) im.src = f.dataset.full; });
 $('#nbList').addEventListener('click', e => { const f = e.target.closest('figure[data-k]'); if (f) f.classList.toggle('grande'); });
 $('#hNubeVer').addEventListener('click', abrirNube);
 $('#nbCerrar').addEventListener('click', () => { nbLimpiarZip(); cerrarHoja('#hNubeS'); });
