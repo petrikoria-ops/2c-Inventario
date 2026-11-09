@@ -198,6 +198,13 @@ body.kb .barra{display:none}
 body.kb .toast{bottom:12px}
 #resp{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:30;display:flex;align-items:center;gap:10px;background:#B3261E;color:#fff;border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.25;box-shadow:0 4px 14px rgba(0,0,0,.35)}#resp.suave{background:#7A4F00}#resp.suave button{color:#7A4F00}#resp span{flex:1;min-width:0}#resp button{flex:none;min-height:44px;padding:0 14px;border-radius:10px;background:#fff;color:#B3261E;font:inherit;font-weight:700}
 #gList{display:grid;gap:14px;margin-top:10px}.gi{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--campo)}.gi img{display:block;width:100%;height:auto;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}.gi p{margin:0;padding:8px 10px;font-size:13px;line-height:1.3}.gi p.mal{color:#B3261E;font-weight:700}
+.nube-f{align-items:center}.nube-ver{background:rgba(255,255,255,.2);color:inherit;border:0;border-radius:8px;padding:4px 10px;font:inherit;font-weight:700;min-height:30px}
+#hNube.err{color:#FFC2B8;font-weight:700}
+.nb-cod,.nb-zip{display:flex;gap:8px;margin:10px 0}.nb-cod input,.nb-zip select{flex:1;min-width:0;min-height:46px;border:1px solid var(--line);border-radius:12px;padding:0 10px;background:var(--campo);color:inherit;font:inherit}
+.nb-sec{margin:18px 0 6px;font-size:15px;font-weight:800}.nb-it{margin:10px 0 6px;font-size:13.5px;font-weight:700}
+.nb-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.nb-g figure{margin:0}.nb-g img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--campo);-webkit-touch-callout:default}
+.nb-g figure.grande{grid-column:1/-1}.nb-g figure.grande img{aspect-ratio:auto;object-fit:contain}
+.nb-g figcaption{font-size:11px;line-height:1.25;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 </style>
 </head>
 <body>
@@ -225,6 +232,7 @@ body.kb .toast{bottom:12px}
     </div>
     <div class="top-2"><div class="pbar"><i id="hBar"></i></div><span class="pnum" id="hProg">0/0 · 0%</span></div>
     <div class="top-3"><span id="hFotos">0 fotos · 0 MB</span><span id="hAlm"></span></div>
+    <div class="top-3 nube-f" id="hNubeF" hidden><span id="hNube"></span><button type="button" class="nube-ver" id="hNubeVer">Ver nube</button></div>
   </header>
 
   <div class="herr">
@@ -267,6 +275,17 @@ body.kb .toast{bottom:12px}
   </div>
 </div></div>
 
+<div class="hoja" id="hNubeS" hidden><div class="hoja-c">
+  <h3>Fotos en la nube</h3>
+  <p class="muted sm" id="nbInfo">Cargando…</p>
+  <div class="nb-cod" id="nbCod" hidden><input id="nbCodIn" placeholder="Pega el código de obra" autocomplete="off"><button class="btn pri" id="nbCodOk" type="button">Activar</button></div>
+  <div class="nb-zip" id="nbZipF" hidden><select id="nbSec"></select><button class="btn pri" id="nbZip" type="button">Preparar ZIP</button></div>
+  <p class="estado" id="nbEst" hidden></p>
+  <div class="hoja-b"><button class="btn pri" id="nbShare" type="button" hidden>Compartir ZIP…</button><button class="btn alt" id="nbDown" type="button" hidden>Descargar ZIP</button></div>
+  <div id="nbList"></div>
+  <div class="hoja-b"><button class="btn alt" id="nbCerrar" type="button">Cerrar</button></div>
+</div></div>
+
 <div class="hoja" id="hGal" hidden><div class="hoja-c">
   <h3>Guardar fotos una a una</h3>
   <p class="muted sm">Mantén presionada cada foto y elige <b>Guardar en Fotos</b>. Sirve cuando el visor no deja descargar el ZIP.</p>
@@ -282,6 +301,7 @@ body.kb .toast{bottom:12px}
   <button class="fila" data-m="datos">Datos de la obra</button>
   <button class="fila" data-m="seccion">Nueva sección</button>
   <button class="fila" data-m="lista">Editar lista (texto)</button>
+  <button class="fila" data-m="nube">Fotos en la nube (todos los teléfonos)</button>
   <button class="fila" data-m="ayuda">Ayuda</button>
   <button class="fila rojo" data-m="borrar">Borrar fotos y notas…</button>
   <p class="muted sm" id="mAlm"></p>
@@ -443,6 +463,7 @@ const DB = {
     }
     this.mem.fotos.set(meta.id, meta); this.mem.blobs.set(meta.id, {id: meta.id, orig, mini}); return Promise.resolve();
   },
+  guardarMeta(meta) { if (this.modo === 'idb') return this._w(['fotos'], t => t.objectStore('fotos').put(meta)); this.mem.fotos.set(meta.id, meta); return Promise.resolve(); },
   async blob(id) {
     if (this.modo !== 'idb') return this.mem.blobs.get(id);
     const r = await this._get('blobs', id);
@@ -754,7 +775,7 @@ async function agregarFotos(iid, files, slot) {
       if (!FOTOS.has(iid)) FOTOS.set(iid, []);
       FOTOS.get(iid).push(meta);
       if (mini.blob) TH.set(meta.id, URL.createObjectURL(mini.blob));
-      ok++; bytes += buf.length; SIN_RESP++;
+      ok++; bytes += buf.length; SIN_RESP++; setTimeout(nubeCola, 400);
     } catch (e) {
       console.error(e);
       const cuota = e && (e.name === 'QuotaExceededError' || /quota/i.test(msgErr(e)));
@@ -1302,6 +1323,134 @@ async function ultimoRescate() {
   $('#gUlt').disabled = false;
 }
 $('#gUlt').addEventListener('click', ultimoRescate);
+/* ---------- NUBE: respaldo automático en Supabase (app 2C) ----------
+   Cada foto queda en el teléfono Y se sube sola a la nube cuando hay señal.
+   Acceso sin cuenta con el código de obra que trae el link (#c=...).
+   Los bytes van directo a Supabase Storage con una URL firmada que entrega /api/terreno/subir. */
+const NUBE_API = '/api/terreno';
+const NUBE = {codigo: '', activo: false, ocupado: false, ultimoError: ''};
+async function nubeIniciar() {
+  let c = '';
+  try { const m = location.hash.match(/[#&]c=([^&]+)/); if (m) c = decodeURIComponent(m[1]).trim(); } catch (e) {}
+  if (c) { try { await DB.setKV('nubeCodigo', c); } catch (e) {} }
+  else { try { c = (await DB.getKV('nubeCodigo')) || ''; } catch (e) {} }
+  NUBE.codigo = c; NUBE.activo = !!c && /^https?:$/.test(location.protocol);
+  nubePintar(); if (NUBE.activo) nubeCola();
+}
+function nubeConteo() { let tot = 0, ok = 0; FOTOS.forEach(a => a.forEach(m => { tot++; if (m.nube) ok++; })); return {tot, ok, pend: tot - ok}; }
+function nubePintar() {
+  const f = $('#hNubeF'), e = $('#hNube'); if (!f) return;
+  if (!NUBE.activo) { f.hidden = true; return; }
+  f.hidden = false; e.classList.remove('err');
+  const {tot, ok, pend} = nubeConteo();
+  if (!tot) e.textContent = '☁ Nube activa';
+  else if (!pend) e.textContent = '☁ ' + ok + '/' + tot + ' respaldadas en la nube';
+  else if (NUBE.ocupado) e.textContent = '☁ Subiendo… ' + ok + '/' + tot;
+  else if (navigator.onLine === false) e.textContent = '☁ Sin señal · ' + pend + ' por subir';
+  else if (NUBE.ultimoError) { e.textContent = '☁ Error: ' + NUBE.ultimoError.slice(0, 70) + ' · ' + pend + ' por subir'; e.classList.add('err'); }
+  else e.textContent = '☁ ' + ok + '/' + tot + ' · ' + pend + ' por subir';
+}
+async function nubeJSON(ruta, datos) {
+  const r = await fetch(NUBE_API + ruta, {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(datos)});
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || ('servidor ' + r.status));
+  return j;
+}
+async function nubeSubir(m, it, sec) {
+  const b = await DB.blob(m.id);
+  if (!b || !b.orig || !b.orig.size) throw new Error('la foto no tiene datos locales');
+  const mime = /^image\//.test(b.orig.type) ? b.orig.type : (/^image\//.test(m.tipo || '') ? m.tipo : 'image/jpeg');
+  const j = await nubeJSON('/subir', {codigo: NUBE.codigo, id: m.id, ts: m.ts, mime, size: b.orig.size,
+    meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || ''}});
+  if (!j.ya) {
+    const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([b.orig], {type: mime}), 'foto');
+    const h = {'x-upsert': 'false'}; if (j.anon) { h.apikey = j.anon; h.authorization = 'Bearer ' + j.anon; }
+    const u = await fetch(j.url, {method: 'PUT', headers: h, body: fd});
+    if (!u.ok) { let t = ''; try { t = await u.text(); } catch (e) {} if (!/exist|duplicate/i.test(t)) throw new Error('subida ' + u.status + (t ? ': ' + t.slice(0, 90) : '')); }
+  }
+  m.nube = Date.now(); await DB.guardarMeta(m);
+}
+async function nubeCola() {
+  if (!NUBE.activo || NUBE.ocupado || !S) return;
+  NUBE.ocupado = true; nubePintar();
+  try {
+    for (const sec of S.secciones) for (const it of sec.items) for (const m of (FOTOS.get(it.id) || []).slice()) {
+      if (m.nube) continue;
+      if (navigator.onLine === false) throw new Error('sin señal');
+      await nubeSubir(m, it, sec); NUBE.ultimoError = ''; nubePintar();
+    }
+    NUBE.ultimoError = '';
+  } catch (e) { NUBE.ultimoError = msgErr(e); }
+  finally { NUBE.ocupado = false; nubePintar(); }
+}
+setInterval(() => { if (NUBE.activo && nubeConteo().pend > 0) nubeCola(); }, 20000);
+window.addEventListener('online', () => nubeCola());
+document.addEventListener('visibilitychange', () => { if (!document.hidden) nubeCola(); });
+
+/* visor: fotos de todos los teléfonos + ZIP desde la nube */
+const NB = {fotos: [], zip: null, url: null};
+function nbEstado(t, err) { const e = $('#nbEst'); e.hidden = !t; e.textContent = t || ''; e.className = 'estado' + (err ? ' err' : ''); }
+function nbLimpiarZip() { if (NB.url) URL.revokeObjectURL(NB.url); NB.zip = null; NB.url = null; $('#nbShare').hidden = true; $('#nbDown').hidden = true; }
+async function abrirNube() {
+  abrirHoja('#hNubeS'); nbLimpiarZip(); nbEstado(''); $('#nbList').innerHTML = ''; $('#nbZipF').hidden = true;
+  if (!NUBE.codigo) { $('#nbInfo').textContent = 'Este teléfono no tiene el código de obra. Ábrelo con el link de la obra o pega el código aquí.'; $('#nbCod').hidden = false; return; }
+  $('#nbCod').hidden = true; $('#nbInfo').textContent = 'Cargando fotos de la nube…';
+  try {
+    const j = await nubeJSON('/listado', {codigo: NUBE.codigo});
+    NB.fotos = (j.fotos || []).filter(f => f.url).sort((a, b) => (a.seccion || '').localeCompare(b.seccion || '') || (a.item || '').localeCompare(b.item || '') || a.ts - b.ts);
+    const autores = Array.from(new Set(NB.fotos.map(f => f.autor).filter(Boolean)));
+    $('#nbInfo').textContent = (j.obra || '') + ' · ' + plural(NB.fotos.length, 'foto') + ' en la nube · ' + fmtMB(NB.fotos.reduce((a, f) => a + (f.size || 0), 0)) + (autores.length ? ' · de: ' + autores.join(', ') : '') + '. Mantén presionada una foto para guardarla.';
+    const secs = Array.from(new Set(NB.fotos.map(f => f.seccion || 'Sin sección')));
+    $('#nbSec').innerHTML = '<option value="*">Todo (' + NB.fotos.length + ')</option>' + secs.map(s => '<option value="' + esc(s) + '">' + esc(s) + ' (' + NB.fotos.filter(f => (f.seccion || 'Sin sección') === s).length + ')</option>').join('');
+    $('#nbZipF').hidden = !NB.fotos.length;
+    let h = '', sAct = null, iAct = null;
+    NB.fotos.forEach((f, k) => {
+      const sec = f.seccion || 'Sin sección', item = f.item || 'Sin ítem';
+      if (sec !== sAct) { if (sAct !== null) h += '</div>'; h += '<div class="nb-sec">' + esc(sec) + '</div>'; sAct = sec; iAct = null; }
+      if (item !== iAct) { if (iAct !== null) h += '</div>'; h += '<div class="nb-it">' + esc(item) + '</div><div class="nb-g">'; iAct = item; }
+      const d = new Date(f.ts || Date.now());
+      h += '<figure data-k="' + k + '"><img loading="lazy" alt="" src="' + esc(f.url) + '"><figcaption>' + esc((f.slot ? f.slot + ' · ' : '') + fHora(d) + (f.autor ? ' · ' + f.autor : '')) + '</figcaption></figure>';
+    });
+    if (iAct !== null) h += '</div>';
+    $('#nbList').innerHTML = h || '<p class="muted">Aún no hay fotos en la nube.</p>';
+  } catch (e) { $('#nbInfo').textContent = 'No se pudo leer la nube: ' + msgErr(e); }
+}
+$('#nbList').addEventListener('click', e => { const f = e.target.closest('figure[data-k]'); if (f) f.classList.toggle('grande'); });
+$('#hNubeVer').addEventListener('click', abrirNube);
+$('#nbCerrar').addEventListener('click', () => { nbLimpiarZip(); cerrarHoja('#hNubeS'); });
+$('#nbCodOk').addEventListener('click', async () => {
+  const c = $('#nbCodIn').value.trim(); if (!c) return;
+  NUBE.codigo = c; try { await DB.setKV('nubeCodigo', c); } catch (e) {}
+  NUBE.activo = /^https?:$/.test(location.protocol); nubePintar(); nubeCola(); abrirNube();
+});
+$('#nbZip').addEventListener('click', async () => {
+  const sel = $('#nbSec').value, fotos = NB.fotos.filter(f => sel === '*' || (f.seccion || 'Sin sección') === sel);
+  if (!fotos.length) return;
+  nbLimpiarZip(); $('#nbZip').disabled = true;
+  try {
+    const E = [], usados = new Set();
+    for (let k = 0; k < fotos.length; k++) {
+      const f = fotos[k]; nbEstado('Bajando ' + (k + 1) + ' de ' + fotos.length + '…');
+      const r = await fetch(f.url); if (!r.ok) throw new Error('no se pudo bajar «' + f.item + '» (' + r.status + '). Cierra y vuelve a abrir la nube.');
+      const bl = await r.blob(), crc = crc32(new Uint8Array(await bl.arrayBuffer()));
+      const base = limpio(f.item || 'foto') + (f.slot ? '_' + limpio(f.slot) : '');
+      E.push({ruta: unico(limpio(f.seccion || 'Sin_seccion') + '/' + base + '.' + (f.ext || 'jpg'), usados), ts: f.ts || Date.now(), size: bl.size, crc, data: bl});
+    }
+    const nombre = '2C_' + limpio(S.obra || 'obra') + '_nube_' + (sel === '*' ? 'Todo' : limpio(sel)) + '_' + fISO(new Date()) + '.zip';
+    const blob = armarZip(E); let file; try { file = new File([blob], nombre, {type: 'application/zip'}); } catch (e) { file = blob; file.name = nombre; }
+    NB.zip = file; nbEstado('Listo: ' + nombre + '\n' + plural(E.length, 'foto') + ' · ' + fmtMB(blob.size));
+    let puede = false; try { puede = !!(navigator.share && navigator.canShare && navigator.canShare({files: [file]})); } catch (e) {}
+    $('#nbShare').hidden = !puede; $('#nbDown').hidden = false;
+  } catch (e) { nbEstado('No se pudo armar el ZIP: ' + msgErr(e), true); }
+  finally { $('#nbZip').disabled = false; }
+});
+$('#nbShare').addEventListener('click', () => { if (NB.zip) navigator.share({files: [NB.zip]}).catch(e => { if (!e || e.name !== 'AbortError') nbEstado('No se pudo compartir: ' + msgErr(e) + '. Usa «Descargar ZIP».', true); }); });
+$('#nbDown').addEventListener('click', () => {
+  if (!NB.zip) return; if (!NB.url) NB.url = URL.createObjectURL(NB.zip);
+  const a = document.createElement('a'); a.href = NB.url; a.download = NB.zip.name || 'fotos.zip'; document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 0);
+  toast('Descargando… En iPhone queda en Archivos › Descargas.');
+});
+
 
 
 $('#gClose').addEventListener('click', cerrarGal);
@@ -1314,7 +1463,8 @@ function autoRespaldo() {
 }
 setInterval(() => { try { autoRespaldo(); } catch (e) {} try {
   const n = S ? totales().f : 0; let pend = 0;
-  if (DB.modo === 'idb' && S) FOTOS.forEach(arr => arr.forEach(m => { if (m.ts > ULT_EXPORT) pend++; }));
+  if (DB.modo === 'idb' && S) FOTOS.forEach(arr => arr.forEach(m => { if (m.ts > ULT_EXPORT && !m.nube) pend++; }));
+  nubePintar();
   const memo = DB.modo !== 'idb' && n > 0, recu = !memo && pend >= 15;
   $('#resp').hidden = !(memo || recu); $('#resp').classList.toggle('suave', recu);
   if (memo) $('#respT').textContent = '⚠ ' + plural(n, 'foto') + ' solo en memoria: se pierden al cerrar o recargar. Respalda el ZIP.';
@@ -1332,6 +1482,7 @@ $('#hMenu').addEventListener('click', e => {
   else if (m === 'seccion') nuevaSeccion();
   else if (m === 'lista') { $('#tLista').value = listaATexto(); abrirHoja('#hLista'); }
   else if (m === 'ayuda') abrirHoja('#hAyuda');
+  else if (m === 'nube') abrirNube();
   else if (m === 'borrar') borrarTodo();
 });
 $('#dOk').addEventListener('click', () => {
@@ -1393,6 +1544,7 @@ async function iniciar() {
   if (VISOR_APP) avisar(TXT_VISOR); else if (!persistente) avisar(TXT_PRIVADO);
   if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
   marcarFiltro(); renderTodo();
+  nubeIniciar();
 }
 iniciar().catch(e => avisar('Error al iniciar: ' + msgErr(e)));
 </script>
