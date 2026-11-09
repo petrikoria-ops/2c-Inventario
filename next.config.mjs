@@ -34,6 +34,15 @@ const nextConfig = {
           { key: 'Permissions-Policy', value: 'camera=(), microphone=(), geolocation=()' },
         ],
       },
+      {
+        // Herramientas de terreno (public/terreno/*.html): sacan fotos con la
+        // cámara del teléfono, así que aquí se permite la cámara (va después
+        // de la regla general para sobrescribir su Permissions-Policy).
+        source: '/terreno/:path*',
+        headers: [
+          { key: 'Permissions-Policy', value: 'camera=(self), microphone=(), geolocation=()' },
+        ],
+      },
     ]
   },
 }

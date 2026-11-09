@@ -131,6 +131,7 @@ export async function middleware(req: NextRequest) {
 
 export const config = {
   matcher: [
-    '/((?!api/|_next/static|_next/image|favicon.ico|logo-2c.png|.*\.png$|.*\.svg$).*)',
+    // /terreno/ son herramientas de terreno estáticas (public/terreno/*.html), públicas y sin sesión.
+    '/((?!api/|terreno/|_next/static|_next/image|favicon.ico|logo-2c.png|.*\.png$|.*\.svg$).*)',
   ],
 }
