@@ -158,7 +158,7 @@ textarea.nota{width:100%;min-height:76px;margin-top:10px;border:1.5px solid var(
 </head>
 <body>
 <header>
-  <p class="k">2C Electricidad · Ruta de verificación · versión 9-nov 17:45</p>
+  <p class="k">2C Electricidad · Ruta de verificación · versión 10-nov 13:45</p>
   <h1>Unimarc San Bernardo · Local 0249</h1>
   <div class="prog"><div class="bar"><i id="pb"></i></div><b id="pt">0/0</b></div>
   <div class="sub"><span id="ps">Enchufes 0/0 · Iluminación 0/0</span><span id="pg">Guardado en este dispositivo</span></div>
@@ -484,17 +484,22 @@ function nubeRuta(ya) {
   clearTimeout(tNR); tNR = setTimeout(async () => {
     try {
       let autor = ''; try { autor = localStorage.getItem('terreno_autor') || ''; } catch (e) {}
-      const r = await fetch('/api/terreno/estado', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({codigo: NUBE_R.codigo, tipo: 'ruta', dispositivo: NUBE_R.dispositivo, autor, datos: {est: EST, tot: {E: C.filter(c => mod(c) === 'E').length, L: C.filter(c => mod(c) === 'L').length}, info: Object.fromEntries(Object.keys(EST).map(id => { const c = C.find(x => x.id === id); return [id, c ? {g: c.grupo, d: titulo(c)} : {}]; }))}})});
+      const r = await fetch('/api/terreno/estado', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({codigo: NUBE_R.codigo, tipo: 'ruta', dispositivo: NUBE_R.dispositivo, autor, respaldo: {est: EST}, datos: {est: EST, tot: {E: C.filter(c => mod(c) === 'E').length, L: C.filter(c => mod(c) === 'L').length}, info: Object.fromEntries(Object.keys(EST).map(id => { const c = C.find(x => x.id === id); return [id, c ? {g: c.grupo, d: titulo(c)} : {}]; }))}})});
       let j = {}; try { j = await r.json(); } catch (e) {}
       if (!r.ok) throw new Error(j.error || ('servidor ' + r.status));
-      NUBE_R.ts = Date.now(); NUBE_R.err = '';
+      NUBE_R.ts = Date.now(); NUBE_R.err = ''; NUBE_R.ok = false;
+      try {   // verificación: leer de vuelta lo que quedó en la nube
+        const v = await (await fetch('/api/terreno/informe', {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify({codigo: NUBE_R.codigo, solo: 'estados'})})).json();
+        const yo = (v.estados || []).find(e => e.tipo === 'ruta' && e.dispositivo === NUBE_R.dispositivo);
+        NUBE_R.ok = !!(yo && (!j.ts || yo.ts >= j.ts)); if (!NUBE_R.ok) NUBE_R.err = 'no se pudo verificar';
+      } catch (e) { NUBE_R.err = 'no se pudo verificar'; }
     } catch (e) { NUBE_R.err = (e && e.message) || String(e); }
     pintarNubeR();
   }, ya ? 100 : 2500);
 }
 function pintarNubeR() {
   if (!NUBE_R.codigo) return; const el = $('#pg');
-  el.textContent = NUBE_R.err ? '☁ Error: ' + NUBE_R.err.slice(0, 40) : NUBE_R.ts ? '☁ En la nube ' + new Date(NUBE_R.ts).toLocaleTimeString('es-CL', {hour: '2-digit', minute: '2-digit'}) : '☁ Conectando…';
+  el.textContent = NUBE_R.err ? '⚠ Sin respaldar: ' + NUBE_R.err.slice(0, 40) : NUBE_R.ts ? '☁ Respaldado ' + new Date(NUBE_R.ts).toLocaleTimeString('es-CL', {hour: '2-digit', minute: '2-digit'}) + (NUBE_R.ok ? ' ✓' : '') : '☁ Conectando…';
 }
 window.addEventListener('online', () => nubeRuta(true));
 
