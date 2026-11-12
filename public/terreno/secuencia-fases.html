@@ -497,6 +497,22 @@ async function cargarEstado() {
   try { var raw = localStorage.getItem(LS_KEY); if (raw) b = JSON.parse(raw); } catch (e) {}
   var c = [a, b].filter(valido).sort(function (x, y) { return (y.modificado || 0) - (x.modificado || 0); });
   st = c.length ? normalizar(c[0]) : nuevoEstado();
+  migrarPreset();
+}
+/* Versiones anteriores guardaron menos puntos: agrega los que faltan y refresca los que aún no tienen datos. Nunca borra nada. */
+function migrarPreset() {
+  var ids = new Set(PRESET.map(function (p) { return p.id; }));
+  var prev = new Map(st.tableros.map(function (t) { return [t.id, t]; }));
+  var nuevos = PRESET.map(function (p) {
+    var t = prev.get(p.id);
+    if (!t) return Object.assign(nuevoTablero(p.tipo), { id: p.id, nombre: p.nombre, ubicacion: p.ubicacion, padre: p.padre, ref: p.ref, riesgo: p.riesgo });
+    if (!t.resultado && !t.comentario.trim() && !t.fotos.length && !t.corr) { t.tipo = p.tipo; t.nombre = p.nombre; t.ubicacion = p.ubicacion; t.padre = p.padre; t.ref = p.ref; t.riesgo = p.riesgo; }
+    return t;
+  });
+  var extra = st.tableros.filter(function (t) { return !ids.has(t.id); });
+  var ant = st.tableros.map(function (t) { return t.id; }).join();
+  st.tableros = nuevos.concat(extra);
+  if (st.tableros.map(function (t) { return t.id; }).join() !== ant) st.modificado = Date.now();
 }
 function nombreTab(t, i) { return (t.nombre || '').trim() || ('Tablero ' + (i + 1)); }
 function nomCorto(t, i) { return nombreTab(t, i).split(' — ')[0]; }
