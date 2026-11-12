@@ -326,21 +326,41 @@ var APP_ID = 'secuencia-fases-2c', DB_NAME = 'secfases2c', LS_KEY = 'secfases2c_
 var DEF = { proyecto: 'ALVI EL BELLOTO', responsable: 'Benjamín Chavarría',
   direccion: 'Av. Freire N°1515, Quilpué (Local 3085)',
   planos: '3085-ABE-EL-PL-007 Diagramas unilineales (C01); 3085-ABE-EL-PL-008 Cuadros de cargas (C01)' };
-// Puntos críticos según planos PL-007 (unilineal) y PL-008 (cuadros de carga). Se excluyen TDA/TDF «PDV», TDAYF y TDC:
-// solo alimentan alumbrado, enchufes y computación monofásicos (no se dañan con secuencia negativa).
+// Instalación completa según planos PL-007 (unilineal) y PL-008 (cuadros de carga), existente + proyectado.
+// Toda la instalación estaba en secuencia negativa y se dejará positiva: lo normal es corregir lo más arriba posible.
 var PRESET = [
-  { id: 'p-tgp', tipo: 'tablero', nombre: 'Tablero general existente (poste)', ubicacion: 'Poste · desde subestación 300 kVA', padre: '', ref: 'PL-007',
-    riesgo: 'Origen: su secuencia define la de toda la instalación.' },
-  { id: 'p-tgn', tipo: 'tablero', nombre: 'TGN — Tablero General Nuevo', ubicacion: 'Sala eléctrica · 4x160/400A', padre: 'p-tgp', ref: 'PL-007',
-    riesgo: 'De aquí cuelgan frío, PEAS y PDV: invertir aquí cambia todo lo de abajo.' },
-  { id: 'p-ge', tipo: 'fuente', nombre: 'Grupo generador 200 kVA + transferencia', ubicacion: 'G/E · AL-EM1', padre: '', ref: 'PL-007',
-    riesgo: 'Debe coincidir con la red: si no, al transferir los motores giran al revés.' },
+  { id: 'p-tgp', tipo: 'tablero', nombre: 'Tablero general existente (poste)', ubicacion: 'Poste · 3x400A 65kA · desde subestación 300 kVA', padre: '', ref: 'PL-007',
+    riesgo: 'Origen: su secuencia define la de toda la instalación. Si la corrección se hace aquí, todo lo de abajo queda positivo.' },
+  { id: 'p-tga', tipo: 'tablero', nombre: 'Tablero general antiguo (existente)', ubicacion: 'Sala eléctrica · barras BPCR 200x50', padre: 'p-tgp', ref: 'PL-007',
+    riesgo: 'Se une en barras con el TGN. Situación existente: confirmar en terreno qué sigue en servicio.' },
+  { id: 'p-alu', tipo: 'tablero', nombre: 'Tablero de alumbrado (existente)', ubicacion: '3x80A · 4x33,6 mm²', padre: 'p-tga', ref: 'PL-007',
+    riesgo: 'Existente. Alumbrado: sin riesgo de daño, pero debe quedar positivo. Confirmar si sigue en servicio.' },
+  { id: 'p-esv', tipo: 'tablero', nombre: 'TDF enchufe servicio (existente)', ubicacion: '3x40A · 4x16 mm²', padre: 'p-tga', ref: 'PL-007',
+    riesgo: 'Existente. Revisar si alimenta algún equipo trifásico. Confirmar si sigue en servicio.' },
+  { id: 'p-frioe', tipo: 'tablero', nombre: 'Tablero FRIO (existente)', ubicacion: '3x175A 30kA', padre: 'p-tga', ref: 'PL-007',
+    riesgo: 'Existente, motores de frío. Confirmar si sigue en servicio o lo reemplaza el TDF «FRIO».' },
+  { id: 'p-bco', tipo: 'carga', nombre: 'Banco de condensadores (existente 40 kVAR)', ubicacion: 'Sala eléctrica · 3x100A', padre: 'p-tga', ref: 'PL-007',
+    riesgo: 'No debería dañarse, pero revisa el controlador y los TC tras la corrección. El plano recomienda uno automático de 80 kVAR.' },
+  { id: 'p-tgn', tipo: 'tablero', nombre: 'TGN — Tablero General Nuevo', ubicacion: 'Sala eléctrica · 4x160/400A', padre: 'p-tga', ref: 'PL-007',
+    riesgo: 'De aquí cuelgan frío, PEAS, PDV y TDAYF: invertir aquí cambia todo lo de abajo.' },
+  { id: 'p-tdayf', tipo: 'tablero', nombre: 'TDAYF (existente, emergencia)', ubicacion: 'Sala eléctrica · AL-EM2 · 4x400A 36kA', padre: 'p-tgn', ref: 'PL-007',
+    riesgo: 'Existente: alumbrado y fuerza (21 kW). Revisar si alimenta algún motor trifásico.' },
+  { id: 'p-pdv', tipo: 'tablero', nombre: 'TDA y F «PDV»', ubicacion: 'Sala eléctrica · 4x200A 25kA', padre: 'p-tgn', ref: 'PL-007 / 008',
+    riesgo: 'Alumbrado y enchufes monofásicos: no se dañan, pero debe quedar positivo.' },
+  { id: 'p-tdc', tipo: 'tablero', nombre: 'TDC «CO» (computación, existente)', ubicacion: '1x40A', padre: 'p-pdv', ref: 'PL-008',
+    riesgo: 'Monofásico. Aguas abajo: UPS y tablero by-pass.' },
+  { id: 'p-ups', tipo: 'carga', nombre: 'UPS 10 kVA + tablero by-pass', ubicacion: 'Desde TDC «CO»', padre: 'p-tdc', ref: 'PL-007',
+    riesgo: 'Confirmar si la entrada es trifásica: en ese caso una secuencia incorrecta da alarma o bloquea el by-pass.' },
+  { id: 'p-tcl', tipo: 'tablero', nombre: 'TCL (control de luminarias)', ubicacion: 'Contactores / telerruptores', padre: 'p-pdv', ref: 'PL-007',
+    riesgo: 'Control monofásico: sin riesgo de daño, pero debe quedar positivo.' },
   { id: 'p-frio', tipo: 'tablero', nombre: 'TDF «FRIO»', ubicacion: 'Sala eléctrica · 4x125A · 55 kW', padre: 'p-tgn', ref: 'PL-007',
     riesgo: 'Motores y compresores trifásicos de frío.' },
   { id: 'p-cfrio', tipo: 'carga', nombre: 'Compresores / unidades condensadoras de frío', ubicacion: 'Desde TDF «FRIO»', padre: 'p-frio', ref: 'PL-007',
     riesgo: 'Un compresor scroll que gira al revés se sobrecalienta y puede dañarse. Agrega una carga por cada equipo.' },
   { id: 'p-peas', tipo: 'tablero', nombre: 'TDF «PEAS»', ubicacion: 'Sala eléctrica · 4x16A · 1,12 kW', padre: 'p-tgn', ref: 'PL-007',
-    riesgo: 'Alimentación 4x16A (trifásica). Confirmar qué equipo alimenta.' }
+    riesgo: 'Alimentación 4x16A (trifásica). Confirmar qué equipo alimenta.' },
+  { id: 'p-ge', tipo: 'fuente', nombre: 'Grupo generador + transferencia (TTA)', ubicacion: 'G/E · existente 100 kVA / proyectado 200 kVA', padre: '', ref: 'PL-007',
+    riesgo: 'Debe coincidir con la red: si no, al transferir los motores giran al revés.' }
 ];
 var TIPOS = { tablero: 'Tablero', carga: 'Carga crítica', fuente: 'Fuente' };
 var MAX_LADO = 1920, CALIDAD = 0.85, MAX_SHARE = 10;
