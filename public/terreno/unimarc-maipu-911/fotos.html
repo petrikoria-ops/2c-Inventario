@@ -1,0 +1,1741 @@
+<!doctype html>
+<html lang="es-CL">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex,nofollow">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1F3A5F">
+<meta name="color-scheme" content="light dark">
+<meta name="format-detection" content="telephone=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Fotos 2C">
+<title>Fotos 2C · Unimarc Maipú 4 Poniente · Local 911</title>
+<link rel="icon" href="data:,">
+<style>
+:root{
+  --navy:#1F3A5F;--navy-2:#2B5283;--amar:#F2C230;--ok:#17924F;--ok-bg:#E2F3E9;--rojo:#C0392B;--lnk:#24569A;--cam:#1F3A5F;
+  --bg:#EEF1F5;--card:#FFFFFF;--tx:#122033;--mut:#5E6B7B;--line:#E1E6ED;--chip:#F2F4F8;--campo:#F7F9FB;
+  --barra:rgba(238,241,245,.92);--sombra:0 1px 2px rgba(16,32,51,.06),0 3px 10px rgba(16,32,51,.05);
+}
+@media (prefers-color-scheme:dark){:root{
+  --bg:#0B131D;--card:#152131;--tx:#E7EDF4;--mut:#97A4B4;--line:#24344A;--chip:#1C2B3F;--campo:#101A27;
+  --ok:#3CC57A;--ok-bg:#163527;--lnk:#8DB8EE;--cam:#2C5A91;--barra:rgba(11,19,29,.9);--sombra:none;
+}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%;scroll-padding-top:120px;scroll-padding-bottom:110px}
+html,body{margin:0;background:var(--bg);color:var(--tx);overscroll-behavior-y:none}
+body{font:16px/1.35 -apple-system,BlinkMacSystemFont,"SF Pro Text","Segoe UI",Roboto,Helvetica,Arial,sans-serif;min-height:100vh}
+body.modal{overflow:hidden}
+button{font:inherit;color:inherit;background:none;border:0;padding:0;margin:0;cursor:pointer;touch-action:manipulation;text-align:inherit}
+button:disabled{opacity:.5}
+input,textarea{font:inherit;font-size:16px;color:inherit}
+svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+[hidden]{display:none!important}
+.oculto{position:fixed;left:-2000px;top:0;width:1px;height:1px;opacity:0}
+.muted{color:var(--mut)}.sm{font-size:13.5px}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.92em;background:var(--chip);padding:1px 5px;border-radius:6px}
+
+/* sin JavaScript (vista previa de iPhone) */
+.sinjs{max-width:560px;margin:0 auto;padding:28px 20px;line-height:1.45}
+.sinjs .k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5E6B7B;margin:0}
+.sinjs h1{font-size:22px;margin:4px 0 14px;color:#1F3A5F}
+.sinjs .alerta{background:#FFF4CC;color:#4D3B00;border-radius:12px;padding:12px 14px}
+.sinjs li{margin:10px 0}
+
+/* cabecera */
+.top{position:-webkit-sticky;position:sticky;top:0;z-index:20;background:var(--navy);color:#fff;padding:calc(env(safe-area-inset-top) + 10px) 16px 10px;box-shadow:0 2px 12px rgba(0,0,0,.18)}
+.top-1{display:flex;align-items:center;gap:10px}
+.tt{flex:1;min-width:0}
+.kick{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.72}
+.obra{font-size:20px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.12)}
+.ib .p{fill:currentColor;stroke:none}
+.top-2{display:flex;align-items:center;gap:10px;margin-top:8px}
+.pbar{flex:1;height:8px;border-radius:8px;background:rgba(255,255,255,.18);overflow:hidden}
+.pbar i{display:block;height:100%;width:0;background:var(--amar);border-radius:8px;transition:width .3s}
+.pnum{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums}
+.top-3{display:flex;justify-content:space-between;gap:8px;font-size:12.5px;opacity:.85;margin-top:4px}
+
+/* herramientas */
+.herr{padding:12px 12px 2px;display:grid;gap:10px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--chip);border-radius:12px;padding:3px;border:1px solid var(--line)}
+.seg button{height:42px;border-radius:9px;font-size:14px;font-weight:600;color:var(--mut);text-align:center}
+.seg button.on{background:var(--card);color:var(--tx);box-shadow:0 1px 3px rgba(0,0,0,.14)}
+.seg span{font-weight:500;opacity:.75;font-variant-numeric:tabular-nums}
+.buscar{position:relative}
+.buscar>svg{position:absolute;left:12px;top:12px;width:20px;height:20px;color:var(--mut)}
+.buscar input{width:100%;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--card);padding:0 44px 0 40px;-webkit-appearance:none;appearance:none;outline:none}
+.buscar input:focus{border-color:var(--navy-2)}
+.buscar input::-webkit-search-cancel-button{-webkit-appearance:none}
+.buscar .x{position:absolute;right:0;top:0;width:44px;height:44px;display:grid;place-items:center;color:var(--mut);font-size:22px;text-align:center}
+.aviso{margin:10px 12px 0;padding:10px 12px;border-radius:12px;background:#FFF4CC;color:#4D3B00;font-size:14px}
+@media (prefers-color-scheme:dark){.aviso{background:#3A3010;color:#F5DE8A}}
+
+/* secciones */
+#lista{padding:2px 0 6px}
+.sec{background:var(--card);margin:10px 12px;border-radius:16px;box-shadow:var(--sombra);overflow:hidden}
+.sec-h{width:100%;display:grid;grid-template-columns:22px 1fr auto;align-items:center;gap:8px;padding:13px 14px 17px 10px;position:relative;min-height:62px;text-align:left}
+.sec-h .chev{width:20px;height:20px;color:var(--mut);transition:transform .2s}
+.sec.abierta .chev{transform:rotate(90deg)}
+.sec-t{font-weight:700;font-size:16.5px;min-width:0}
+.sec-t small{display:block;font-weight:500;font-size:12.5px;color:var(--mut);margin-top:2px}
+.sec-n{font-size:14px;color:var(--mut);font-variant-numeric:tabular-nums;white-space:nowrap}
+.sec-n b{color:var(--tx);font-size:16px}
+.sec.completa .sec-n b{color:var(--ok)}
+.sec-p{position:absolute;left:14px;right:14px;bottom:8px;height:3px;border-radius:3px;background:var(--line);overflow:hidden}
+.sec-p i{display:block;height:100%;background:var(--ok);border-radius:3px}
+.sec-b{border-top:1px solid var(--line)}
+.sec-f{display:flex;flex-wrap:wrap;align-items:center;gap:0 16px;padding:2px 14px 4px;border-top:1px solid var(--line)}
+.sec-vacia,.vacio,.det-v{color:var(--mut);font-size:14px;margin:0;padding:14px}
+.vacio{text-align:center;padding:28px 16px}
+.det-v{padding:6px 0 10px}
+
+/* ítems */
+.it+.it{border-top:1px solid var(--line)}
+.it.abierto{background:var(--chip)}
+.it-r{display:flex;align-items:stretch}
+.it-m{flex:1;min-width:0;display:flex;align-items:center;gap:12px;padding:9px 4px 9px 14px;min-height:60px;text-align:left}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid #B9C3CF;display:grid;place-items:center;flex:none;font-weight:800;color:#fff;font-size:16px}
+.dot svg{width:16px;height:16px;stroke-width:3}
+.it.ok .dot{background:var(--ok);border-color:var(--ok)}
+.it.na .dot{background:#9AA5B3;border-color:#9AA5B3}
+.it-t{flex:1;min-width:0}
+.it-t b{display:block;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.it-t small{display:block;font-size:12.5px;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px}
+.it.na .it-t b{color:var(--mut)}
+.cnt{min-width:28px;height:26px;padding:0 8px;border-radius:13px;background:var(--line);font-size:13px;font-weight:700;display:grid;place-items:center;font-variant-numeric:tabular-nums}
+.it.ok .cnt{background:var(--ok-bg);color:var(--ok)}
+.cam{width:66px;flex:none;display:grid;place-items:center}
+.cam span{width:48px;height:48px;border-radius:14px;background:var(--cam);color:#fff;display:grid;place-items:center;box-shadow:0 2px 6px rgba(31,58,95,.25)}
+.cam:active span{transform:scale(.94)}
+.slots{display:flex;align-items:center;gap:6px;padding:0 10px 0 2px;flex:none}
+.slot{width:58px;height:52px;border-radius:13px;background:var(--cam);color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;font-size:11.5px;font-weight:700;text-align:center;box-shadow:0 2px 6px rgba(31,58,95,.22)}
+.slot svg{width:20px;height:20px}
+.slot.lleno{background:#17924F}
+.slot.lleno svg{stroke-width:3}
+.slot:active{transform:scale(.95)}
+.it.parcial .dot{border-color:#D9A400;background:rgba(242,194,48,.28)}
+.slt{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:6px 0 4px}
+.slt-t{font-size:12.5px;font-weight:700;color:var(--mut);margin:0 0 5px;text-transform:uppercase;letter-spacing:.06em}
+.slt-b{display:grid;grid-template-columns:1fr 46px;gap:6px;margin-top:6px}
+.btn.chico{min-height:44px;font-size:15px;padding:0 8px;gap:6px}
+.th-in{position:absolute;left:0;top:0;right:0;bottom:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;color:var(--mut);font-size:13px;font-weight:600}
+.th.vacio-th{background:transparent;border:2px dashed #B9C3CF}
+.extra-t{font-size:13px;color:var(--mut);margin:10px 0 4px}
+.det{padding:2px 14px 6px}
+.ths{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 10px}
+.th{position:relative;width:100%;padding-top:100%;border-radius:10px;overflow:hidden;background:var(--line)}
+.th img{position:absolute;left:0;top:0;width:100%;height:100%;object-fit:cover;display:block}
+.th .n{position:absolute;left:4px;top:4px;min-width:20px;height:20px;padding:0 5px;border-radius:10px;background:rgba(0,0,0,.6);color:#fff;font-size:12px;font-weight:700;display:grid;place-items:center}
+.th.sinmini::after{content:"Foto";position:absolute;left:0;right:0;top:50%;margin-top:-9px;text-align:center;font-size:13px;color:var(--mut)}
+.det-b{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.btn{min-height:48px;border-radius:12px;display:inline-flex;align-items:center;justify-content:center;gap:8px;font-weight:600;font-size:16px;padding:0 14px;text-align:center}
+.btn.pri{background:var(--navy);color:#fff}
+.btn.alt{background:var(--card);color:var(--tx);border:1px solid var(--line)}
+.nota{display:block;width:100%;margin-top:10px;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--card);padding:11px 12px;resize:vertical;outline:none;-webkit-appearance:none;appearance:none}
+.nota:focus{border-color:var(--navy-2)}
+.det-f{display:flex;align-items:center;flex-wrap:wrap;gap:0 16px;margin-top:4px}
+.chk{display:inline-flex;align-items:center;gap:9px;min-height:44px;font-size:15px}
+.chk input{width:22px;height:22px;margin:0;accent-color:var(--navy)}
+.sp{flex:1}
+.lnk{min-height:44px;font-size:15px;color:var(--lnk);font-weight:600}
+.lnk.rojo{color:var(--rojo)}
+
+/* barra inferior */
+.pie-esp{height:calc(98px + env(safe-area-inset-bottom))}
+.barra{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px 12px calc(env(safe-area-inset-bottom) + 10px);background:var(--barra);-webkit-backdrop-filter:saturate(1.6) blur(14px);backdrop-filter:saturate(1.6) blur(14px);border-top:1px solid var(--line)}
+.btn.gran{width:100%;min-height:58px;border-radius:16px;font-size:17px;gap:12px;box-shadow:0 4px 14px rgba(31,58,95,.28)}
+.btn.gran>span{display:flex;flex-direction:column;align-items:flex-start;line-height:1.15;text-align:left}
+.btn.gran small{font-size:12.5px;font-weight:500;opacity:.82}
+body.kb .barra{display:none}
+
+/* hojas */
+.hoja{position:fixed;top:0;left:0;right:0;bottom:0;z-index:40;background:rgba(8,14,22,.5);display:flex;align-items:flex-end;justify-content:center;animation:fade .15s}
+.hoja-c{width:100%;max-width:560px;max-height:85vh;max-height:85dvh;overflow:auto;-webkit-overflow-scrolling:touch;background:var(--card);border-radius:20px 20px 0 0;padding:8px 16px calc(env(safe-area-inset-bottom) + 16px);animation:sube .22s ease-out}
+.hoja-c::before{content:"";display:block;width:40px;height:5px;border-radius:3px;background:var(--line);margin:4px auto 10px}
+.hoja h3{margin:2px 0 6px;font-size:19px}
+.fila{display:flex;align-items:center;width:100%;min-height:52px;border-bottom:1px solid var(--line);font-size:16.5px;text-align:left}
+.fila.rojo{color:var(--rojo)}
+.op{display:flex;align-items:center;gap:12px;padding:9px 2px;border-bottom:1px solid var(--line);min-height:58px}
+.op input{width:22px;height:22px;margin:0;accent-color:var(--navy);flex:none}
+.op b{display:block;font-weight:600}
+.op small{color:var(--mut);font-size:13px}
+.op.off{opacity:.45}
+.campo{display:block;margin:10px 0}
+.campo span{display:block;font-size:13px;color:var(--mut);margin-bottom:4px}
+.campo input,.campo textarea{width:100%;border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:var(--campo);outline:none;-webkit-appearance:none;appearance:none}
+.campo textarea{min-height:40vh;min-height:40dvh;font-family:ui-monospace,Menlo,Consolas,monospace;line-height:1.4;resize:vertical}
+.hoja-b{display:grid;gap:8px;margin-top:14px}
+.estado{margin:12px 0 0;padding:10px 12px;border-radius:12px;background:var(--chip);font-size:14px;white-space:pre-line}
+.estado.err{background:#FDE7E4;color:#8E2418}
+.ayuda{padding-left:20px;margin:6px 0}.ayuda li{margin:8px 0}
+@keyframes sube{from{transform:translateY(30px);opacity:.6}to{transform:none;opacity:1}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+
+/* visor */
+.lb{position:fixed;top:0;left:0;right:0;bottom:0;z-index:50;background:#000;color:#fff;display:flex;flex-direction:column}
+.lb-t,.lb-b{display:flex;align-items:center;gap:8px;padding:8px 12px}
+.lb-t{padding-top:calc(env(safe-area-inset-top) + 8px)}
+.lb-b{padding-bottom:calc(env(safe-area-inset-bottom) + 10px)}
+.lb-t b{flex:1;font-size:16px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-i{flex:1;min-height:0;display:flex;align-items:center;justify-content:center}
+.lb-i img{max-width:100%;max-height:100%;object-fit:contain}
+.lb button{min-width:48px;height:44px;border-radius:12px;background:rgba(255,255,255,.14);color:#fff;padding:0 12px;font-weight:600;font-size:16px;text-align:center}
+.lb button:disabled{opacity:.3}
+.lb-info{flex:1;text-align:center;font-size:12.5px;opacity:.85}
+.lb .del{background:rgba(192,57,43,.9)}
+
+/* ocupado y avisos */
+.ocupado{position:fixed;top:0;left:0;right:0;bottom:0;z-index:60;display:flex;align-items:center;justify-content:center;background:rgba(8,14,22,.28)}
+.ocupado>div{display:flex;align-items:center;gap:12px;background:var(--card);padding:14px 18px;border-radius:14px;box-shadow:0 8px 30px rgba(0,0,0,.25);font-weight:600}
+.spin{width:20px;height:20px;border-radius:50%;border:3px solid var(--line);border-top-color:var(--navy-2);animation:gira .8s linear infinite}
+@keyframes gira{to{transform:rotate(360deg)}}
+.toast{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom) + 88px);z-index:55;margin:0 auto;max-width:520px;background:#122033;color:#fff;padding:12px 14px;border-radius:14px;font-size:15px;box-shadow:0 8px 24px rgba(0,0,0,.25);opacity:0;transform:translateY(8px);transition:opacity .2s,transform .2s;pointer-events:none}
+.toast.si{opacity:1;transform:none}
+.toast.err{background:#9B2C20}
+body.kb .toast{bottom:12px}
+#resp{position:fixed;left:10px;right:10px;bottom:calc(env(safe-area-inset-bottom,0px) + 10px);z-index:30;display:flex;align-items:center;gap:10px;background:#B3261E;color:#fff;border-radius:14px;padding:10px 12px;font-size:14px;line-height:1.25;box-shadow:0 4px 14px rgba(0,0,0,.35)}#resp.suave{background:#7A4F00}#resp.suave button{color:#7A4F00}#resp span{flex:1;min-width:0}#resp button{flex:none;min-height:44px;padding:0 14px;border-radius:10px;background:#fff;color:#B3261E;font:inherit;font-weight:700}
+#gList{display:grid;gap:14px;margin-top:10px}.gi{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--campo)}.gi img{display:block;width:100%;height:auto;-webkit-touch-callout:default;-webkit-user-select:auto;user-select:auto}.gi p{margin:0;padding:8px 10px;font-size:13px;line-height:1.3}.gi p.mal{color:#B3261E;font-weight:700}
+.nube-f{align-items:center}.nube-ver{background:rgba(255,255,255,.2);color:inherit;border:0;border-radius:8px;padding:4px 10px;font:inherit;font-weight:700;min-height:30px}
+#hNube.err{color:#FFC2B8;font-weight:700}
+.nb-cod,.nb-zip{display:flex;gap:8px;margin:10px 0}.nb-cod input,.nb-zip select{flex:1;min-width:0;min-height:46px;border:1px solid var(--line);border-radius:12px;padding:0 10px;background:var(--campo);color:inherit;font:inherit}
+.nb-sec{margin:18px 0 6px;font-size:15px;font-weight:800}.nb-it{margin:10px 0 6px;font-size:13.5px;font-weight:700}
+.nb-g{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.nb-g figure{margin:0}.nb-g img{display:block;width:100%;aspect-ratio:1;object-fit:cover;border-radius:8px;background:var(--campo);-webkit-touch-callout:default}
+.nb-g figure.grande{grid-column:1/-1}.nb-g figure.grande img{aspect-ratio:auto;object-fit:contain}
+.nb-g figcaption{font-size:11px;line-height:1.25;color:var(--mut);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inf-k{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:10px 0}.inf-k div{background:var(--campo);border:1px solid var(--line);border-radius:12px;padding:9px 10px}.inf-k b{display:block;font-size:20px;line-height:1.1}.inf-k span{font-size:12px;color:var(--mut)}
+.inf-eq{font-size:12.5px;color:var(--mut);margin:4px 0 10px}.inf-h{font-size:15px;font-weight:800;margin:16px 0 6px}
+.inf-obs{margin:0;padding-left:18px;font-size:13.5px;line-height:1.35}.inf-obs li{margin:4px 0}
+details.inf-s{border:1px solid var(--line);border-radius:12px;margin:8px 0;background:var(--card)}details.inf-s>summary{list-style:none;cursor:pointer;padding:11px 12px;font-weight:750;display:flex;justify-content:space-between;gap:8px}details.inf-s>summary::-webkit-details-marker{display:none}
+.inf-bar{height:6px;border-radius:4px;background:var(--line);overflow:hidden;margin:0 12px 10px}.inf-bar i{display:block;height:100%;background:var(--ok,#17924F)}
+.inf-it{border-top:1px solid var(--line);padding:9px 12px}.inf-it .t{display:flex;justify-content:space-between;gap:8px;font-size:14px;font-weight:650}.inf-it .n{font-size:12.5px;color:var(--mut);margin-top:3px}
+.chip{font-size:11.5px;font-weight:800;border-radius:999px;padding:2px 8px;white-space:nowrap;align-self:flex-start}.chip.ok{background:#DCF3E5;color:#11673A}.chip.fa{background:#FFF0D1;color:#8A5300}.chip.pe{background:#ECEFF3;color:#4A5563}.chip.na{background:#E7ECF7;color:#2C4A86}
+.inf-it .nb-g{margin-top:7px}
+.th.rem{position:relative}.th .au{position:absolute;right:3px;top:3px;min-width:18px;height:18px;border-radius:9px;background:#1F3A5F;color:#fff;font:700 11px/18px system-ui;text-align:center;padding:0 4px}
+.rem-n{margin:6px 0 0;font-size:13.5px;color:var(--mut)}
+</style>
+</head>
+<body>
+
+<div id="sinjs" class="sinjs">
+  <p class="k">2C Electricidad · Registro fotográfico</p>
+  <h1>Checklist de fotos — UNIMARC MAIPÚ 911</h1>
+  <p class="alerta"><b>Esta vista previa no ejecuta la app.</b> En iPhone, la vista previa de Archivos, Mail o WhatsApp no corre JavaScript, y Safari no abre archivos .html guardados en el teléfono.</p>
+  <p><b>Cómo abrirla:</b></p>
+  <ol>
+    <li><b>iPhone (recomendado):</b> publica este archivo como página (Vercel, GitHub Pages u otro) y abre el enlace en Safari. Solo se publica la app: las fotos quedan guardadas en el teléfono.</li>
+    <li><b>iPhone 100 % local:</b> app gratuita iSH → copia el archivo a Archivos › iSH › root con el nombre <code>index.html</code> → en iSH escribe <code>apk add python3</code> (una vez) y <code>python3 -m http.server</code> → en Safari abre <code>localhost:8000</code>.</li>
+    <li><b>Android, Windows o Mac:</b> abre el archivo con Chrome, Edge o Safari (Mac).</li>
+  </ol>
+</div>
+
+<div id="app" hidden>
+  <header class="top">
+    <div class="top-1">
+      <div class="tt">
+        <div class="kick">2C Electricidad · Registro fotográfico</div>
+        <div class="obra" id="hObra">UNIMARC MAIPÚ 911</div>
+      </div>
+      <button class="ib" id="btnMenu" aria-label="Opciones"><svg viewBox="0 0 24 24" aria-hidden="true"><circle class="p" cx="5" cy="12" r="2"/><circle class="p" cx="12" cy="12" r="2"/><circle class="p" cx="19" cy="12" r="2"/></svg></button>
+    </div>
+    <div class="top-2"><div class="pbar"><i id="hBar"></i></div><span class="pnum" id="hProg">0/0 · 0%</span></div>
+    <div class="top-3"><span id="hFotos">0 fotos · 0 MB</span><span id="hAlm"></span></div>
+    <div class="top-3 nube-f" id="hNubeF" hidden><span id="hNube"></span></div>
+  </header>
+
+  <div class="herr">
+    <div class="seg" id="seg" role="group" aria-label="Filtro">
+      <button data-f="todos" class="on">Todos</button>
+      <button data-f="pend">Pendientes <span id="cPend">0</span></button>
+      <button data-f="ok">Listos <span id="cOk">0</span></button>
+    </div>
+    <div class="buscar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m20 20-4.8-4.8"/></svg>
+      <input id="q" type="search" placeholder="Buscar ítem (ej.: FZA 12)" autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false" enterkeyhint="search" aria-label="Buscar ítem">
+      <button class="x" id="qx" aria-label="Limpiar búsqueda" hidden>×</button>
+    </div>
+  </div>
+
+  <div class="aviso" id="aviso" hidden></div>
+  <div id="resp" hidden><span id="respT"></span><button type="button" id="respB">Respaldar ahora</button></div>
+  <main id="lista" aria-live="off"></main>
+  <div class="pie-esp"></div>
+
+  <nav class="barra">
+    <button class="btn pri gran" id="btnZip">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V3.5M7.5 8 12 3.5 16.5 8"/><path d="M5 12.5v7h14v-7"/></svg>
+      <span><b>Exportar ZIP</b><small id="zSub">Aún sin fotos</small></span>
+    </button>
+  </nav>
+</div>
+
+<div class="hoja" id="hZip" hidden><div class="hoja-c">
+  <h3>Exportar ZIP</h3>
+  <p class="muted sm">Fotos originales sin recomprimir, ordenadas por sección e ítem, más <code>resumen.csv</code> y <code>datos_informe.json</code>.</p>
+  <div id="zOps"></div>
+  <p class="estado" id="zEst" hidden></p>
+  <div class="hoja-b">
+    <button class="btn pri" id="zPrep">Preparar ZIP</button>
+    <button class="btn pri" id="zShare" hidden>Compartir…</button>
+    <button class="btn alt" id="zDown" hidden>Descargar</button>
+    <button class="btn alt" id="zGal">Guardar fotos una a una</button>
+    <button class="btn alt" data-cerrar>Cerrar</button>
+  </div>
+</div></div>
+
+<div class="hoja" id="hNubeS" hidden><div class="hoja-c">
+  <h3>Informe en vivo</h3>
+  <p class="muted sm" id="nbInfo">Cargando…</p>
+  <div id="nbRes"></div>
+  <div class="nb-cod" id="nbCod" hidden><input id="nbCodIn" placeholder="Pega el código de obra" autocomplete="off"><button class="btn pri" id="nbCodOk" type="button">Activar</button></div>
+  <div class="nb-zip" id="nbZipF" hidden><select id="nbSec"></select><button class="btn pri" id="nbZip" type="button">Preparar ZIP</button></div>
+  <p class="estado" id="nbEst" hidden></p>
+  <div class="hoja-b"><button class="btn pri" id="nbShare" type="button" hidden>Compartir ZIP…</button><button class="btn alt" id="nbDown" type="button" hidden>Descargar ZIP</button></div>
+  <div id="nbList"></div>
+  <div class="hoja-b"><button class="btn alt" id="nbCerrar" type="button">Cerrar</button></div>
+</div></div>
+
+<div class="hoja" id="hGal" hidden><div class="hoja-c">
+  <h3>Guardar fotos una a una</h3>
+  <p class="muted sm">Mantén presionada cada foto y elige <b>Guardar en Fotos</b>. Sirve cuando el visor no deja descargar el ZIP.</p>
+  <button class="btn pri" id="gUlt" style="width:100%;margin-bottom:8px">Último rescate (más vías + diagnóstico)</button>
+  <button class="btn alt" id="gResc" style="width:100%;margin-bottom:10px" hidden>Rescatar fotos para Claude (subir)</button>
+  <p class="estado" id="gRes" hidden></p>
+  <div id="gList"></div>
+  <div class="hoja-b"><button class="btn alt" id="gClose">Cerrar</button></div>
+</div></div>
+
+<div class="hoja" id="hMenu" hidden><div class="hoja-c">
+  <h3>Opciones</h3>
+  <button class="fila" data-m="datos">Datos de la obra</button>
+  <button class="fila" data-m="seccion">Nueva sección</button>
+  <button class="fila" data-m="lista">Editar lista (texto)</button>
+  <button class="fila" data-m="ayuda">Ayuda</button>
+  <button class="fila rojo" data-m="borrar">Borrar fotos y notas…</button>
+  <p class="muted sm" id="mAlm"></p>
+  <div class="hoja-b"><button class="btn alt" data-cerrar>Cerrar</button></div>
+</div></div>
+
+<div class="hoja" id="hDatos" hidden><div class="hoja-c">
+  <h3>Datos de la obra</h3>
+  <label class="campo"><span>Obra / proyecto</span><input id="dObra" autocomplete="off"></label>
+  <label class="campo"><span>Técnico (opcional)</span><input id="dTec" autocomplete="name"></label>
+  <label class="campo"><span>Instrumento</span><input id="dIns" autocomplete="off"></label>
+  <div class="hoja-b"><button class="btn pri" id="dOk">Guardar</button><button class="btn alt" data-cerrar>Cancelar</button></div>
+</div></div>
+
+<div class="hoja" id="hLista" hidden><div class="hoja-c">
+  <h3>Editar lista</h3>
+  <p class="muted sm"><code># Sección | nota</code> abre una sección; cada línea siguiente es un ítem <code>Nombre | referencia</code>. Rango: <code>CTO 1..12</code>. Las fotos siguen en su ítem si el nombre no cambia; para renombrar un ítem con fotos usa «Renombrar». <code>| fotos: Bucle, Dif</code> en la línea de sección pide esas fotos en cada ítem.</p>
+  <label class="campo"><textarea id="tLista" spellcheck="false" autocapitalize="off" autocorrect="off" aria-label="Lista de ítems"></textarea></label>
+  <div class="hoja-b"><button class="btn pri" id="tOk">Guardar lista</button><button class="btn alt" data-cerrar>Cancelar</button></div>
+</div></div>
+
+<div class="hoja" id="hAyuda" hidden><div class="hoja-c">
+  <h3>Ayuda</h3>
+  <ul class="ayuda">
+    <li><b>Foto rápida:</b> botón de cámara a la derecha de cada ítem.</li>
+    <li><b>Bucle + RCD:</b> cada circuito lleva 2 fotos, <b>Bucle</b> y <b>Dif</b>. Tocar otra vez una de ellas repite la foto (reemplaza la anterior).</li>
+    <li><b>Toca el ítem</b> para ver sus fotos, usar la Galería, escribir una nota o marcar «No aplica».</li>
+    <li><b>Las fotos quedan en este teléfono</b>; no se suben a internet. Siguen ahí aunque cierres la pestaña.</li>
+    <li><b>Exportar ZIP → Compartir</b> → Guardar en Archivos, AirDrop, Mail o WhatsApp (va como documento y no se comprime). Fotos originales, sin pérdida de calidad.</li>
+    <li>El ZIP trae <b>resumen.csv</b> (Excel) y <b>datos_informe.json</b> para armar el informe Word de 2C.</li>
+    <li><b>iPhone:</b> usa Safari, abriendo la checklist desde su enlace https. En el visor de otras apps la cámara no entrega la foto.</li>
+    <li><b>Respaldo:</b> exporta el ZIP al terminar cada jornada. Si se borran los datos de Safari, se pierden las fotos.</li>
+    <li>Usa siempre el mismo acceso (pestaña de Safari o ícono en la pantalla de inicio): cada uno guarda sus fotos por separado.</li>
+    <li><b>Varios ítems a la vez:</b> separa con comas o usa rango, ej.: <code>CTO 1..12</code>.</li>
+  </ul>
+  <p class="muted sm">Versión 1.1 · 10-11-2026</p>
+  <div class="hoja-b"><button class="btn alt" data-cerrar>Cerrar</button></div>
+</div></div>
+
+<div class="lb" id="lb" hidden>
+  <div class="lb-t"><b id="lbT"></b><button id="lbX">Cerrar</button></div>
+  <div class="lb-i"><img id="lbImg" alt=""></div>
+  <div class="lb-b"><button id="lbPrev" aria-label="Foto anterior">‹</button><span class="lb-info" id="lbInfo"></span><button id="lbNext" aria-label="Foto siguiente">›</button><button class="del" id="lbDel">Eliminar</button></div>
+</div>
+
+<div class="ocupado" id="ocupado" hidden><div><span class="spin"></span><span id="ocMsg">Guardando…</span></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<input type="file" id="inCam" class="oculto" accept="image/*" capture="environment" tabindex="-1" aria-hidden="true">
+<input type="file" id="inGal" class="oculto" accept="image/*" multiple tabindex="-1" aria-hidden="true">
+
+<script>
+'use strict';
+const SEED = {"clave":"unimarc-maipu-911","obra":"UNIMARC MAIPÚ 911","instrumento":"Metrel MI 3155 · N° serie 26161056","secciones":[{"id":"ais","titulo":"Aislación · Alimentadores","nota":"Rais 500 V · una foto del instrumento por alimentador","items":[{"id":"ais-pdv","nombre":"SAL-PDV","ref":"TDA y F PDV · RZ1 3x35 + N 50 + T 35 mm² · 12 m · 4x150A"},{"id":"ais-ln","nombre":"SAL-LN","ref":"TDA local nuevo · RZ1 3x16 + N 25 + T 16 mm² · 20 m · queda en caja 200x200x100"}]},{"id":"pdven","titulo":"Bucle + RCD · TDA y F PDV · enchufes","nota":"2 fotos por circuito: Bucle (Zs) y Dif (RCD 30 mA) · barra 1 normal (EN-N) y barra 2 fuerza (EN-F)","tipos":["Bucle","Dif"],"items":[{"id":"pdven-n1","nombre":"EN-N1","ref":"Matavector-turnomatic · Venta asistida"},{"id":"pdven-f1","nombre":"EN-F1","ref":"Cooler hielo · Sala de ventas"},{"id":"pdven-f2","nombre":"EN-F2","ref":"Servicio · Sala de ventas"},{"id":"pdven-f3","nombre":"EN-F3","ref":"Cooler · Botilleria"},{"id":"pdven-f4","nombre":"EN-F4","ref":"Cooler · Botilleria"},{"id":"pdven-f5","nombre":"EN-F5","ref":"Cooler · Botilleria"},{"id":"pdven-f6","nombre":"EN-F6","ref":"Cooler · Botilleria"},{"id":"pdven-f7","nombre":"EN-F7","ref":"Cooler · Botilleria"},{"id":"pdven-f8","nombre":"EN-F8","ref":"Cooler · Botilleria"},{"id":"pdven-f9","nombre":"EN-F9","ref":"Cooler · Botilleria"},{"id":"pdven-f10","nombre":"EN-F10","ref":"Cooler · Botilleria"},{"id":"pdven-f11","nombre":"EN-F11","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f12","nombre":"EN-F12","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f13","nombre":"EN-F13","ref":"Cooler · Panaderia"},{"id":"pdven-f14","nombre":"EN-F14","ref":"Mantenedor pollos (trifásico) · Exhibidor caliente"},{"id":"pdven-f15","nombre":"EN-F15","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f16","nombre":"EN-F16","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f17","nombre":"EN-F17","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f18","nombre":"EN-F18","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f19","nombre":"EN-F19","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f20","nombre":"EN-F20","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f21","nombre":"EN-F21","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f22","nombre":"EN-F22","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f23","nombre":"EN-F23","ref":"Cooler · Carnes congeladas"},{"id":"pdven-f24","nombre":"EN-F24","ref":"Cooler · Carnes congeladas"}]},{"id":"pdval","titulo":"Bucle · TDA y F PDV · alumbrado","nota":"1 foto por circuito: Bucle (Zs) en la última luminaria · sin diferencial en la tabla","tipos":["Bucle"],"items":[{"id":"pdval-1","nombre":"AL-1","ref":"Lineal led-embutido led · Venta asistida carnes"},{"id":"pdval-2","nombre":"AL-2","ref":"Salida de emergencia · Sala de ventas"},{"id":"pdval-3","nombre":"AL-3","ref":"Proyector dirigible led · Camillas ff.vv. pasillo"}]},{"id":"comp","titulo":"Bucle + RCD · TD COMP (altillo)","nota":"Circuitos existentes · 2 fotos por circuito: Bucle (Zs) y Dif (RCD 30 mA)","tipos":["Bucle","Dif"],"items":[{"id":"comp-1","nombre":"CO-1","ref":"Computación · Consulta precios"},{"id":"comp-2","nombre":"CO-2","ref":"Computación · Sala de ventas"},{"id":"comp-3","nombre":"CO-3","ref":"Computación · Venta asistida"}]},{"id":"lux","titulo":"Iluminación","nota":"Lux en zonas intervenidas · emergencia: funcionamiento y autonomía","items":[{"id":"lux-1","nombre":"VENTA ASISTIDA CARNES","ref":"AL-1 · lineal + embutido LED"},{"id":"lux-2","nombre":"CAMILLAS FF.VV. (PASILLO)","ref":"AL-3 · proyectores de acento"},{"id":"lux-3","nombre":"SALIDAS DE EMERGENCIA","ref":"AL-2 · 9 señaléticas · autonomía 3 h"}]}]};
+const VERSION = '1.1 · 10-11-2026';
+const DBNAME = 'fotos2c-' + SEED.clave;
+const LSK = k => k + '__' + SEED.clave;   // claves de esta obra (no pisan las de otras obras del mismo sitio)
+
+document.getElementById('sinjs').remove();
+document.getElementById('app').hidden = false;
+
+/* ---------- utilidades ---------- */
+const $ = (s, el) => (el || document).querySelector(s);
+const $$ = (s, el) => Array.prototype.slice.call((el || document).querySelectorAll(s));
+const ESC = {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'};
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ESC[c]);
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+const sinTildes = s => String(s).normalize('NFD').replace(/[̀-ͯ]/g, '');
+const norm = s => sinTildes(s).toLowerCase().replace(/\s+/g, ' ').trim();
+const limpio = s => sinTildes(s).replace(/[^A-Za-z0-9.-]+/g, '_').replace(/_+/g, '_').replace(/^[_.]+|[_.]+$/g, '') || 'sin_nombre';
+const pad2 = n => String(n).padStart(2, '0');
+const fmtMB = b => !b ? '0 MB' : b >= 1e9 ? (b / 1e9).toFixed(2).replace('.', ',') + ' GB' : b >= 1e5 ? (b / 1e6).toFixed(1).replace('.', ',') + ' MB' : Math.max(1, Math.round(b / 1e3)) + ' KB';
+const fFecha = d => pad2(d.getDate()) + '-' + pad2(d.getMonth() + 1) + '-' + d.getFullYear();
+const fHora = d => pad2(d.getHours()) + ':' + pad2(d.getMinutes());
+const fISO = d => d.getFullYear() + '-' + pad2(d.getMonth() + 1) + '-' + pad2(d.getDate());
+const clonar = o => JSON.parse(JSON.stringify(o));
+const msgErr = e => (e && (e.message || e.name)) || String(e);
+const plural = (n, s, p) => n + ' ' + (n === 1 ? s : (p || s + 's'));
+async function leerBuf(b) {
+  let err1 = null;
+  if (b.arrayBuffer) { try { return await b.arrayBuffer(); } catch (e) { err1 = e; } }
+  try {
+    return await new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = () => rej(r.error || new Error('lectura fallida')); r.readAsArrayBuffer(b); });
+  } catch (e2) { throw err1 || e2; }
+}
+const esIlegible = e => !!e && (e.name === 'NotReadableError' || /I\/O read|not ?readable/i.test(msgErr(e)));
+const MIME = {jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', heic: 'image/heic', heif: 'image/heif', webp: 'image/webp', gif: 'image/gif', tif: 'image/tiff', tiff: 'image/tiff'};
+const EXT = {'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/heic': 'heic', 'image/heif': 'heif', 'image/webp': 'webp', 'image/gif': 'gif', 'image/tiff': 'tif'};
+const extNombre = n => { const x = /\.([A-Za-z0-9]{1,5})$/.exec(n || ''); return x ? x[1].toLowerCase() : ''; };
+const extension = m => EXT[m.tipo] || extNombre(m.nombre) || 'jpg';
+
+const UA = navigator.userAgent || '';
+const IOS = /iPhone|iPad|iPod/.test(UA) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+// En iPhone, Safari incluye «Safari/» en su UA; el visor web de otras apps (p. ej. la app de Claude o Mail) no.
+const VISOR_APP = IOS && !/Safari\//.test(UA) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(UA) && navigator.standalone !== true;
+const TXT_VISOR = '⚠ Estás en el visor de una app, no en Safari: aquí la cámara no entrega la foto y nada se guarda. Abre la checklist en Safari desde su enlace (https).';
+const TXT_PRIVADO = '⚠ Aquí no se pueden guardar fotos en el teléfono (visor de una app o navegación privada): se pierden al cerrar. Ábrela en una pestaña normal de Safari o exporta el ZIP antes de salir.';
+const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+function crc32(u8) { let c = 0xFFFFFFFF; for (let i = 0, n = u8.length; i < n; i++) c = CRC_T[(c ^ u8[i]) & 255] ^ (c >>> 8); return (c ^ 0xFFFFFFFF) >>> 0; }
+
+const IC = {
+  cam: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8.6 5h6.8l1.5 2.2h2.6c.9 0 1.5.7 1.5 1.5v9c0 .9-.6 1.6-1.5 1.6H4.5c-.8 0-1.5-.7-1.5-1.6v-9c0-.8.7-1.5 1.5-1.5h2.6z"/><circle cx="12" cy="13.2" r="3.5"/></svg>',
+  img: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4.5" width="18" height="15" rx="2.5"/><circle cx="8.7" cy="9.7" r="1.7"/><path d="m21 15.5-4.8-4.8L7 19.5"/></svg>',
+  ok: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5.5 12.5 4 4 9-9"/></svg>',
+  chev: '<svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5.5 6.5 6.5L9 18.5"/></svg>'
+};
+
+/* ---------- almacenamiento: IndexedDB en el teléfono, con respaldo en memoria ---------- */
+const DB = {
+  modo: 'memoria', db: null,
+  mem: {kv: new Map(), fotos: new Map(), blobs: new Map()},
+  abrir() {
+    return new Promise(res => {
+      let r;
+      try { r = indexedDB.open(DBNAME, 1); } catch (e) { return res(null); }
+      r.onupgradeneeded = () => {
+        const d = r.result;
+        if (!d.objectStoreNames.contains('kv')) d.createObjectStore('kv');
+        if (!d.objectStoreNames.contains('fotos')) d.createObjectStore('fotos', {keyPath: 'id'}).createIndex('item', 'item');
+        if (!d.objectStoreNames.contains('blobs')) d.createObjectStore('blobs', {keyPath: 'id'});
+      };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => res(null);
+      r.onblocked = () => res(null);
+    }).then(async d => {
+      if (!d) return false;
+      this.db = d;
+      try { // prueba real: guardar y leer un Blob
+        await this._w(['blobs'], t => t.objectStore('blobs').put({id: '__prueba', orig: new Blob(['ok'], {type: 'text/plain'})}));
+        const p = await this._get('blobs', '__prueba');
+        await this._w(['blobs'], t => t.objectStore('blobs').delete('__prueba'));
+        if (!p || !p.orig || p.orig.size !== 2) throw new Error('sin soporte de Blob');
+        this.modo = 'idb';
+        d.onversionchange = () => d.close();
+        return true;
+      } catch (e) { console.warn('IndexedDB no disponible:', e); this.db = null; try { d.close(); } catch (x) {} return false; }
+    });
+  },
+  _w(stores, fn) {
+    return new Promise((res, rej) => {
+      const t = this.db.transaction(stores, 'readwrite');
+      t.oncomplete = () => res();
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error || new Error('operación cancelada'));
+      fn(t);
+    });
+  },
+  _get(store, key) { return new Promise((res, rej) => { const q = this.db.transaction(store).objectStore(store).get(key); q.onsuccess = () => res(q.result); q.onerror = () => rej(q.error); }); },
+  _all(store) { return new Promise((res, rej) => { const q = this.db.transaction(store).objectStore(store).getAll(); q.onsuccess = () => res(q.result || []); q.onerror = () => rej(q.error); }); },
+  getKV(k) { return this.modo === 'idb' ? this._get('kv', k) : Promise.resolve(this.mem.kv.has(k) ? clonar(this.mem.kv.get(k)) : undefined); },
+  setKV(k, v) { if (this.modo === 'idb') return this._w(['kv'], t => t.objectStore('kv').put(v, k)); this.mem.kv.set(k, clonar(v)); return Promise.resolve(); },
+  fotos() { return this.modo === 'idb' ? this._all('fotos') : Promise.resolve(Array.from(this.mem.fotos.values())); },
+  async agregar(meta, orig, mini) {
+    if (this.modo === 'idb') {   // se guardan los bytes como ArrayBuffer (más fiable que Blob en Safari) y se verifica al leer
+      const ob = await leerBuf(orig);
+      if (ob.byteLength !== meta.size) throw new Error('lectura incompleta de la foto');
+      await this._w(['fotos', 'blobs'], t => { t.objectStore('fotos').put(meta); t.objectStore('blobs').put({id: meta.id, ob, tipo: meta.tipo, mini}); });
+      const r = await this._get('blobs', meta.id);
+      if (!r || !r.ob || r.ob.byteLength !== meta.size) { await this._w(['fotos', 'blobs'], t => { t.objectStore('fotos').delete(meta.id); t.objectStore('blobs').delete(meta.id); }).catch(() => {}); throw new Error('verificación fallida: la foto no quedó guardada'); }
+      return;
+    }
+    this.mem.fotos.set(meta.id, meta); this.mem.blobs.set(meta.id, {id: meta.id, orig, mini}); return Promise.resolve();
+  },
+  guardarMeta(meta) { if (this.modo === 'idb') return this._w(['fotos'], t => t.objectStore('fotos').put(meta)); this.mem.fotos.set(meta.id, meta); return Promise.resolve(); },
+  async blob(id) {
+    if (this.modo !== 'idb') return this.mem.blobs.get(id);
+    const r = await this._get('blobs', id);
+    if (r && r.ob) return {id, orig: new Blob([r.ob], {type: r.tipo || 'image/jpeg'}), mini: r.mini};
+    return r;
+  },
+  borrar(ids) {
+    try { ids.forEach(i => BORR.add(i)); this.setKV('borradas', Array.from(BORR).slice(-3000)).catch(() => {}); setTimeout(() => nubeEstado(), 0); } catch (e) {}
+    if (!ids.length) return Promise.resolve();
+    if (this.modo === 'idb') return this._w(['fotos', 'blobs'], t => ids.forEach(id => { t.objectStore('fotos').delete(id); t.objectStore('blobs').delete(id); }));
+    ids.forEach(id => { this.mem.fotos.delete(id); this.mem.blobs.delete(id); }); return Promise.resolve();
+  },
+  borrarFotos() {
+    try { FOTOS.forEach(a => a.forEach(m => BORR.add(m.id))); this.setKV('borradas', Array.from(BORR).slice(-3000)).catch(() => {}); setTimeout(() => nubeEstado(), 0); } catch (e) {}
+    if (this.modo === 'idb') return this._w(['fotos', 'blobs'], t => { t.objectStore('fotos').clear(); t.objectStore('blobs').clear(); });
+    this.mem.fotos.clear(); this.mem.blobs.clear(); return Promise.resolve();
+  }
+};
+
+/* ---------- estado ---------- */
+let S = null;
+const UI = {filtro: 'todos', q: '', qRaw: '', abiertas: new Set(), cerradas: new Set(), item: null, keep: new Set()};
+const FOTOS = new Map();   // id ítem -> [meta de fotos] (orden de captura)
+const TH = new Map();      // id foto -> URL de miniatura
+
+function estadoInicial() {
+  return {v: 2, migraciones: ['tdfsv'], obra: SEED.obra, tecnico: '', instrumento: SEED.instrumento || '',
+    secciones: SEED.secciones.map(s => ({id: s.id, titulo: s.titulo, nota: s.nota || '', tipos: s.tipos ? s.tipos.slice() : null,
+      items: s.items.map(it => ({id: it.id, nombre: it.nombre, ref: it.ref || '', na: false, nota: ''}))}))};
+}
+const valido = s => !!(s && Array.isArray(s.secciones) && s.secciones.every(x => x && x.id && Array.isArray(x.items)));
+const tiposDe = sec => sec && Array.isArray(sec.tipos) && sec.tipos.length ? sec.tipos : null;   // fotos obligatorias por ítem (ej.: Bucle, Dif)
+function faltan(it, sec) {
+  const t = tiposDe(sec); if (!t) return [];
+  const arr = (FOTOS.get(it.id) || []).concat(REM.fotos.get(it.id) || []);
+  return t.filter(x => !arr.some(m => m.slot === x));
+}
+function hecho(it, sec) {
+  if (it.na || remNA(it.id)) return true;
+  return tiposDe(sec) ? faltan(it, sec).length === 0 : ((FOTOS.get(it.id) || []).length + (REM.fotos.get(it.id) || []).length) > 0;
+}
+/* ---------- equipo: lo que suben los otros teléfonos se ve aquí mismo (fotos, N/A y notas) ---------- */
+const REM = {fotos: new Map(), notas: new Map(), firma: '', urls: new Map(), n: 0, pend: false};
+const BORR = new Set();   // fotos borradas en este teléfono (para no verlas volver desde la nube)
+const remNA = id => (REM.notas.get(id) || []).some(x => x.na);
+function ordenFotos(it, sec) {
+  const arr = (FOTOS.get(it.id) || []).concat(REM.fotos.get(it.id) || []), t = tiposDe(sec);
+  if (!t) return arr.sort((a, b) => a.ts - b.ts);
+  const pos = m => { const k = t.indexOf(m.slot); return k < 0 ? t.length : k; };
+  return arr.sort((a, b) => pos(a) - pos(b) || a.ts - b.ts);
+}
+const buscarSec = id => S.secciones.find(s => s.id === id);
+function buscarItem(id) { for (const sec of S.secciones) { const it = sec.items.find(i => i.id === id); if (it) return {sec, it}; } return null; }
+function totales() {
+  let t = 0, h = 0, f = 0, b = 0;
+  for (const s of S.secciones) for (const it of s.items) {
+    t++; if (hecho(it, s)) h++;
+    const a = FOTOS.get(it.id); if (a) { f += a.length; a.forEach(m => { b += m.size; }); }
+    const r = REM.fotos.get(it.id); if (r) { f += r.length; r.forEach(m => { b += m.size || 0; }); }
+  }
+  return {t, h, f, b};
+}
+
+let tG = null, tU = null;
+function guardar(ya) {
+  try { nubeEstado(); } catch (e) {}
+  clearTimeout(tG); tG = null;
+  const f = () => DB.setKV('estado', S).catch(e => toast('No se pudo guardar: ' + msgErr(e), true));
+  if (ya) return f();
+  tG = setTimeout(() => { tG = null; f(); }, 400);
+}
+function guardarUI() { clearTimeout(tU); tU = setTimeout(() => DB.setKV('ui', {abiertas: Array.from(UI.abiertas), filtro: UI.filtro}).catch(() => {}), 500); }
+function flush() { if (tG) guardar(true); }
+
+/* ---------- vista ---------- */
+function renderHeader() {
+  const {t, h, f, b} = totales(), pct = t ? Math.round(h * 100 / t) : 0;
+  $('#hObra').textContent = S.obra || 'Sin nombre';
+  document.title = 'Fotos 2C · ' + (S.obra || '');
+  $('#hBar').style.width = pct + '%';
+  $('#hProg').textContent = h + '/' + t + ' · ' + pct + '%';
+  $('#hFotos').textContent = plural(f, 'foto') + ' · ' + fmtMB(b);
+  $('#cPend').textContent = t - h;
+  $('#cOk').textContent = h;
+  $('#zSub').textContent = f ? plural(f, 'foto') + ' · ' + fmtMB(b) : 'Aún sin fotos';
+}
+
+function itemVisible(it, sec, secCoincide) {
+  if (it.id === UI.item || UI.keep.has(it.id)) return true;
+  const ok = hecho(it, sec);
+  if (UI.filtro === 'pend' && ok) return false;
+  if (UI.filtro === 'ok' && !ok) return false;
+  if (UI.q && !secCoincide && !norm(it.nombre + ' ' + (it.ref || '') + ' ' + (it.nota || '')).includes(UI.q)) return false;
+  return true;
+}
+
+function renderLista() {
+  const filtrando = !!UI.q || UI.filtro !== 'todos', html = [];
+  for (const sec of S.secciones) {
+    const secCoincide = !!UI.q && norm(sec.titulo).includes(UI.q);
+    const vis = sec.items.filter(it => itemVisible(it, sec, secCoincide));
+    if (filtrando && !vis.length && !secCoincide) continue;
+    const abierta = UI.q ? !UI.cerradas.has(sec.id) : UI.abiertas.has(sec.id);
+    html.push(htmlSec(sec, vis, abierta));
+  }
+  if (!html.length) html.push('<p class="vacio">' + (UI.q ? 'Sin resultados para «' + esc(UI.qRaw.trim()) + '».' : UI.filtro === 'pend' ? '✓ No quedan ítems pendientes.' : 'Aún no hay ítems listos.') + '</p>');
+  $('#lista').innerHTML = html.join('');
+  cargarMiniaturas();
+}
+
+function htmlSec(sec, vis, abierta) {
+  const tot = sec.items.length, ok = sec.items.filter(it => hecho(it, sec)).length, pct = tot ? Math.round(ok * 100 / tot) : 0;
+  let cuerpo = '';
+  if (abierta) {
+    cuerpo = '<div class="sec-b">' + (vis.length ? vis.map(it => htmlItem(it, sec)).join('')
+      : '<p class="sec-vacia">' + (tot ? 'Sin ítems con este filtro.' : 'Sin ítems. Agrégalos abajo (ej.: CTO 1..8).') + '</p>') +
+      '<div class="sec-f"><button class="lnk" data-a="add">+ Agregar ítem</button><span class="sp"></span>' +
+      '<button class="lnk" data-a="sren">Renombrar</button><button class="lnk rojo" data-a="sdel">Eliminar</button></div></div>';
+  }
+  return '<section class="sec' + (abierta ? ' abierta' : '') + (tot && ok === tot ? ' completa' : '') + '" data-sec="' + esc(sec.id) + '">' +
+    '<button class="sec-h" data-a="sec" aria-expanded="' + abierta + '">' + IC.chev +
+    '<span class="sec-t">' + esc(sec.titulo) + (sec.nota ? '<small>' + esc(sec.nota) + '</small>' : '') + '</span>' +
+    '<span class="sec-n"><b>' + ok + '</b>/' + tot + '</span><span class="sec-p"><i style="width:' + pct + '%"></i></span></button>' +
+    cuerpo + '</section>';
+}
+
+function htmlItem(it, sec) {
+  const tipos = tiposDe(sec), fotos = ordenFotos(it, sec), n = fotos.length, ok = hecho(it, sec), ab = UI.item === it.id;
+  const falta = tipos && !it.na ? faltan(it, sec) : [];
+  const parcial = !!tipos && !it.na && n > 0 && falta.length > 0;
+  const sub = it.na ? 'No aplica' : (REM.notas.get(it.id) || []).some(x => x.na) ? 'No aplica (' + (REM.notas.get(it.id) || []).find(x => x.na).autor + ')' : parcial ? 'Falta: ' + falta.join(' y ') : (it.ref || '');
+  const th = (m, i) => m.remota
+    ? '<button class="th rem" data-a="ver" data-f="' + esc(m.id) + '" aria-label="Ver foto de ' + esc(m.autor || 'otro teléfono') + '"><img src="' + esc(m.mini || m.url) + '" alt="" loading="lazy">' + (i >= 0 ? '<span class="n">' + (i + 1) + '</span>' : '') + '<span class="au">' + esc((m.autor || '☁').slice(0, 1).toUpperCase()) + '</span></button>'
+    : '<button class="th" data-a="ver" data-f="' + esc(m.id) + '" aria-label="Ver foto ' + (m.slot ? esc(m.slot) : i + 1) + '"><img data-th="' + esc(m.id) + '"' +
+    (TH.get(m.id) ? ' src="' + TH.get(m.id) + '"' : '') + ' alt="">' + (i >= 0 ? '<span class="n">' + (i + 1) + '</span>' : '') + '</button>';
+  const rn = REM.notas.get(it.id) || [], rNA = !it.na && rn.find(x => x.na);
+  const der = tipos
+    ? '<div class="slots">' + tipos.map(t => {
+        const lleno = fotos.some(m => m.slot === t);
+        return '<button class="slot' + (lleno ? ' lleno' : '') + '" data-a="cam" data-s="' + esc(t) + '" aria-label="' + (lleno ? 'Repetir' : 'Tomar') + ' foto ' + esc(t) + ': ' + esc(it.nombre) + '">' +
+          (lleno ? IC.ok : IC.cam) + '<span>' + esc(t) + '</span></button>';
+      }).join('') + '</div>'
+    : '<button class="cam" data-a="cam" aria-label="Tomar foto: ' + esc(it.nombre) + '"><span>' + IC.cam + '</span></button>';
+  let h = '<div class="it' + (ok ? ' ok' : '') + (parcial ? ' parcial' : '') + (it.na ? ' na' : '') + (ab ? ' abierto' : '') + '" data-it="' + esc(it.id) + '"><div class="it-r">' +
+    '<button class="it-m" data-a="item" aria-expanded="' + ab + '"><span class="dot">' + (it.na || rNA ? '–' : ok ? IC.ok : '') + '</span>' +
+    '<span class="it-t"><b>' + esc(it.nombre) + '</b>' + (sub ? '<small>' + esc(sub) + '</small>' : '') +
+    (!ab && it.nota ? '<small>Nota: ' + esc(it.nota) + '</small>' : '') + (!ab ? rn.filter(x => x.txt).map(x => '<small>' + esc(x.autor) + ': ' + esc(x.txt) + '</small>').join('') : '') + '</span>' +
+    (n && !tipos ? '<span class="cnt">' + n + '</span>' : '') + '</button>' + der + '</div>';
+  if (ab) {
+    let cuerpo;
+    if (tipos) {
+      const extras = fotos.filter(m => tipos.indexOf(m.slot) < 0);
+      cuerpo = '<div class="slt">' + tipos.map(t => {
+        const fs = fotos.filter(m => m.slot === t), m = fs[fs.length - 1];
+        return '<div><p class="slt-t">' + esc(t) + (fs.length > 1 ? ' (' + fs.length + ')' : '') + '</p>' +
+          (m ? th(m, -1) : '<button class="th vacio-th" data-a="cam" data-s="' + esc(t) + '" aria-label="Tomar foto ' + esc(t) + '"><span class="th-in">' + IC.cam + '<span>Tomar</span></span></button>') +
+          '<div class="slt-b"><button class="btn pri chico" data-a="cam" data-s="' + esc(t) + '">' + IC.cam + (m ? 'Repetir' : 'Cámara') + '</button>' +
+          '<button class="btn alt chico" data-a="gal" data-s="' + esc(t) + '" aria-label="Galería: ' + esc(t) + '">' + IC.img + '</button></div></div>';
+      }).join('') + '</div>' +
+      (extras.length ? '<p class="extra-t">Otras fotos</p><div class="ths">' + extras.map((m, i) => th(m, i)).join('') + '</div>' : '');
+    } else {
+      cuerpo = (n ? '<div class="ths">' + fotos.map((m, i) => th(m, i)).join('') + '</div>' : '<p class="det-v">Sin fotos todavía.</p>') +
+        '<div class="det-b"><button class="btn pri" data-a="cam">' + IC.cam + 'Cámara</button><button class="btn alt" data-a="gal">' + IC.img + 'Galería</button></div>';
+    }
+    h += '<div class="det">' + cuerpo +
+      '<textarea class="nota" data-a="nota" rows="2" placeholder="Nota (opcional)">' + esc(it.nota) + '</textarea>' +
+      rn.filter(x => x.txt || x.na).map(x => '<p class="rem-n"><b>' + esc(x.autor) + ':</b> ' + (x.na ? 'No aplica. ' : '') + esc(x.txt) + '</p>').join('') +
+      '<div class="det-f"><label class="chk"><input type="checkbox" data-a="na"' + (it.na ? ' checked' : '') + '>No aplica</label><span class="sp"></span>' +
+      '<button class="lnk" data-a="ren">Renombrar</button><button class="lnk rojo" data-a="idel">Eliminar</button></div></div>';
+  }
+  return h + '</div>';
+}
+
+async function cargarMiniaturas() {
+  for (const img of $$('img[data-th]').filter(i => !i.getAttribute('src'))) {
+    const id = img.dataset.th;
+    if (!TH.has(id)) {
+      try { const b = await DB.blob(id); TH.set(id, b && b.mini ? URL.createObjectURL(b.mini) : ''); } catch (e) { TH.set(id, ''); }
+    }
+    const u = TH.get(id);
+    $$('img[data-th="' + id + '"]').forEach(i => { if (u) i.src = u; else i.parentNode.classList.add('sinmini'); });
+  }
+}
+function soltarTH(id) { const u = TH.get(id); if (u) URL.revokeObjectURL(u); TH.delete(id); }
+
+function renderTodo() { renderHeader(); renderLista(); }
+
+// Re-dibuja manteniendo fija en pantalla la fila tocada (evita saltos de scroll).
+function renderConservando(sel) {
+  const a = sel ? $(sel) : null, y0 = a ? a.getBoundingClientRect().top : null;
+  renderLista();
+  const b = sel ? $(sel) : null;
+  if (b && y0 !== null) { const dy = b.getBoundingClientRect().top - y0; if (Math.abs(dy) > 1) window.scrollBy(0, dy); }
+  return b;
+}
+function mostrarEntero(el) {
+  const r = el.getBoundingClientRect(), arriba = $('.top').getBoundingClientRect().bottom + 6;
+  const abajo = window.innerHeight - ($('.barra').offsetHeight || 0) - 6;
+  if (r.bottom > abajo) window.scrollBy(0, Math.min(r.bottom - abajo, r.top - arriba));
+  else if (r.top < arriba) window.scrollBy(0, r.top - arriba);
+}
+
+/* ---------- acciones de lista ---------- */
+function toggleSec(id) {
+  if (UI.q) { if (UI.cerradas.has(id)) UI.cerradas.delete(id); else UI.cerradas.add(id); }
+  else { if (UI.abiertas.has(id)) UI.abiertas.delete(id); else UI.abiertas.add(id); guardarUI(); }
+  renderConservando('[data-sec="' + id + '"]');
+}
+function toggleItem(id) {
+  UI.item = UI.item === id ? null : id;
+  const el = renderConservando('[data-it="' + id + '"]');
+  if (el && UI.item === id) mostrarEntero(el);
+}
+
+function expandir(txt, comas) {
+  const out = [];
+  for (const parte of String(txt).split(comas ? /[,;\n]+/ : /\n+/)) {
+    const p = parte.trim(); if (!p) continue;
+    const m = /^(.*?)(\d+)\s*\.\.\s*(\d+)$/.exec(p);
+    if (m) {
+      const a = parseInt(m[2], 10), b = parseInt(m[3], 10), w = m[2].length > 1 && m[2][0] === '0' ? m[2].length : 0;
+      if (b >= a && b - a < 300) { for (let n = a; n <= b; n++) out.push(m[1] + (w ? String(n).padStart(w, '0') : n)); continue; }
+    }
+    out.push(p);
+  }
+  return out.map(s => s.slice(0, 80));
+}
+function agregarItems(sid) {
+  const sec = buscarSec(sid); if (!sec) return;
+  const r = prompt('Nombre del ítem.\nVarios: separa con comas o usa rango (ej.: CTO 1..12).', '');
+  if (r == null) return;
+  const nombres = expandir(r, true); if (!nombres.length) return;
+  nombres.forEach(n => sec.items.push({id: uid(), nombre: n, ref: '', na: false, nota: ''}));
+  UI.abiertas.add(sid); guardar(true); renderTodo();
+  toast('+ ' + plural(nombres.length, 'ítem') + ' en ' + sec.titulo);
+}
+function renombrarItem(iid) {
+  const l = buscarItem(iid); if (!l) return;
+  const r = prompt('Nombre del ítem:', l.it.nombre); if (r == null || !r.trim()) return;
+  l.it.nombre = r.trim().slice(0, 80); guardar(true); renderConservando('[data-it="' + iid + '"]');
+}
+async function eliminarItem(iid) {
+  const l = buscarItem(iid); if (!l) return;
+  const fs = FOTOS.get(iid) || [];
+  if (!confirm(fs.length ? '¿Eliminar «' + l.it.nombre + '» y sus ' + plural(fs.length, 'foto') + '?' : '¿Eliminar «' + l.it.nombre + '»?')) return;
+  if (fs.length) {
+    try { await DB.borrar(fs.map(m => m.id)); } catch (e) { return toast('No se pudo eliminar: ' + msgErr(e), true); }
+    fs.forEach(m => soltarTH(m.id)); FOTOS.delete(iid);
+  }
+  l.sec.items.splice(l.sec.items.indexOf(l.it), 1);
+  if (UI.item === iid) UI.item = null;
+  guardar(true); renderTodo();
+}
+function renombrarSec(sid) {
+  const s = buscarSec(sid); if (!s) return;
+  const r = prompt('Nombre de la sección:', s.titulo); if (r == null || !r.trim()) return;
+  s.titulo = r.trim().slice(0, 80); guardar(true); renderTodo();
+}
+async function eliminarSec(sid) {
+  const s = buscarSec(sid); if (!s) return;
+  const ids = []; s.items.forEach(it => (FOTOS.get(it.id) || []).forEach(m => ids.push(m.id)));
+  if (!confirm('¿Eliminar la sección «' + s.titulo + '»' + (s.items.length ? ' con ' + plural(s.items.length, 'ítem') : '') + (ids.length ? ' y ' + plural(ids.length, 'foto') : '') + '?')) return;
+  if (ids.length) { try { await DB.borrar(ids); } catch (e) { return toast('No se pudo eliminar: ' + msgErr(e), true); } }
+  s.items.forEach(it => { (FOTOS.get(it.id) || []).forEach(m => soltarTH(m.id)); FOTOS.delete(it.id); if (UI.item === it.id) UI.item = null; });
+  S.secciones.splice(S.secciones.indexOf(s), 1); UI.abiertas.delete(sid);
+  guardar(true); guardarUI(); renderTodo();
+}
+function nuevaSeccion() {
+  const r = prompt('Nombre de la nueva sección (ej.: Bucle · TDA IL):', '');
+  if (r == null || !r.trim()) return;
+  const s = {id: uid(), titulo: r.trim().slice(0, 80), nota: '', items: []};
+  S.secciones.push(s); UI.abiertas.add(s.id); guardar(true); guardarUI(); renderTodo();
+  const el = $('[data-sec="' + s.id + '"]'); if (el) el.scrollIntoView({block: 'center'});
+}
+
+/* ---------- fotos ---------- */
+let destino = null, scrollAntes = 0;
+function abrirSelector(sel, iid, slot) {
+  if (!iid) return;
+  destino = {iid, slot: slot || null}; scrollAntes = window.scrollY;
+  const i = $(sel); i.value = '';
+  if (sel === '#inGal') i.multiple = !slot;   // Bucle / Dif: una foto
+  i.click();
+}
+
+function miniatura(blob) {
+  return new Promise(res => {
+    const url = URL.createObjectURL(blob), img = new Image();
+    const fin = r => { URL.revokeObjectURL(url); res(r); };
+    img.onload = () => {
+      const W = img.naturalWidth, H = img.naturalHeight;
+      try {
+        const k = Math.min(1, 360 / Math.max(W, H)), c = document.createElement('canvas');
+        c.width = Math.max(1, Math.round(W * k)); c.height = Math.max(1, Math.round(H * k));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => { c.width = c.height = 0; fin({blob: b, w: W, h: H}); }, 'image/jpeg', 0.72);
+      } catch (e) { fin({blob: null, w: W, h: H}); }
+    };
+    img.onerror = () => fin({blob: null, w: 0, h: 0});
+    img.src = url;
+  });
+}
+
+async function agregarFotos(iid, files, slot) {
+  const l = buscarItem(iid); if (!l) return;
+  if (slot) files = files.slice(0, 1);
+  const previas = slot ? (FOTOS.get(iid) || []).filter(m => m.slot === slot) : [];
+  let ok = 0, bytes = 0, ilegible = false;
+  ocupado(files.length > 1 ? 'Guardando 1 de ' + files.length + '…' : 'Guardando foto…');
+  for (let i = 0; i < files.length; i++) {
+    const f = files[i];
+    if (files.length > 1) ocupado('Guardando ' + (i + 1) + ' de ' + files.length + '…');
+    try {
+      const buf = new Uint8Array(await leerBuf(f));
+      if (!buf.length) throw new Error('archivo vacío');
+      const tipo = f.type || MIME[extNombre(f.name)] || 'image/jpeg';
+      const orig = new Blob([buf], {type: tipo});   // bytes originales: sin recomprimir
+      const mini = await miniatura(orig);
+      const meta = {id: uid(), item: iid, slot: slot || null, ts: Date.now(), nombre: f.name || '', tipo, size: buf.length, crc: crc32(buf), w: mini.w, h: mini.h};
+      await DB.agregar(meta, orig, mini.blob);
+      if (!FOTOS.has(iid)) FOTOS.set(iid, []);
+      FOTOS.get(iid).push(meta);
+      if (mini.blob) TH.set(meta.id, URL.createObjectURL(mini.blob));
+      ok++; bytes += buf.length; SIN_RESP++; setTimeout(nubeCola, 400);
+    } catch (e) {
+      console.error(e);
+      const cuota = e && (e.name === 'QuotaExceededError' || /quota/i.test(msgErr(e)));
+      if (esIlegible(e)) ilegible = true;
+      toast(cuota ? 'Sin espacio en el teléfono: exporta el ZIP y libera fotos.'
+        : esIlegible(e) ? 'No se pudo leer la foto: este visor no lo permite. Abre la checklist en Safari.'
+        : 'No se pudo guardar una foto: ' + msgErr(e), true);
+    }
+  }
+  if (ok && previas.length) {   // Repetir: la nueva reemplaza a la anterior
+    try {
+      await DB.borrar(previas.map(m => m.id));
+      previas.forEach(m => soltarTH(m.id));
+      FOTOS.set(iid, (FOTOS.get(iid) || []).filter(m => previas.indexOf(m) < 0));
+    } catch (e) { toast('No se pudo quitar la foto anterior: ' + msgErr(e), true); }
+  }
+  listo();
+  if (ilegible && !ok) avisar(TXT_VISOR);
+  if (ok) {
+    UI.keep.add(iid);
+    renderHeader(); renderConservando('[data-it="' + iid + '"]');
+    toast('✓ ' + l.it.nombre + (slot ? ' · ' + slot + (previas.length ? ' (reemplazada)' : '') : ': ' + plural(ok, 'foto guardada', 'fotos guardadas')) + ' (' + fmtMB(bytes) + ')');
+  }
+}
+
+/* visor */
+const LB = {item: null, idx: 0, url: null, tok: 0};
+function listaLB() { const l = buscarItem(LB.item); return l ? ordenFotos(l.it, l.sec) : (FOTOS.get(LB.item) || []); }
+function verFoto(iid, fid) {
+  LB.item = iid;
+  const k = listaLB().findIndex(m => m.id === fid);
+  if (k < 0) return;
+  LB.idx = k;
+  $('#lb').hidden = false; document.body.classList.add('modal');
+  mostrarLB();
+}
+async function mostrarLB() {
+  const arr = listaLB();
+  if (!arr.length) return cerrarLB();
+  LB.idx = Math.max(0, Math.min(LB.idx, arr.length - 1));
+  const m = arr[LB.idx], l = buscarItem(LB.item), d = new Date(m.ts), tok = ++LB.tok;
+  $('#lbT').textContent = (l ? l.it.nombre : '') + (m.slot ? ' · ' + m.slot : '') + ' · ' + (LB.idx + 1) + '/' + arr.length;
+  $('#lbInfo').textContent = [m.w && m.h ? m.w + '×' + m.h : '', fmtMB(m.size), fFecha(d) + ' ' + fHora(d)].filter(Boolean).join(' · ');
+  $('#lbPrev').disabled = LB.idx === 0; $('#lbNext').disabled = LB.idx >= arr.length - 1;
+  const img = $('#lbImg'); img.removeAttribute('src');
+  if (LB.url) { URL.revokeObjectURL(LB.url); LB.url = null; }
+  $('#lbDel').hidden = !!m.remota;
+  if (m.remota) { $('#lbInfo').textContent = [fmtMB(m.size), fFecha(d) + ' ' + fHora(d), m.autor ? 'de ' + m.autor : 'de otro teléfono'].filter(Boolean).join(' · '); img.src = m.url; return; }
+  try {
+    const b = await DB.blob(m.id);
+    if (tok !== LB.tok || !b || !b.orig) return;
+    LB.url = URL.createObjectURL(b.orig); img.src = LB.url;
+  } catch (e) { toast('No se pudo abrir la foto: ' + msgErr(e), true); }
+}
+function cerrarLB() {
+  LB.tok++; $('#lb').hidden = true; $('#lbImg').removeAttribute('src');
+  if (LB.url) { URL.revokeObjectURL(LB.url); LB.url = null; }
+  if (!$$('.hoja:not([hidden])').length) document.body.classList.remove('modal');
+}
+async function borrarFotoLB() {
+  const arr = listaLB(), m = arr[LB.idx]; if (!m || m.remota) return;
+  if (!confirm('¿Eliminar esta foto' + (m.slot ? ' (' + m.slot + ')' : '') + '?')) return;
+  try { await DB.borrar([m.id]); } catch (e) { return toast('No se pudo eliminar: ' + msgErr(e), true); }
+  const todas = FOTOS.get(LB.item) || [], k = todas.indexOf(m);
+  if (k >= 0) todas.splice(k, 1);
+  soltarTH(m.id);
+  if (!todas.length) FOTOS.delete(LB.item);
+  UI.keep.add(LB.item);
+  renderHeader(); renderConservando('[data-it="' + LB.item + '"]');
+  if (!todas.length) cerrarLB(); else mostrarLB();
+  toast('Foto eliminada');
+}
+
+/* ---------- ZIP (sin compresión: bytes originales) ---------- */
+function dosFH(ms) {
+  const d = new Date(ms), y = Math.min(2107, Math.max(1980, d.getFullYear()));
+  return {t: (d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1), f: ((y - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()};
+}
+function armarZip(E) {
+  const enc = new TextEncoder(), partes = [], cd = [];
+  let off = 0, cdl = 0;
+  const LIM = 'El ZIP superaría 4 GB: expórtalo por sección.';
+  if (E.length > 65535) throw new Error(LIM);
+  for (const e of E) {
+    const nm = enc.encode(e.ruta), {t, f} = dosFH(e.ts);
+    if (off + 30 + nm.length + e.size > 0xFFFFFFFF) throw new Error(LIM);
+    const h = new DataView(new ArrayBuffer(30));
+    h.setUint32(0, 0x04034b50, true); h.setUint16(4, 20, true); h.setUint16(6, 0x0800, true); h.setUint16(8, 0, true);
+    h.setUint16(10, t, true); h.setUint16(12, f, true); h.setUint32(14, e.crc >>> 0, true);
+    h.setUint32(18, e.size, true); h.setUint32(22, e.size, true); h.setUint16(26, nm.length, true); h.setUint16(28, 0, true);
+    partes.push(h.buffer, nm, e.data);
+    const c = new DataView(new ArrayBuffer(46));
+    c.setUint32(0, 0x02014b50, true); c.setUint16(4, 20, true); c.setUint16(6, 20, true); c.setUint16(8, 0x0800, true); c.setUint16(10, 0, true);
+    c.setUint16(12, t, true); c.setUint16(14, f, true); c.setUint32(16, e.crc >>> 0, true);
+    c.setUint32(20, e.size, true); c.setUint32(24, e.size, true); c.setUint16(28, nm.length, true);
+    c.setUint32(42, off, true);
+    cd.push(c.buffer, nm); cdl += 46 + nm.length;
+    off += 30 + nm.length + e.size;
+  }
+  if (off + cdl + 22 > 0xFFFFFFFF) throw new Error(LIM);
+  const z = new DataView(new ArrayBuffer(22));
+  z.setUint32(0, 0x06054b50, true); z.setUint16(8, E.length, true); z.setUint16(10, E.length, true);
+  z.setUint32(12, cdl, true); z.setUint32(16, off, true);
+  return new Blob(partes.concat(cd, [z.buffer]), {type: 'application/zip'});
+}
+function unico(ruta, usados) {
+  const p = ruta.lastIndexOf('.'); let r = ruta, i = 2;
+  while (usados.has(r.toLowerCase())) r = ruta.slice(0, p) + '-' + (i++) + ruta.slice(p);
+  usados.add(r.toLowerCase()); return r;
+}
+
+async function construirZip(secs, todo, prog) {
+  const ahora = new Date();
+  const total = secs.reduce((a, s) => a + s.items.reduce((b, it) => b + (FOTOS.get(it.id) || []).length, 0), 0);
+  const E = [], usados = new Set(), registro = [], resumen = [], obs = [], bloques = [];
+  const csv = [['Sección', 'Ítem', 'Referencia', 'Estado', 'Fotos', 'Archivos', 'Nota']];
+  let k = 0;
+  for (const sec of secs) {
+    const carpeta = pad2(S.secciones.indexOf(sec) + 1) + '_' + limpio(sec.titulo);
+    const fotosInf = []; let cOk = 0, cNa = 0, cPend = 0;
+    const tipos = tiposDe(sec);
+    for (const it of sec.items) {
+      const arr = ordenFotos(it, sec), archivos = [], cuenta = {};
+      for (let i = 0; i < arr.length; i++) {
+        let m = arr[i];
+        let base = limpio(it.nombre);
+        if (tipos && tipos.indexOf(m.slot) >= 0) { cuenta[m.slot] = (cuenta[m.slot] || 0) + 1; base += '_' + limpio(m.slot) + (cuenta[m.slot] > 1 ? '_' + cuenta[m.slot] : ''); }
+        else { cuenta[''] = (cuenta[''] || 0) + 1; base += (tipos ? '_extra_' : '_') + cuenta['']; }
+        const ruta = unico(carpeta + '/' + base + '.' + extension(m), usados);
+        let b;
+        if (m.remota) {
+          const rr = await fetch(m.url); if (!rr.ok) throw new Error('no se pudo bajar la foto de ' + (m.autor || 'otro teléfono') + ' («' + it.nombre + '», ' + rr.status + ')');
+          const bl = await rr.blob(); b = {orig: bl}; m = Object.assign({}, m, {size: bl.size, crc: crc32(new Uint8Array(await bl.arrayBuffer()))});
+        } else b = await DB.blob(m.id);
+        if (!b || !b.orig) throw new Error('falta la foto ' + (m.slot || i + 1) + ' de ' + it.nombre);
+        if (!b.orig.size || b.orig.size !== m.size) throw new Error('la foto ' + (m.slot || i + 1) + ' de «' + it.nombre + '» está vacía o dañada (' + b.orig.size + ' de ' + m.size + ' bytes). Usa «Guardar fotos una a una».');
+        let crc = m.crc;
+        if (typeof crc !== 'number' || b.orig.size !== m.size) crc = crc32(new Uint8Array(await leerBuf(b.orig)));
+        E.push({ruta, ts: m.ts, size: b.orig.size, crc, data: b.orig});
+        archivos.push(ruta.split('/').pop());
+        k++;
+        fotosInf.push({img: ruta, pie: 'Foto ' + k + ' — ' + it.nombre + (m.slot ? ' · ' + m.slot : '')});
+        const d = new Date(m.ts);
+        registro.push({seccion: sec.titulo, item: it.nombre, tipo: m.slot || '', archivo: ruta, fecha: fFecha(d) + ' ' + fHora(d), bytes: b.orig.size,
+          resolucion: m.w && m.h ? m.w + 'x' + m.h : '', crc32: crc.toString(16).padStart(8, '0')});
+        if (prog) prog(k, total);
+      }
+      const comp = hecho(it, sec), falta = faltan(it, sec);
+      if (it.na) cNa++; else if (comp) cOk++; else cPend++;
+      csv.push([sec.titulo, it.nombre, it.ref || '', it.na ? 'No aplica' : comp ? 'Completo' : arr.length ? 'Incompleto (falta ' + falta.join(' y ') + ')' : 'Pendiente',
+        String(arr.length), archivos.join(' | '), it.nota || '']);
+      const nota = (it.nota || '').trim().replace(/\s+/g, ' ').replace(/[.;:,]+$/, ''), partes = [];
+      if (it.na) partes.push('no aplica'); else if (arr.length && !comp) partes.push('falta foto de ' + falta.join(' y '));
+      if (nota) partes.push(nota);
+      if (partes.length) obs.push(sec.titulo + ' — ' + it.nombre + ': ' + partes.join('. ') + '.');
+    }
+    resumen.push([sec.titulo, String(sec.items.length), String(cOk), String(cNa), String(cPend)]);
+    if (fotosInf.length) bloques.push({titulo: sec.titulo, fotos: fotosInf});
+  }
+  // Datos para la skill «generador-documentos-2c» (informe Word con membrete 2C).
+  const F = fFecha(ahora), datos = [['Proyecto', S.obra || ''], ['Fecha del registro', F]];
+  if (S.instrumento) datos.push(['Instrumento', S.instrumento]);
+  if (S.tecnico) datos.push(['Técnico', S.tecnico]);
+  datos.push(['Elaborado por', '2C Electricidad']);
+  const suma = j => String(resumen.reduce((a, r) => a + Number(r[j]), 0));
+  const tabla = {cols: ['Sección', 'Ítems', 'Completos', 'N/A', 'Pendientes'], anchos: [190, 50, 60, 45, 65], alinear: 'lcccc', filas: resumen};
+  if (resumen.length > 1) tabla.total = ['Total', suma(1), suma(2), suma(3), suma(4)];
+  let n = 0;
+  const secciones = [{titulo: (++n) + '. RESUMEN', contenido: [{tabla}]}];
+  if (obs.length) secciones.push({titulo: (++n) + '. OBSERVACIONES', contenido: [{lista: obs}]});
+  bloques.forEach(b => secciones.push({titulo: (++n) + '. ' + b.titulo.toUpperCase(), contenido: [{fotos: b.fotos}]}));
+  const informe = {tipo: 'REGISTRO FOTOGRÁFICO', subtitulo: 'Mediciones eléctricas en terreno', codigo: '', proyecto: S.obra || '',
+    dirigido_a: '', fecha: F, datos, secciones, firma: {}, origen: 'Checklist Fotos 2C v' + VERSION, generado: ahora.toISOString(), registro};
+  const celda = v => { if (/^[=+\-@]/.test(v)) v = "'" + v; return /[";\r\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };   // evita fórmulas en Excel
+  const csvTxt = '﻿' + csv.map(r => r.map(c => celda(String(c))).join(';')).join('\r\n') + '\r\n';
+  const enc = new TextEncoder();
+  const txt = (ruta, s) => { const u = enc.encode(s); return {ruta, ts: ahora.getTime(), size: u.length, crc: crc32(u), data: u}; };
+  E.unshift(txt('resumen.csv', csvTxt), txt('datos_informe.json', JSON.stringify(informe, null, 1)));
+  const nombre = '2C_' + limpio(S.obra || 'obra') + '_' + (todo ? 'Fotos' : limpio(secs[0].titulo)) + '_' + fISO(ahora) + '.zip';
+  return {blob: armarZip(E), nombre, n: k};
+}
+
+let ZIP = null, SIN_RESP = 0, ULT_AUTO = Date.now(), ULT_EXPORT = 0;
+function marcarExport() { if (!ZIP || !ZIP.todo) return; ULT_EXPORT = Date.now(); SIN_RESP = 0; try { DB.setKV('ultExport', ULT_EXPORT); } catch (e) {} }
+function estadoZip(msg, err) { const e = $('#zEst'); e.hidden = !msg; e.textContent = msg || ''; e.className = 'estado' + (err ? ' err' : ''); }
+function liberarZip() {
+  if (ZIP && ZIP.url) URL.revokeObjectURL(ZIP.url);
+  ZIP = null; $('#zShare').hidden = true; $('#zDown').hidden = true; $('#zPrep').hidden = false;
+}
+function abrirExport() {
+  const {f, b} = totales();
+  const op = (v, t, sub, chk, off) => '<label class="op' + (off ? ' off' : '') + '"><input type="radio" name="zop" value="' + esc(v) + '"' +
+    (chk ? ' checked' : '') + (off ? ' disabled' : '') + '><span><b>' + esc(t) + '</b><small>' + esc(sub) + '</small></span></label>';
+  const ops = [op('*', 'Todo', plural(f, 'foto') + ' · ' + fmtMB(b) + ' · ' + plural(S.secciones.length, 'sección', 'secciones'), true, false)];
+  S.secciones.forEach(s => {
+    let nf = 0, by = 0;
+    s.items.forEach(it => (FOTOS.get(it.id) || []).forEach(m => { nf++; by += m.size; }));
+    ops.push(op(s.id, s.titulo, nf ? plural(nf, 'foto') + ' · ' + fmtMB(by) : 'Sin fotos', false, !nf));
+  });
+  $('#zOps').innerHTML = ops.join('');
+  liberarZip(); estadoZip('');
+  abrirHoja('#hZip');
+}
+async function prepararZip() {
+  const sel = $('#zOps input:checked'), v = sel ? sel.value : '*';
+  const secs = v === '*' ? S.secciones.slice() : S.secciones.filter(s => s.id === v);
+  if (!secs.length) return;
+  liberarZip(); $('#zPrep').disabled = true; estadoZip('Preparando ZIP…');
+  try {
+    const r = await construirZip(secs, v === '*', (i, n) => estadoZip('Preparando… ' + i + ' de ' + n));
+    let file;
+    try { file = new File([r.blob], r.nombre, {type: 'application/zip', lastModified: Date.now()}); } catch (e) { file = r.blob; }
+    ZIP = {file, nombre: r.nombre, url: null, todo: v === '*'};
+    estadoZip('Listo: ' + r.nombre + '\n' + plural(r.n, 'foto') + ' · ' + fmtMB(r.blob.size) + ' · calidad original');
+    let puede = false;
+    try { puede = !!(navigator.share && navigator.canShare && navigator.canShare({files: [file]})); } catch (e) { puede = false; }
+    $('#zShare').hidden = !puede; $('#zDown').hidden = false; $('#zPrep').hidden = true;
+    $('#zDown').className = 'btn ' + (puede ? 'alt' : 'pri');   // sin «Compartir», Descargar pasa a ser la acción principal
+  } catch (e) {
+    estadoZip('No se pudo crear el ZIP: ' + msgErr(e), true);
+  } finally { $('#zPrep').disabled = false; }
+}
+function compartirZip() {   // se llama directo desde el toque (requisito de iOS)
+  if (!ZIP) return;
+  navigator.share({files: [ZIP.file]})
+    .then(() => { toast('ZIP compartido'); marcarExport(); })
+    .catch(e => { if (e && e.name === 'AbortError') return; toast('No se pudo compartir (' + msgErr(e) + '). Usa «Descargar».', true); });
+}
+function descargarZip() {
+  if (!ZIP) return;
+  if (!ZIP.url) ZIP.url = URL.createObjectURL(ZIP.file);
+  const a = document.createElement('a');
+  a.href = ZIP.url; a.download = ZIP.nombre; a.rel = 'noopener';
+  document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 0);
+  toast('Descargando… En iPhone queda en Archivos › Descargas.'); marcarExport();
+}
+
+/* ---------- hojas, menú y edición ---------- */
+function abrirHoja(sel) { $(sel).hidden = false; document.body.classList.add('modal'); }
+function cerrarHoja(sel) {
+  $(sel).hidden = true;
+  if (!$$('.hoja:not([hidden])').length && $('#lb').hidden) document.body.classList.remove('modal');
+}
+async function infoAlmacen() {
+  let t = DB.modo === 'idb' ? 'Fotos guardadas en este teléfono (no en internet).' : '⚠ Sin guardado permanente en este navegador: exporta antes de cerrar.';
+  try {
+    if (navigator.storage && navigator.storage.estimate) {
+      const e = await navigator.storage.estimate();
+      if (e && e.quota) t += ' Espacio usado: ' + fmtMB(e.usage || 0) + ' de ' + fmtMB(e.quota) + '.';
+    }
+  } catch (e) {}
+  return t;
+}
+function abrirDatos() {
+  $('#dObra').value = S.obra || ''; $('#dTec').value = S.tecnico || ''; $('#dIns').value = S.instrumento || '';
+  abrirHoja('#hDatos');
+}
+function listaATexto() {
+  return S.secciones.map(s => '# ' + s.titulo + (s.nota ? ' | ' + s.nota : '') + (tiposDe(s) ? ' | fotos: ' + s.tipos.join(', ') : '') +
+    (s.items.length ? '\n' + s.items.map(it => it.nombre + (it.ref ? ' | ' + it.ref : '')).join('\n') : '')).join('\n\n');
+}
+function textoALista(txt) {
+  const secs = []; let cur = null;
+  for (const raw of String(txt).split(/\r?\n/)) {
+    const l = raw.trim(); if (!l) continue;
+    if (l[0] === '#') {
+      const p = l.replace(/^#+/, '').split('|').map(x => x.trim()), notas = [];
+      const titulo = (p.shift() || '').slice(0, 80) || 'Sección';
+      let tipos = null;
+      p.forEach(x => {
+        const m = /^fotos\s*:\s*(.*)$/i.exec(x);
+        if (m) { const t = m[1].split(/[,;/]+/).map(y => y.trim().slice(0, 20)).filter((y, i, a) => y && a.indexOf(y) === i); tipos = t.length ? t.slice(0, 6) : null; }
+        else if (x) notas.push(x);
+      });
+      cur = {titulo, nota: notas.join(' | '), tipos, items: []};
+      secs.push(cur); continue;
+    }
+    if (!cur) { cur = {titulo: 'General', nota: '', items: []}; secs.push(cur); }
+    const p = l.split('|'), nombre = (p.shift() || '').trim(), ref = p.join('|').trim();
+    expandir(nombre, false).forEach(nm => cur.items.push({nombre: nm, ref}));
+  }
+  return secs;
+}
+async function aplicarLista(nuevas) {
+  if (!nuevas.length) { toast('La lista está vacía.', true); return false; }
+  const viejas = S.secciones, usS = new Set(), usI = new Set(), todos = [];
+  viejas.forEach(s => s.items.forEach(it => todos.push(it)));
+  const res = nuevas.map(ns => {
+    const sv = viejas.find(s => !usS.has(s.id) && norm(s.titulo) === norm(ns.titulo));
+    if (sv) usS.add(sv.id);
+    return {ns, sv, items: ns.items.map(ni => ({ni, it: null}))};
+  });
+  res.forEach((r, i) => {   // sección renombrada: conserva la de la misma posición
+    if (!r.sv && viejas[i] && !usS.has(viejas[i].id)) { r.sv = viejas[i]; usS.add(r.sv.id); }
+  });
+  for (const r of res) if (r.sv) for (const x of r.items) {   // 1) mismo nombre en la misma sección
+    const m = r.sv.items.find(it => !usI.has(it.id) && norm(it.nombre) === norm(x.ni.nombre));
+    if (m) { x.it = m; usI.add(m.id); }
+  }
+  for (const r of res) for (const x of r.items) if (!x.it) {   // 2) mismo nombre en otra sección
+    const m = todos.find(it => !usI.has(it.id) && norm(it.nombre) === norm(x.ni.nombre));
+    if (m) { x.it = m; usI.add(m.id); }
+  }
+  const perdidos = todos.filter(it => !usI.has(it.id) && (FOTOS.get(it.id) || []).length);
+  if (perdidos.length) {
+    const nf = perdidos.reduce((a, it) => a + FOTOS.get(it.id).length, 0);
+    if (!confirm('Se eliminarán ' + plural(perdidos.length, 'ítem') + ' con ' + plural(nf, 'foto') + ':\n' +
+      perdidos.slice(0, 8).map(i => '• ' + i.nombre).join('\n') + (perdidos.length > 8 ? '\n…' : '') + '\n¿Continuar?')) return false;
+    const ids = []; perdidos.forEach(it => FOTOS.get(it.id).forEach(m => ids.push(m.id)));
+    try { await DB.borrar(ids); } catch (e) { toast('No se pudieron eliminar fotos: ' + msgErr(e), true); return false; }
+    perdidos.forEach(it => { FOTOS.get(it.id).forEach(m => soltarTH(m.id)); FOTOS.delete(it.id); });
+  }
+  S.secciones = res.map(r => {
+    const s = {id: r.sv ? r.sv.id : uid(), titulo: r.ns.titulo, nota: r.ns.nota, tipos: r.ns.tipos || null,
+      items: r.items.map(x => x.it ? Object.assign(x.it, {nombre: x.ni.nombre, ref: x.ni.ref}) : {id: uid(), nombre: x.ni.nombre, ref: x.ni.ref, na: false, nota: ''})};
+    if (r.sv && r.sv.recup) s.recup = true;
+    return s;
+  });
+  if (UI.item && !buscarItem(UI.item)) UI.item = null;
+  guardar(true); renderTodo(); toast('Lista actualizada');
+  return true;
+}
+async function borrarTodo() {
+  const {f} = totales();
+  if (!confirm('Se borrarán ' + plural(f, 'foto') + ', las notas y las marcas «No aplica». La lista de ítems se mantiene.\n\n¿Ya exportaste el ZIP?')) return;
+  if (!confirm('¿Seguro? No se puede deshacer.')) return;
+  try { await DB.borrarFotos(); } catch (e) { return toast('No se pudo borrar: ' + msgErr(e), true); }
+  TH.forEach(u => { if (u) URL.revokeObjectURL(u); }); TH.clear(); FOTOS.clear();
+  S.secciones = S.secciones.filter(s => !s.recup);
+  S.secciones.forEach(s => s.items.forEach(it => { it.na = false; it.nota = ''; }));
+  UI.item = null; UI.keep.clear(); guardar(true); renderTodo(); toast('Fotos y notas borradas');
+}
+
+// Fotos cuyo ítem ya no existe: se agrupan para no perderlas nunca.
+function recuperarHuerfanas() {
+  const ids = new Set(); S.secciones.forEach(s => s.items.forEach(it => ids.add(it.id)));
+  const huerf = Array.from(FOTOS.keys()).filter(k => !ids.has(k));
+  if (!huerf.length) return;
+  let sec = S.secciones.find(s => s.recup);
+  if (!sec) { sec = {id: uid(), titulo: 'Fotos recuperadas', nota: 'Fotos sin ítem asociado', items: [], recup: true}; S.secciones.push(sec); }
+  huerf.forEach(k => sec.items.push({id: k, nombre: 'Ítem recuperado ' + (sec.items.length + 1), ref: '', na: false, nota: ''}));
+  guardar(true);
+}
+
+/* ---------- avisos ---------- */
+let tT = null;
+function toast(msg, err) {
+  const t = $('#toast'); t.textContent = msg; t.className = 'toast si' + (err ? ' err' : '');
+  clearTimeout(tT); tT = setTimeout(() => { t.className = 'toast' + (err ? ' err' : ''); }, err ? 4500 : 2600);
+}
+function ocupado(msg) { $('#ocMsg').textContent = msg; $('#ocupado').hidden = false; }
+function listo() { $('#ocupado').hidden = true; }
+function avisar(msg) { const a = $('#aviso'); a.textContent = msg; a.hidden = false; }
+
+/* ---------- eventos ---------- */
+$('#lista').addEventListener('click', e => {
+  const b = e.target.closest('[data-a]');
+  if (!b || b.tagName === 'TEXTAREA' || b.tagName === 'INPUT') return;
+  const sEl = b.closest('[data-sec]'), iEl = b.closest('[data-it]');
+  const sid = sEl ? sEl.dataset.sec : null, iid = iEl ? iEl.dataset.it : null, a = b.dataset.a;
+  if (a === 'sec') toggleSec(sid);
+  else if (a === 'item') toggleItem(iid);
+  else if (a === 'cam') abrirSelector('#inCam', iid, b.dataset.s);
+  else if (a === 'gal') abrirSelector('#inGal', iid, b.dataset.s);
+  else if (a === 'ver') verFoto(iid, b.dataset.f);
+  else if (a === 'add') agregarItems(sid);
+  else if (a === 'sren') renombrarSec(sid);
+  else if (a === 'sdel') eliminarSec(sid);
+  else if (a === 'ren') renombrarItem(iid);
+  else if (a === 'idel') eliminarItem(iid);
+});
+$('#lista').addEventListener('change', e => {
+  const t = e.target; if (t.dataset.a !== 'na') return;
+  const l = buscarItem(t.closest('[data-it]').dataset.it); if (!l) return;
+  l.it.na = t.checked; UI.keep.add(l.it.id); guardar(true); renderHeader(); renderConservando('[data-it="' + l.it.id + '"]');
+});
+$('#lista').addEventListener('input', e => {
+  const t = e.target; if (t.dataset.a !== 'nota') return;
+  const l = buscarItem(t.closest('[data-it]').dataset.it); if (!l) return;
+  l.it.nota = t.value.slice(0, 1000); guardar();
+});
+['#inCam', '#inGal'].forEach(sel => $(sel).addEventListener('change', async e => {
+  const input = e.target, files = Array.from(input.files || []), d = destino || {};
+  if (Math.abs(window.scrollY - scrollAntes) > 2) window.scrollTo(0, scrollAntes);
+  if (d.iid && files.length) await agregarFotos(d.iid, files, d.slot);
+  input.value = '';
+}));
+$('#seg').addEventListener('click', e => {
+  const b = e.target.closest('[data-f]'); if (!b) return;
+  UI.filtro = b.dataset.f; UI.keep.clear(); UI.item = null; marcarFiltro(); guardarUI(); renderLista();
+});
+function marcarFiltro() { $$('#seg [data-f]').forEach(b => b.classList.toggle('on', b.dataset.f === UI.filtro)); }
+let tQ = null;
+$('#q').addEventListener('input', e => {
+  clearTimeout(tQ);
+  tQ = setTimeout(() => { UI.qRaw = e.target.value; UI.q = norm(e.target.value); UI.cerradas.clear(); UI.keep.clear(); UI.item = null; $('#qx').hidden = !UI.qRaw; renderLista(); }, 120);
+});
+$('#q').addEventListener('keydown', e => { if (e.key === 'Enter') e.target.blur(); });
+$('#qx').addEventListener('click', () => { $('#q').value = ''; UI.q = UI.qRaw = ''; $('#qx').hidden = true; UI.keep.clear(); UI.item = null; renderLista(); });
+
+$('#btnZip').addEventListener('click', abrirExport);
+/* ---------- rescate: guardar fotos una a una (mantener presionado) ---------- */
+let GAL = [];
+function cerrarGal() { GAL.forEach(u => URL.revokeObjectURL(u)); GAL = []; $('#gList').innerHTML = ''; cerrarHoja('#hGal'); }
+async function abrirGaleria() {
+  cerrarHoja('#hZip'); GAL.forEach(u => URL.revokeObjectURL(u)); GAL = [];
+  const box = $('#gList'); box.innerHTML = ''; abrirHoja('#hGal'); let n = 0, buenas = 0;
+  const res = document.createElement('p'); res.className = 'muted sm'; res.textContent = 'Leyendo fotos…'; box.appendChild(res);
+  for (const sec of S.secciones) for (const it of sec.items) for (const m of ordenFotos(it, sec).filter(x => !x.remota)) {
+    n++; const d = document.createElement('div'); d.className = 'gi'; const p = document.createElement('p');
+    const rot = n + '. ' + sec.titulo + ' — ' + it.nombre + (m.slot ? ' · ' + m.slot : '');
+    p.textContent = rot + ' · leyendo…'; d.appendChild(p); box.appendChild(d);
+    try {
+      const b = await DB.blob(m.id); let buf = null;
+      let via = '';
+      try { const r0 = b && b.orig ? await leerBytes(b.orig) : null; buf = r0 ? r0.buf : null; via = r0 ? r0.via : ''; } catch (e) { buf = null; }
+      const leidos = buf ? buf.byteLength : 0, ok = leidos > 0 && leidos === m.size;
+      let src = null, fmt = '';
+      if (ok) {
+        const u8 = new Uint8Array(buf, 0, 12); fmt = (u8[0] === 255 && u8[1] === 216) ? 'JPEG' : (u8[4] === 102 && u8[5] === 116 && u8[6] === 121 && u8[7] === 112) ? 'HEIC' : 'formato ' + Array.from(u8.slice(0, 4)).map(x => x.toString(16)).join('');
+        src = new Blob([buf], {type: m.tipo && /^image\//.test(m.tipo) ? m.tipo : (fmt === 'JPEG' ? 'image/jpeg' : 'image/heic')}); buenas++;
+      } else if (b && b.mini) { try { const r1 = await leerBytes(b.mini); if (r1) src = new Blob([r1.buf], {type: 'image/jpeg'}); } catch (e) {} }
+      if (src) { const u = URL.createObjectURL(src); GAL.push(u); const im = document.createElement('img'); im.alt = ''; im.src = u; im.onerror = () => { p.textContent += ' · el visor no puede mostrar este formato (' + fmt + ')'; p.className = 'mal'; }; d.insertBefore(im, p); }
+      p.textContent = rot + ' · ' + (ok ? fmtMB(leidos) + ' leídos ✓ (' + fmt + ', vía ' + via + ')' : 'ILEGIBLE: se leyeron ' + leidos + ' de ' + m.size + ' bytes' + (src ? ' (solo miniatura)' : ''));
+      if (!ok) p.className = 'mal';
+    } catch (e) { p.textContent = n + '. error al leer: ' + msgErr(e); p.className = 'mal'; }
+  }
+  res.textContent = n ? buenas + ' de ' + n + ' fotos legibles' : 'No hay fotos guardadas.'; if (n && buenas < n) res.style.color = '#B3261E';
+}
+$('#zGal').addEventListener('click', abrirGaleria);
+/* ---------- rescate profundo: leer por varias vías y subir al almacén del artifact para que Claude las recupere ---------- */
+async function leerBytes(b) {
+  const T = [
+    ['arrayBuffer', () => b.arrayBuffer()],
+    ['FileReader', () => leerBuf(b)],
+    ['fetch', async () => { const u = URL.createObjectURL(b); try { return await (await fetch(u)).arrayBuffer(); } finally { URL.revokeObjectURL(u); } }],
+    ['stream', async () => { const r = b.stream().getReader(), ch = []; let n = 0; for (;;) { const x = await r.read(); if (x.done) break; ch.push(x.value); n += x.value.length; } const o = new Uint8Array(n); let k = 0; ch.forEach(c => { o.set(c, k); k += c.length; }); return o.buffer; }],
+    ['trozos', async () => { const ch = []; let n = 0; for (let i = 0; i < b.size; i += 262144) { const x = new Uint8Array(await leerBuf(b.slice(i, i + 262144))); ch.push(x); n += x.length; } const o = new Uint8Array(n); let k = 0; ch.forEach(c => { o.set(c, k); k += c.length; }); return o.buffer; }]
+  ];
+  for (const [via, f] of T) { try { const buf = await f(); if (buf && buf.byteLength > 0) return {buf, via}; } catch (e) {} }
+  return null;
+}
+async function rescatarClaude() {
+  const st = $('#gRes'); st.hidden = false; st.className = 'estado';
+  let A = null; try { A = window.claude && claude.use ? await claude.use('assets') : null; } catch (e) { A = null; }
+  if (!A) { st.className = 'estado err'; st.textContent = 'Esta función solo está en el link del artifact, con tu sesión de Claude iniciada.'; return; }
+  $('#gResc').disabled = true; const filas = []; let n = 0, ok = 0, tot = 0;
+  S.secciones.forEach(sec => sec.items.forEach(it => tot += ordenFotos(it, sec).filter(x => !x.remota).length));
+  for (const sec of S.secciones) for (const it of sec.items) for (const m of ordenFotos(it, sec).filter(x => !x.remota)) {
+    n++; st.textContent = 'Rescatando ' + n + ' de ' + tot + '… (' + ok + ' subidas)';
+    const fila = {n, seccion: sec.titulo, item: it.nombre, slot: m.slot || '', ts: m.ts, nombre: m.nombre || '', tipo: m.tipo || '', esperado: m.size};
+    try {
+      const b = await DB.blob(m.id); let r = b && b.orig ? await leerBytes(b.orig) : null, que = 'original';
+      if (!r && b && b.mini) { r = await leerBytes(b.mini); que = 'miniatura'; }
+      if (!r) { fila.estado = 'sin datos'; }
+      else {
+        const u8 = new Uint8Array(r.buf, 0, 12), tipo = (u8[0] === 255 && u8[1] === 216) ? 'image/jpeg' : 'application/octet-stream';
+        const up = await A.upload(new Blob([r.buf], {type: tipo})); Object.assign(fila, {estado: 'subida', parte: que, via: r.via, bytes: r.buf.byteLength, asset: up.id}); ok++;
+      }
+    } catch (e) { fila.estado = 'error: ' + msgErr(e); }
+    filas.push(fila);
+  }
+  try { const up = await A.upload(new Blob([JSON.stringify({generado: new Date().toISOString(), filas}, null, 1)], {type: 'application/json'})); st.textContent = 'Listo: ' + ok + ' de ' + tot + ' fotos subidas. Avísale a Claude. (manifiesto ' + up.id + ')'; }
+  catch (e) { st.textContent = 'Subidas ' + ok + ' de ' + tot + '. No se pudo subir el manifiesto: ' + msgErr(e); }
+  st.className = 'estado' + (ok < tot ? ' err' : ''); $('#gResc').disabled = false;
+}
+$('#gResc').addEventListener('click', rescatarClaude);
+try { if (window.claude && claude.use) claude.use('assets').then(a => { if (a) $('#gResc').hidden = false; }).catch(() => {}); } catch (e) {}
+/* ---------- último rescate: más vías de lectura + diagnóstico de almacenamiento + manifiesto ---------- */
+async function leerExtra(b) {
+  const T = [
+    ['Response', () => new Response(b).arrayBuffer()],
+    ['copia', () => leerBuf(typeof structuredClone === 'function' ? structuredClone(b) : b)],
+    ['imagen (recodificada)', async () => { const bm = await createImageBitmap(b), c = document.createElement('canvas'); c.width = bm.width; c.height = bm.height; c.getContext('2d').drawImage(bm, 0, 0); const o = await new Promise(r => c.toBlob(r, 'image/jpeg', 0.95)); c.width = c.height = 0; return o ? leerBuf(o) : null; }]
+  ];
+  for (const [via, f] of T) { try { const buf = await f(); if (buf && buf.byteLength > 0) return {buf, via}; } catch (e) {} }
+  return null;
+}
+function leerCursor() {   // conexión nueva a la base, recorriendo con cursor
+  return new Promise(res => {
+    const out = {};
+    try {
+      const r = indexedDB.open(DBNAME);
+      r.onsuccess = () => { try { const d = r.result, c = d.transaction(['blobs'], 'readonly').objectStore('blobs').openCursor(); c.onsuccess = () => { const x = c.result; if (!x) { d.close(); return res(out); } out[x.key] = x.value; x.continue(); }; c.onerror = () => res(out); } catch (e) { res(out); } };
+      r.onerror = () => res(out); r.onblocked = () => res(out);
+    } catch (e) { res(out); }
+  });
+}
+function leerEnWorker(ids) {   // lectura en un proceso aparte (Worker + FileReaderSync)
+  return new Promise(res => {
+    try {
+      const code = "onmessage=e=>{const{db,ids}=e.data,out={};let k=0;if(!ids.length)return postMessage(out);const rd=b=>{try{if(!b)return null;const x=new FileReaderSync().readAsArrayBuffer(b);return x&&x.byteLength?x:null}catch(z){return null}};const r=indexedDB.open(db);r.onerror=()=>postMessage(out);r.onsuccess=()=>{let s;try{s=r.result.transaction(['blobs'],'readonly').objectStore('blobs')}catch(z){return postMessage(out)}ids.forEach(id=>{const q=s.get(id);q.onsuccess=()=>{const v=q.result;out[id]={o:v?(v.ob||rd(v.orig)):null,m:v?rd(v.mini):null};if(++k===ids.length)postMessage(out)};q.onerror=()=>{out[id]={};if(++k===ids.length)postMessage(out)}})}}";
+      const u = URL.createObjectURL(new Blob([code], {type: 'text/javascript'})), w = new Worker(u);
+      let listo = false; const fin = v => { if (listo) return; listo = true; try { w.terminate(); } catch (e) {} URL.revokeObjectURL(u); res(v || {}); };
+      w.onmessage = e => fin(e.data); w.onerror = () => fin({}); setTimeout(() => fin({}), 90000);
+      w.postMessage({db: DBNAME, ids});
+    } catch (e) { res({}); }
+  });
+}
+const formato = buf => { const u = new Uint8Array(buf, 0, Math.min(12, buf.byteLength)); return (u[0] === 255 && u[1] === 216) ? 'image/jpeg' : (u[4] === 102 && u[5] === 116 && u[6] === 121 && u[7] === 112) ? 'image/heic' : (u[0] === 137 && u[1] === 80) ? 'image/png' : 'application/octet-stream'; };
+async function ultimoRescate() {
+  const box = $('#gList'), st = $('#gRes'); st.hidden = false; st.className = 'estado'; $('#gUlt').disabled = true;
+  GAL.forEach(u => URL.revokeObjectURL(u)); GAL = []; box.innerHTML = '';
+  const lista = []; S.secciones.forEach(sec => sec.items.forEach(it => ordenFotos(it, sec).filter(x => !x.remota).forEach(m => lista.push({sec, it, m}))));
+  const total = lista.reduce((a, x) => a + (x.m.size || 0), 0);
+  st.textContent = 'Último rescate: midiendo el almacenamiento…';
+  let usado = null; try { const e = navigator.storage && navigator.storage.estimate ? await navigator.storage.estimate() : null; usado = e && typeof e.usage === 'number' ? e.usage : null; } catch (e) {}
+  st.textContent = 'Último rescate: leyendo en un proceso aparte…'; const WK = DB.modo === 'idb' ? await leerEnWorker(lista.map(x => x.m.id)) : {};
+  st.textContent = 'Último rescate: abriendo la base de nuevo…'; const CU = DB.modo === 'idb' ? await leerCursor() : {};
+  let buenas = 0, minis = 0; const man = [];
+  for (let i = 0; i < lista.length; i++) {
+    const {sec, it, m} = lista[i]; st.textContent = 'Último rescate: foto ' + (i + 1) + ' de ' + lista.length + '…';
+    let r = null, que = 'original'; const fuentes = [];
+    try { const b = await DB.blob(m.id); if (b && b.orig) fuentes.push(['', b.orig]); } catch (e) {}
+    const cv = CU[m.id]; if (cv && cv.ob && cv.ob.byteLength) r = {buf: cv.ob, via: 'base nueva (bytes)'}; else if (cv && cv.orig) fuentes.push([' · base nueva', cv.orig]);
+    for (const [suf, bl] of fuentes) { if (r) break; r = (await leerBytes(bl)) || (await leerExtra(bl)); if (r) r.via += suf; }
+    if (!r && WK[m.id] && WK[m.id].o) r = {buf: WK[m.id].o, via: 'proceso aparte'};
+    if (!r) {
+      que = 'miniatura'; const fm = [];
+      try { const b = await DB.blob(m.id); if (b && b.mini) fm.push(b.mini); } catch (e) {}
+      if (cv && cv.mini) fm.push(cv.mini);
+      for (const bl of fm) { if (r) break; r = (await leerBytes(bl)) || (await leerExtra(bl)); }
+      if (!r && WK[m.id] && WK[m.id].m) r = {buf: WK[m.id].m, via: 'proceso aparte'};
+    }
+    const rot = (i + 1) + '. ' + sec.titulo + ' — ' + it.nombre + (m.slot ? ' · ' + m.slot : '');
+    const d = document.createElement('div'); d.className = 'gi'; const p = document.createElement('p'); let res = 'ilegible';
+    if (r) {
+      const tipo = formato(r.buf), u = URL.createObjectURL(new Blob([r.buf], {type: tipo})); GAL.push(u);
+      const im = document.createElement('img'); im.alt = ''; im.src = u; d.appendChild(im);
+      if (que === 'original' && !/recodificada/.test(r.via)) { buenas++; res = 'original ' + fmtMB(r.buf.byteLength); } else { minis++; res = que + (/recodificada/.test(r.via) ? ' recodificada' : '') + ' ' + fmtMB(r.buf.byteLength); }
+      p.textContent = rot + ' · RECUPERADA: ' + res + ' (vía ' + r.via + '). Mantén presionada → Guardar en Fotos.';
+    } else { p.textContent = rot + ' · ILEGIBLE por todas las vías (0 de ' + m.size + ' bytes)'; p.className = 'mal'; }
+    d.appendChild(p); box.appendChild(d);
+    const f = new Date(m.ts);
+    man.push([i + 1, sec.titulo, it.nombre, m.slot || '', fFecha(f) + ' ' + fHora(f), m.size, typeof m.crc === 'number' ? m.crc.toString(16).padStart(8, '0') : '', m.tipo || '', m.nombre || '', res].join(';'));
+  }
+  const pres = usado == null ? 'no disponible' : fmtMB(usado);
+  let ver;
+  if (buenas === lista.length) ver = 'Se recuperaron todas las fotos originales.';
+  else if (usado != null && usado >= total * 0.5) ver = 'Los datos de las fotos SÍ ocupan espacio en el teléfono, pero Safari no los entrega. Queda reiniciar el iPhone y repetir, o el respaldo del iPhone en un PC.';
+  else if (usado != null && usado < total * 0.2) ver = 'Los datos de las fotos NO quedaron guardados en el teléfono: no se pueden recuperar.';
+  else ver = 'Resultado incierto: revisa el detalle.';
+  st.className = 'estado' + (buenas < lista.length ? ' err' : '');
+  st.textContent = 'Recuperadas ' + buenas + ' de ' + lista.length + ' originales' + (minis ? ' (+' + minis + ' en baja calidad)' : '') + '. Espacio usado por esta página: ' + pres + ' · las fotos registradas suman ' + fmtMB(total) + '. ' + ver;
+  const head = ['REGISTRO DE FOTOS · ' + (S.obra || ''), 'Generado: ' + fFecha(new Date()) + ' ' + fHora(new Date()), 'Espacio usado por la página: ' + pres + ' · fotos registradas: ' + fmtMB(total) + ' · ' + (DB.modo === 'idb' ? 'IndexedDB' : 'memoria'), 'n;seccion;item;tipo;fecha;bytes;crc32;mime;archivo;resultado'];
+  const ta = document.createElement('textarea'); ta.id = 'gMan'; ta.readOnly = true; ta.className = 'nota'; ta.style.cssText = 'min-height:160px;font:12px/1.35 ui-monospace,Menlo,monospace'; ta.value = head.concat(man).join('\n');
+  const bc = document.createElement('button'); bc.type = 'button'; bc.className = 'btn alt'; bc.style.cssText = 'width:100%;margin-top:8px'; bc.textContent = 'Copiar manifiesto (para Claude)';
+  bc.addEventListener('click', () => { ta.focus(); ta.select(); ta.setSelectionRange(0, 1e7); const ok = () => toast('Manifiesto copiado'), mal = () => { try { if (document.execCommand('copy')) return ok(); } catch (e) {} toast('Selecciona el texto y cópialo', true); }; try { navigator.clipboard.writeText(ta.value).then(ok, mal); } catch (e) { mal(); } });
+  const tt = document.createElement('p'); tt.className = 'muted sm'; tt.style.margin = '14px 0 4px'; tt.textContent = 'Manifiesto: lista exacta de lo capturado (nombres, horas, bytes). Cópialo y pégamelo en el chat.';
+  box.appendChild(tt); box.appendChild(ta); box.appendChild(bc);
+  $('#gUlt').disabled = false;
+}
+$('#gUlt').addEventListener('click', ultimoRescate);
+/* ---------- NUBE: respaldo automático en Supabase (app 2C) ----------
+   Cada foto queda en el teléfono Y se sube sola a la nube cuando hay señal.
+   Acceso sin cuenta con el código de obra que trae el link (#c=...).
+   Los bytes van directo a Supabase Storage con una URL firmada que entrega /api/terreno/subir. */
+const NUBE_API = '/api/terreno';
+const NUBE = {codigo: '', activo: false, ocupado: false, ultimoError: '', dispositivo: '', estadoTs: 0, notasOk: 0, notasErr: ''};
+async function nubeIniciar() {
+  let c = '';
+  try { const m = location.hash.match(/[#&]c=([^&]+)/); if (m) c = decodeURIComponent(m[1]).trim(); } catch (e) {}
+  if (c) { try { await DB.setKV('nubeCodigo', c); } catch (e) {} }
+  else { try { c = (await DB.getKV('nubeCodigo')) || ''; } catch (e) {} }
+  NUBE.codigo = c; NUBE.activo = !!c && /^https?:$/.test(location.protocol);
+  try { let d = await DB.getKV('dispositivo'); if (!d) { d = Math.random().toString(36).slice(2, 12); await DB.setKV('dispositivo', d); } NUBE.dispositivo = d; } catch (e) { NUBE.dispositivo = 'c' + Math.random().toString(36).slice(2, 10); }
+  try { if (c) localStorage.setItem(LSK('terreno_nube_codigo'), c); localStorage.setItem(LSK('terreno_dispositivo'), NUBE.dispositivo); } catch (e) {}
+  try { ((await DB.getKV('borradas')) || []).forEach(x => BORR.add(x)); } catch (e) {}
+  nubePintar(); if (NUBE.activo) { nubeCola(); nubeEstado(true); remCargar(); }
+}
+async function remCargar() {
+  if (!NUBE.activo || !S || document.hidden) return;
+  let j; try { j = await nubeJSON('/informe', {codigo: NUBE.codigo}); } catch (e) { return; }
+  const mias = new Set(BORR); FOTOS.forEach(a => a.forEach(m => mias.add(m.id)));
+  const otros = (j.estados || []).filter(e => e.dispositivo !== NUBE.dispositivo);
+  otros.forEach(e => ((e.datos && e.datos.borradas) || []).forEach(x => mias.add(x)));
+  const fotos = new Map(), ahora = Date.now(); let n = 0;
+  (j.fotos || []).forEach(f => {
+    if (!f.url || !f.itemId || mias.has(f.id) || (f.dispositivo && f.dispositivo === NUBE.dispositivo)) return;
+    let u = REM.urls.get(f.nombre); if (!u || u.exp < ahora) { u = {url: f.url, mini: f.mini || f.url, exp: ahora + 50 * 60 * 1000}; REM.urls.set(f.nombre, u); }
+    if (!fotos.has(f.itemId)) fotos.set(f.itemId, []);
+    fotos.get(f.itemId).push({id: f.id, remota: true, item: f.itemId, slot: f.slot || null, ts: f.ts || 0, autor: f.autor || '', url: u.url, mini: u.mini, size: f.size || 0, tipo: f.mime || '', nombre: f.nombre || '', w: 0, h: 0, nube: 1});
+    n++;
+  });
+  const notas = new Map();
+  otros.filter(e => e.tipo === 'checklist').forEach(e => ((e.datos && e.datos.secciones) || []).forEach(s => (s.items || []).forEach(it => {
+    if (!it.na && !it.nota) return;
+    if (!notas.has(it.id)) notas.set(it.id, []);
+    notas.get(it.id).push({autor: e.autor || ('Teléfono ' + String(e.dispositivo || '').slice(0, 4)), txt: it.nota || '', na: !!it.na});
+  })));
+  const firma = JSON.stringify([[...fotos.entries()].map(([k, a]) => [k, a.map(x => x.id).sort()]).sort(), [...notas.entries()].sort()]);
+  REM.fotos = fotos; REM.notas = notas; REM.n = n;
+  if (firma !== REM.firma) { REM.firma = firma; remRepintar(); } else nubePintar();
+}
+function remRepintar() {
+  const a = document.activeElement;
+  if (a && (a.tagName === 'TEXTAREA' || a.tagName === 'INPUT') && $('#lista').contains(a)) { REM.pend = true; return; }   // no interrumpir si está escribiendo
+  if (!$('#lb').hidden || $$('.hoja:not([hidden])').length) { REM.pend = true; return; }
+  REM.pend = false; renderHeader();
+  if (UI.item) renderConservando('[data-it="' + UI.item + '"]'); else renderLista();
+  nubePintar();
+}
+setInterval(() => { if (REM.pend) remRepintar(); }, 1500);
+setInterval(remCargar, 15000);
+document.addEventListener('visibilitychange', () => { if (!document.hidden) remCargar(); });
+/* estado de la checklist en la nube (para el informe en vivo): ítems, N/A, notas y conteo de fotos */
+let tNE = null;
+function nubeEstado(ya) { if (!NUBE.activo) return; clearTimeout(tNE); tNE = setTimeout(nubeEstadoSubir, ya ? 50 : 3000); }
+async function nubeEstadoSubir() {
+  if (!NUBE.activo || !S) return;
+  try { localStorage.setItem(LSK('terreno_autor'), S.tecnico || ''); } catch (e) {}
+  const datos = {obra: S.obra || '', tecnico: S.tecnico || '', borradas: Array.from(BORR).slice(-3000), secciones: S.secciones.map(s => ({id: s.id, titulo: s.titulo, tipos: tiposDe(s),
+    items: s.items.map(it => { const a = FOTOS.get(it.id) || []; return {id: it.id, nombre: it.nombre, ref: it.ref || '', na: !!it.na, nota: it.nota || '', fotos: a.length, enNube: a.filter(m => m.nube).length}; })}))};
+  const metas = []; FOTOS.forEach(a => a.forEach(m => metas.push({id: m.id, item: m.item, slot: m.slot || null, ts: m.ts, nombre: m.nombre || '', tipo: m.tipo || '', size: m.size, crc: m.crc, w: m.w || 0, h: m.h || 0, nube: !!m.nube})));
+  const respaldo = {version: '1.1 · 10-11-2026', estado: S, fotos: metas};   // todo lo anotado: ítems, notas, N/A, nombres, datos de obra y registro de cada foto
+  try {
+    const j = await nubeJSON('/estado', {codigo: NUBE.codigo, tipo: 'checklist', dispositivo: NUBE.dispositivo, autor: S.tecnico || '', datos, respaldo});
+    NUBE.estadoTs = Date.now();
+    const v = await nubeJSON('/informe', {codigo: NUBE.codigo, solo: 'estados'});   // verificación: leer de vuelta lo que quedó en la nube
+    const yo = (v.estados || []).find(e => e.tipo === 'checklist' && e.dispositivo === NUBE.dispositivo);
+    if (yo && (!j.ts || yo.ts >= j.ts)) { NUBE.notasOk = Date.now(); NUBE.notasErr = ''; } else NUBE.notasErr = 'no se pudo verificar';
+  } catch (e) { NUBE.notasErr = msgErr(e); }
+  nubePintar();
+}
+function nubeConteo() { let tot = 0, ok = 0; FOTOS.forEach(a => a.forEach(m => { tot++; if (m.nube) ok++; })); return {tot, ok, pend: tot - ok}; }
+function nubePintar() {
+  const f = $('#hNubeF'), e = $('#hNube'); if (!f) return;
+  if (!NUBE.activo) { f.hidden = true; return; }
+  f.hidden = false; e.classList.remove('err');
+  const {tot, ok, pend} = nubeConteo();
+  const nt = NUBE.notasErr ? ' · ⚠ notas sin respaldar' : NUBE.notasOk ? ' · notas ✓ ' + fHora(new Date(NUBE.notasOk)).slice(0, 5) : '';
+  if (NUBE.notasErr) e.classList.add('err');
+  if (!tot) e.textContent = '☁ Nube activa' + nt + (REM.n ? ' · ' + REM.n + ' fotos del equipo' : '');
+  else if (!pend) e.textContent = '☁ ' + ok + '/' + tot + ' fotos respaldadas' + nt + (REM.n ? ' · +' + REM.n + ' del equipo' : '');
+  else if (NUBE.ocupado) e.textContent = '☁ Subiendo… ' + ok + '/' + tot + nt;
+  else if (navigator.onLine === false) e.textContent = '☁ Sin señal · ' + pend + ' por subir' + nt;
+  else if (NUBE.ultimoError) { e.textContent = '☁ Error: ' + NUBE.ultimoError.slice(0, 70) + ' · ' + pend + ' por subir'; e.classList.add('err'); }
+  else e.textContent = '☁ ' + ok + '/' + tot + ' · ' + pend + ' por subir' + nt;
+}
+async function nubeJSON(ruta, datos) {
+  const r = await fetch(NUBE_API + ruta, {method: 'POST', headers: {'content-type': 'application/json'}, body: JSON.stringify(datos)});
+  let j = {}; try { j = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(j.error || ('servidor ' + r.status));
+  return j;
+}
+async function nubeSubir(m, it, sec) {
+  const b = await DB.blob(m.id);
+  if (!b || !b.orig || !b.orig.size) throw new Error('la foto no tiene datos locales');
+  const mime = /^image\//.test(b.orig.type) ? b.orig.type : (/^image\//.test(m.tipo || '') ? m.tipo : 'image/jpeg');
+  const j = await nubeJSON('/subir', {codigo: NUBE.codigo, id: m.id, ts: m.ts, mime, size: b.orig.size,
+    meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || '', dv: NUBE.dispositivo}});
+  if (!j.ya) {
+    const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([b.orig], {type: mime}), 'foto');
+    const h = {'x-upsert': 'false'}; if (j.anon) { h.apikey = j.anon; h.authorization = 'Bearer ' + j.anon; }
+    const u = await fetch(j.url, {method: 'PUT', headers: h, body: fd});
+    if (!u.ok) { let t = ''; try { t = await u.text(); } catch (e) {} if (!/exist|duplicate/i.test(t)) throw new Error('subida ' + u.status + (t ? ': ' + t.slice(0, 90) : '')); }
+  }
+  m.nube = Date.now(); await DB.guardarMeta(m);
+  await nubeSubirMini(m, it, sec, b);
+  nubeEstado();
+}
+async function nubeSubirMini(m, it, sec, b) {   // miniatura para el informe en vivo (si falla, no bloquea nada)
+  if (m.nubeMini || m.sinMini) return;
+  try {
+    if (!b) b = await DB.blob(m.id);
+    if (!b || !b.mini || !b.mini.size) { m.sinMini = true; await DB.guardarMeta(m); return; }
+    const jm = await nubeJSON('/subir', {codigo: NUBE.codigo, id: m.id, ts: m.ts, mime: 'image/jpeg', size: b.mini.size, variante: 'mini',
+      meta: {s: sec.titulo, i: it.nombre, id: it.id, sl: m.slot || '', a: S.tecnico || '', dv: NUBE.dispositivo}});
+    if (!jm.ya) {
+      const fd = new FormData(); fd.append('cacheControl', '3600'); fd.append('', new Blob([b.mini], {type: 'image/jpeg'}), 'mini');
+      const h = {'x-upsert': 'false'}; if (jm.anon) { h.apikey = jm.anon; h.authorization = 'Bearer ' + jm.anon; }
+      const u = await fetch(jm.url, {method: 'PUT', headers: h, body: fd});
+      if (!u.ok) { let t = ''; try { t = await u.text(); } catch (e) {} if (!/exist|duplicate/i.test(t)) return; }
+    }
+    m.nubeMini = Date.now(); await DB.guardarMeta(m);
+  } catch (e) {}
+}
+async function nubeCola() {
+  if (!NUBE.activo || NUBE.ocupado || !S) return;
+  NUBE.ocupado = true; nubePintar();
+  try {
+    for (const sec of S.secciones) for (const it of sec.items) for (const m of (FOTOS.get(it.id) || []).slice()) {
+      if (m.nube) continue;
+      if (navigator.onLine === false) throw new Error('sin señal');
+      await nubeSubir(m, it, sec); NUBE.ultimoError = ''; nubePintar();
+    }
+    for (const sec of S.secciones) for (const it of sec.items) for (const m of (FOTOS.get(it.id) || []).slice()) {
+      if (m.nube && !m.nubeMini && !m.sinMini && navigator.onLine !== false) await nubeSubirMini(m, it, sec);
+    }
+    NUBE.ultimoError = '';
+  } catch (e) { NUBE.ultimoError = msgErr(e); }
+  finally { NUBE.ocupado = false; nubePintar(); }
+}
+setInterval(() => { if (NUBE.activo && nubeConteo().pend > 0) nubeCola(); }, 20000);
+window.addEventListener('online', () => nubeCola());
+document.addEventListener('visibilitychange', () => { if (!document.hidden) nubeCola(); });
+
+/* visor: fotos de todos los teléfonos + ZIP desde la nube */
+const NB = {fotos: [], zip: null, url: null};
+function nbEstado(t, err) { const e = $('#nbEst'); e.hidden = !t; e.textContent = t || ''; e.className = 'estado' + (err ? ' err' : ''); }
+function nbLimpiarZip() { if (NB.url) URL.revokeObjectURL(NB.url); NB.zip = null; NB.url = null; $('#nbShare').hidden = true; $('#nbDown').hidden = true; }
+const INF = {timer: null, firma: '', abiertas: new Set(['__res']), urls: new Map(), j: null};
+function infURL(f) {   // URL estable por foto (las firmadas duran 1 h): evita re-descargar en cada refresco
+  const c = INF.urls.get(f.nombre), ahora = Date.now();
+  if (c && c.exp > ahora) return c;
+  const v = {mini: f.mini || f.url, url: f.url, exp: ahora + 50 * 60 * 1000}; INF.urls.set(f.nombre, v); return v;
+}
+const infNom = e => e.autor || ('Teléfono ' + String(e.dispositivo || '').slice(0, 4));
+function infProcesar(j) {
+  const est = j.estados || [], ck = est.filter(e => e.tipo === 'checklist').sort((a, b) => b.ts - a.ts), rt = est.filter(e => e.tipo === 'ruta');
+  const fotos = (j.fotos || []).filter(f => f.url), porItem = new Map();
+  fotos.forEach(f => { const k = f.itemId || (f.seccion + '|' + f.item); if (!porItem.has(k)) porItem.set(k, []); porItem.get(k).push(f); });
+  let secs = [];
+  const idx = new Map();
+  if (ck.length) {
+    ck.forEach(e => ((e.datos && e.datos.secciones) || []).forEach(s => {
+      let sec = secs.find(x => x.id === s.id); if (!sec) { sec = {id: s.id, titulo: s.titulo, tipos: s.tipos, items: []}; secs.push(sec); }
+      (s.items || []).forEach(it => {
+        let t = idx.get(it.id); if (!t) { t = {id: it.id, nombre: it.nombre, ref: it.ref || '', na: false, notas: []}; sec.items.push(t); idx.set(it.id, t); }
+        if (it.na) t.na = true;
+        if (it.nota && !t.notas.some(n => n.txt === it.nota)) t.notas.push({txt: it.nota, autor: infNom(e)});
+      });
+    }));
+  }
+  const usadas = new Set();
+  secs.forEach(s => s.items.forEach(it => { const a = porItem.get(it.id) || porItem.get(s.titulo + '|' + it.nombre) || []; a.forEach(f => usadas.add(f.nombre)); it.fotos = a.sort((x, y) => x.ts - y.ts); }));
+  const sueltas = fotos.filter(f => !usadas.has(f.nombre));   // fotos de ítems que ningún teléfono ha informado todavía
+  if (sueltas.length) {
+    const m = new Map(); sueltas.forEach(f => { const k = (f.seccion || 'Sin sección') + '|' + (f.item || 'Sin ítem'); if (!m.has(k)) m.set(k, []); m.get(k).push(f); });
+    m.forEach((a, k) => { const [st, nm] = k.split('|'); let sec = secs.find(x => x.titulo === st); if (!sec) { sec = {id: 'x-' + st, titulo: st, tipos: null, items: []}; secs.push(sec); } sec.items.push({id: 'x-' + k, nombre: nm, ref: '', na: false, notas: [], fotos: a}); });
+  }
+  let tot = 0, ok = 0;
+  secs.forEach(s => { s.h = 0; s.items.forEach(it => {
+    const slots = new Set((it.fotos || []).map(f => f.slot)); it.faltan = s.tipos ? s.tipos.filter(x => !slots.has(x)) : [];
+    it.hecho = it.na || (s.tipos ? it.faltan.length === 0 : (it.fotos || []).length > 0); tot++; if (it.hecho) { ok++; s.h++; }
+  }); });
+  const R = {}, info = {}, totR = {E: 0, L: 0};
+  rt.forEach(e => { const d = e.datos || {}; if (d.tot) { totR.E = Math.max(totR.E, d.tot.E || 0); totR.L = Math.max(totR.L, d.tot.L || 0); } Object.assign(info, d.info || {});
+    Object.entries(d.est || {}).forEach(([id, v]) => { if (!v) return; const t = v.t || e.ts; if (!R[id] || t > R[id].t) R[id] = {s: v.s || '', n: v.n || (R[id] && R[id].n) || '', t, autor: infNom(e)}; else if (v.n && !R[id].n) R[id].n = v.n; }); });
+  const esL = id => /^(IL|SVL|AL)-/.test(id) || /^ilum/i.test(((info[id] || {}).g) || ''), rk = Object.keys(R).filter(id => R[id].s);
+  const ruta = {E: rk.filter(id => !esL(id)).length, L: rk.filter(id => esL(id)).length, obs: rk.filter(id => R[id].s === 'obs'), totR, R, info};
+  const equipo = est.map(e => ({n: infNom(e), tipo: e.tipo, ts: e.ts})).sort((a, b) => b.ts - a.ts);
+  return {secs, tot, ok, fotos, ruta, equipo};
+}
+function infRender(j) {
+  const d = infProcesar(j), h = [], hora = t => fHora(new Date(t));
+  const pct = d.tot ? Math.round(d.ok / d.tot * 100) : 0;
+  h.push('<div class="inf-k"><div><b>' + d.ok + '/' + d.tot + '</b><span>ítems completos (' + pct + '%)</span></div><div><b>' + d.fotos.length + '</b><span>fotos en la nube</span></div>' +
+    '<div><b>' + d.ruta.E + (d.ruta.totR.E ? '/' + d.ruta.totR.E : '') + '</b><span>enchufes revisados</span></div><div><b>' + d.ruta.L + (d.ruta.totR.L ? '/' + d.ruta.totR.L : '') + '</b><span>circuitos de iluminación</span></div></div>');
+  const eq = []; const vistos = new Set(); d.equipo.forEach(e => { if (!vistos.has(e.n)) { vistos.add(e.n); eq.push(esc(e.n) + ' ' + hora(e.ts)); } });
+  h.push('<p class="inf-eq">Actualizado ' + hora(Date.now()) + ' · se actualiza solo' + (eq.length ? ' · equipo: ' + eq.join(', ') : '') + '</p>');
+  const obs = [];
+  d.secs.forEach(s => s.items.forEach(it => it.notas.forEach(n => obs.push(esc(s.titulo) + ' — <b>' + esc(it.nombre) + '</b>: ' + esc(n.txt) + ' <span class="muted">(' + esc(n.autor) + ')</span>'))));
+  d.ruta.obs.forEach(id => { const r = d.ruta.R[id], inf = d.ruta.info[id] || {}; obs.push('Ruta — <b>' + esc(id) + '</b>' + (inf.d ? ' ' + esc(inf.d) : '') + ': ' + esc(r.n || 'con observación') + ' <span class="muted">(' + esc(r.autor) + ')</span>'); });
+  if (obs.length) h.push('<div class="inf-h">Observaciones (' + obs.length + ')</div><ul class="inf-obs"><li>' + obs.join('</li><li>') + '</li></ul>');
+  h.push('<div class="inf-h">Checklist por sección</div>');
+  d.secs.forEach(s => {
+    const n = s.items.length, p = n ? Math.round(s.h / n * 100) : 0, abierta = INF.abiertas.has(s.id);
+    h.push('<details class="inf-s" data-id="' + esc(s.id) + '"' + (abierta ? ' open' : '') + '><summary><span>' + esc(s.titulo) + '</span><span>' + s.h + '/' + n + '</span></summary><div class="inf-bar"><i style="width:' + p + '%"></i></div>');
+    if (abierta) s.items.forEach(it => {
+      const ch = it.na ? '<span class="chip na">N/A</span>' : it.hecho ? '<span class="chip ok">✓ Listo</span>' : (it.fotos || []).length ? '<span class="chip fa">Falta ' + esc(it.faltan.join(' y ')) + '</span>' : '<span class="chip pe">Pendiente</span>';
+      h.push('<div class="inf-it"><div class="t"><span>' + esc(it.nombre) + (it.ref ? ' <span class="muted" style="font-weight:500">· ' + esc(it.ref) + '</span>' : '') + '</span>' + ch + '</div>');
+      if (it.notas.length) h.push('<div class="n">' + it.notas.map(x => esc(x.txt) + ' (' + esc(x.autor) + ')').join(' · ') + '</div>');
+      if ((it.fotos || []).length) h.push('<div class="nb-g">' + it.fotos.map(f => { const u = infURL(f); return '<figure data-full="' + esc(u.url) + '"><img loading="lazy" alt="" src="' + esc(u.mini) + '"><figcaption>' + esc((f.slot ? f.slot + ' · ' : '') + fHora(new Date(f.ts || Date.now())) + (f.autor ? ' · ' + f.autor : '')) + '</figcaption></figure>'; }).join('') + '</div>');
+      h.push('</div>');
+    });
+    h.push('</details>');
+  });
+  const rObs = d.ruta.obs.length, rOk = Object.keys(d.ruta.R).filter(id => d.ruta.R[id].s === 'ok').length;
+  h.push('<div class="inf-h">Ruta de enchufes e iluminación</div><p class="sm" style="margin:0 0 6px">' + rOk + ' listos · ' + rObs + ' con observación' + (d.ruta.totR.E + d.ruta.totR.L ? ' · ' + (d.ruta.totR.E + d.ruta.totR.L - rOk - rObs) + ' pendientes' : '') + '</p>');
+  $('#nbRes').innerHTML = h.join('');
+  $('#nbInfo').textContent = (j.obra || '') + ' · informe en vivo';
+}
+async function infCargar(silencioso) {
+  if (!NUBE.codigo) return;
+  try {
+    const j = await nubeJSON('/informe', {codigo: NUBE.codigo});
+    const firma = JSON.stringify([(j.fotos || []).map(f => f.nombre), (j.estados || []).map(e => e.dispositivo + e.tipo + e.ts)]);
+    NB.fotos = (j.fotos || []).filter(f => f.url).sort((a, b) => (a.seccion || '').localeCompare(b.seccion || '') || (a.item || '').localeCompare(b.item || '') || a.ts - b.ts);
+    const secs = Array.from(new Set(NB.fotos.map(f => f.seccion || 'Sin sección'))), selAct = $('#nbSec').value;
+    $('#nbSec').innerHTML = '<option value="*">ZIP: todo (' + NB.fotos.length + ' fotos)</option>' + secs.map(x => '<option value="' + esc(x) + '">ZIP: ' + esc(x) + ' (' + NB.fotos.filter(f => (f.seccion || 'Sin sección') === x).length + ')</option>').join('');
+    if (selAct) $('#nbSec').value = selAct;
+    $('#nbZipF').hidden = !NB.fotos.length;
+    if (firma !== INF.firma || !silencioso) { INF.firma = firma; INF.j = j; infRender(j); }
+    else { const p = $('#nbRes .inf-eq'); if (p) p.textContent = p.textContent.replace(/^Actualizado \S+/, 'Actualizado ' + fHora(new Date())); }
+  } catch (e) { if (!silencioso) $('#nbInfo').textContent = 'No se pudo leer la nube: ' + msgErr(e); }
+}
+async function abrirNube() {
+  abrirHoja('#hNubeS'); nbLimpiarZip(); nbEstado(''); $('#nbList').innerHTML = ''; $('#nbZipF').hidden = true;
+  if (!NUBE.codigo) { $('#nbRes').innerHTML = ''; $('#nbInfo').textContent = 'Este teléfono no tiene el código de obra. Ábrelo con el link de la obra o pega el código aquí.'; $('#nbCod').hidden = false; return; }
+  $('#nbCod').hidden = true; $('#nbInfo').textContent = 'Cargando informe…';
+  nubeEstado(true); await infCargar(false);
+  clearInterval(INF.timer); INF.timer = setInterval(() => { if ($('#hNubeS').hidden) { clearInterval(INF.timer); return; } infCargar(true); }, 20000);
+}
+$('#nbRes').addEventListener('toggle', e => { const dt = e.target; if (!dt.matches || !dt.matches('details.inf-s')) return; const id = dt.dataset.id; if (dt.open) { if (!INF.abiertas.has(id)) { INF.abiertas.add(id); if (INF.j) infRender(INF.j); } } else INF.abiertas.delete(id); }, true);
+$('#nbRes').addEventListener('click', e => { const f = e.target.closest('figure[data-full]'); if (!f) return; f.classList.toggle('grande'); const im = f.querySelector('img'); if (f.classList.contains('grande') && im && im.src !== f.dataset.full) im.src = f.dataset.full; });
+$('#nbList').addEventListener('click', e => { const f = e.target.closest('figure[data-k]'); if (f) f.classList.toggle('grande'); });
+$('#nbCerrar').addEventListener('click', () => { nbLimpiarZip(); cerrarHoja('#hNubeS'); });
+$('#nbCodOk').addEventListener('click', async () => {
+  const c = $('#nbCodIn').value.trim(); if (!c) return;
+  NUBE.codigo = c; try { await DB.setKV('nubeCodigo', c); } catch (e) {}
+  NUBE.activo = /^https?:$/.test(location.protocol); nubePintar(); nubeCola(); abrirNube();
+});
+$('#nbZip').addEventListener('click', async () => {
+  const sel = $('#nbSec').value, fotos = NB.fotos.filter(f => sel === '*' || (f.seccion || 'Sin sección') === sel);
+  if (!fotos.length) return;
+  nbLimpiarZip(); $('#nbZip').disabled = true;
+  try {
+    const E = [], usados = new Set();
+    for (let k = 0; k < fotos.length; k++) {
+      const f = fotos[k]; nbEstado('Bajando ' + (k + 1) + ' de ' + fotos.length + '…');
+      const r = await fetch(f.url); if (!r.ok) throw new Error('no se pudo bajar «' + f.item + '» (' + r.status + '). Cierra y vuelve a abrir la nube.');
+      const bl = await r.blob(), crc = crc32(new Uint8Array(await bl.arrayBuffer()));
+      const base = limpio(f.item || 'foto') + (f.slot ? '_' + limpio(f.slot) : '');
+      E.push({ruta: unico(limpio(f.seccion || 'Sin_seccion') + '/' + base + '.' + (f.ext || 'jpg'), usados), ts: f.ts || Date.now(), size: bl.size, crc, data: bl});
+    }
+    const nombre = '2C_' + limpio(S.obra || 'obra') + '_nube_' + (sel === '*' ? 'Todo' : limpio(sel)) + '_' + fISO(new Date()) + '.zip';
+    const blob = armarZip(E); let file; try { file = new File([blob], nombre, {type: 'application/zip'}); } catch (e) { file = blob; file.name = nombre; }
+    NB.zip = file; nbEstado('Listo: ' + nombre + '\n' + plural(E.length, 'foto') + ' · ' + fmtMB(blob.size));
+    let puede = false; try { puede = !!(navigator.share && navigator.canShare && navigator.canShare({files: [file]})); } catch (e) {}
+    $('#nbShare').hidden = !puede; $('#nbDown').hidden = false;
+  } catch (e) { nbEstado('No se pudo armar el ZIP: ' + msgErr(e), true); }
+  finally { $('#nbZip').disabled = false; }
+});
+$('#nbShare').addEventListener('click', () => { if (NB.zip) navigator.share({files: [NB.zip]}).catch(e => { if (!e || e.name !== 'AbortError') nbEstado('No se pudo compartir: ' + msgErr(e) + '. Usa «Descargar ZIP».', true); }); });
+$('#nbDown').addEventListener('click', () => {
+  if (!NB.zip) return; if (!NB.url) NB.url = URL.createObjectURL(NB.zip);
+  const a = document.createElement('a'); a.href = NB.url; a.download = NB.zip.name || 'fotos.zip'; document.body.appendChild(a); a.click(); setTimeout(() => a.remove(), 0);
+  toast('Descargando… En iPhone queda en Archivos › Descargas.');
+});
+
+
+
+$('#gClose').addEventListener('click', cerrarGal);
+
+$('#respB').addEventListener('click', abrirExport);
+/* guardado automático: sin guardado permanente, cada 5 fotos nuevas o 4 min abre el ZIP ya preparado */
+function autoRespaldo() {
+  if (DB.modo === 'idb' || !S || SIN_RESP < 1 || $$('.hoja:not([hidden])').length || !$('#lb').hidden) return;
+  if (SIN_RESP >= 5 || Date.now() - ULT_AUTO > 240000) { SIN_RESP = 0; ULT_AUTO = Date.now(); abrirExport(); prepararZip(); toast('Respaldo automático: toca Descargar para guardarlo', false); }
+}
+setInterval(() => { try { autoRespaldo(); } catch (e) {} try {
+  let n = 0; FOTOS.forEach(a => { n += a.length; }); let pend = 0;
+  if (DB.modo === 'idb' && S) FOTOS.forEach(arr => arr.forEach(m => { if (m.ts > ULT_EXPORT && !m.nube) pend++; }));
+  nubePintar();
+  const memo = DB.modo !== 'idb' && n > 0, recu = !memo && pend >= 15;
+  $('#resp').hidden = !(memo || recu); $('#resp').classList.toggle('suave', recu);
+  if (memo) $('#respT').textContent = '⚠ ' + plural(n, 'foto') + ' solo en memoria: se pierden al cerrar o recargar. Respalda el ZIP.';
+  else if (recu) $('#respT').textContent = plural(pend, 'foto') + ' sin respaldo. Exporta «Todo» y guárdalo en Archivos.';
+} catch (e) {} }, 1200);
+$('#zPrep').addEventListener('click', prepararZip);
+$('#zShare').addEventListener('click', compartirZip);
+$('#zDown').addEventListener('click', descargarZip);
+$('#zOps').addEventListener('change', () => { liberarZip(); estadoZip(''); });
+$('#btnMenu').addEventListener('click', () => { $('#mAlm').textContent = ''; infoAlmacen().then(t => { $('#mAlm').textContent = t + ' · v' + VERSION; }); abrirHoja('#hMenu'); });
+$('#hMenu').addEventListener('click', e => {
+  const b = e.target.closest('[data-m]'); if (!b) return;
+  const m = b.dataset.m; cerrarHoja('#hMenu');
+  if (m === 'datos') abrirDatos();
+  else if (m === 'seccion') nuevaSeccion();
+  else if (m === 'lista') { $('#tLista').value = listaATexto(); abrirHoja('#hLista'); }
+  else if (m === 'ayuda') abrirHoja('#hAyuda');
+  else if (m === 'nube') abrirNube();
+  else if (m === 'borrar') borrarTodo();
+});
+$('#dOk').addEventListener('click', () => {
+  S.obra = $('#dObra').value.trim().slice(0, 120) || S.obra; S.tecnico = $('#dTec').value.trim().slice(0, 120); S.instrumento = $('#dIns').value.trim().slice(0, 160);
+  guardar(true); renderHeader(); cerrarHoja('#hDatos'); toast('Datos guardados');
+});
+$('#tOk').addEventListener('click', async () => { if (await aplicarLista(textoALista($('#tLista').value))) cerrarHoja('#hLista'); });
+$$('[data-cerrar]').forEach(b => b.addEventListener('click', () => cerrarHoja('#' + b.closest('.hoja').id)));
+$$('.hoja').forEach(h => h.addEventListener('click', e => { if (e.target === h) cerrarHoja('#' + h.id); }));
+
+$('#lbX').addEventListener('click', cerrarLB);
+$('#lbPrev').addEventListener('click', () => { LB.idx--; mostrarLB(); });
+$('#lbNext').addEventListener('click', () => { LB.idx++; mostrarLB(); });
+$('#lbDel').addEventListener('click', borrarFotoLB);
+let x0 = null;
+$('#lb').addEventListener('touchstart', e => { x0 = e.touches.length === 1 ? e.touches[0].clientX : null; }, {passive: true});
+$('#lb').addEventListener('touchmove', e => { if (e.touches.length > 1) x0 = null; }, {passive: true});
+$('#lb').addEventListener('touchend', e => {
+  if (x0 === null || !e.changedTouches.length) return;
+  const dx = e.changedTouches[0].clientX - x0; x0 = null;
+  const n = (FOTOS.get(LB.item) || []).length;
+  if (dx < -60 && LB.idx < n - 1) { LB.idx++; mostrarLB(); } else if (dx > 60 && LB.idx > 0) { LB.idx--; mostrarLB(); }
+}, {passive: true});
+document.addEventListener('keydown', e => {
+  if ($('#lb').hidden) return;
+  if (e.key === 'Escape') cerrarLB(); else if (e.key === 'ArrowLeft') $('#lbPrev').click(); else if (e.key === 'ArrowRight') $('#lbNext').click();
+});
+
+const esCampo = el => !!el && el.matches && el.matches('textarea, input:not([type=checkbox]):not([type=radio]):not([type=file])');
+document.addEventListener('focusin', e => { if (esCampo(e.target)) document.body.classList.add('kb'); });
+document.addEventListener('focusout', () => setTimeout(() => { if (!esCampo(document.activeElement)) document.body.classList.remove('kb'); }, 60));
+document.addEventListener('visibilitychange', () => { if (document.hidden) flush(); });
+window.addEventListener('pagehide', flush);
+window.addEventListener('beforeunload', e => { flush(); if (DB.modo !== 'idb' && S && totales().f) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('error', e => { try { toast('Error: ' + (e.message || 'desconocido'), true); } catch (x) {} });
+window.addEventListener('unhandledrejection', e => { try { toast('Error: ' + msgErr(e.reason), true); } catch (x) {} });
+
+/* ---------- inicio ---------- */
+async function iniciar() {
+  const persistente = await DB.abrir();
+  try { ULT_EXPORT = Number(await DB.getKV('ultExport')) || 0; } catch (e) { ULT_EXPORT = 0; }
+  let est, ui, metas = [];
+  try { est = await DB.getKV('estado'); } catch (e) {}
+  try { ui = await DB.getKV('ui'); } catch (e) {}
+  try { metas = await DB.fotos(); } catch (e) { toast('No se pudieron leer las fotos: ' + msgErr(e), true); }
+  S = valido(est) ? est : estadoInicial();
+  if (valido(est) && !(est.v >= 2)) {   // v1.0 → v1.1: Bucle y Dif en las secciones de bucle
+    S.secciones.forEach(s => { const x = SEED.secciones.find(y => y.id === s.id); if (x && x.tipos && !tiposDe(s)) { s.tipos = x.tipos.slice(); s.nota = x.nota; } });
+    S.v = 2; guardar(true);
+  }
+  if (!Array.isArray(S.migraciones)) S.migraciones = [];
+  if (S.migraciones.indexOf('tdfsv') < 0) {   // nueva sección: enchufes del tablero SV (de la ruta)
+    const ns = SEED.secciones.find(x => x.id === 'tdfsv');
+    if (ns && !S.secciones.some(x => x.id === 'tdfsv')) {
+      const k = S.secciones.findIndex(x => x.id === 'tdfen');
+      S.secciones.splice(k >= 0 ? k + 1 : S.secciones.length, 0, {id: ns.id, titulo: ns.titulo, nota: ns.nota || '', tipos: ns.tipos ? ns.tipos.slice() : null,
+        items: ns.items.map(it => ({id: it.id, nombre: it.nombre, ref: it.ref || '', na: false, nota: ''}))});
+    }
+    S.migraciones.push('tdfsv'); guardar(true);
+  }
+  if (ui) {
+    UI.abiertas = new Set(ui.abiertas || []);
+    if (['todos', 'pend', 'ok'].indexOf(ui.filtro) >= 0) UI.filtro = ui.filtro;
+  } else if (S.secciones[0]) UI.abiertas.add(S.secciones[0].id);
+  metas.sort((a, b) => a.ts - b.ts).forEach(m => { if (!FOTOS.has(m.item)) FOTOS.set(m.item, []); FOTOS.get(m.item).push(m); });
+  recuperarHuerfanas();
+  if (!valido(est)) guardar(true);
+  $('#hAlm').textContent = persistente ? '● Guardado en este teléfono' : '⚠ Sin guardado';
+  if (VISOR_APP) avisar(TXT_VISOR); else if (!persistente) avisar(TXT_PRIVADO);
+  if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {});
+  marcarFiltro(); renderTodo();
+  nubeIniciar();
+}
+iniciar().catch(e => avisar('Error al iniciar: ' + msgErr(e)));
+</script>
+</body>
+</html>

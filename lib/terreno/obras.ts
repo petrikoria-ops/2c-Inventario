@@ -13,6 +13,10 @@ export const OBRAS_TERRENO: Record<string, { nombre: string; sha256: string }> =
     nombre: 'UNIMARC SN BDO',
     sha256: '97233b545c5a6c6b36b842a4ff570323b2f2ff0cd12582516b98ede98305c63f',
   },
+  'unimarc-maipu-911': {
+    nombre: 'UNIMARC MAIPÚ 4 PTE · LOCAL 911',
+    sha256: '4718d1c787e2c539e11d31f6ac5b1c59b0122968541819338c5291b704f6a366',
+  },
 }
 
 export const BUCKET_TERRENO = 'terreno'
