@@ -17,6 +17,10 @@ export const OBRAS_TERRENO: Record<string, { nombre: string; sha256: string }> =
     nombre: 'UNIMARC MAIPÚ 4 PTE · LOCAL 911',
     sha256: '4718d1c787e2c539e11d31f6ac5b1c59b0122968541819338c5291b704f6a366',
   },
+  'lider-puente-nuevo': {
+    nombre: 'LIDER PUENTE NUEVO · TDF COMPUTACIÓN',
+    sha256: '0b0a01264467cd03ebfddd686ff7c884308b5381b74ee90862ac0f36a083948c',
+  },
 }
 
 export const BUCKET_TERRENO = 'terreno'
