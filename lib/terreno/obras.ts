@@ -21,6 +21,10 @@ export const OBRAS_TERRENO: Record<string, { nombre: string; sha256: string }> =
     nombre: 'LIDER PUENTE NUEVO · TDF COMPUTACIÓN',
     sha256: '0b0a01264467cd03ebfddd686ff7c884308b5381b74ee90862ac0f36a083948c',
   },
+  'dpx3-420033': {
+    nombre: 'DPX³ 160 · LEGRAND 420033',
+    sha256: '7a1f01e98a3cb7d7fbd31f55d1945055956c3c3ee270c7d4cb1b94517576cc64',
+  },
 }
 
 export const BUCKET_TERRENO = 'terreno'
