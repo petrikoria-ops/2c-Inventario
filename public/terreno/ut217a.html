@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0e1116">
+<meta name="robots" content="noindex,nofollow">
+<title>UT217A BLE – Visor (CH y L)</title>
+<style>
+:root{--bg:#0e1116;--card:#171c24;--line:#283040;--tx:#e8edf5;--mut:#8b96a8;--acc:#e5233b;--ok:#2fbf71;--warn:#f0b429;--lcd:#f5f7a8}
+*{box-sizing:border-box}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--tx);-webkit-text-size-adjust:100%}
+header{position:sticky;top:0;z-index:5;background:var(--bg);padding:10px 14px;border-bottom:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px}
+header b{font-size:15px}header small{color:var(--mut);display:block;font-size:11px}
+#stBox{text-align:right;font-size:12px;color:var(--mut);max-width:48%}
+main{padding:12px;max-width:760px;margin:auto;display:grid;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px}
+.card h3{margin:0 0 8px;font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+button,select,input{font:inherit;color:var(--tx);background:#222a36;border:1px solid var(--line);border-radius:8px;padding:9px 11px;min-height:42px}
+button{cursor:pointer}
+button.p{background:var(--acc);border-color:var(--acc);font-weight:600}
+button.g{background:var(--ok);border-color:var(--ok);color:#06210f;font-weight:600}
+button:disabled{opacity:.45}
+.row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.grow{flex:1 1 140px;min-width:0}
+.big{display:flex;align-items:baseline;justify-content:flex-end;gap:8px;padding:2px}
+#val{font:700 58px/1.05 ui-monospace,Consolas,monospace;color:var(--lcd);white-space:nowrap;overflow:hidden}
+#unit{font:600 24px ui-monospace,Consolas,monospace;color:var(--mut);min-width:1ch}
+.tags{display:flex;gap:6px;flex-wrap:wrap;min-height:22px}
+.tag{font-size:11px;padding:2px 8px;border-radius:99px;background:#222a36;border:1px solid #3a475c}
+.tag.m{background:#2a1a1d;border-color:var(--acc)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;font-size:12px;color:var(--mut);text-align:center;margin-top:8px}
+.stats b{display:block;color:var(--tx);font-size:15px}
+canvas{width:100%;height:150px;background:#0b0e13;border-radius:8px;display:block;margin-top:10px}
+.dot{width:10px;height:10px;border-radius:50%;background:#555;display:inline-block;margin-right:6px;vertical-align:middle}
+.dot.on{background:var(--ok)}.dot.wait{background:var(--warn)}.dot.rec{background:var(--acc);animation:b 1s infinite}
+@keyframes b{50%{opacity:.3}}
+.mut{color:var(--mut);font-size:12px}.warn{color:var(--warn)}.okc{color:var(--ok)}
+p{margin:8px 0 0}
+details>summary{cursor:pointer;list-style:none}
+details>summary::-webkit-details-marker{display:none}
+details>summary:before{content:'▸ '}details[open]>summary:before{content:'▾ '}
+details.card>summary{font-size:12px;color:var(--mut);text-transform:uppercase;letter-spacing:.05em}
+pre,#log{font:11px/1.35 ui-monospace,Consolas,monospace;max-height:220px;overflow:auto;background:#0b0e13;padding:8px;border-radius:8px;white-space:pre-wrap;word-break:break-all;margin:8px 0 0}
+ol.help{margin:6px 0 0;padding-left:18px;font-size:13px;line-height:1.45}
+.cand{display:flex;justify-content:space-between;gap:8px;padding:8px;border:1px solid var(--line);border-radius:8px;margin-top:6px;cursor:pointer;font-size:13px}
+.cand:hover{border-color:var(--acc)}
+.notes{font-size:13px;margin-top:8px}
+.notes div{display:flex;justify-content:space-between;gap:8px;border-top:1px solid var(--line);padding:6px 0}
+#hint{display:none}
+#hint.show{display:block}
+#modal{position:fixed;inset:0;background:#000a;display:none;align-items:center;justify-content:center;padding:20px;z-index:20}
+#modal .card{max-width:400px;width:100%}
+textarea{width:100%;height:150px;background:#0b0e13;color:var(--tx);border:1px solid var(--line);border-radius:8px;font:11px ui-monospace,Consolas,monospace;margin-top:8px}
+.banner{border-color:var(--warn)}
+</style>
+</head>
+<body>
+<header>
+  <div><b>UNI-T UT217A · Visor BLE</b><small>Chavarría y Labbé Ingeniería Eléctrica y Tecnología</small></div>
+  <div id="stBox"><span id="dot" class="dot"></span><span id="st">Desconectado</span><br><span id="devInfo"></span></div>
+</header>
+<main>
+  <div class="card banner" id="noBle" hidden>
+    <b class="warn" id="noBleT">Este navegador no tiene Bluetooth web.</b>
+    <p class="mut">Ábrela en <b>Chrome</b> (Android, o PC con Windows 10+). No funciona dentro de la app de Claude, en iPhone/Safari ni en Firefox.</p>
+  </div>
+
+  <div class="card">
+    <h3>Conexión</h3>
+    <div class="row">
+      <button class="p grow" id="bFind">Buscar pinza</button>
+      <button id="bAll">Ver todos</button>
+      <button id="bRecon" hidden>Reconectar</button>
+      <button id="bDis" disabled>Desconectar</button>
+    </div>
+    <p class="mut">En la lista la pinza aparece como <b>BDM</b> (no como UT217A). Antes, en la pinza: mantén presionado <b>Tab ⇄ (BLE)</b> hasta que salga el ícono de Bluetooth.</p>
+    <details style="margin-top:6px"><summary class="mut">¿No aparece en la lista?</summary>
+      <ol class="help">
+        <li>Ícono Bluetooth visible en la pantalla de la pinza (Tab ⇄ mantenido ~3 s).</li>
+        <li>Cierra la app oficial (UNI-T / iMeter) y no emparejes la pinza desde Ajustes de Android: si ya está conectada a otro equipo, deja de anunciarse.</li>
+        <li>En el teléfono: Bluetooth y Ubicación activados. Si Chrome pide permiso de <i>Dispositivos cercanos</i> o de ubicación, acéptalo.</li>
+        <li>Toca <b>Ver todos</b> y busca “BDM” o un “Dispositivo desconocido” que aparezca al activar el BLE de la pinza.</li>
+        <li>Usa la pinza en modo <b>DMM</b> (no OSC).</li>
+      </ol>
+    </details>
+  </div>
+
+  <div class="card">
+    <div class="tags" id="tags"></div>
+    <div class="big"><span id="val">--.--</span><span id="unit"></span></div>
+    <p class="mut" id="protoLine" style="margin:0;text-align:right"></p>
+    <div class="stats">
+      <div>Mín<b id="sMin">–</b></div><div>Máx<b id="sMax">–</b></div><div>Prom<b id="sAvg">–</b></div><div>Guardadas<b id="sN">0</b></div>
+    </div>
+    <canvas id="cv"></canvas>
+    <p class="warn" id="hint"></p>
+  </div>
+
+  <div class="card">
+    <h3>Registro</h3>
+    <div class="row">
+      <input id="lbl" class="grow" placeholder="Etiqueta (ej: TG-1 fase R)" maxlength="40">
+      <button id="bNote">📌 Anotar</button>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button class="g grow" id="bRec">● Grabar continuo</button>
+      <select id="ivl" title="Intervalo de grabación">
+        <option value="0">cada lectura</option><option value="1" selected>cada 1 s</option><option value="5">cada 5 s</option><option value="10">cada 10 s</option><option value="60">cada 1 min</option>
+      </select>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <button id="bCsv">Exportar CSV</button><button id="bShare">Compartir</button><button id="bCopy">Copiar</button><button id="bClr">Borrar</button>
+    </div>
+    <p class="mut" id="saveInfo"></p>
+    <div class="notes" id="notes"></div>
+  </div>
+
+  <details class="card" id="dDiag">
+    <summary>Diagnóstico</summary>
+    <pre id="diag">Sin conexión.</pre>
+    <div class="row" style="margin-top:8px"><button id="bDiagCopy">Copiar diagnóstico</button><button id="bRaw">Exportar crudo</button></div>
+    <div id="log"></div>
+  </details>
+
+  <details class="card" id="dCal">
+    <summary>Calibración manual (si no reconoce el formato)</summary>
+    <p class="mut">Solo si el valor no aparece o no coincide con la pinza. Escribe lo que muestra la pantalla ahora y toca Buscar: revisa los últimos paquetes.</p>
+    <div class="row" style="margin-top:8px">
+      <input id="ref" class="grow" inputmode="decimal" placeholder="Valor en pantalla, ej: 0.15">
+      <select id="calUnit"><option>A</option><option>mA</option><option>V</option><option>mV</option><option>Ω</option><option>kΩ</option><option>MΩ</option><option>Hz</option><option>µF</option><option>°C</option><option>%</option></select>
+      <button class="p" id="bCal">Buscar</button>
+    </div>
+    <div id="cands"></div>
+    <p class="mut">Activo: <b id="calName">ninguno</b> <button id="bCalReset" style="min-height:0;padding:3px 8px">quitar</button></p>
+    <label class="mut"><input type="checkbox" id="calForce" style="min-height:0"> Usar calibración aunque reconozca el protocolo</label>
+  </details>
+
+  <details class="card">
+    <summary>Comando manual (avanzado)</summary>
+    <div class="row" style="margin-top:8px"><select id="wChar" class="grow"><option value="">(conecta primero)</option></select></div>
+    <div class="row" style="margin-top:8px">
+      <input id="cmd" class="grow" placeholder="HEX, ej: AB CD 03 5D 01 D8">
+      <input id="cmdIvl" type="number" value="500" style="width:90px" title="ms">
+      <button id="bOnce">Enviar</button><button id="bPoll">Repetir</button>
+    </div>
+    <p class="mut">No envíes comandos al azar: pueden cambiar la función de la pinza.</p>
+  </details>
+  <p class="mut" style="text-align:center">Si algo no calza con la pantalla: abre Diagnóstico → Copiar diagnóstico y envíalo.</p>
+</main>
+
+<div id="modal"><div class="card"><p id="mTxt" style="margin:0"></p><textarea id="mArea" readonly hidden></textarea>
+<div class="row" style="justify-content:flex-end;margin-top:10px"><button id="mNo">Cancelar</button><button class="p" id="mYes">OK</button></div></div></div>
+
+<script id="proto">
+/* ===== Decodificadores de protocolo (sin DOM) =====
+   Fuentes: OWON R2W/R10W y "Bluetooth DMM" (XOR) según github.com/ble-multimeter/fakemeter
+   y github.com/webspiderteam/Bluetooth-DMM-For-Windows; UNI-T iDMM2.0 (AB CD) según los mismos. */
+(function(G){
+'use strict';
+const PREF=['p','n','µ','m','','k','M','G'];
+// Códigos de función OWON (comunes a registros de 6 y 15 bytes)
+const OFN=[['V','DC'],['V','AC'],['A','DC'],['A','AC'],['Ω','Ω'],['F','Cap'],['Hz','Hz'],['%','Duty'],['°C','Temp'],['°F','Temp'],['V','Diodo'],['Ω','Contin.'],['','hFE'],['','NCV'],
+  ['W','Potencia'],['VA','Potencia'],['','FP'],['%','4-20mA'],['Ah','Ah'],['s','Tiempo'],['Wh','Energía'],['V','Potencia'],['A','Potencia'],['V','AC+DC'],['','Motor'],['W/m²','Solar'],['°','Ángulo'],['°','Brújula'],['V','DC HV'],['V','AC HV']];
+const R10W_SERIES=new Set([91,92,83,85,87,89,61,65,67,69,101]);
+const R2W_SERIES=new Set([18,20,21,33,35,41]);
+const NUM=/^-?\d*\.?\d+$/;
+
+function pad(count,dp){let s=String(count).padStart(Math.max(4,dp+1),'0');return dp>0?s.slice(0,s.length-dp)+'.'+s.slice(s.length-dp):s;}
+
+// OWON 6 bytes (B35T+/B41T+/OW18E/CM2100B): [función LE16][estado LE16][valor LE16 signo-magnitud]
+function owon6(b,o){
+  o=o||0;
+  const sym=b[o]|(b[o+1]<<8), st=b[o+2]|(b[o+3]<<8), raw=b[o+4]|(b[o+5]<<8);
+  const point=sym&7, scale=(sym>>3)&7, fn=(sym>>6)&15;
+  const f=OFN[fn]||['?','f'+fn];
+  const fl=[];
+  if(st&1)fl.push('HOLD');if(st&2)fl.push('REL');if(st&4)fl.push('AUTO');if(st&8)fl.push('BAT');
+  if(st&16)fl.push('MIN');if(st&32)fl.push('MAX');if(st&0x100)fl.push('PMIN');if(st&0x200)fl.push('PMAX');if(st&0x1800)fl.push('LPF');
+  const r={proto:'OWON 6B',mode:f[1],unit:f[0]?PREF[scale]+f[0]:'',flags:fl,value:null,text:'',valid:(sym>>13)===0};
+  if(fn===13){r.text=raw>0?'-'.repeat(Math.min(raw,8)):'EF';r.unit='';return r;}
+  if(point===7){r.text='OL';return r;}
+  if(point===6){r.text='UL';return r;}
+  const neg=(raw&0x8000)!==0, mag=raw&0x7fff;
+  r.value=(neg?-1:1)*mag/Math.pow(10,point);
+  r.text=(neg?'-':'')+pad(mag,point);
+  return r;
+}
+
+// OWON 15 bytes (R10W, serie CMS/VC9xx): 5 palabras LE24: función, valor, función2, valor2, estado
+const R10F=[[1,'HOLD'],[2,'REL'],[4,'AUTO'],[8,'BAT'],[16,'MIN'],[32,'MAX'],[64,'AVG'],[256,'LoZ'],[512,'LPF'],[1024,'PEAK'],[1<<17,'INRUSH'],[1<<18,'OSC']];
+function owon15(b,o){
+  o=o||0;
+  const le=i=>b[o+i]|(b[o+i+1]<<8)|(b[o+i+2]<<16);
+  const g=le(0), v=le(3), st=le(12);
+  const dp=g&7, cu=(g>>3)&7, gear=(g>>6)&31;
+  const f=OFN[gear]||['?','g'+gear];
+  const fl=R10F.filter(x=>st&x[0]).map(x=>x[1]);
+  if(gear>3){if(st&(1<<13))fl.push('AC');if(st&(1<<14))fl.push('DC');}
+  const r={proto:'OWON 15B',mode:f[1],unit:f[0]?PREF[cu]+f[0]:'',flags:fl,value:null,text:'',valid:gear<=29&&dp<=6&&(g>>13)===0};
+  const ovr=(v>>20)&7, neg=(b[o+5]&0x80)!==0, count=v&0x7ffff;
+  if(gear===13){r.text=count>0?'-'.repeat(Math.min(count,8)):'EF';r.unit='';return r;}
+  if(ovr){r.text=ovr===2?'UL':ovr===3?'HI':'OL';return r;}
+  r.value=(neg?-1:1)*count/Math.pow(10,dp);
+  r.text=(neg?'-':'')+pad(count,dp);
+  return r;
+}
+
+// OWON antiguo 14 bytes ASCII (B35T)
+function owon14(b){
+  if(b.length<14||(b[0]!==0x2b&&b[0]!==0x2d))return null;
+  const bit=(x,n)=>(x>>n)&1;
+  let digits='';for(let i=1;i<5;i++)digits+=String.fromCharCode(b[i]);
+  const point={0x31:3,0x32:2,0x34:1}[b[6]]||0;
+  let unit='';
+  if(bit(b[10],1))unit+='°C';if(bit(b[10],0))unit+='°F';if(bit(b[8],1))unit+='n';if(bit(b[9],6))unit+='m';if(bit(b[9],7))unit+='µ';
+  if(bit(b[9],4))unit+='M';if(bit(b[9],5))unit+='k';if(bit(b[10],7))unit+='V';if(bit(b[10],2))unit+='F';if(bit(b[9],1))unit+='%';
+  if(bit(b[10],5))unit+='Ω';if(bit(b[10],3))unit+='Hz';if(bit(b[10],6))unit+='A';
+  const fl=[];if(bit(b[7],1))fl.push('HOLD');if(bit(b[7],2))fl.push('REL');if(bit(b[7],5))fl.push('AUTO');
+  if(bit(b[8],3))fl.push('BAT');if(bit(b[8],4))fl.push('MIN');if(bit(b[8],5))fl.push('MAX');
+  const mode=bit(b[7],3)?'AC':bit(b[7],4)?'DC':bit(b[9],2)?'Diodo':bit(b[9],3)?'Contin.':'';
+  const r={proto:'OWON 14B',mode,unit,flags:fl,value:null,text:'',valid:true};
+  if(digits[0]==='?'&&digits[3]==='?'){r.text='OL';return r;}
+  const d=digits.replace(/ /g,'0');
+  if(!/^\d{4}$/.test(d)){r.valid=false;return r;}
+  const t=point?d.slice(0,4-point)+'.'+d.slice(4-point):d;
+  const neg=b[0]===0x2d;
+  r.value=(neg?-1:1)*parseFloat(t);r.text=(neg?'-':'')+t;
+  return r;
+}
+
+// "Bluetooth DMM" (ANENG/ZOYI/BSIDE): bytes con XOR + segmentos LCD
+const XK=[0x41,0x21,0x73,0x55,0xa2,0xc1,0x32,0x71,0x66,0xaa,0x3b,0xd0,0xe2,0xa8,0x33,0x14,0x20,0x21,0xaa,0xbb];
+const SEG={'0000000':' ','1111110':'A','0010011':'U','0110101':'T','0010111':'O','1110101':'E','1110100':'F','0110001':'L','0000100':'-','1111011':'0','0001010':'1','1011101':'2','1001111':'3','0101110':'4','1100111':'5','1110111':'6','1001010':'7','1111111':'8','1101111':'9'};
+function isBdm(b){return (b.length===10||b.length===11||b.length>=17)&&b[0]===0x1b&&(b[1]===0x84||b[1]===0x7b);}
+function bdm(b){
+  let s='';for(let i=0;i<b.length&&i<XK.length;i++)s+=((b[i]^XK[i])&255).toString(2).padStart(8,'0');
+  const on=i=>s[i]==='1', sub=(i,n)=>s.substr(i,n).padEnd(n,'0');
+  const type=(b[2]^XK[2])&255;
+  const r={proto:'BDM '+b.length+'B',mode:'',unit:'',flags:[],value:null,text:'',valid:true};
+  let txt='';
+  if(type!==4){
+    const pre=['-','.','.','.'];
+    for(let n=0;n<4;n++){const g=SEG[sub((n+3)*8,3)+sub((n+4)*8+4,4)];txt+=(on((n+3)*8+3)?pre[n]:'')+(g===undefined?'?':g);}
+  }else{
+    const pre=['.','.','.','.',''];
+    for(let n=13;n>8;n--){
+      const fi=n*8,first=sub(fi,3),second=sub(fi+4,4);let g;
+      if(n===13){const h=second.slice(0,2);g=(first[0]==='1'?'-':'')+(h==='11'?'1':h==='00'?'':'?');}
+      else{g=SEG[first+second];if(g===undefined)g='?';}
+      txt+=(on(fi+3)?pre[n-9]:'')+g;
+    }
+  }
+  const F=(arr)=>arr.forEach(x=>{if(x[0])r.flags.push(x[1]);});
+  if(b.length===11){
+    const UB=[[57,'°C'],[58,'°F'],[74,'m'],[75,'V'],[64,'n'],[65,'m'],[66,'µ'],[67,'F'],[69,'%'],[76,'M'],[77,'k'],[78,'Ω'],[79,'Hz'],[85,'µ'],[84,'m'],[72,'A']];
+    r.unit=UB.filter(x=>on(x[0])).map(x=>x[1]).join('');
+    r.mode=on(68)?'AC':on(73)?'DC':on(56)?'Diodo':on(28)?'Contin.':'';
+    F([[on(59),'HOLD'],[on(30),'REL'],[on(87),'AUTO'],[on(31),'BAT'],[on(71),'MAX'],[on(70),'MIN']]);
+  }else if(b.length===10){
+    const sv=type===2?sub(28,4)+sub(56,4)+sub(68,4)+sub(64,4)+sub(76,4)+sub(72,4):sub(28,4)+sub(72,4)+sub(56,4)+sub(68,4)+sub(64,4)+sub(76,4);
+    const S=i=>sv[i]==='1';
+    r.unit=(S(20)?'°C':'')+(S(21)?'°F':'')+(S(16)?'M':'')+(S(18)?'k':'')+(S(19)?'Ω':'')+((S(23)&&type!==1)?'%':'')+(S(22)?'Hz':'')+(S(11)?'n':'')+(S(12)?'µ':'')+(S(17)?'m':'')+(S(10)?'V':'')+(S(15)?'F':'')+(S(13)?'A':'');
+    r.mode=S(8)?'AC':S(9)?'DC':S(14)?'Diodo':S(0)?'Contin.':'';
+    F([[S(2),'HOLD'],[S(3),'BAT']]);
+  }else if(type===4){
+    const sv=sub(28,4)+sub(24,4)+sub(36,4)+sub(32,4)+sub(108,4)+sub(104,4)+sub(128,4)+sub(140,4)+sub(144,4);
+    const S=i=>sv[i]==='1';
+    r.unit=(S(27)?'M':'')+(S(26)?'k':'')+(S(25)?'Ω':'')+(S(24)?'Hz':'')+(S(28)?'n':'')+(S(30)?'µ':'')+(S(29)?'m':'')+(S(15)?'V':'')+(S(31)?'F':'')+(S(35)?'A':'');
+    r.mode=S(21)?'AC':S(18)?'DC':S(5)?'Diodo':S(6)?'Contin.':'';
+    F([[S(8),'HOLD'],[S(7),'REL'],[S(1),'AUTO'],[S(3),'BAT'],[S(10),'MAX'],[S(11),'MIN'],[S(9),'PEAK']]);
+  }
+  txt=txt.trim();r.text=txt;
+  if(/L/.test(txt)){r.text='OL';}
+  else if(NUM.test(txt)){r.value=parseFloat(txt);}
+  else if(/\?/.test(txt)){r.valid=false;}
+  return r;
+}
+
+// Clasifica un paquete del servicio FFF0 (OWON o "Bluetooth DMM"). hint: 0|6|15 según serie FFF2
+function fff0(b,hint){
+  const n=b.length;
+  if(n===14&&(b[0]===0x2b||b[0]===0x2d)){const r=owon14(b);return r&&r.valid?{kind:'14',recs:[r]}:null;}
+  if(!hint&&isBdm(b)){const r=bdm(b);return r.valid?{kind:'bdm',recs:[r]}:null;}
+  const tryRec=k=>{if(!n||n%k)return null;const out=[];for(let o=0;o<n;o+=k){const r=k===15?owon15(b,o):owon6(b,o);if(!r.valid)return null;out.push(r);}return out;};
+  const order=hint===15?[15,6]:hint===6?[6,15]:(n%15===0?[15,6]:[6,15]);
+  for(const k of order){const out=tryRec(k);if(out)return {kind:String(k),recs:out};}
+  return null;
+}
+
+/* ---- UNI-T iDMM2.0 (servicio ISSC 49535343-…, tramas AB CD) ---- */
+const UFN=['ACV','ACmV','DCV','DCmV','Hz','%','OHM','CONT','DIODE','CAP','°C','°F','DCuA','ACuA','DCmA','ACmA','DCA','ACA','HFE','Live','NCV','LozV','ACA','DCA','LPF','AC/DC','LPF','AC+DC','LPFA','AC+DC2','INRUSH'];
+const URNG={ACV:['V','V','V','V'],DCV:['V','V','V','V'],LozV:['V','V','V','V'],ACmV:['mV','mV'],DCmV:['mV','mV'],Hz:['Hz','Hz','Hz','kHz','kHz','kHz','MHz','MHz'],'%':['%'],OHM:['Ω','kΩ','kΩ','kΩ','MΩ','MΩ','MΩ'],CONT:['Ω'],DIODE:['V'],CAP:['nF','nF','nF','µF','µF','µF','mF','mF'],'°C':['°C'],'°F':['°F'],DCuA:['µA','µA'],ACuA:['µA','µA'],DCmA:['mA','mA'],ACmA:['mA','mA'],DCA:['A','A'],ACA:['A','A'],HFE:[''],Live:[''],NCV:[''],LPF:['V','V','V','V'],'AC/DC':['V','V','V','V'],LPFA:['V','V','V','V'],'AC+DC':['A','A'],'AC+DC2':['A','A'],INRUSH:['A','A']};
+const URNG60={ACV:['mV','V','V','V'],DCV:['mV','V','V','V'],LPF:['mV','V','V','V'],'AC/DC':['mV','V','V','V'],LPFA:['mV','V','V','V'],OHM:['Ω','kΩ','kΩ','kΩ','MΩ','MΩ']};
+const UMODE={OHM:'Ω',CONT:'Contin.',DIODE:'Diodo',CAP:'Cap',Hz:'Hz','%':'Duty','°C':'Temp','°F':'Temp',HFE:'hFE',Live:'Live',NCV:'NCV',LPF:'LPF',LPFA:'LPF','AC/DC':'AC/DC','AC+DC':'AC+DC','AC+DC2':'AC+DC',INRUSH:'Inrush',LozV:'LoZ'};
+const UACDC=new Set(['ACV','DCV','LozV','ACmV','DCmV','DCuA','ACuA','DCmA','ACmA','DCA','ACA']);
+function asc(f,s,n,stop){let t='';for(let i=s;i<s+n&&i<f.length;i++){const c=f[i];if(stop&&c===0)break;t+=c===0x6f&&stop==='ohm'?'Ω':c===0xb0?'°':c===0x7e&&stop==='u181'?'Ω':String.fromCharCode(c);}return t.trim();}
+function numOrNull(s){return NUM.test(s)?parseFloat(s):null;}
+function unit19(f,model){
+  const fn=UFN[f[3]&0x7f]||('f'+(f[3]&0x7f)), ri=f[4]-0x30;
+  const tbl=(/^UT-?60/i.test(model||'')&&URNG60[fn])||URNG[fn]||[''];
+  const unit=tbl[ri]!==undefined?tbl[ri]:tbl[tbl.length-1];
+  const s=asc(f,5,7);
+  const fl=[];
+  if(f[14]&8)fl.push('MAX');if(f[14]&4)fl.push('MIN');if(f[14]&2)fl.push('HOLD');if(f[14]&1)fl.push('REL');
+  if(!(f[15]&4))fl.push('AUTO');if(f[15]&2)fl.push('BAT');if(f[15]&1)fl.push('HV');
+  if(f[16]&4)fl.push('PMAX');if(f[16]&2)fl.push('PMIN');
+  const mode=UACDC.has(fn)?((f[16]&8)?'AC':'DC'):(UMODE[fn]||fn);
+  return {proto:'UNI-T 19B',mode,unit,flags:fl,value:numOrNull(s),text:s||'--',valid:true};
+}
+const U117={1:'ACV',2:'ACV',3:'ACV',4:'DCV',5:'DCV',6:'OHM',7:'CONT',8:'DIODE',9:'CAP',10:'LozV',11:'Hz',12:'Hz',13:'NCV',14:'DCA',15:'ACA',16:'Hz',17:'ACA',18:'ACA',19:'DCA'};
+function ut117(f){
+  const fn=U117[f[5]]||('f'+f[5]);
+  const s=asc(f,8,7), unit=asc(f,15,3,'ohm');
+  const fl=[];if(f[20]&1)fl.push('REL');if(f[20]&2)fl.push('HOLD');if(f[20]&8)fl.push('BAT');if(f[21]&8)fl.push('AUTO');if(f[21]&1)fl.push('HV');
+  const mode=UACDC.has(fn)?((f[21]&2)?'AC':'DC'):(UMODE[fn]||fn);
+  const r={proto:'UNI-T 24B',mode,unit,flags:fl,value:numOrNull(s),text:s||'--',valid:true};
+  if(fn==='NCV'){r.text=f[6]===0x31?'HI':'LO';r.value=null;}
+  else if(r.value!==null&&(f[18]===0x31||f[18]===0x32)){r.text=f[18]===0x32?'-OL':'OL';r.value=null;}
+  return r;
+}
+function f32le(f,o){const a=new Uint8Array(f.slice(o,o+4));return new DataView(a.buffer).getFloat32(0,true);}
+function roundDp(x,dp){const p=Math.pow(10,dp);return Math.round(x*p)/p;}
+const U181ST={1:'OL',2:'-OL',4:'LEAD',5:'DISC',6:'Lo',7:'Hi'};
+function ut181(f){
+  const raw=f32le(f,10), sb=f[14], dot=sb>>4, st=U181ST[sb&15];
+  const unit=asc(f,15,8,'u181');
+  const fl=[];if(f[5]&0x80)fl.push('HOLD');if(f[5]&0x10)fl.push('REL');if(f[5]&0x20)fl.push('MAX');if(f[5]&0x40)fl.push('PEAK');if(f[6]&1)fl.push('AUTO');if(f[6]&2)fl.push('HV');
+  const U=unit.toUpperCase();
+  const r={proto:'UNI-T 181',mode:U.includes('AC')?'AC':U.includes('DC')?'DC':'',unit:unit.replace(/\s*(AC|DC)\s*/i,''),flags:fl,value:null,text:'',valid:true};
+  if(st){r.text=st;return r;}
+  r.value=roundDp(raw,dot);r.text=r.value.toFixed(Math.min(dot,6));return r;
+}
+const U171U={0:['V','DC'],1:['V','AC'],3:['mV','DC'],4:['mV','AC'],6:['µA','DC'],7:['µA','AC'],9:['mA','DC'],10:['mA','AC'],12:['A','DC'],13:['A','AC'],15:['Ω','Ω'],16:['kΩ','Ω'],17:['MΩ','Ω'],18:['Hz','Hz'],19:['kHz','Hz'],20:['MHz','Hz'],21:['%','Duty'],22:['nF','Cap'],23:['µF','Cap'],24:['mF','Cap'],25:['°C','Temp'],26:['°F','Temp'],27:['V','Diodo'],28:['Ω','Contin.']};
+function ut171(f){
+  const raw=f32le(f,9), mf=f[13], ol=mf&15, dot=mf>>4, u=U171U[f[14]]||['?','?'];
+  const fl=[];if(f[5]&0x80)fl.push('HOLD');if(f[5]&0x10)fl.push('REL');if(f[5]&4)fl.push('BAT');if(f[6]&1)fl.push('AUTO');if(f[6]&2)fl.push('HV');
+  const r={proto:'UNI-T 171',mode:u[1],unit:u[0],flags:fl,value:null,text:'',valid:true};
+  if(ol===1||ol===2){r.text='OL';return r;}
+  r.value=roundDp(raw,dot);r.text=r.value.toFixed(Math.min(dot,6));return r;
+}
+function ut219(f){
+  const dao=f[6], b1=f[7], idx=(f[11]>>4)&15;
+  const set=dao===2?{1:['A','AC'],2:['A','Peak'],3:['Hz','Hz']}:{1:['V','AC'],2:['V','Peak'],3:['Hz','Hz']};
+  const u=set[idx]||set[1];
+  const code0=(f[13]>>6)&3;
+  const fl=[];if(b1&0x10)fl.push('HOLD');if(!(b1&2))fl.push('AUTO');if(f[8]&8)fl.push('REL');if(f[8]&4)fl.push('HV');
+  const r={proto:'UNI-T 219',mode:u[1],unit:u[0],flags:fl,value:null,text:'',valid:true};
+  if(code0){r.text=code0===2?'Err':code0===3?'--':'OL';return r;}
+  const raw=f32le(f,19), dp=u[0]==='A'?2:1;
+  r.value=roundDp(raw,dp);r.text=r.value.toFixed(dp);return r;
+}
+function sum16(a,s,e){let x=0;for(let i=s;i<e;i++)x+=a[i];return x&0xffff;}
+function chkOK(k,f){
+  const n=f.length;
+  if(k==='len8'||k==='u117'){const s=sum16(f,0,n-2);return ((s>>8)&255)===f[n-2]&&(s&255)===f[n-1];}
+  const s=sum16(f,2,n-2);return (s&255)===f[n-2]&&((s>>8)&255)===f[n-1];
+}
+// Extrae tramas AB CD completas desde un búfer (se modifica). Soporta tramas partidas en varios paquetes.
+function abcdExtract(buf){
+  const out=[];let guard=0;
+  while(buf.length>=4&&guard++<400){
+    let i=-1;for(let k=0;k<buf.length-1;k++){if(buf[k]===0xab&&buf[k+1]===0xcd){i=k;break;}}
+    if(i<0){buf.splice(0,buf.length-(buf[buf.length-1]===0xab?1:0));break;}
+    if(i>0)buf.splice(0,i);
+    if(buf.length<4)break;
+    const cands=[];
+    const L8=buf[2];if(L8>=3&&L8<=0x40)cands.push(['len8',L8+3]);
+    const B16=(buf[2]<<8)|buf[3], L16=buf[2]|(buf[3]<<8);
+    if(B16>=2&&B16<=400){cands.push(['u117',B16+6]);cands.push(['u219',B16+6]);}
+    if(L16>=3&&L16<=400)cands.push(['u181',L16+4]);
+    let done=false,need=false;
+    for(const c of cands){
+      if(buf.length<c[1]){need=true;continue;}
+      const fr=buf.slice(0,c[1]);
+      if(chkOK(c[0],fr)){out.push({kind:c[0],frame:fr});buf.splice(0,c[1]);done=true;break;}
+    }
+    if(done)continue;
+    if(need&&buf.length<512)break;
+    buf.splice(0,2);
+  }
+  return out;
+}
+function decodeAbcd(fr,kind,model){
+  const n=fr.length;
+  if(kind==='len8'){
+    if(n===19&&fr[2]===0x10)return {meas:unit19(fr,model)};
+    if(n===9)return {req:'type'};
+    if(n===7)return {req:'data'};
+    const p=fr.slice(3,n-2);
+    if(p.length&&p.every(c=>c>=0x20&&c<0x7f))return {name:String.fromCharCode.apply(null,p).trim()};
+    return {other:true};
+  }
+  if(kind==='u117'&&n>=24&&fr[4]===2)return {meas:ut117(fr)};
+  if(kind==='u219'&&n>=25&&fr[4]===5&&fr[5]===0)return {meas:ut219(fr)};
+  if(kind==='u181'&&fr[4]===2){
+    if(n>=23&&fr[15]>=0x20&&(fr[15]<0x7f||fr[15]===0xb0))return {meas:ut181(fr)};
+    if(n>=17)return {meas:ut171(fr)};
+  }
+  return {other:true};
+}
+const CMD={GET_NAME:[0xab,0xcd,0x03,0x5f,0x01,0xda],GET_DATA:[0xab,0xcd,0x03,0x5d,0x01,0xd8],POLL117:[0xab,0xcd,0x00,0x04,0x05,0x00,0x01,0x81],ON181:[0xab,0xcd,0x04,0x00,0x05,0x01,0x0a,0x00],POLL219:[0xab,0xcd,0x00,0x04,0x05,0x00,0x09,0x00]};
+
+/* ---- Calibración genérica: busca el valor de la pantalla dentro de paquetes desconocidos ---- */
+function extract(d,b){
+  const o=d.o, L=b.length, k=Math.pow(10,-(d.k||0));
+  try{
+    switch(d.t){
+      case 'i16le':if(o+2>L)return NaN;{let x=b[o]|(b[o+1]<<8);if(x&0x8000)x-=0x10000;return x*k;}
+      case 'i16be':if(o+2>L)return NaN;{let x=(b[o]<<8)|b[o+1];if(x&0x8000)x-=0x10000;return x*k;}
+      case 'sm16le':if(o+2>L)return NaN;{const x=b[o]|(b[o+1]<<8);return (x&0x8000?-1:1)*(x&0x7fff)*k;}
+      case 'sm16be':if(o+2>L)return NaN;{const x=(b[o]<<8)|b[o+1];return (x&0x8000?-1:1)*(x&0x7fff)*k;}
+      case 'u24le':if(o+3>L)return NaN;return ((b[o]|(b[o+1]<<8)|(b[o+2]<<16))&0x7ffff)*k*((b[o+2]&0x80)?-1:1);
+      case 'u24be':if(o+3>L)return NaN;return ((b[o+2]|(b[o+1]<<8)|(b[o]<<16))&0x7ffff)*k*((b[o]&0x80)?-1:1);
+      case 'f32le':case 'f32be':{if(o+4>L)return NaN;const a=new Uint8Array(4);for(let i=0;i<4;i++)a[i]=b[o+i];return new DataView(a.buffer).getFloat32(0,d.t==='f32le');}
+      case 'ascii':{let s='';for(let i=0;i<L;i++)s+=(b[i]>=32&&b[i]<127)?String.fromCharCode(b[i]):' ';const m=s.match(/[-+]?\d*\.?\d+/g)||[];return m[o]!==undefined?parseFloat(m[o]):NaN;}
+    }
+  }catch(e){}
+  return NaN;
+}
+function calName(d){const ks=d.k?' ×10^-'+d.k:'';return ({i16le:'entero 16b LE',i16be:'entero 16b BE',sm16le:'signo+mag 16b LE',sm16be:'signo+mag 16b BE',u24le:'24b LE',u24be:'24b BE',f32le:'float LE',f32be:'float BE',ascii:'texto #'}[d.t]||d.t)+(d.t==='ascii'?d.o:' @'+d.o+ks)+' ('+d.len+'B)';}
+function findCands(pkts,ref,refStr){
+  if(!pkts.length)return [];
+  const last=pkts[pkts.length-1];
+  const same=pkts.filter(p=>p.b.length===last.b.length&&p.c===last.c).slice(-40);
+  const L=last.b.length;
+  const dec=((String(refStr||ref).split(/[.,]/)[1])||'').length;
+  const tol=Math.max(Math.abs(ref)*0.1,3*Math.pow(10,-dec),1e-9);
+  const types=[];
+  for(let o=0;o+2<=L;o++)for(let k=0;k<=4;k++)['i16le','i16be','sm16le','sm16be'].forEach(t=>types.push({t,o,k}));
+  for(let o=0;o+3<=L;o++)for(let k=0;k<=4;k++)['u24le','u24be'].forEach(t=>types.push({t,o,k}));
+  for(let o=0;o+4<=L;o++)['f32le','f32be'].forEach(t=>types.push({t,o,k:0}));
+  for(let o=0;o<6;o++)types.push({t:'ascii',o,k:0});
+  const res=[];
+  for(const d of types){
+    let hits=0;for(const p of same){const v=extract(d,p.b);if(isFinite(v)&&Math.abs(v-ref)<=tol)hits++;}
+    const lastV=extract(d,last.b);
+    if(hits)res.push(Object.assign({},d,{hits,of:same.length,v:lastV,len:L,c:last.c}));
+  }
+  const pri={ascii:0,sm16le:1,i16le:2,u24le:3,f32le:4,sm16be:5,i16be:6,u24be:7,f32be:8};
+  res.sort((a,b)=>b.hits-a.hits||pri[a.t]-pri[b.t]||a.o-b.o);
+  const seen=new Set();
+  return res.filter(r=>{const key=r.v+'|'+r.hits;if(seen.has(key))return false;seen.add(key);return true;}).slice(0,10);
+}
+
+G.UTP={owon6,owon15,owon14,bdm,isBdm,fff0,abcdExtract,decodeAbcd,unit19,ut117,ut181,ut171,ut219,extract,findCands,calName,pad,CMD,R10W_SERIES,R2W_SERIES,XK};
+})(typeof window!=='undefined'?window:globalThis);
+</script>
+
+<script>
+(()=>{
+'use strict';
+const $=id=>document.getElementById(id);
+const U=window.UTP;
+const uu=n=>'0000'+n.toString(16).padStart(4,'0')+'-0000-1000-8000-00805f9b34fb';
+const C={fff2:uu(0xfff2),fff4:uu(0xfff4),ffb2:uu(0xffb2),bat:uu(0x2a19),model:uu(0x2a24),manu:uu(0x2a29),
+  isN:'49535343-1e4d-4bd9-ba61-23c647249616',isW1:'49535343-8841-43f4-a8d4-ecbe34729bb3',isW2:'49535343-6daa-4d02-abf6-19569aca69fe'};
+const ISSC='49535343-fe7d-4ae5-8fa9-9fafd205e455';
+const OPT_SVCS=[0xfff0,0xffe0,0xffe5,0xffb0,0xff00,0xff10,0xffd0,0xfee7,0xae00,0xae30,0x180a,0x180f,ISSC,'6e400001-b5a3-f393-e0a9-e50e24dcca9e','0783b03e-8535-b5a0-7140-a304d2495cb7'];
+const FILTERS=[{namePrefix:'BDM'},{namePrefix:'UT'},{namePrefix:'OWON'},{namePrefix:'UNI'},{namePrefix:'Bluetooth DMM'},{name:'ZY'},{services:[0xfff0]},{services:[ISSC]}];
+const short=u=>/^0000....-0000-1000-8000-00805f9b34fb$/.test(u)?u.slice(4,8):u.slice(0,8);
+const hex=b=>Array.from(b,x=>x.toString(16).padStart(2,'0')).join(' ');
+const pad2=n=>String(n).padStart(2,'0');
+const hhmmss=t=>{const d=new Date(t);return pad2(d.getHours())+':'+pad2(d.getMinutes())+':'+pad2(d.getSeconds());};
+const fmtNum=v=>v==null||!isFinite(v)?'–':(Math.abs(v)>=1000?v.toFixed(1):Math.abs(v)>=100?v.toFixed(2):v.toFixed(3));
+
+/* ---------- almacenamiento local por bloques ---------- */
+const P='ut217a_';
+const store={ok:false,
+  test(){try{localStorage.setItem(P+'t','1');const r=localStorage.getItem(P+'t')==='1';localStorage.removeItem(P+'t');return this.ok=r;}catch(e){return this.ok=false;}},
+  get(k,d){try{const v=localStorage.getItem(P+k);return v==null?d:JSON.parse(v);}catch(e){return d;}},
+  set(k,v){try{localStorage.setItem(P+k,JSON.stringify(v));return true;}catch(e){return false;}},
+  del(k){try{localStorage.removeItem(P+k);}catch(e){}}};
+store.test();
+const CH=500;
+let samples=[];           // [t, valor|null, texto, unidad, modo, indicadores, etiqueta, tipo C|M]
+let savedUpTo=0, dirty=false, lastSaveOk=null, lastSaveT=0, pendingMig=false;
+let rawLog=[], rawDirty=false;
+(function load(){
+  const m=store.get('meta',{n:0});
+  for(let i=0;i<m.n;i++)samples=samples.concat(store.get('c'+i,[]));
+  savedUpTo=samples.length;
+  // Migración única desde la v1 (clave ut217a_samples con objetos {t,v,u}). No borra la clave antigua.
+  if(!store.get('mig1',false)){
+    const old=store.get('samples',null);
+    if(Array.isArray(old)&&old.length){
+      const conv=old.filter(o=>o&&typeof o.t==='number').map(o=>[o.t,typeof o.v==='number'?o.v:null,typeof o.v==='number'?String(o.v):'',o.u||'','','','v1','C']);
+      samples=conv.concat(samples).sort((a,b)=>a[0]-b[0]);savedUpTo=0;dirty=true;pendingMig=true;
+    }else store.set('mig1',true);
+  }
+  rawLog=store.get('raw',[]).filter(Array.isArray);
+  $('lbl').value=store.get('lbl','');
+  const iv=store.get('ivl',null);if(iv!=null)$('ivl').value=iv;
+})();
+function persist(){
+  if(!dirty&&!rawDirty)return;
+  let ok=true;
+  if(dirty){
+    const first=Math.floor(Math.min(savedUpTo,samples.length)/CH), nCh=Math.ceil(samples.length/CH);
+    for(let i=first;i<nCh&&ok;i++)ok=store.set('c'+i,samples.slice(i*CH,(i+1)*CH));
+    if(ok)ok=store.set('meta',{n:nCh,count:samples.length});
+    if(ok){savedUpTo=samples.length;dirty=false;if(pendingMig){store.set('mig1',true);pendingMig=false;}}
+  }
+  if(rawDirty){store.set('raw',rawLog.slice(-400));rawDirty=false;}
+  lastSaveOk=ok;lastSaveT=Date.now();showSave();
+}
+function showSave(){
+  const el=$('saveInfo');
+  if(!store.ok){el.innerHTML='<span class="warn">⚠ Este navegador no permite guardar localmente: exporta antes de cerrar.</span>';return;}
+  if(lastSaveOk===false){el.innerHTML='<span class="warn">⚠ No se pudo guardar (memoria llena). Exporta y borra.</span>';return;}
+  el.innerHTML=(lastSaveT?'Guardado local ✓ '+hhmmss(lastSaveT)+' — ':'')+samples.length+' lecturas en este navegador. Exporta al terminar.';
+}
+setInterval(persist,2000);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)persist();else if(connected)wakeOn();});
+window.addEventListener('pagehide',persist);
+window.addEventListener('beforeunload',e=>{persist();if(recording||dirty){e.preventDefault();e.returnValue='';}});
+
+/* ---------- UI auxiliares ---------- */
+function modal(txt,o){o=o||{};return new Promise(res=>{
+  $('mTxt').textContent=txt;$('mNo').style.display=o.confirm?'':'none';
+  $('mArea').hidden=o.area==null;if(o.area!=null)$('mArea').value=o.area;
+  $('modal').style.display='flex';
+  if(o.area!=null)setTimeout(()=>{try{$('mArea').focus();$('mArea').select();}catch(e){}},50);
+  $('mYes').onclick=()=>{$('modal').style.display='none';res(true);};
+  $('mNo').onclick=()=>{$('modal').style.display='none';res(false);};
+});}
+function status(t,cls){$('st').textContent=t;$('dot').className='dot'+(recording&&connected?' rec':cls?' '+cls:'');}
+function hint(t){const h=$('hint');h.textContent=t||'';h.className=t?'warn show':'warn';}
+function logLine(s){if(!$('dDiag').open)return;const L=$('log');L.textContent=(s+'\n'+L.textContent).slice(0,9000);}
+
+/* ---------- estado ---------- */
+let dev=null,connected=false,userDisc=false,reconN=0,reconT=null,wdT=null,pollT=null,uPollT=null,connT=0;
+let resub=false,chars={},svcList=[],family='',fff2info=null,batPct=null,modelStr='',owonHint=0,unitModel='',unitKind='',probeI=0;
+let pktN=0,lenHist={},decN=0,lastDecT=0,lastPktT=0,lastKind='';
+const recentPkts=[];let ubuf=[];
+let cur=null;const live=[];
+let recording=false,lastRecT=0;
+let calDec=store.get('cal',null), calUnit=store.get('calUnit','A');
+$('calUnit').value=calUnit;
+
+/* ---------- Bluetooth ---------- */
+let gq=Promise.resolve();
+function gatt(fn){const p=gq.then(fn,fn);gq=p.catch(()=>{});return p;}
+function bytesOf(dv){return new Uint8Array(dv.buffer.slice(dv.byteOffset,dv.byteOffset+dv.byteLength));}
+function props(c){const p=c.properties;return ['read','write','writeWithoutResponse','notify','indicate'].filter(k=>p[k]).map(k=>k==='writeWithoutResponse'?'writeNR':k).join(',');}
+function writeTo(c,bytes){return gatt(async()=>{const a=Uint8Array.from(bytes),p=c.properties;
+  if(p.writeWithoutResponse&&c.writeValueWithoutResponse)return c.writeValueWithoutResponse(a);
+  if(c.writeValueWithResponse)return c.writeValueWithResponse(a);return c.writeValue(a);});}
+
+async function initBle(){
+  if(!navigator.bluetooth){
+    $('noBle').hidden=false;if(!window.isSecureContext)$('noBleT').textContent='Esta página no está abierta en modo seguro (https), y el Bluetooth web queda bloqueado.';
+    $('bFind').disabled=$('bAll').disabled=true;return;}
+  try{if(navigator.bluetooth.getAvailability&&!(await navigator.bluetooth.getAvailability())){$('noBle').hidden=false;$('noBleT').textContent='El Bluetooth del equipo está apagado o no disponible.';}}catch(e){}
+}
+async function pick(all){
+  if(!navigator.bluetooth)return;
+  let d;
+  try{d=await navigator.bluetooth.requestDevice(all?{acceptAllDevices:true,optionalServices:OPT_SVCS}:{filters:FILTERS,optionalServices:OPT_SVCS});}
+  catch(e){
+    if(e&&e.name==='NotFoundError'){if(!all)modal('No se eligió ningún equipo. Si la pinza no aparecía, revisa “¿No aparece en la lista?” o toca “Ver todos”.');}
+    else modal('Error de Bluetooth: '+(e&&e.message||e));
+    return;}
+  if(dev&&dev!==d){userDisc=true;try{dev.gatt.disconnect();}catch(e){}}
+  dev=d;userDisc=false;reconN=0;
+  if(!dev._utl){dev.addEventListener('gattserverdisconnected',e=>{if(e&&e.target&&e.target!==dev)return;onDisc();});dev._utl=true;}
+  try{await setup();}catch(e){status('Error al conectar','');modal('No se pudo conectar: '+(e&&e.message||e)+'. Acércate a la pinza y toca Reconectar.');$('bRecon').hidden=false;}
+}
+async function setup(){
+  clearTimers();
+  status('Conectando…','wait');
+  const server=await dev.gatt.connect();
+  if(userDisc){try{dev.gatt.disconnect();}catch(e){}return;}
+  chars={};svcList=[];
+  let svcs=[];try{svcs=await server.getPrimaryServices();}catch(e){svcs=[];}
+  for(const s of svcs){let cs=[];try{cs=await s.getCharacteristics();}catch(e){}
+    svcList.push({u:s.uuid,c:cs.map(c=>short(c.uuid)+'['+props(c)+']')});for(const c of cs)chars[c.uuid]=c;}
+  family=chars[C.fff4]?'fff0':chars[C.isN]?'unit':chars[C.ffb2]?'ffb0':'gen';
+  fff2info=null;batPct=null;modelStr='';
+  try{if(chars[C.fff2]&&chars[C.fff2].properties.read){const b=bytesOf(await chars[C.fff2].readValue());if(b.length>=6){fff2info={serie:b[0],bat:b[1],fw:b[2]+'.'+b[3]+'.'+b[4]};if(b[1]<=100)batPct=b[1];}}}catch(e){}
+  try{if(chars[C.bat])batPct=bytesOf(await chars[C.bat].readValue())[0];}catch(e){}
+  try{if(chars[C.model])modelStr=new TextDecoder().decode(await chars[C.model].readValue()).replace(/\0/g,'').trim();}catch(e){}
+  let nSub=0;
+  for(const u in chars){const c=chars[u],p=c.properties;if(!(p.notify||p.indicate))continue;
+    try{await c.startNotifications();if(!c._utl){c.addEventListener('characteristicvaluechanged',onNotif);c._utl=true;}nSub++;}catch(e){logLine('No se pudo suscribir '+short(u));}}
+  owonHint=fff2info?(U.R10W_SERIES.has(fff2info.serie)?15:U.R2W_SERIES.has(fff2info.serie)?6:0):0;
+  const sel=$('wChar');sel.innerHTML='';
+  for(const u in chars){const p=chars[u].properties;if(p.write||p.writeWithoutResponse){const o=document.createElement('option');o.value=u;o.textContent='Escribir en '+short(u);sel.appendChild(o);}}
+  if(!sel.options.length)sel.innerHTML='<option value="">(sin característica de escritura)</option>';
+  connected=true;connT=Date.now();reconN=0;ubuf=[];unitKind='';probeI=0;resub=false;
+  $('bDis').disabled=false;$('bRecon').hidden=true;
+  status('Conectado','on');devLine();
+  wakeOn();
+  if(family==='unit')unitStart();
+  wdT=setInterval(watchdog,1500);
+  if(!svcs.length)hint('Conectado, pero no se encontró ningún servicio conocido. Copia el Diagnóstico y envíamelo.');
+  else if(!nSub)hint('Conectado, pero sin canales de datos. Copia el Diagnóstico y envíamelo.');
+  else hint('');
+  renderDiag();
+}
+function devLine(){
+  const parts=[];if(dev)parts.push(dev.name||'sin nombre');if(batPct!=null)parts.push('🔋'+batPct+'%');if(wakeLock)parts.push('pantalla activa');
+  $('devInfo').textContent=parts.join(' · ');}
+function clearTimers(){clearInterval(wdT);clearInterval(uPollT);clearTimeout(reconT);wdT=uPollT=reconT=null;}
+function onDisc(){
+  const was=connected;connected=false;clearTimers();persist();
+  if(userDisc||!dev){status('Desconectado','');$('bRecon').hidden=!dev;$('bDis').disabled=true;wakeOff();return;}
+  if(was)logLine('Se perdió la conexión '+hhmmss(Date.now()));
+  scheduleRecon();
+}
+function scheduleRecon(){
+  if(reconN>=30){status('Sin conexión','');$('bRecon').hidden=false;$('bDis').disabled=true;hint('Se perdió la conexión con la pinza. Acércate y toca Reconectar.');wakeOff();return;}
+  reconN++;status('Reconectando… ('+reconN+')','wait');$('bDis').disabled=false;
+  reconT=setTimeout(async()=>{if(userDisc)return;try{await setup();}catch(e){if(!connected)scheduleRecon();}},Math.min(1500+reconN*500,8000));
+}
+function onNotif(e){const c=e.target;onData(c.uuid,bytesOf(c.value));}
+
+/* ---------- UNI-T: saludo y sondeo ---------- */
+function unitW(){return chars[C.isW1]||chars[C.isW2]||null;}
+function unitSend(bytes){const c=unitW();if(!c)return;writeTo(c,bytes).catch(e=>logLine('Error escritura: '+e.message));}
+function unitStart(){unitSend(U.CMD.GET_NAME);setTimeout(()=>{if(connected)unitSend(U.CMD.GET_DATA);},400);}
+function unitProbe(){
+  const seq=[[U.CMD.GET_DATA],[U.CMD.GET_NAME,U.CMD.GET_DATA],[U.CMD.POLL117],[U.CMD.ON181],[U.CMD.POLL219]];
+  const s=seq[probeI++%seq.length];s.forEach((c,i)=>setTimeout(()=>{if(connected)unitSend(c);},i*400));
+}
+function feedUnit(b){
+  for(const x of b)ubuf.push(x);if(ubuf.length>4096)ubuf.splice(0,ubuf.length-1024);
+  const out=[];
+  for(const f of U.abcdExtract(ubuf)){
+    const d=U.decodeAbcd(f.frame,f.kind,unitModel);
+    if(d.meas){out.push(d.meas);if(unitKind!==f.kind){unitKind=f.kind;clearInterval(uPollT);uPollT=null;if(f.kind==='u117')uPollT=setInterval(()=>{if(connected)unitSend(U.CMD.POLL117);},500);}}
+    else if(d.req==='type')unitSend(U.CMD.GET_NAME);
+    else if(d.req==='data')unitSend(U.CMD.GET_DATA);
+    else if(d.name){unitModel=d.name;unitSend(U.CMD.GET_DATA);}
+  }
+  return out;
+}
+
+/* ---------- recepción y decodificación ---------- */
+function onData(uuid,b){
+  const t=Date.now();
+  pktN++;lastPktT=t;lenHist[b.length]=(lenHist[b.length]||0)+1;
+  recentPkts.push({t,c:uuid,b});if(recentPkts.length>300)recentPkts.shift();
+  rawLog.push([t,short(uuid),hex(b)]);if(rawLog.length>3000)rawLog.splice(0,rawLog.length-3000);rawDirty=true;
+  logLine(hhmmss(t)+' ['+short(uuid)+'] '+b.length+'B '+hex(b));
+  const force=$('calForce').checked&&calDec;
+  let rs=null;
+  if(!force){
+    if(family==='fff0'&&uuid===C.fff4){const r=U.fff0(b,owonHint);if(r){rs=r.recs;lastKind=r.kind;}}
+    else if(family==='unit'&&uuid===C.isN)rs=feedUnit(b);
+  }
+  if(rs&&rs.length){for(const r of rs)onReading(r,t);return;}
+  if(calDec&&calDec.c===uuid&&calDec.len===b.length){const v=U.extract(calDec,b);if(isFinite(v))onReading({proto:'calibrado',mode:'',unit:calUnit,flags:[],value:v,text:fmtNum(v),valid:true},t);}
+}
+function onReading(r,t){
+  decN++;lastDecT=t;cur=r;
+  $('val').textContent=r.text||'--';$('unit').textContent=r.unit||'';
+  const tg=$('tags');tg.innerHTML='';
+  [r.mode].concat(r.flags||[]).filter(Boolean).forEach((x,i)=>{const s=document.createElement('span');s.className='tag'+(i===0?' m':'');s.textContent=x;tg.appendChild(s);});
+  $('protoLine').textContent='Formato: '+r.proto+' · compara con la pantalla de la pinza';
+  if(r.value!=null&&isFinite(r.value)){live.push({t,v:r.value,u:r.unit});if(live.length>300)live.shift();drawSoon();}
+  if(recording){const iv=(+$('ivl').value||0)*1000;if(!iv||t-lastRecT>=iv-60){addSample(r,t,'C');lastRecT=t;}}
+}
+function addSample(r,t,kind){
+  samples.push([t,r.value!=null&&isFinite(r.value)?r.value:null,r.text||'',r.unit||'',r.mode||'',(r.flags||[]).join(' '),$('lbl').value.trim(),kind]);
+  dirty=true;stats();if(kind==='M')notes();
+}
+
+/* ---------- estadísticas, notas, gráfico ---------- */
+function stats(){
+  const unit=cur?cur.unit:(samples.length?samples[samples.length-1][3]:'');
+  let mn=Infinity,mx=-Infinity,s=0,n=0;
+  for(const x of samples){if(x[1]==null||x[3]!==unit)continue;mn=Math.min(mn,x[1]);mx=Math.max(mx,x[1]);s+=x[1];n++;}
+  $('sMin').textContent=n?fmtNum(mn):'–';$('sMax').textContent=n?fmtNum(mx):'–';$('sAvg').textContent=n?fmtNum(s/n):'–';$('sN').textContent=samples.length;showSave();
+}
+function notes(){
+  const box=$('notes');box.innerHTML='';
+  const m=samples.filter(x=>x[7]==='M').slice(-6).reverse();
+  if(!m.length)return;
+  const h=document.createElement('div');h.innerHTML='<span class="mut">Últimas anotaciones</span><span></span>';box.appendChild(h);
+  for(const x of m){const d=document.createElement('div');const a=document.createElement('span'),b=document.createElement('b');
+    a.textContent=hhmmss(x[0])+(x[6]?' · '+x[6]:'');b.textContent=x[2]+' '+x[3]+(x[4]?' '+x[4]:'');d.appendChild(a);d.appendChild(b);box.appendChild(d);}
+}
+let drawPending=false;
+function drawSoon(){if(drawPending)return;drawPending=true;requestAnimationFrame(()=>{drawPending=false;draw();});}
+function draw(){
+  const c=$('cv'),r=window.devicePixelRatio||1,W=c.clientWidth,H=c.clientHeight;if(!W)return;
+  if(c.width!==Math.round(W*r)){c.width=Math.round(W*r);c.height=Math.round(H*r);}
+  const g=c.getContext('2d');g.setTransform(r,0,0,r,0,0);g.clearRect(0,0,W,H);
+  const u=live.length?live[live.length-1].u:'';const pts=live.filter(p=>p.u===u);
+  if(pts.length<2)return;
+  let mn=Infinity,mx=-Infinity;for(const p of pts){mn=Math.min(mn,p.v);mx=Math.max(mx,p.v);}
+  if(mx-mn<1e-9){mx+=Math.max(Math.abs(mx)*0.05,0.01);mn-=Math.max(Math.abs(mn)*0.05,0.01);}
+  const pd=(mx-mn)*0.1;mn-=pd;mx+=pd;
+  g.strokeStyle='#283040';g.fillStyle='#8b96a8';g.font='10px monospace';
+  for(let i=0;i<=4;i++){const y=H*i/4;g.beginPath();g.moveTo(0,y);g.lineTo(W,y);g.stroke();}
+  const t0=pts[0].t,t1=pts[pts.length-1].t||t0+1;
+  g.strokeStyle='#f5f7a8';g.lineWidth=1.6;g.beginPath();
+  pts.forEach((p,i)=>{const x=(p.t-t0)/Math.max(1,t1-t0)*W,y=H-(p.v-mn)/(mx-mn)*H;i?g.lineTo(x,y):g.moveTo(x,y);});g.stroke();
+  g.font='10px monospace';for(let i=0;i<=4;i++){const y=Math.min(H-3,H*i/4+11),t=fmtNum(mx-(mx-mn)*i/4)+' '+u,w=g.measureText(t).width;g.fillStyle='rgba(11,14,19,.8)';g.fillRect(2,y-10,w+4,13);g.fillStyle='#8b96a8';g.fillText(t,4,y);}
+}
+window.addEventListener('resize',drawSoon);
+
+/* ---------- vigilancia ---------- */
+function watchdog(){
+  if(!connected)return;
+  if(dev&&!dev.gatt.connected){onDisc();return;}
+  const t=Date.now(),sincePkt=t-(lastPktT>connT?lastPktT:connT),sinceDec=t-(lastDecT>connT?lastDecT:connT);
+  if(family==='unit'&&sinceDec>3000)unitProbe();
+  if(family==='fff0'&&sincePkt>6000&&!resub&&chars[C.fff4]){resub=true;gatt(()=>chars[C.fff4].startNotifications()).catch(()=>{});}
+  if(sincePkt>6000)hint('Conectado, pero la pinza no envía datos. Revisa que esté en modo DMM (no OSC) y con el ícono Bluetooth fijo.');
+  else if(lastPktT>connT&&sinceDec>4000&&!calDec){hint('Llegan datos, pero el formato no se reconoce. Si la pinza está en OSC, pásala a DMM; si no, usa Calibración manual (abajo) o envíame el Diagnóstico.');$('dCal').open=true;}
+  else if(sinceDec<=4000)hint('');
+  if($('dDiag').open)renderDiag();
+}
+function diagText(){
+  const L=[];
+  L.push('App: visor UT217A v2 · '+new Date().toLocaleString('es-CL'));
+  L.push('Navegador: '+navigator.userAgent);
+  L.push('Equipo: '+(dev?(dev.name||'(sin nombre)')+' · id '+dev.id:'—')+' · '+(connected?'conectado':'desconectado'));
+  L.push('Familia: '+(family||'—')+(family==='fff0'?' (OWON / Bluetooth DMM)':family==='unit'?' (UNI-T iDMM2.0)':'')+' · formato: '+(lastKind||unitKind||(cur&&cur.proto)||'—'));
+  if(fff2info)L.push('Info FFF2: serie '+fff2info.serie+' · batería '+fff2info.bat+'% · fw '+fff2info.fw);
+  if(modelStr)L.push('Modelo (DIS): '+modelStr);if(unitModel)L.push('Modelo UNI-T: '+unitModel);
+  L.push('Servicios:');svcList.forEach(s=>L.push('  '+short(s.u)+': '+s.c.join(' ')));
+  L.push('Paquetes: '+pktN+' · por largo: '+(Object.keys(lenHist).map(k=>k+'B×'+lenHist[k]).join(', ')||'—')+' · lecturas decodificadas: '+decN);
+  if(calDec)L.push('Calibración activa: '+U.calName(calDec));
+  if(cur)L.push('Última lectura: '+cur.text+' '+cur.unit+' '+cur.mode+' ['+(cur.flags||[]).join(',')+']');
+  L.push('Últimos paquetes:');recentPkts.slice(-12).forEach(p=>L.push('  '+hhmmss(p.t)+' '+short(p.c)+' '+p.b.length+'B '+hex(p.b)));
+  return L.join('\n');
+}
+function renderDiag(){$('diag').textContent=diagText();}
+$('dDiag').addEventListener('toggle',()=>{if($('dDiag').open)renderDiag();});
+
+/* ---------- pantalla encendida ---------- */
+let wakeLock=null;
+async function wakeOn(){try{if('wakeLock' in navigator&&!wakeLock&&!document.hidden){wakeLock=await navigator.wakeLock.request('screen');wakeLock.addEventListener('release',()=>{wakeLock=null;devLine();});}}catch(e){}devLine();}
+function wakeOff(){try{wakeLock&&wakeLock.release();}catch(e){}wakeLock=null;devLine();}
+
+/* ---------- botones de conexión ---------- */
+$('bFind').onclick=()=>pick(false);
+$('bAll').onclick=()=>pick(true);
+$('bRecon').onclick=async()=>{if(!dev)return pick(false);userDisc=false;reconN=0;try{await setup();}catch(e){status('Sin conexión','');modal('No se pudo reconectar: '+(e&&e.message||e)+'. Revisa que el Bluetooth de la pinza siga activo, o usa Buscar pinza.');}};
+$('bDis').onclick=()=>{userDisc=true;clearTimers();try{dev&&dev.gatt.connected?dev.gatt.disconnect():onDisc();}catch(e){onDisc();}};
+
+/* ---------- registro ---------- */
+$('lbl').onchange=()=>store.set('lbl',$('lbl').value);
+$('ivl').onchange=()=>store.set('ivl',$('ivl').value);
+$('bRec').onclick=()=>{
+  if(!recording&&!connected){modal('Conecta la pinza primero.');return;}
+  recording=!recording;lastRecT=0;
+  $('bRec').textContent=recording?'■ Detener':'● Grabar continuo';$('bRec').className=(recording?'p':'g')+' grow';
+  status($('st').textContent,connected?'on':'');persist();
+};
+$('bNote').onclick=()=>{
+  if(!cur||Date.now()-lastDecT>5000){modal('No hay una lectura actual (conecta la pinza y espera que aparezca el valor).');return;}
+  addSample(cur,Date.now(),'M');persist();
+};
+const csvVal=v=>v==null?'':String(v).replace('.',',');
+const q=s=>/[;"\n]/.test(s)?'"'+String(s).replace(/"/g,'""')+'"':s;
+function csv(){return 'fecha_hora;timestamp_ms;tipo;etiqueta;valor;texto;unidad;modo;indicadores\n'+
+  samples.map(x=>[new Date(x[0]).toLocaleString('es-CL'),x[0],x[7]==='M'?'anotación':'continuo',q(x[6]),csvVal(x[1]),q(x[2]),x[3],x[4],x[5]].join(';')).join('\n');}
+const rawCsv=()=>'timestamp_ms;caracteristica;hex\n'+rawLog.map(r=>r.join(';')).join('\n');
+const stamp=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'_'+pad2(d.getHours())+pad2(d.getMinutes());};
+function download(txt,name){
+  try{const blob=new Blob(['﻿'+txt],{type:'text/csv;charset=utf-8'});const a=document.createElement('a');
+    a.href=URL.createObjectURL(blob);a.download=name;document.body.appendChild(a);a.click();
+    setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},5000);
+    modal('Descarga iniciada: '+name+'. Revisa que aparezca en Descargas; si no aparece, usa Compartir o Copiar.');}
+  catch(e){modal('No se pudo descargar ('+e.message+'). Usa Compartir o Copiar.');}
+}
+$('bCsv').onclick=()=>{persist();samples.length?download(csv(),'UT217A_'+stamp()+'.csv'):modal('No hay lecturas guardadas.');};
+$('bRaw').onclick=()=>rawLog.length?download(rawCsv(),'UT217A_crudo_'+stamp()+'.csv'):modal('No hay paquetes.');
+$('bShare').onclick=async()=>{
+  if(!samples.length)return modal('No hay lecturas guardadas.');persist();
+  try{const f=new File(['﻿'+csv()],'UT217A_'+stamp()+'.csv',{type:'text/csv'});
+    if(navigator.canShare&&navigator.canShare({files:[f]}))await navigator.share({files:[f],title:'Mediciones UT217A'});
+    else modal('Compartir archivos no está disponible aquí. Usa Exportar CSV o Copiar.');}
+  catch(e){if(e.name!=='AbortError')modal('No se pudo compartir: '+e.message);}
+};
+async function copyText(t,okMsg){try{await navigator.clipboard.writeText(t);modal(okMsg);}catch(e){modal('No se pudo copiar automáticamente. Mantén presionado el texto, Seleccionar todo y Copiar:',{area:t});}}
+$('bCopy').onclick=()=>samples.length?copyText(csv(),'Copiadas '+samples.length+' lecturas ✓ (pégalas en Excel o WhatsApp).'):modal('No hay lecturas guardadas.');
+$('bDiagCopy').onclick=()=>copyText(diagText(),'Diagnóstico copiado ✓ Pégalo en el chat.');
+$('bClr').onclick=async()=>{
+  if(!(await modal('¿Borrar '+samples.length+' lecturas y '+rawLog.length+' paquetes crudos? No se puede deshacer: exporta antes.',{confirm:true})))return;
+  const m=store.get('meta',{n:0});for(let i=0;i<Math.max(m.n,Math.ceil(samples.length/CH));i++)store.del('c'+i);
+  store.del('meta');store.del('raw');samples=[];rawLog=[];savedUpTo=0;dirty=false;rawDirty=false;live.length=0;
+  $('log').textContent='';stats();notes();draw();
+};
+
+/* ---------- calibración manual ---------- */
+function showCal(){$('calName').textContent=calDec?U.calName(calDec)+' → '+calUnit:'ninguno';}
+showCal();
+$('calUnit').onchange=()=>{calUnit=$('calUnit').value;store.set('calUnit',calUnit);showCal();};
+$('bCalReset').onclick=()=>{calDec=null;store.del('cal');$('cands').innerHTML='';showCal();};
+$('bCal').onclick=()=>{
+  const s=($('ref').value||'').trim().replace(',','.');const ref=parseFloat(s);
+  if(!isFinite(ref))return modal('Escribe el número que muestra la pinza (ej: 0.15).');
+  if(!recentPkts.length)return modal('Aún no llegan paquetes. Conecta la pinza primero.');
+  const cs=U.findCands(recentPkts,ref,s),box=$('cands');box.innerHTML='';
+  if(!cs.length){box.innerHTML='<p class="warn">Sin coincidencias. Cambia la medición, espera 3 s y reintenta, o envíame el Diagnóstico.</p>';return;}
+  cs.forEach(x=>{const d=document.createElement('div');d.className='cand';const a=document.createElement('span'),b=document.createElement('b');
+    a.textContent=U.calName(x)+' · calza '+x.hits+'/'+x.of;b.textContent=fmtNum(x.v);d.appendChild(a);d.appendChild(b);
+    d.onclick=()=>{calDec={t:x.t,o:x.o,k:x.k,len:x.len,c:x.c};store.set('cal',calDec);box.innerHTML='';showCal();};box.appendChild(d);});
+  const p=document.createElement('p');p.className='mut';p.textContent='Toca el que siga el valor de la pantalla. Verifícalo cambiando la carga.';box.appendChild(p);
+};
+
+/* ---------- comando manual ---------- */
+let cmdT=null;
+function hexBytes(s){const h=s.replace(/[^0-9a-f]/gi,'');if(!h||h.length%2)return null;return h.match(/../g).map(x=>parseInt(x,16));}
+function sendCmd(){const c=chars[$('wChar').value],b=hexBytes($('cmd').value);
+  if(!c||!b){stopCmd();modal(c?'HEX inválido.':'No hay característica de escritura (conecta primero).');return;}
+  writeTo(c,b).then(()=>logLine('→ '+hex(b))).catch(e=>logLine('Error escritura: '+e.message));}
+function stopCmd(){clearInterval(cmdT);cmdT=null;$('bPoll').textContent='Repetir';}
+$('bOnce').onclick=sendCmd;
+$('bPoll').onclick=()=>{if(cmdT)return stopCmd();sendCmd();cmdT=setInterval(sendCmd,Math.max(150,+$('cmdIvl').value||500));$('bPoll').textContent='Detener';};
+
+/* ---------- inicio ---------- */
+initBle();stats();notes();showSave();draw();
+})();
+</script>
+</body>
+</html>
