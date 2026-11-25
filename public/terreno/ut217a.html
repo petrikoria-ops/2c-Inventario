@@ -89,7 +89,8 @@ textarea{width:100%;height:150px;background:#0b0e13;color:var(--tx);border:1px s
   <div class="card">
     <div class="tags" id="tags"></div>
     <div class="big"><span id="val">--.--</span><span id="unit"></span></div>
-    <p class="mut" id="protoLine" style="margin:0;text-align:right"></p>
+    <p id="sec" style="margin:0;text-align:right;font:600 16px ui-monospace,Consolas,monospace;color:var(--mut)"></p>
+    <p class="mut" id="protoLine" style="margin:2px 0 0;text-align:right"></p>
     <div class="stats">
       <div>Mín<b id="sMin">–</b></div><div>Máx<b id="sMax">–</b></div><div>Prom<b id="sAvg">–</b></div><div>Guardadas<b id="sN">0</b></div>
     </div>
@@ -187,22 +188,33 @@ function owon6(b,o){
   return r;
 }
 
-// OWON 15 bytes (R10W, serie CMS/VC9xx): 5 palabras LE24: función, valor, función2, valor2, estado
+// OWON 15 bytes (R10W, serie CMS / UT217A): [función LE16][F0][valor LE24][función2 LE16][F0][valor2 LE24][estado LE24]
+// Trama real UT217A (serie 61): e2 00 f0 00 00 00 a2 01 f0 13 00 00 04 00 00 → 00.00 A AC, AUTO, 2ª pantalla Hz
 const R10F=[[1,'HOLD'],[2,'REL'],[4,'AUTO'],[8,'BAT'],[16,'MIN'],[32,'MAX'],[64,'AVG'],[256,'LoZ'],[512,'LPF'],[1024,'PEAK'],[1<<17,'INRUSH'],[1<<18,'OSC']];
+function owonVal(v,signByte,dp){
+  const ovr=(v>>20)&7, count=v&0x7ffff, neg=(signByte&0x80)!==0;
+  if(dp===7||ovr===1)return {value:null,text:'OL'};
+  if(dp===6||ovr===2)return {value:null,text:'UL'};
+  if(ovr)return {value:null,text:ovr===3?'HI':'OL'};
+  return {value:(neg?-1:1)*count/Math.pow(10,dp),text:(neg?'-':'')+pad(count,dp)};
+}
 function owon15(b,o){
   o=o||0;
-  const le=i=>b[o+i]|(b[o+i+1]<<8)|(b[o+i+2]<<16);
-  const g=le(0), v=le(3), st=le(12);
+  const g=b[o]|(b[o+1]<<8), g2=b[o+6]|(b[o+7]<<8);
+  const v=b[o+3]|(b[o+4]<<8)|(b[o+5]<<16), v2=b[o+9]|(b[o+10]<<8)|(b[o+11]<<16), st=b[o+12]|(b[o+13]<<8)|(b[o+14]<<16);
   const dp=g&7, cu=(g>>3)&7, gear=(g>>6)&31;
   const f=OFN[gear]||['?','g'+gear];
   const fl=R10F.filter(x=>st&x[0]).map(x=>x[1]);
   if(gear>3){if(st&(1<<13))fl.push('AC');if(st&(1<<14))fl.push('DC');}
-  const r={proto:'OWON 15B',mode:f[1],unit:f[0]?PREF[cu]+f[0]:'',flags:fl,value:null,text:'',valid:gear<=29&&dp<=6&&(g>>13)===0};
-  const ovr=(v>>20)&7, neg=(b[o+5]&0x80)!==0, count=v&0x7ffff;
-  if(gear===13){r.text=count>0?'-'.repeat(Math.min(count,8)):'EF';r.unit='';return r;}
-  if(ovr){r.text=ovr===2?'UL':ovr===3?'HI':'OL';return r;}
-  r.value=(neg?-1:1)*count/Math.pow(10,dp);
-  r.text=(neg?'-':'')+pad(count,dp);
+  const mk=x=>x===0||x===0xf0;
+  const r={proto:'OWON 15B',mode:f[1],unit:f[0]?PREF[cu]+f[0]:'',flags:fl,value:null,text:'',sec:null,valid:gear<=29&&(g>>13)===0&&mk(b[o+2])};
+  if(gear===13){const c=v&0x7ffff;r.text=c>0?'-'.repeat(Math.min(c,8)):'EF';r.unit='';}
+  else Object.assign(r,owonVal(v,b[o+5],dp));
+  const dp2=g2&7, cu2=(g2>>3)&7, gear2=(g2>>6)&31;
+  if(g2!==0&&(b[o+8]===0xf0||((g>>12)&1))&&gear2<=29&&gear2!==13&&(g2>>13)===0){
+    const f2=OFN[gear2]||['?','g'+gear2], sv=owonVal(v2,b[o+11],dp2);
+    r.sec={text:sv.text,value:sv.value,unit:f2[0]?PREF[cu2]+f2[0]:'',mode:f2[1]};
+  }
   return r;
 }
 
@@ -577,7 +589,7 @@ async function setup(){
     svcList.push({u:s.uuid,c:cs.map(c=>short(c.uuid)+'['+props(c)+']')});for(const c of cs)chars[c.uuid]=c;}
   family=chars[C.fff4]?'fff0':chars[C.isN]?'unit':chars[C.ffb2]?'ffb0':'gen';
   fff2info=null;batPct=null;modelStr='';
-  try{if(chars[C.fff2]&&chars[C.fff2].properties.read){const b=bytesOf(await chars[C.fff2].readValue());if(b.length>=6){fff2info={serie:b[0],bat:b[1],fw:b[2]+'.'+b[3]+'.'+b[4]};if(b[1]<=100)batPct=b[1];}}}catch(e){}
+  try{if(chars[C.fff2]&&chars[C.fff2].properties.read){const b=bytesOf(await chars[C.fff2].readValue());if(b.length>=6){fff2info={serie:b[0],bat:b[1],fw:b[2]+'.'+b[3]+'.'+b[4]};if(b[1]>0&&b[1]<=100)batPct=b[1];}}}catch(e){}
   try{if(chars[C.bat])batPct=bytesOf(await chars[C.bat].readValue())[0];}catch(e){}
   try{if(chars[C.model])modelStr=new TextDecoder().decode(await chars[C.model].readValue()).replace(/\0/g,'').trim();}catch(e){}
   let nSub=0;
@@ -657,12 +669,13 @@ function onReading(r,t){
   $('val').textContent=r.text||'--';$('unit').textContent=r.unit||'';
   const tg=$('tags');tg.innerHTML='';
   [r.mode].concat(r.flags||[]).filter(Boolean).forEach((x,i)=>{const s=document.createElement('span');s.className='tag'+(i===0?' m':'');s.textContent=x;tg.appendChild(s);});
+  $('sec').textContent=r.sec?'2ª pantalla: '+r.sec.text+' '+r.sec.unit:'';
   $('protoLine').textContent='Formato: '+r.proto+' · compara con la pantalla de la pinza';
   if(r.value!=null&&isFinite(r.value)){live.push({t,v:r.value,u:r.unit});if(live.length>300)live.shift();drawSoon();}
   if(recording){const iv=(+$('ivl').value||0)*1000;if(!iv||t-lastRecT>=iv-60){addSample(r,t,'C');lastRecT=t;}}
 }
 function addSample(r,t,kind){
-  samples.push([t,r.value!=null&&isFinite(r.value)?r.value:null,r.text||'',r.unit||'',r.mode||'',(r.flags||[]).join(' '),$('lbl').value.trim(),kind]);
+  samples.push([t,r.value!=null&&isFinite(r.value)?r.value:null,r.text||'',r.unit||'',r.mode||'',(r.flags||[]).join(' '),$('lbl').value.trim(),kind,r.sec&&r.sec.value!=null&&isFinite(r.sec.value)?r.sec.value:null,r.sec?r.sec.unit:'']);
   dirty=true;stats();if(kind==='M')notes();
 }
 
@@ -715,7 +728,7 @@ function watchdog(){
 }
 function diagText(){
   const L=[];
-  L.push('App: visor UT217A v2 · '+new Date().toLocaleString('es-CL'));
+  L.push('App: visor UT217A v3 · '+new Date().toLocaleString('es-CL'));
   L.push('Navegador: '+navigator.userAgent);
   L.push('Equipo: '+(dev?(dev.name||'(sin nombre)')+' · id '+dev.id:'—')+' · '+(connected?'conectado':'desconectado'));
   L.push('Familia: '+(family||'—')+(family==='fff0'?' (OWON / Bluetooth DMM)':family==='unit'?' (UNI-T iDMM2.0)':'')+' · formato: '+(lastKind||unitKind||(cur&&cur.proto)||'—'));
@@ -724,7 +737,7 @@ function diagText(){
   L.push('Servicios:');svcList.forEach(s=>L.push('  '+short(s.u)+': '+s.c.join(' ')));
   L.push('Paquetes: '+pktN+' · por largo: '+(Object.keys(lenHist).map(k=>k+'B×'+lenHist[k]).join(', ')||'—')+' · lecturas decodificadas: '+decN);
   if(calDec)L.push('Calibración activa: '+U.calName(calDec));
-  if(cur)L.push('Última lectura: '+cur.text+' '+cur.unit+' '+cur.mode+' ['+(cur.flags||[]).join(',')+']');
+  if(cur)L.push('Última lectura: '+cur.text+' '+cur.unit+' '+cur.mode+' ['+(cur.flags||[]).join(',')+']'+(cur.sec?' · 2ª: '+cur.sec.text+' '+cur.sec.unit:''));
   L.push('Últimos paquetes:');recentPkts.slice(-12).forEach(p=>L.push('  '+hhmmss(p.t)+' '+short(p.c)+' '+p.b.length+'B '+hex(p.b)));
   return L.join('\n');
 }
@@ -757,8 +770,8 @@ $('bNote').onclick=()=>{
 };
 const csvVal=v=>v==null?'':String(v).replace('.',',');
 const q=s=>/[;"\n]/.test(s)?'"'+String(s).replace(/"/g,'""')+'"':s;
-function csv(){return 'fecha_hora;timestamp_ms;tipo;etiqueta;valor;texto;unidad;modo;indicadores\n'+
-  samples.map(x=>[new Date(x[0]).toLocaleString('es-CL'),x[0],x[7]==='M'?'anotación':'continuo',q(x[6]),csvVal(x[1]),q(x[2]),x[3],x[4],x[5]].join(';')).join('\n');}
+function csv(){return 'fecha_hora;timestamp_ms;tipo;etiqueta;valor;texto;unidad;modo;indicadores;valor2;unidad2\n'+
+  samples.map(x=>[new Date(x[0]).toLocaleString('es-CL'),x[0],x[7]==='M'?'anotación':'continuo',q(x[6]),csvVal(x[1]),q(x[2]),x[3],x[4],x[5],csvVal(x[8]==null?null:x[8]),x[9]||''].join(';')).join('\n');}
 const rawCsv=()=>'timestamp_ms;caracteristica;hex\n'+rawLog.map(r=>r.join(';')).join('\n');
 const stamp=()=>{const d=new Date();return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate())+'_'+pad2(d.getHours())+pad2(d.getMinutes());};
 function download(txt,name){
