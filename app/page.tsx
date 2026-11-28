@@ -8,7 +8,6 @@ import { getContextoUsuario, NOMBRE_DEPARTAMENTO } from '@/lib/auth/verComo'
 import { getDeptConfig } from '@/lib/departamentos/config'
 import VerComoSelector from '@/components/layout/VerComoSelector'
 import CockpitHeader from '@/components/hub/CockpitHeader'
-import CountUp from '@/components/ui/CountUp'
 import Reveal from '@/components/ui/Reveal'
 import ResumenEjecutivoDia from '@/components/hub/ResumenEjecutivoDia'
 import ResumenEjecutivoDiaSkeleton from '@/components/hub/ResumenEjecutivoDiaSkeleton'
@@ -18,10 +17,7 @@ import WidgetOficinaTecnica from '@/components/hub/WidgetOficinaTecnica'
 import WidgetPrevencion from '@/components/hub/WidgetPrevencion'
 import WidgetRRHH from '@/components/hub/WidgetRRHH'
 import WidgetDirectiva from '@/components/hub/WidgetDirectiva'
-import {
-  AlertTriangle, CheckCircle, ClipboardList, ShoppingCart,
-  ArrowRight, Sparkles,
-} from 'lucide-react'
+import { AlertTriangle, ArrowRight } from 'lucide-react'
 
 export const dynamic    = 'force-dynamic'
 export const revalidate = 0
@@ -48,42 +44,26 @@ function saludoSegunHora(): string {
 export default async function HomePage() {
   const sb = getSupabaseServer()
 
-  // El contexto del usuario y los datos del tablero no dependen entre sí: el
-  // perfil (y el "ver como") no cambia QUÉ se consulta acá abajo, solo cómo
-  // se muestra después. Antes se esperaba el contexto entero —que por dentro
-  // son varios viajes a Supabase encadenados— y recién ahí arrancaban las
-  // consultas de datos. Ahora salen todas juntas, así el Inicio tarda lo que
-  // la más lenta y no la suma de todas. Es la pestaña más visitada de la app.
-  //
-  // Columnas superset: cubren lo que necesitan tanto el contador de acá
-  // abajo como ResumenEjecutivoDia y el Widget del departamento (Bodega) —
-  // los 3 se pintan en esta misma página y antes cada uno pedía la tabla
-  // completa de materiales por su cuenta (3 fetches paginados de la misma
-  // tabla en una sola carga del home).
+  // El contexto del usuario y el catálogo de materiales no dependen entre sí:
+  // salen juntos para que el Inicio tarde lo que la consulta más lenta y no la
+  // suma. Es la pestaña más visitada de la app. Las columnas cubren lo que
+  // necesitan tanto ResumenEjecutivoDia como el Widget del departamento.
   const [
     { real: perfil, efectivo: perfilEfectivo, puedeSimular, verComo, verComoPuesto },
     materiales,
-    { count: proyActivos },
-    solicRes,
   ] = await Promise.all([
     getContextoUsuario(),
     fetchAllMateriales<MaterialAlerta>(sb, 'id,codigo,descripcion,stock_actual,stock_minimo,ubicacion'),
-    sb.from('proyectos').select('*', { count: 'exact', head: true }).eq('estado', 'en_proceso'),
-    sb.from('solicitudes_compra').select('*', { count: 'exact', head: true }).eq('estado', 'pendiente'),
   ])
 
   const departamentoMostrado = perfilEfectivo?.departamento as Departamento | undefined
   const cfg = getDeptConfig(departamentoMostrado, perfilEfectivo?.puesto)
 
-  const alertas   = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo)).length
-  const solicPend = solicRes.error ? 0 : (solicRes.count ?? 0)
+  const alertas = materiales.filter(m => estaBajoMinimo(m.stock_actual, m.stock_minimo)).length
 
   // Filtrado por permisos del perfil efectivo
   const verModulo = (modulo: Parameters<typeof puedeVer>[1]) => !perfilEfectivo || puedeVer(perfilEfectivo, modulo)
   const acciones = cfg.acciones.filter(a => verModulo(a.modulo))
-  const secciones = cfg.herramientas
-    .map(s => ({ ...s, items: s.items.filter(i => verModulo(i.modulo)) }))
-    .filter(s => s.items.length > 0)
 
   const Widget = departamentoMostrado ? WIDGETS[departamentoMostrado] : null
 
@@ -126,52 +106,15 @@ export default async function HomePage() {
         </div>
       )}
 
-      {/* Resumen ejecutivo del día — capa de lectura sobre los módulos ya
-          existentes, streameada aparte con Suspense para no bloquear el
-          resto del cockpit. */}
+      {/* Resumen ejecutivo del día — único bloque de pulso, KPIs, avances y
+          alertas del día. Streameado aparte con Suspense para no bloquear el
+          resto del inicio. */}
       <Suspense fallback={<ResumenEjecutivoDiaSkeleton />}>
         <ResumenEjecutivoDia perfil={perfilEfectivo} acento={cfg.acento} materiales={materiales} />
       </Suspense>
 
-      {/* Pulso general — 3 KPIs con contador animado */}
-      <h2 className="seccion-label" style={{ '--seccion-acento': cfg.acento } as React.CSSProperties}>
-        <span className="dot" /> Pulso de la empresa
-      </h2>
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8 max-w-2xl stagger">
-        <div className={`stat-card ${alertas > 0 ? 'ring-2 ring-red-200' : ''}`}>
-          <div className={`stat-icon flex items-center justify-center ${alertas > 0 ? 'bg-red-100' : 'bg-green-100'}`}>
-            {alertas > 0
-              ? <AlertTriangle size={18} style={{ color: '#DC2626' }} />
-              : <CheckCircle  size={18} style={{ color: '#059669' }} />}
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-800 leading-tight"><CountUp value={alertas} /></div>
-            <div className="text-xs text-brand-n500 font-medium">Alertas de stock</div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className="stat-icon flex items-center justify-center bg-yellow-100">
-            <ClipboardList size={18} style={{ color: '#D97706' }} />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-800 leading-tight"><CountUp value={proyActivos ?? 0} /></div>
-            <div className="text-xs text-brand-n500 font-medium">Obras en proceso</div>
-          </div>
-        </div>
-
-        <div className="stat-card">
-          <div className={`stat-icon flex items-center justify-center ${solicPend > 0 ? 'bg-orange-100' : 'bg-slate-100'}`}>
-            <ShoppingCart size={18} style={{ color: solicPend > 0 ? '#EA580C' : 'var(--n-500)' }} />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-800 leading-tight"><CountUp value={solicPend} /></div>
-            <div className="text-xs text-brand-n500 font-medium">Compras pendientes</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Acciones rápidas — el "listo para resolver" del área */}
+      {/* Acciones rápidas — el "listo para resolver" del área (solo verbos del
+          día; el catálogo completo vive en la barra lateral, no se repite aquí). */}
       {acciones.length > 0 && (
         <div className="mb-9">
           <h2 className="seccion-label" style={{ '--seccion-acento': cfg.acento } as React.CSSProperties}>
@@ -219,41 +162,6 @@ export default async function HomePage() {
           </h2>
           <Widget materiales={materiales} />
         </Reveal>
-      )}
-
-      {/* Todas las herramientas del área, agrupadas */}
-      {secciones.length > 0 && (
-        <div className="mb-4">
-          <h2 className="seccion-label" style={{ '--seccion-acento': cfg.acento } as React.CSSProperties}>
-            <Sparkles size={13} style={{ color: cfg.acento }} /> Herramientas de {cfg.nombre}
-          </h2>
-          <div className="space-y-6">
-            {secciones.map((s, idx) => (
-              <Reveal key={s.titulo} delay={idx * 60}>
-                <div className="text-[11px] font-bold uppercase tracking-wider text-brand-n500 mb-2.5">{s.titulo}</div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-                  {s.items.map(i => (
-                    <Link key={i.href + i.titulo} href={i.href} className="tool-card group"
-                      {...(i.href.startsWith('http') ? { target: '_blank', rel: 'noopener noreferrer' } : {})}>
-                      <div
-                        className="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0
-                                   transition-colors duration-200"
-                        style={{ background: `${cfg.acento}14`, color: cfg.acento }}
-                      >
-                        <i.Icon size={17} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="font-semibold text-slate-800 text-[13px] leading-tight truncate group-hover:text-slate-900">{i.titulo}</div>
-                        <div className="text-[11px] text-brand-n500 leading-snug truncate">{i.desc}</div>
-                      </div>
-                      <ArrowRight size={14} className="text-slate-300 flex-shrink-0 opacity-0 -translate-x-1 transition-all duration-200 group-hover:opacity-100 group-hover:translate-x-0" />
-                    </Link>
-                  ))}
-                </div>
-              </Reveal>
-            ))}
-          </div>
-        </div>
       )}
     </div>
   )
