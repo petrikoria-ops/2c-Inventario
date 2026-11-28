@@ -11,6 +11,7 @@ import CockpitHeader from '@/components/hub/CockpitHeader'
 import Reveal from '@/components/ui/Reveal'
 import ResumenEjecutivoDia from '@/components/hub/ResumenEjecutivoDia'
 import ResumenEjecutivoDiaSkeleton from '@/components/hub/ResumenEjecutivoDiaSkeleton'
+import MisTareas from '@/components/hub/MisTareas'
 import WidgetBodega from '@/components/hub/WidgetBodega'
 import WidgetTaller from '@/components/hub/WidgetTaller'
 import WidgetOficinaTecnica from '@/components/hub/WidgetOficinaTecnica'
@@ -105,6 +106,12 @@ export default async function HomePage() {
           <Link href="/materiales?bajo_minimo=1" className="underline font-semibold">Ver ahora →</Link>
         </div>
       )}
+
+      {/* Mis tareas y vencimientos — lo asignado al usuario real, arriba del
+          pulso general. No renderiza nada si no hay tareas por atender. */}
+      <Suspense fallback={null}>
+        <MisTareas perfilId={perfil?.id} />
+      </Suspense>
 
       {/* Resumen ejecutivo del día — único bloque de pulso, KPIs, avances y
           alertas del día. Streameado aparte con Suspense para no bloquear el
