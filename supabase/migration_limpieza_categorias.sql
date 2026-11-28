@@ -6,40 +6,43 @@
 -- La tabla `categorias` tenía 26 filas mezclando DOS taxonomías:
 --   • Esquema NUMERADO — el que usa el catálogo real. Los 2.339 materiales
 --     están TODOS aquí: "1- BANDEJAS" (662), "3 - CANALIZACION" (433), etc.
---   • Esquema con NOMBRE (ids 1–11) — el seed por defecto de la app
---     (Protecciones, Conductores y Cables, Riel DIN…): quedó con 0 materiales.
---   • "3 - CANALIZACION" estaba DUPLICADA: dos filas con el mismo nombre
---     (una con 433 materiales y otra con 45).
+--   • Esquema con NOMBRE (seed por defecto de la app: Protecciones, Conductores
+--     y Cables, Riel DIN…): quedó con 0 materiales.
+--   • "3 - CANALIZACION" estaba DUPLICADA — y con una trampa: las dos filas NO
+--     tenían el nombre idéntico, una terminaba con un ESPACIO invisible
+--     ("3 - CANALIZACION" id 26 con 433, vs "3 - CANALIZACION " id 27 con 45).
 --
--- QUÉ HACE esta migración (idempotente: correrla de nuevo no cambia nada):
---   1. Fusiona cualquier categoría con nombre repetido en una sola fila,
---      reapuntando sus materiales. Resuelve el duplicado "3 - CANALIZACION".
---   2. Elimina las categorías VACÍAS que no siguen el patrón numerado
---      ("N - …") del catálogo real — las 11 del seed que nunca se usaron.
+-- QUÉ HACE (idempotente: correrla de nuevo no cambia nada):
+--   1. Fusiona categorías con el mismo nombre NORMALIZADO (ignora espacios
+--      sobrantes), conservando la de menor id. Resuelve "3 - CANALIZACION".
+--   2. Normaliza (TRIM) los nombres para que no reaparezcan duplicados invisibles.
+--   3. A los materiales YA ELIMINADOS (soft-delete) que aún apuntan a una
+--      categoría del seed con nombre, les quita la categoría (para poder borrarla).
+--   4. Elimina las categorías del seed con nombre que quedaron sin NINGÚN
+--      material (activo o inactivo).
 --
--- SEGURIDAD: va en una transacción. No modifica ningún material salvo
--- reasignar `categoria_id` de los duplicados; y solo borra categorías SIN
--- materiales (doble resguardo con NOT EXISTS). Si algo falla, revierte todo.
+-- SEGURIDAD: transacción única. Solo reasigna `categoria_id` (de duplicados y de
+-- materiales ya eliminados) y borra categorías sin materiales. Si algo falla,
+-- revierte todo. Resultado esperado: 14 categorías, todas con material, sin
+-- nombres repetidos.
 --
--- EJECUTAR MANUALMENTE en Supabase → SQL Editor. Resultado esperado: 14
--- categorías, todas con al menos 1 material y sin nombres repetidos.
+-- EJECUTAR MANUALMENTE en Supabase → SQL Editor.
 -- ============================================================================
 
 BEGIN;
 
--- 1a) Reasignar los materiales de las filas duplicadas a la fila "canónica"
---     de cada nombre (se conserva la de menor id). Para "3 - CANALIZACION"
---     conserva la id 26 (433 materiales) y le suma los 45 de la id 27.
+-- 1) Fusionar categorías cuyo nombre es igual salvo espacios (conserva menor id).
+--    El GROUP BY por TRIM(nombre) sí junta "3 - CANALIZACION" y "3 - CANALIZACION ".
 WITH canonicos AS (
-  SELECT nombre, MIN(id) AS keep_id
+  SELECT TRIM(nombre) AS tnombre, MIN(id) AS keep_id
   FROM categorias
-  GROUP BY nombre
+  GROUP BY TRIM(nombre)
   HAVING COUNT(*) > 1
 ),
 duplicados AS (
   SELECT c.id AS dup_id, k.keep_id
   FROM categorias c
-  JOIN canonicos k ON k.nombre = c.nombre
+  JOIN canonicos k ON k.tnombre = TRIM(c.nombre)
   WHERE c.id <> k.keep_id
 )
 UPDATE materiales m
@@ -47,29 +50,42 @@ SET categoria_id = d.keep_id
 FROM duplicados d
 WHERE m.categoria_id = d.dup_id;
 
--- 1b) Borrar las filas duplicadas ya vaciadas (toda fila con nombre repetido
---     que no sea la de menor id).
 DELETE FROM categorias c
 USING (
-  SELECT nombre, MIN(id) AS keep_id
+  SELECT TRIM(nombre) AS tnombre, MIN(id) AS keep_id
   FROM categorias
-  GROUP BY nombre
+  GROUP BY TRIM(nombre)
   HAVING COUNT(*) > 1
 ) k
-WHERE c.nombre = k.nombre
+WHERE TRIM(c.nombre) = k.tnombre
   AND c.id <> k.keep_id;
 
--- 2) Eliminar las categorías del seed con nombre que están VACÍAS: las que NO
---    siguen el patrón numerado "N - …" del catálogo real y no tienen ningún
---    material. El NOT EXISTS evita borrar cualquier categoría que sí se use.
+-- 2) Normalizar nombres (quita espacios sobrantes que crean duplicados invisibles).
+UPDATE categorias
+SET nombre = TRIM(nombre)
+WHERE nombre <> TRIM(nombre);
+
+-- 3) Materiales ya eliminados (soft-delete) que aún apuntan a una categoría del
+--    seed con nombre: se les quita la categoría para poder borrarla.
+UPDATE materiales m
+SET categoria_id = NULL
+WHERE m.activo = false
+  AND EXISTS (
+    SELECT 1 FROM categorias c
+    WHERE c.id = m.categoria_id
+      AND c.nombre !~ '^[[:space:]]*[0-9]+[[:space:]]*-'
+  );
+
+-- 4) Eliminar las categorías del seed con nombre que quedaron SIN materiales.
+--    El NOT EXISTS (sobre activos e inactivos) evita borrar cualquiera en uso.
 DELETE FROM categorias c
 WHERE c.nombre !~ '^[[:space:]]*[0-9]+[[:space:]]*-'
   AND NOT EXISTS (SELECT 1 FROM materiales m WHERE m.categoria_id = c.id);
 
 COMMIT;
 
--- ── Verificación (opcional, correr aparte después del COMMIT) ────────────────
--- Debería listar 14 categorías, todas con materiales > 0 y sin nombres repetidos:
+-- ── Verificación (opcional, correr aparte) ───────────────────────────────────
+-- Debería dar 14 categorías, todas con materiales > 0 y sin nombres repetidos:
 -- SELECT c.id, c.nombre, COUNT(m.id) AS materiales
 -- FROM categorias c
 -- LEFT JOIN materiales m ON m.categoria_id = c.id AND m.activo = true
