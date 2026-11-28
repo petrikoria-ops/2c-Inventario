@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
 import ConfirmDangerModal from '@/components/ui/ConfirmDangerModal'
+import RowActions from '@/components/ui/RowActions'
 import { BadgeStock, BadgeTipo } from '@/components/ui/Badge'
 import { clp, num, fechaHora, estaBajoMinimo } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
@@ -512,27 +513,12 @@ export default function TablaMateriales({ initialData, categorias, proveedores, 
                     <td className="td"><BadgeStock actual={m.stock_actual} minimo={m.stock_minimo} /></td>
                     {verPrecios && <td className="td-r text-slate-700">{clp(m.precio_unitario)}</td>}
                     <td className="td">
-                      <div className="flex gap-0.5">
-                        {editable && (
-                          <button className="btn-icon" title="Registrar movimiento" aria-label="Registrar movimiento"
-                            onClick={() => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) }}>
-                            <ArrowUpDown size={13} />
-                          </button>
-                        )}
-                        <button className="btn-icon" title="Ver historial" aria-label="Ver historial" onClick={() => verHistorial(m)}>
-                          <ScrollText size={13} />
-                        </button>
-                        {editable && (
-                          <>
-                            <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...m }); setModalForm(true) }}>
-                              <Pencil size={13} />
-                            </button>
-                            <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(m)}>
-                              <Trash2 size={13} />
-                            </button>
-                          </>
-                        )}
-                      </div>
+                      <RowActions actions={[
+                        { label: 'Registrar movimiento', Icon: ArrowUpDown, hidden: !editable, onClick: () => { setMovMat(m); setMovForm({ tipo: 'salida', cantidad: '1', proyecto_id: '', usuario: 'admin', motivo: '' }); setModalMov(true) } },
+                        { label: 'Ver historial', Icon: ScrollText, onClick: () => verHistorial(m) },
+                        { label: 'Editar', Icon: Pencil, hidden: !editable, onClick: () => { setEditando({ ...m }); setModalForm(true) } },
+                        { label: 'Eliminar', Icon: Trash2, danger: true, hidden: !editable, onClick: () => eliminar(m) },
+                      ]} />
                     </td>
                   </tr>
                 )

@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Users, Pencil, Trash2, FileText } from 'lucide-react'
 import Modal from '@/components/ui/Modal'
+import RowActions from '@/components/ui/RowActions'
 import { useToast } from '@/contexts/ToastContext'
 import type { Trabajador } from '@/types'
 
@@ -96,22 +97,11 @@ export default function TablaTrabjadores({ initialData, editable = true }: { ini
                   <td className="td text-xs text-brand-n500">{t.cargo ?? '—'}</td>
                   <td className="td text-xs text-brand-n500">{t.telefono ?? '—'}</td>
                   <td className="td">
-                    <div className="flex gap-0.5">
-                      <Link href={`/trabajadores/${t.id}`} className="btn-icon" title="Documentos" aria-label="Ver documentos">
-                        <FileText size={13} />
-                      </Link>
-                      {editable && (
-                        <>
-                          <button className="btn-icon" title="Editar" aria-label="Editar"
-                            onClick={() => { setEditando({ ...t }); setModalOpen(true) }}>
-                            <Pencil size={13} />
-                          </button>
-                          <button className="btn-icon" title="Desactivar" aria-label="Desactivar" onClick={() => eliminar(t)}>
-                            <Trash2 size={13} />
-                          </button>
-                        </>
-                      )}
-                    </div>
+                    <RowActions actions={[
+                      { label: 'Documentos', Icon: FileText, href: `/trabajadores/${t.id}` },
+                      { label: 'Editar', Icon: Pencil, hidden: !editable, onClick: () => { setEditando({ ...t }); setModalOpen(true) } },
+                      { label: 'Desactivar', Icon: Trash2, danger: true, hidden: !editable, onClick: () => eliminar(t) },
+                    ]} />
                   </td>
                 </tr>
               ))}

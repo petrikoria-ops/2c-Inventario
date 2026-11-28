@@ -238,6 +238,23 @@
     color: #2E333A;
   }
 
+  /* Menú "⋯" de acciones de fila (components/ui/RowActions.tsx). Se renderiza
+     en un portal con position:fixed; el z-index lo pone sobre la tabla. */
+  .row-actions-menu {
+    @apply rounded-xl bg-white py-1 shadow-lg;
+    border: 1px solid #E8EAED;
+    max-height: 70vh;
+    overflow-y: auto;
+    z-index: 60;
+  }
+  .row-actions-item {
+    @apply flex items-center gap-2.5 w-full px-3 text-[13px] text-slate-700 transition-colors;
+    min-height: 40px;
+  }
+  .row-actions-item:hover { background-color: #F4F6F8; color: #181818; }
+  .row-actions-item.is-danger { color: #DC2626; }
+  .row-actions-item.is-danger:hover { background-color: #FEF2F2; }
+
   /* ── Forms ───────────────────────────────────── */
   .label {
     @apply text-[11px] font-semibold uppercase tracking-wide block mb-1;

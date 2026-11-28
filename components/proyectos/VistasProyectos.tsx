@@ -10,6 +10,7 @@ import { clp, fechaCorta, num, cn } from '@/lib/utils'
 import { useToast } from '@/contexts/ToastContext'
 import TableroProyectos from '@/components/proyectos/TableroProyectos'
 import CalendarioProyectos from '@/components/proyectos/CalendarioProyectos'
+import RowActions from '@/components/ui/RowActions'
 import { ESTADOS_PROY, ESTADO_PROY, type EstadoProy } from '@/lib/proyectos/estados'
 import type { Movimiento, Proyecto } from '@/types'
 
@@ -186,27 +187,15 @@ export default function VistasProyectos({ initialData, editable = true }: { init
                     <td className="td text-xs text-brand-n500">{fechaCorta(p.fecha_inicio)}</td>
                     <td className="td text-xs text-brand-n500">{fechaCorta(p.fecha_entrega)}</td>
                     <td className="td-r font-medium text-slate-700">{clp(calcCosto(p.costo_total))}</td>
-                    <td className="td"><div className="flex gap-0.5">
-                      <a href={`/proyectos/${p.id}`} className="btn-icon" title="Ver obra" aria-label="Ver obra">
-                        <Building2 size={13} />
-                      </a>
-                      <button className="btn-icon" title="Ver movimientos" aria-label="Ver movimientos" onClick={() => verDetalle(p)}>
-                        <ScrollText size={13} />
-                      </button>
-                      <a href={`/proyectos/${p.id}/factibilidad`} className="btn-icon" title="Factibilidad" aria-label="Factibilidad">
-                        <ClipboardCheck size={13} />
-                      </a>
-                      {editable && (
-                        <>
-                          <button className="btn-icon" title="Editar" aria-label="Editar" onClick={() => { setEditando({ ...p }); setModalOpen(true) }}>
-                            <Pencil size={13} />
-                          </button>
-                          <button className="btn-icon" title="Eliminar" aria-label="Eliminar" onClick={() => eliminar(p)}>
-                            <Trash2 size={13} />
-                          </button>
-                        </>
-                      )}
-                    </div></td>
+                    <td className="td">
+                      <RowActions actions={[
+                        { label: 'Ver obra', Icon: Building2, href: `/proyectos/${p.id}` },
+                        { label: 'Ver movimientos', Icon: ScrollText, onClick: () => verDetalle(p) },
+                        { label: 'Factibilidad', Icon: ClipboardCheck, href: `/proyectos/${p.id}/factibilidad` },
+                        { label: 'Editar', Icon: Pencil, hidden: !editable, onClick: () => { setEditando({ ...p }); setModalOpen(true) } },
+                        { label: 'Eliminar', Icon: Trash2, danger: true, hidden: !editable, onClick: () => eliminar(p) },
+                      ]} />
+                    </td>
                   </tr>
                 ))}
                 {!filtered.length && <tr><td colSpan={8} className="text-center py-10 text-brand-n500">Sin proyectos</td></tr>}
