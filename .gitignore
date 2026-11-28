@@ -20,3 +20,6 @@ Thumbs.db
 
 # Vercel
 .vercel
+
+# Prototipo original archivado (Express+SQLite), no se despliega
+_legacy-prototipo/

@@ -8,7 +8,7 @@ import {
   Package, Wrench, ArrowUpDown, Upload, PackageOpen, Handshake, HardHat, Users, Bot,
   ClipboardList, Building2, ShoppingCart, ListChecks, ShieldCheck, ShieldAlert, Zap,
   Calculator, CheckSquare, Tag, Menu, X, LogOut, UserCog, AlertOctagon, ChevronDown,
-  ClipboardCheck,
+  ClipboardCheck, Truck, RotateCcw,
 } from 'lucide-react'
 import { getSupabaseBrowser } from '@/lib/supabase/client'
 import { puedeVer, type Perfil, type Modulo, type Departamento } from '@/lib/auth/permisos'
@@ -34,50 +34,67 @@ const NAV: NavGroup[] = [
   {
     section: 'Principal',
     links: [
-      { href: '/',           Icon: Home,             label: 'Inicio' },
-      { href: '/mensajes',   Icon: MessageCircle,    label: 'Mensajes' },
-      { href: '/itinerario', Icon: CalendarCheck2,   label: 'Itinerario' },
-      { href: '/dashboard',  Icon: LayoutDashboard,  label: 'Métricas', modulo: 'metricas' },
+      { href: '/',           Icon: Home,            label: 'Inicio' },
+      { href: '/mensajes',   Icon: MessageCircle,   label: 'Mensajes' },
+      { href: '/itinerario', Icon: CalendarCheck2,  label: 'Itinerario' },
+      { href: '/dashboard',  Icon: LayoutDashboard, label: 'Métricas', modulo: 'metricas' },
+    ],
+  },
+  {
+    section: 'Obras',
+    links: [
+      { href: '/proyectos',   Icon: ClipboardList, label: 'Obras',          modulo: 'proyectos' },
+      { href: '/avance-obra', Icon: ListChecks,    label: 'Avance de obra', modulo: 'avance_obra' },
     ],
   },
   {
     section: 'Inventario',
     links: [
-      { href: '/materiales',   Icon: Package,     label: 'Materiales', modulo: 'materiales' },
-      { href: '/herramientas',          Icon: Wrench,    label: 'Herramientas',          modulo: 'herramientas' },
-      { href: '/herramientas/entregar', Icon: HardHat,  label: 'Entregar herramientas', modulo: 'herramientas' },
-      { href: '/trabajadores',          Icon: Users,    label: 'Trabajadores',          modulo: 'trabajadores' },
-      { href: '/movimientos',  Icon: ArrowUpDown,  label: 'Movimientos', modulo: 'movimientos' },
-      { href: '/importar',     Icon: Upload,       label: 'Importar',    modulo: 'materiales' },
-      { href: '/salidas',         Icon: PackageOpen, label: 'Salidas',           modulo: 'movimientos' },
-      { href: '/entregas/nueva', Icon: Handshake,   label: 'Entrega por mano', modulo: 'movimientos' },
+      { href: '/materiales',   Icon: Package,     label: 'Materiales',   modulo: 'materiales' },
+      { href: '/herramientas', Icon: Wrench,      label: 'Herramientas', modulo: 'herramientas' },
+      { href: '/movimientos',  Icon: ArrowUpDown, label: 'Movimientos',  modulo: 'movimientos' },
+      { href: '/importar',     Icon: Upload,      label: 'Importar',     modulo: 'materiales' },
     ],
   },
   {
-    section: 'Gestión',
+    section: 'Operación',
     links: [
-      { href: '/proyectos',   Icon: ClipboardList, label: 'Obras activas — Tableros', modulo: 'proyectos' },
-      { href: '/avance-obra', Icon: ListChecks,    label: 'Avance de obra',     modulo: 'avance_obra' },
-      { href: '/proveedores', Icon: Building2,     label: 'Proveedores', modulo: 'proveedores' },
-      { href: '/solicitudes', Icon: ShoppingCart,  label: 'Compras',     modulo: 'compras' },
+      { href: '/salidas',               Icon: PackageOpen, label: 'Despachos',             modulo: 'movimientos' },
+      { href: '/entregas/nueva',        Icon: Handshake,   label: 'Entrega por mano',      modulo: 'movimientos' },
+      { href: '/herramientas/entregar', Icon: HardHat,     label: 'Entregar herramientas', modulo: 'herramientas' },
+      { href: '/pedidos-bodega',        Icon: Truck,       label: 'Pedidos a bodega',      modulo: 'pedidos_bodega' },
+      { href: '/solicitudes-ajuste',    Icon: RotateCcw,   label: 'Ajustes de inventario', modulo: 'solicitudes_ajuste' },
+    ],
+  },
+  {
+    section: 'Abastecimiento',
+    links: [
+      { href: '/solicitudes', Icon: ShoppingCart, label: 'Compras',     modulo: 'compras' },
+      { href: '/proveedores', Icon: Building2,    label: 'Proveedores', modulo: 'proveedores' },
     ],
   },
   {
     section: 'Verificaciones',
     links: [
-      { href: '/verificacion-ric', Icon: ShieldCheck, label: 'Verificación RIC', modulo: 'verificacion_ric' },
-      { href: '/checklist-drs', Icon: ClipboardCheck, label: 'Checklist DRS', modulo: 'checklist_drs' },
-      { href: '/pruebas-alimentadores', Icon: Zap, label: 'Test de Alimentadores', modulo: 'pruebas_alimentadores' },
-      { href: '/prevencion-riesgos', Icon: ShieldAlert, label: 'Inspección de riesgos', modulo: 'prevencion_riesgos' },
+      { href: '/verificacion-ric',      Icon: ShieldCheck,    label: 'Verificación RIC',      modulo: 'verificacion_ric' },
+      { href: '/checklist-drs',         Icon: ClipboardCheck, label: 'Checklist DRS',         modulo: 'checklist_drs' },
+      { href: '/pruebas-alimentadores', Icon: Zap,            label: 'Test de alimentadores', modulo: 'pruebas_alimentadores' },
+      { href: '/prevencion-riesgos',    Icon: ShieldAlert,    label: 'Inspección de riesgos', modulo: 'prevencion_riesgos' },
     ],
   },
   {
     section: 'Recursos',
     links: [
-      { href: '/recursos',   Icon: Calculator,   label: 'Recursos Técnicos', modulo: 'recursos_tecnicos' },
-      { href: '/checklist',  Icon: CheckSquare,  label: 'Checklist tablero', modulo: 'checklist' },
-      { href: '/etiquetas',  Icon: Tag,          label: 'Etiquetas de obra', modulo: 'etiquetas' },
-      { href: '/agente',     Icon: Bot,          label: 'Agente IA',         modulo: 'agente' },
+      { href: '/recursos',  Icon: Calculator,  label: 'Recursos técnicos', modulo: 'recursos_tecnicos' },
+      { href: '/checklist', Icon: CheckSquare, label: 'Checklist tablero', modulo: 'checklist' },
+      { href: '/etiquetas', Icon: Tag,         label: 'Etiquetas de obra', modulo: 'etiquetas' },
+      { href: '/agente',    Icon: Bot,         label: 'Agente IA',         modulo: 'agente' },
+    ],
+  },
+  {
+    section: 'Personas',
+    links: [
+      { href: '/trabajadores', Icon: Users, label: 'Trabajadores', modulo: 'trabajadores' },
     ],
   },
 ]
