@@ -216,7 +216,7 @@
   /* Ghost — links y cancelar */
   .btn-ghost {
     @apply bg-transparent;
-    color: #909090;
+    color: var(--n-500);
   }
   .btn-ghost:hover {
     background-color: #ECEEF1;
@@ -224,9 +224,14 @@
   }
 
   .btn-sm   { @apply px-2.5 py-1 text-xs; }
+  /* Icono de acción (tablas, barras). Área táctil mínima 44×44 para terreno
+     (dedos con guantes, sol en pantalla) — ver AUDITORIA.md #H1. El icono sigue
+     siendo pequeño; lo que crece es la zona que recibe el toque. */
   .btn-icon {
-    @apply p-1.5 rounded-md transition-colors;
-    color: #909090;
+    @apply inline-flex items-center justify-center rounded-md transition-colors;
+    min-width: 44px;
+    min-height: 44px;
+    color: var(--n-500);
   }
   .btn-icon:hover {
     background-color: #ECEEF1;
@@ -290,7 +295,7 @@
   .pag-btn {
     @apply px-3 py-1 rounded-md text-xs transition-colors;
     border: 1px solid #D8D8D8;
-    color: #909090;
+    color: var(--n-500);
   }
   .pag-btn:hover:not(:disabled) {
     border-color: #2E333A;

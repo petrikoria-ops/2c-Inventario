@@ -116,13 +116,13 @@ const TALLER: DeptConfig = {
   acciones: [
     { href: '/herramientas/entregar', Icon: HardHat,     titulo: 'Entregar herramientas', desc: 'Asignar equipo a un trabajador', modulo: 'herramientas', acento: A.naranja },
     { href: '/checklist',             Icon: CheckSquare, titulo: 'Checklist tablero',     desc: 'Verificación antes de entregar', modulo: 'checklist',    acento: A.teal },
-    { href: '/proyectos',             Icon: ClipboardList,titulo: 'Obras activas',        desc: 'Tableros en proceso y entregas', modulo: 'proyectos',    acento: A.ambar },
+    { href: '/proyectos',             Icon: ClipboardList,titulo: 'Obras',        desc: 'Tableros en proceso y entregas', modulo: 'proyectos',    acento: A.ambar },
     { href: '/etiquetas',             Icon: Tag,         titulo: 'Etiquetas de obra',     desc: 'Identificar bultos y tableros',  modulo: 'etiquetas',    acento: A.oro },
     { href: '/recursos',              Icon: Calculator,  titulo: 'Recursos técnicos',     desc: 'Calculadoras eléctricas',        modulo: 'recursos_tecnicos', acento: A.indigo },
   ],
   herramientas: [
     { titulo: 'Producción', items: [
-      { href: '/proyectos', Icon: ClipboardList, titulo: 'Obras activas',     desc: 'Tableros y factibilidad', modulo: 'proyectos' },
+      { href: '/proyectos', Icon: ClipboardList, titulo: 'Obras',     desc: 'Tableros y factibilidad', modulo: 'proyectos' },
       { href: '/checklist', Icon: CheckSquare,   titulo: 'Checklist tablero', desc: 'Armado y pruebas', modulo: 'checklist' },
       { href: '/etiquetas', Icon: Tag,           titulo: 'Etiquetas de obra', desc: 'Pallets y bultos imprimibles', modulo: 'etiquetas' },
     ]},
@@ -147,14 +147,14 @@ const OFICINA_TECNICA: DeptConfig = {
   grad: ['#3730A3', '#6366F1'],
   acento: A.indigo,
   acciones: [
-    { href: '/proyectos',         Icon: ClipboardList, titulo: 'Obras activas',     desc: 'Crear y seguir proyectos OT', modulo: 'proyectos', acento: A.ambar },
+    { href: '/proyectos',         Icon: ClipboardList, titulo: 'Obras',     desc: 'Crear y seguir proyectos OT', modulo: 'proyectos', acento: A.ambar },
     { href: '/solicitudes/nueva', Icon: ShoppingCart,  titulo: 'Solicitud de compra', desc: 'Pedir material para una obra', modulo: 'compras', acento: A.verde },
     { href: '/recursos',          Icon: Calculator,    titulo: 'Recursos técnicos', desc: 'Cargas, caídas de tensión', modulo: 'recursos_tecnicos', acento: A.indigo },
     { href: '/materiales',        Icon: Package,       titulo: 'Consultar stock',   desc: 'Factibilidad de material', modulo: 'materiales', acento: A.pizarra },
   ],
   herramientas: [
     { titulo: 'Proyectos', items: [
-      { href: '/proyectos',   Icon: ClipboardList, titulo: 'Obras activas', desc: 'Estados y factibilidad', modulo: 'proyectos' },
+      { href: '/proyectos',   Icon: ClipboardList, titulo: 'Obras', desc: 'Estados y factibilidad', modulo: 'proyectos' },
       { href: '/solicitudes', Icon: ShoppingCart,  titulo: 'Compras',       desc: 'Solicitudes de material', modulo: 'compras' },
     ]},
     { titulo: 'Técnico', items: [
@@ -227,7 +227,7 @@ const DIRECTIVA: DeptConfig = {
   acento: A.oro,
   acciones: [
     { href: '/dashboard',  Icon: BarChart3,    titulo: 'Métricas',       desc: 'Indicadores de toda la empresa', modulo: 'metricas', acento: A.oro },
-    { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras activas',  desc: 'Estado de cada proyecto', modulo: 'proyectos', acento: A.ambar },
+    { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras',  desc: 'Estado de cada proyecto', modulo: 'proyectos', acento: A.ambar },
     { href: '/avance-obra', Icon: ListChecks,  titulo: 'Avance de obra', desc: 'Etapas por proyecto', modulo: 'avance_obra', acento: A.teal },
     { href: '/verificacion-ric', Icon: ShieldCheck, titulo: 'Verificación RIC', desc: 'Puesta en marcha N°18/19', modulo: 'verificacion_ric', acento: A.verde },
     { href: '/checklist-drs', Icon: ClipboardCheck, titulo: 'Checklist DRS', desc: 'Protocolo de inspección técnica', modulo: 'checklist_drs', acento: A.teal },
@@ -237,7 +237,7 @@ const DIRECTIVA: DeptConfig = {
   herramientas: [
     { titulo: 'Control', items: [
       { href: '/dashboard',  Icon: FileBarChart, titulo: 'Métricas',      desc: 'KPIs y gráficos', modulo: 'metricas' },
-      { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras activas', desc: 'Seguimiento de obras', modulo: 'proyectos' },
+      { href: '/proyectos',  Icon: ClipboardList,titulo: 'Obras', desc: 'Seguimiento de obras', modulo: 'proyectos' },
       { href: '/agente',     Icon: Bot,          titulo: 'Agente IA',     desc: 'Consultas del negocio', modulo: 'agente' },
     ]},
     { titulo: 'Terreno', items: [
@@ -285,7 +285,7 @@ const SUPERVISION_TERRENO: DeptConfig = {
   ],
   herramientas: [
     { titulo: 'Tu obra', items: [
-      { href: '/proyectos',              Icon: ClipboardList, titulo: 'Obras activas',       desc: 'Buscar tu obra asignada',            modulo: 'proyectos' },
+      { href: '/proyectos',              Icon: ClipboardList, titulo: 'Obras',       desc: 'Buscar tu obra asignada',            modulo: 'proyectos' },
       { href: '/avance-obra',            Icon: ListChecks,    titulo: 'Avance de obra',       desc: 'Plan de etapas por obra',            modulo: 'avance_obra' },
       { href: '/verificacion-ric',       Icon: ShieldCheck,   titulo: 'Verificación RIC',     desc: 'Historial de verificaciones',        modulo: 'verificacion_ric' },
       { href: '/checklist-drs',          Icon: ClipboardCheck, titulo: 'Checklist DRS',       desc: 'Historial de checklists DRS',        modulo: 'checklist_drs' },
@@ -315,7 +315,7 @@ const GENERAL: DeptConfig = {
   acciones: [
     { href: '/salidas/nueva',     Icon: PackageOpen,  titulo: 'Nuevo despacho',      desc: 'Salida de materiales',     modulo: 'movimientos', acento: A.azul },
     { href: '/herramientas/entregar', Icon: HardHat,  titulo: 'Entregar herramientas', desc: 'Comprobante + responsable', modulo: 'herramientas', acento: A.naranja },
-    { href: '/proyectos',         Icon: ClipboardList,titulo: 'Obras activas',       desc: 'Proyectos en proceso',     modulo: 'proyectos', acento: A.ambar },
+    { href: '/proyectos',         Icon: ClipboardList,titulo: 'Obras',       desc: 'Proyectos en proceso',     modulo: 'proyectos', acento: A.ambar },
     { href: '/dashboard',         Icon: BarChart3,    titulo: 'Métricas',            desc: 'Estado global',            modulo: 'metricas', acento: A.oro },
     { href: '/solicitudes/nueva', Icon: ShoppingCart, titulo: 'Solicitud de compra', desc: 'Pedir material',           modulo: 'compras', acento: A.verde },
     { href: '/agente',            Icon: Bot,          titulo: 'Agente IA',           desc: 'Consultas del negocio',    modulo: 'agente', acento: A.violeta },
@@ -333,7 +333,7 @@ const GENERAL: DeptConfig = {
       { href: '/entregas/nueva', Icon: Handshake,titulo: 'Entrega por mano', desc: 'Sin proyecto', modulo: 'movimientos' },
     ]},
     { titulo: 'Gestión', items: [
-      { href: '/proyectos',   Icon: ClipboardList, titulo: 'Obras activas', desc: 'Tableros', modulo: 'proyectos' },
+      { href: '/proyectos',   Icon: ClipboardList, titulo: 'Obras', desc: 'Tableros', modulo: 'proyectos' },
       { href: '/solicitudes', Icon: ShoppingCart,  titulo: 'Compras',       desc: 'Solicitudes', modulo: 'compras' },
       { href: '/proveedores', Icon: Building2,     titulo: 'Proveedores',   desc: 'Catálogo', modulo: 'proveedores' },
     ]},
