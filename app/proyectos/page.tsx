@@ -1,10 +1,10 @@
 import { getSupabaseServer } from '@/lib/supabase/server'
-import TablaProyectos from '@/components/proyectos/TablaProyectos'
+import VistasProyectos from '@/components/proyectos/VistasProyectos'
 import { redirect } from 'next/navigation'
 import { getPerfil, puedeVer, puedeEditar } from '@/lib/auth/permisos.server'
 import type { Metadata } from 'next'
 
-export const metadata: Metadata = { title: 'Obras activas — 2C Inventario' }
+export const metadata: Metadata = { title: 'Obras — 2C Inventario' }
 export const dynamic = 'force-dynamic'
 
 export default async function ProyectosPage() {
@@ -15,5 +15,5 @@ export default async function ProyectosPage() {
   ])
   if (perfil && !puedeVer(perfil, 'proyectos')) redirect('/')
   const editable = !perfil || puedeEditar(perfil, 'proyectos')
-  return <div className="p-5"><TablaProyectos initialData={data ?? []} editable={editable} /></div>
+  return <div className="p-5"><VistasProyectos initialData={data ?? []} editable={editable} /></div>
 }
